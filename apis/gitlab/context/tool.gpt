@@ -1,0 +1,15 @@
+Name: GitLab Tool Context
+Description: High level context for GitLab tools.
+
+
+Share Context: github.com/gptscript-ai/context/os
+Share Context: github.com/gptscript-ai/context/filesystem
+Share Tools: sys.time.now
+
+
+#!sys.echo
+
+Always follow these GitLab Paradigms:
+Ids are numerical or paths that have <owner>/<project>
+Always URL encode paths when used as an ID
+Use default options for the API calls unless it directly addresses the users request

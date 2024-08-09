@@ -1,0 +1,530 @@
+swagger: "2.0"
+info:
+  version: "1.0.0"
+  title: "GitLab API - Issues Operations"
+  description: "API specification for GitLab issue management"
+
+host: "gitlab.com"
+basePath: "/api/v4"
+schemes:
+  - https
+
+paths:
+  /projects/{id}/issues:
+    get:
+      tags:
+        - Issues
+      summary: "List all issues"
+      description: "Retrieve a list of issues for a project with optional filters."
+      operationId: "ListIssues"
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: "The ID or URL-encoded path of the project"
+          required: true
+          type: string
+        - name: state
+          in: query
+          description: "Filter by issue state (opened, closed)"
+          required: false
+          type: string
+        - name: labels
+          in: query
+          description: "Comma-separated list of label names"
+          required: false
+          type: string
+        - name: milestone
+          in: query
+          description: "Filter by milestone title"
+          required: false
+          type: string
+        - name: author_id
+          in: query
+          description: "Filter by the ID of the author"
+          required: false
+          type: integer
+        - name: assignee_id
+          in: query
+          description: "Filter by the ID of the assignee"
+          required: false
+          type: integer
+        - name: search
+          in: query
+          description: "Search issues by title or description"
+          required: false
+          type: string
+        - name: created_after
+          in: query
+          description: "Filter issues created after this date"
+          required: false
+          type: string
+          format: date-time
+        - name: created_before
+          in: query
+          description: "Filter issues created before this date"
+          required: false
+          type: string
+          format: date-time
+      responses:
+        200:
+          description: "List of issues"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Issue"
+        401:
+          description: "Unauthorized, API token is missing or invalid"
+        404:
+          description: "Project not found"
+    post:
+      tags:
+        - Issues
+      summary: "Create an issue"
+      description: "Create a new issue in a project."
+      operationId: "CreateIssue"
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: "The ID or URL-encoded path of the project"
+          required: true
+          type: string
+        - name: body
+          in: body
+          description: "The issue details"
+          required: true
+          schema:
+            type: object
+            required:
+              - title
+            properties:
+              title:
+                type: string
+                description: "The title of the issue"
+              description:
+                type: string
+                description: "The description of the issue"
+              labels:
+                type: string
+                description: "Comma-separated label names for the issue"
+              assignee_ids:
+                type: array
+                items:
+                  type: integer
+                description: "Array of user IDs to assign the issue to"
+              milestone_id:
+                type: integer
+                description: "The ID of the milestone to associate with the issue"
+              due_date:
+                type: string
+                format: date
+                description: "The due date for the issue"
+      responses:
+        201:
+          description: "Issue created successfully"
+          schema:
+            $ref: "#/definitions/Issue"
+        400:
+          description: "Bad request, possibly due to missing required parameters"
+        401:
+          description: "Unauthorized, API token is missing or invalid"
+        404:
+          description: "Project not found"
+
+  /projects/{id}/issues/{issue_iid}:
+    get:
+      tags:
+        - Issues
+      summary: "Get an issue"
+      description: "Retrieve a single issue."
+      operationId: "GetIssue"
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: "The ID or URL-encoded path of the project"
+          required: true
+          type: string
+        - name: issue_iid
+          in: path
+          description: "The IID of the issue"
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "Issue retrieved successfully"
+          schema:
+            $ref: "#/definitions/Issue"
+        401:
+          description: "Unauthorized, API token is missing or invalid"
+        404:
+          description: "Issue not found"
+
+    put:
+      tags:
+        - Issues
+      summary: "Update an issue"
+      description: "Modify an existing issue."
+      operationId: "UpdateIssue"
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: "The ID or URL-encoded path of the project"
+          required: true
+          type: string
+        - name: issue_iid
+          in: path
+          description: "The IID of the issue"
+          required: true
+          type: integer
+        - name: body
+          in: body
+          description: "The issue details to update"
+          required: true
+          schema:
+            type: object
+            properties:
+              title:
+                type: string
+                description: "The title of the issue"
+              description:
+                type: string
+                description: "The description of the issue"
+              labels:
+                type: string
+                description: "Comma-separated label names for the issue"
+              assignee_ids:
+                type: array
+                items:
+                  type: integer
+                description: "Array of user IDs to assign the issue to"
+              milestone_id:
+                type: integer
+                description: "The ID of the milestone to associate with the issue"
+              due_date:
+                type: string
+                format: date
+                description: "The due date for the issue"
+              state_event:
+                type: string
+                description: "Close or reopen the issue ('close', 'reopen')"
+      responses:
+        200:
+          description: "Issue updated successfully"
+          schema:
+            $ref: "#/definitions/Issue"
+        400:
+          description: "Bad request, possibly due to missing required parameters"
+        401:
+          description: "Unauthorized, API token is missing or invalid"
+        404:
+          description: "Issue not found"
+
+    delete:
+      tags:
+        - Issues
+      summary: "Delete an issue"
+      description: "Remove an existing issue."
+      operationId: "DeleteIssue"
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: "The ID or URL-encoded path of the project"
+          required: true
+          type: string
+        - name: issue_iid
+          in: path
+          description: "The IID of the issue"
+          required: true
+          type: integer
+      responses:
+        204:
+          description: "Issue deleted successfully"
+        401:
+          description: "Unauthorized, API token is missing or invalid"
+        404:
+          description: "Issue not found"
+
+  /projects/{id}/issues/{issue_iid}/notes:
+    get:
+      tags:
+        - Notes
+      summary: "List all notes on an issue"
+      description: "Retrieve a list of all notes (comments) for a specific issue."
+      operationId: "ListIssueNotes"
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: "The ID or URL-encoded path of the project"
+          required: true
+          type: string
+        - name: issue_iid
+          in: path
+          description: "The IID of the issue"
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "List of notes"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Note"
+        401:
+          description: "Unauthorized, API token is missing or invalid"
+        404:
+          description: "Issue not found"
+
+    post:
+      tags:
+        - Notes
+      summary: "Add a note to an issue"
+      description: "Create a new note (comment) on an issue."
+      operationId: "CreateIssueNote"
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: "The ID or URL-encoded path of the project"
+          required: true
+          type: string
+        - name: issue_iid
+          in: path
+          description: "The IID of the issue"
+          required: true
+          type: integer
+        - name: body
+          in: body
+          description: "The note details"
+          required: true
+          schema:
+            type: object
+            required:
+              - body
+            properties:
+              body:
+                type: string
+                description: "The content of the note"
+      responses:
+        201:
+          description: "Note created successfully"
+          schema:
+            $ref: "#/definitions/Note"
+        400:
+          description: "Bad request, possibly due to missing required parameters"
+        401:
+          description: "Unauthorized, API token is missing or invalid"
+        404:
+          description: "Issue not found"
+
+  /projects/{id}/issues/{issue_iid}/notes/{note_id}:
+    get:
+      tags:
+        - Notes
+      summary: "Get a specific note"
+      description: "Retrieve a single note by its ID."
+      operationId: "GetIssueNote"
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: "The ID or URL-encoded path of the project"
+          required: true
+          type: string
+        - name: issue_iid
+          in: path
+          description: "The IID of the issue"
+          required: true
+          type: integer
+        - name: note_id
+          in: path
+          description: "The ID of the note"
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "Note retrieved successfully"
+          schema:
+            $ref: "#/definitions/Note"
+        401:
+          description: "Unauthorized, API token is missing or invalid"
+        404:
+          description: "Note not found"
+
+    put:
+      tags:
+        - Notes
+      summary: "Update a note"
+      description: "Modify an existing note."
+      operationId: "UpdateIssueNote"
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: "The ID or URL-encoded path of the project"
+          required: true
+          type: string
+        - name: issue_iid
+          in: path
+          description: "The IID of the issue"
+          required: true
+          type: integer
+        - name: note_id
+          in: path
+          description: "The ID of the note"
+          required: true
+          type: integer
+        - name: body
+          in: body
+          description: "The note details to update"
+          required: true
+          schema:
+            type: object
+            properties:
+              body:
+                type: string
+                description: "The updated content of the note"
+      responses:
+        200:
+          description: "Note updated successfully"
+          schema:
+            $ref: "#/definitions/Note"
+        400:
+          description: "Bad request, possibly due to missing required parameters"
+        401:
+          description: "Unauthorized, API token is missing or invalid"
+        404:
+          description: "Note not found"
+
+    delete:
+      tags:
+        - Notes
+      summary: "Delete a note"
+      description: "Remove an existing note."
+      operationId: "DeleteIssueNote"
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: "The ID or URL-encoded path of the project"
+          required: true
+          type: string
+        - name: issue_iid
+          in: path
+          description: "The IID of the issue"
+          required: true
+          type: integer
+        - name: note_id
+          in: path
+          description: "The ID of the note"
+          required: true
+          type: integer
+      responses:
+        204:
+          description: "Note deleted successfully"
+        401:
+          description: "Unauthorized, API token is missing or invalid"
+        404:
+          description: "Note not found"
+
+definitions:
+  Issue:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: "The ID of the issue"
+      title:
+        type: string
+        description: "The title of the issue"
+      description:
+        type: string
+        description: "The description of the issue"
+      state:
+        type: string
+        description: "The state of the issue (e.g., opened, closed)"
+      labels:
+        type: array
+        items:
+          type: string
+        description: "The labels assigned to the issue"
+      assignees:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: integer
+              description: "The ID of the assignee"
+            name:
+              type: string
+              description: "The name of the assignee"
+      milestone:
+        type: object
+        properties:
+          id:
+            type: integer
+            description: "The ID of the milestone"
+          title:
+            type: string
+            description: "The title of the milestone"
+      due_date:
+        type: string
+        format: date
+        description: "The due date of the issue"
+      created_at:
+        type: string
+        format: date-time
+        description: "The creation date of the issue"
+      updated_at:
+        type: string
+        format: date-time
+        description: "The last update date of the issue"
+  Note:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: "The ID of the note"
+      body:
+        type: string
+        description: "The content of the note"
+      author:
+        type: object
+        properties:
+          id:
+            type: integer
+            description: "The ID of the author"
+          name:
+            type: string
+            description: "The name of the author"
+      created_at:
+        type: string
+        format: date-time
+        description: "The creation date of the note"
+      updated_at:
+        type: string
+        format: date-time
+        description: "The last update date of the note"

@@ -1,0 +1,19 @@
+Name: Projects
+Context: ../context/tool.gpt
+Context: project_context
+Description: Operations related to creating, listing, updating, and deleting projects in GitLab.
+Credentials: github.com/gptscript-ai/gateway-oauth2 as gitlab.comBearerAuth with GPTSCRIPT_GITLAB_COM_BEARER_TOKEN as env and GitLab as integration and "api read_user"
+
+Tools: *ApiV4Projects from ../openapi.yaml
+Tools: *ApiV4ProjectsId from ../openapi.yaml
+Tools: *ApiV4ProjectsUserUserId from ../openapi.yaml
+Tools: *ApiV4UsersUserIdProjects from ../openapi.yaml
+Tools: *ApiV4UsersUserIdContributedProjects from ../openapi.yaml
+Tools: *ApiV4UsersUserIdStarredProjects from ../openapi.yaml
+
+Help the user with their GitLab Project requests
+---
+Name: project_context
+
+#!sys.echo
+Always default to membership=true when listing projects.
