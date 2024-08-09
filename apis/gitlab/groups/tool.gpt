@@ -1,0 +1,9 @@
+Name: Groups
+Context: ../context/tool.gpt
+Description: Manage Groups in GitLab
+Credentials: github.com/gptscript-ai/gateway-oauth2 as gitlab.comBearerAuth with GPTSCRIPT_GITLAB_COM_BEARER_TOKEN as env and GitLab as integration and "api read_user"
+
+Tools: *ApiV4Groups from ../openapi.yaml
+Tools: *ApiV4GroupsId from ../openapi.yaml
+
+Help the user with their groups requests

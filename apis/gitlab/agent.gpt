@@ -2,7 +2,7 @@ Chat: true
 Name: GitLab Agent
 Description: Main entrypoint for GitLab Agent
 Context: ./context/agent.gpt
-Tools: ./pipelines/tool.gpt, ./projects/tool.gpt, ./repositories/tool.gpt, ./merge_requests/tool.gpt, ./project_issues/tool.gpt
+Tools: ./pipelines/tool.gpt, ./projects/tool.gpt, ./repositories/tool.gpt, ./merge_requests/tool.gpt, ./project_issues/tool.gpt, ./groups/tool.gpt
 Credentials: github.com/gptscript-ai/gateway-oauth2 as gitlab.comBearerAuth with GPTSCRIPT_GITLAB_COM_BEARER_TOKEN as env and GitLab as integration and "api read_user" as scope
 
 You understand All things GitLab, source control, CI/CD, and general DevOps best practices.
