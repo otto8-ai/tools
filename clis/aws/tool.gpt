@@ -1,0 +1,18 @@
+name: aws
+type: context
+description: Provides the ability to interact with AWS.
+share tools: sys.exec
+
+#!/bin/bash
+
+if ! command -v aws; then
+  echo "The user does not have aws installed or it is not available on the PATH."
+else
+  echo "The user has the aws cli available. Use it to work with AWS."
+  VERSION="$(aws --version)"
+  VERSION="${VERSION%%.*}"
+  if [ "${VERSION}" = "aws-cli/1" ]; then
+    echo "The user has version 1 of the aws cli installed. Use version 1 syntax."
+  else
+    echo "The user has version 2 of the aws cli installed. Use version 2 syntax."
+fi
