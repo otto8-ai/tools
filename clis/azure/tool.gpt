@@ -1,0 +1,12 @@
+name: azure
+type: context
+description: Provides the ability to interact with Azure.
+share tools: sys.exec
+
+#!/bin/bash
+
+if ! command -v az; then
+  echo "The user does not have az installed or it is not available on the PATH."
+else
+  echo "The user has the az cli available. Use it to work with Azure."
+fi

@@ -1,0 +1,12 @@
+name: gcp
+type: context
+description: Provides the ability to interact with Google Cloud.
+share tools: sys.exec
+
+#!/bin/bash
+
+if ! command -v gcloud; then
+  echo "The user does not have gcloud installed or it is not available on the PATH."
+else
+  echo "The user has the gcloud cli available. Use it to work with Google Cloud (GCP)."
+fi

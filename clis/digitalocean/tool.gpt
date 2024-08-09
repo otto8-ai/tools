@@ -1,0 +1,13 @@
+name: digitalocean
+type: context
+description: Provides the ability to interact with DigitalOcean.
+share tools: sys.exec
+
+#!/bin/bash
+
+if ! command -v doctl; then
+  echo "The user does not have doctl installed or it is not available on the PATH."
+else
+  echo "The user has the doctl cli available. Use it to work with DigitalOcean."
+  doctl --help || true
+fi

@@ -1,0 +1,15 @@
+name: k8s
+type: context
+description: Provides the ability to interact with Kubernetes using kubectl, helm, and other CLIs
+share tools: sys.exec
+
+#!/bin/bash
+
+echo 'You have access to the following CLI tools:'
+
+TOOLS="kubectl helm k3d kind minikube trivy"
+for i in TOOLS; do
+    if [ -e "$(command -v $i)" ]; then
+        echo '  ' $i
+    fi
+done

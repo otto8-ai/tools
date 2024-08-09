@@ -1,0 +1,18 @@
+name: github
+type: context
+description: Provides the ability to interact with GitHub.
+share tools: sys.exec
+
+#!/bin/bash
+
+if ! command -v gh; then
+  echo "The user does not have gh installed or it is not available on the PATH."
+else
+  echo "The user has the gh cli available. Use it to work with GitHub."
+  echo "The following is the help text for the gh cli and some of its sub-commands. Use these when figuring out how to construct new commands. Note that the --search flag is used for filtering and sorting as well; there is no dedicated --sort flag. If needed run --help for subcommands before you use them."
+  gh --help || true
+  gh repo --help || true
+  gh issue --help || true
+  gh pr create --help || true
+  gh run --help || true
+fi
