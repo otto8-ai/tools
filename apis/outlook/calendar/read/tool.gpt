@@ -1,0 +1,3 @@
+Name: Read Outlook Calendar
+Share Tools: openapi.yaml
+Share Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.calendar.read with GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN as env and microsoft365 as integration and "Calendars.Read Calendars.Read.Shared Group.Read.All GroupMember.Read.All User.Read offline_access" as scope
