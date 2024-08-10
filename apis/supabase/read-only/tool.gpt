@@ -1,5 +1,5 @@
 Name: Supabase API(Read)
-Share Credential: github.com/gptscript-ai/credential as api.supabase.combearer with GPTSCRIPT_API_SUPABASE_COM_BEARER as env and "Please go to instruction [here](https://supabase.com/docs/reference/api/introduction) and provide your supabase API key" as message and key as field
+Share Credential: github.com/gptscript-ai/credential as api.supabase.combearer with GPTSCRIPT_API_SUPABASE_COM_BEARER as env and "Please read the instructions [here](https://supabase.com/docs/reference/api/introduction) and provide your supabase API key" as message and key as field
 Share Tools: v1-get* from ./openapi.json
 Share Tools: v1-list* from ./openapi.json
 

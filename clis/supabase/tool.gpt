@@ -1,7 +1,7 @@
 Name: Supabase CLI
 Type: context
 Share Tools: sys.exec
-Description: Helps user to interacte with supabase CLI
+Description: Helps user interact with the supabase CLI
 
 #!/bin/bash
 

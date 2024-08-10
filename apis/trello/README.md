@@ -17,7 +17,7 @@ Chat: true
 Please help me with my Trello workspace.
 ```
 
-Then, run it with `gptscript agent.gpt`. You will be prompted for your API key, and after providing it, you will be able to chat with the large language model and have it perform actions for you in Trello.
+Then, run it with `gptscript agent.gpt`. You'll be prompted to enter your API key; once you provide it, you'll be able to chat with the large language model and have it perform actions for you in Trello.
 
 ## Tools
 
