@@ -1,0 +1,28 @@
+Name: getPage
+Description: Gets the contents of a page in Notion
+Args: id: the ID of the page to get
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js getPage
+
+---
+Name: getDatabase
+Description: Gets the contents of a database in Notion
+Args: id: the ID of the database to get
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js getDatabase
+
+---
+Name: search
+Description: Searches a Notion workspace for pages and databases
+Args: query: the search query
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js search
+
+---
+Name: createPage
+Description: Creates a new page in Notion
+Args: name: the name of the page to create
+Args: contents: the contents of the page in plain text
+Args: parentPageId: ID of the page that will be the parent of the new page
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js createPage

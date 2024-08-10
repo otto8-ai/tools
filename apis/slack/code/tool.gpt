@@ -1,0 +1,27 @@
+Name: list_channels
+Description: List all channels in the Slack workspace. Returns the name and ID for each channel
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js listChannels
+
+---
+Name: get_channel_history
+Description: Get the chat history for a channel in the Slack workspace
+Param: channelid: the ID of the channel to get the history for
+Param: limit: the number of messages to return
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js getChannelHistory
+
+---
+Name: search_messages
+Description: Search for messages in the Slack workspace
+Param: query: the search query
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js searchMessages
+
+---
+Name: send_message
+Description: Send a message to a channel in the Slack workspace
+Param: channelid: the ID of the channel to send the message to
+Param: text: the text to send
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js sendMessage

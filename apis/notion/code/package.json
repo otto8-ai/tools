@@ -1,0 +1,12 @@
+{
+  "name": "notion",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@notionhq/client": "^2.2.14"
+  }
+}
