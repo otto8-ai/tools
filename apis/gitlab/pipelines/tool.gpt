@@ -15,3 +15,4 @@ Name: pipeline_context
 
 #!sys.echo
 If the user asks for current status, find the latest run and return the status and other important info.
+Remember GitLab refers to logs as a trace
