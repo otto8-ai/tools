@@ -7,18 +7,17 @@ share credential: github.com/gptscript-ai/credential as cli.mysql.password with 
 #!/bin/bash
 
 if ! command -v mysql; then
-  echo "The user does not have the mysql cli installed or it is not available on the PATH."
+  echo 'The user does not have the mysql cli installed or it is not available on the PATH.'
 else
-  echo "The user has the mysql cli available. Use it to work with mysql."
-  echo "The following is the help text for the mysql cli. Always execute mysql statements non-interactively from the CLI using one of two options:"
+  echo 'The user has the mysql cli available. Use it to work with mysql.'
+  echo 'Always execute mysql statements non-interactively from the CLI using one of two options:'
   echo '`-e "${SQL_QUERY}"` for single sql statements'
-  echo "`< /path/to/script.sql` for longer scripts"
-  echo ""
+  echo '`< /path/to/script.sql` for longer scripts'
   echo 'The password is pre-set using the `$MYSQL_PWD` environment variable'
 
-  echo "the following text is the help output of the mysql cli:"
-  echo "```"
+  echo 'The following text is the help output of the mysql cli:'
+  echo '```'
   mysql --help
-  echo "```"
+  echo '```'
 fi
 
