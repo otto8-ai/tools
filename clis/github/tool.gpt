@@ -1,6 +1,6 @@
 name: github
 type: context
-description: Provides the ability to interact with GitHub.
+description: Provides the ability to interact with GitHub using the gh CLI.
 share tools: sys.exec
 
 #!/bin/bash

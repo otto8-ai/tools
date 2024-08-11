@@ -1,6 +1,6 @@
 name: k8s
 type: context
-description: Provides the ability to interact with Kubernetes using kubectl, helm, and other CLIs
+description: Provides the ability to interact with Kubernetes using kubectl, helm, and other CLIs.
 share tools: sys.exec
 
 #!/bin/bash

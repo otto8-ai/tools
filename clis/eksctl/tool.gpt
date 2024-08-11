@@ -1,6 +1,6 @@
 name: eks
 type: context
-description: Provides the ability to interact with Amazon EKS Clusters.
+description: Provides the ability to interact with Amazon EKS Clusters using the aws and eksctl CLIs.
 share tools: sys.exec
 
 #!/bin/bash
