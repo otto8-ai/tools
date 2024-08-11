@@ -1,6 +1,6 @@
 name: atlas
 type: context
-description: Provides the ability to interact with MongoDB Atlas.
+description: Provides the ability to interact with MongoDB Atlas using the atlas and mongosh CLIs.
 share tools: sys.exec
 
 #!/bin/bash
