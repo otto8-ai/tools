@@ -16,8 +16,8 @@ else
   echo '`-e "${SQL_QUERY}"` for single sql statements'
   echo '`< /path/to/script.sql` for longer scripts'
   echo 'The password is pre-set using the `$MYSQL_PWD` environment variable'
-  echo 'The username is pre-set using the `$MYSQL_USER' environment variable. You can pass that to the cli using `-u ${MYSQL_USER}`'
-  echo 'The hostname/ip is pre-set using the `$MYSQL_HOST' environment variable. You can pass that to the cli using `-h ${MYSQL_HOST}`'
+  echo 'The username is pre-set using the `$MYSQL_USER` environment variable. You can pass that to the cli using `-u ${MYSQL_USER}`'
+  echo 'The hostname/ip is pre-set using the `$MYSQL_HOST` environment variable. You can pass that to the cli using `-h ${MYSQL_HOST}`'
 
 
   echo 'The following text is the help output of the mysql cli:'
