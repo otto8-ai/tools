@@ -1,6 +1,6 @@
 name: aws
 type: context
-description: Provides the ability to interact with AWS.
+description: Provides the ability to interact with AWS using the aws CLI.
 share tools: sys.exec
 
 #!/bin/bash

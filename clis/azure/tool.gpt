@@ -1,6 +1,6 @@
 name: azure
 type: context
-description: Provides the ability to interact with Azure.
+description: Provides the ability to interact with Azure using the az CLI.
 share tools: sys.exec
 
 #!/bin/bash

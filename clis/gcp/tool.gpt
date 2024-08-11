@@ -1,6 +1,6 @@
 name: gcp
 type: context
-description: Provides the ability to interact with Google Cloud.
+description: Provides the ability to interact with Google Cloud using the gcloud CLI.
 share tools: sys.exec
 
 #!/bin/bash
