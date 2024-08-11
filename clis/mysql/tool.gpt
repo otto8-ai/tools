@@ -1,6 +1,6 @@
 name: mysql
 type: context
-description: Provides the ability to interact with mysql databases.
+description: Provides the ability to interact with mysql databases using the mysql cli.
 share tools: sys.exec
 share credentials: github.com/gptscript-ai/credential as cli.mysql.password with MYSQL_PWD as env and password as field and "Please enter your mysql user's password:" as message
 share credentials: github.com/gptscript-ai/credential as cli.mysql.username with MYSQL_USER as env and username as field and "Please enter your mysql username:" as message
