@@ -1,0 +1,19 @@
+Name: psql
+Description: Provides the ability to interact with PostgresSQL database through psql
+Share Context: github.com/gptscript-ai/context/os
+Share Credential: github.com/gptscript-ai/credential as cli.psql.password with PGPASSWORD as env and password as field and "Please enter your PostgreSQL user's password:" as message
+Type: context
+Share Tools: sys.exec
+
+#!/bin/bash
+
+if ! command -v psql; then
+  echo 'The user does not have the psql cli installed or it is not available on the PATH.'
+  echo "Recommend the user install and provide instructions based on their OS."
+else
+  echo 'The user has the psql cli available. Use it to work with PostgreSQL.'
+  echo 'The password is set via the PGPASSWORD environment variable.'
+  psql --help
+fi
+
+
