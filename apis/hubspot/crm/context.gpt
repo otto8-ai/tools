@@ -1,0 +1,16 @@
+name: context
+tools: sys.http.html2text
+
+Read the documentation for working with Companies from here: https://developers.hubspot.com/beta-docs/guides/api/crm/objects/companies
+Read the documentation for working with Contacts from here: https://developers.hubspot.com/beta-docs/guides/api/crm/objects/contacts
+Read the documentation for working with Deals from here: https://developers.hubspot.com/beta-docs/guides/api/crm/objects/deals
+Read the documentation for working with Imports from here: https://developers.hubspot.com/beta-docs/guides/api/crm/imports
+Read the documentation for working with LineItems from here: https://developers.hubspot.com/beta-docs/guides/api/crm/objects/line-items
+Read the documentation for working with Lists from here: https://developers.hubspot.com/beta-docs/guides/api/crm/lists/overview
+Read the documentation for working with Owners from here: https://developers.hubspot.com/beta-docs/guides/api/crm/owners
+Read the documentation for working with Pipelines from here: https://developers.hubspot.com/beta-docs/guides/api/crm/pipelines
+Read the documentation for working with Products from here: https://developers.hubspot.com/beta-docs/guides/api/crm/objects/products
+Read the documentation for working with Properties from here: https://developers.hubspot.com/beta-docs/guides/api/crm/properties
+Read the documentation for working with Quotes from here: https://developers.hubspot.com/beta-docs/guides/api/crm/commerce/quotes
+Read the documentation for working with Timeline from here: https://developers.hubspot.com/beta-docs/guides/api/crm/extensions/timeline
+All calls will be made using Oauth authentication.
