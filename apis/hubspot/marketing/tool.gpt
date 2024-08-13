@@ -1,0 +1,5 @@
+Name: HubSpot Marketing
+Type: context
+Share Tools: emails.yaml, events.yaml, forms.yaml, single-send.yaml, transactional-single-send.yaml
+Share Context: context.gpt
+Share Credential: github.com/gptscript-ai/gateway-oauth2 as hubspot.marketing with GPTSCRIPT_API_HUBAPI_COM_BEARER_TOKEN as env and hubspot as integration and "transactional-email crm.objects.marketing_events.read crm.objects.marketing_events.write forms marketing-email" as optional_scope and "oauth" as scope

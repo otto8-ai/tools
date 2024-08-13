@@ -1,0 +1,79 @@
+Name: HubSpot CRM
+Type: context
+Share Tools: companies, contacts, deals, imports, lineitems, lists, owners, pipelines, products, properties, quotes, timeline, github.com/gptscript-ai/context/current-time
+Share Credential: github.com/gptscript-ai/gateway-oauth2 as hubspot.crm with GPTSCRIPT_API_HUBAPI_COM_BEARER_TOKEN as env and hubspot as integration and "crm.objects.companies.read crm.objects.companies.write crm.schemas.companies.read crm.schemas.companies.write crm.objects.contacts.read crm.objects.contacts.write crm.schemas.contacts.read crm.schemas.contacts.write crm.dealsplits.read_write crm.objects.deals.read crm.objects.deals.write crm.schemas.deals.read crm.schemas.deals.write crm.import crm.export crm.objects.line_items.read crm.objects.line_items.write crm.schemas.line_items.read crm.lists.read crm.lists.write crm.objects.owners.read crm.pipelines.orders.read crm.pipelines.orders.write e-commerce crm.objects.contacts.read crm.objects.contacts.write crm.objects.companies.read crm.objects.companies.write crm.objects.deals.read crm.objects.deals.write tickets e-commerce crm.objects.quotes.read crm.objects.quotes.write crm.schemas.quotes.read timeline" as optional_scope and "oauth" as scope
+
+You are an expert as using HubSpot's CRM apis to accomplish tasks. Read the documentation you are given when the user asks you to do a task before deciding how to complete the task.
+
+---
+name: companies
+Type: context
+description: Use the companies API to create and manage CRM records that represent the companies and organizations that interact with your business.
+Share Tools: ./companies.yaml
+
+---
+name: contacts
+Type: context
+description: Use the contact lists API to create and manage contact lists.
+Share Tools: contacts.yaml
+
+---
+name: deals
+Type: context
+description: Use the deals API to create and manage CRM records that represent transactions with contacts and/or companies. Deals progress through pipeline stages to reflect whether the transaction has been completed, is active, or has otherwise been lost.
+Share Tools: deals.yaml
+
+---
+name: imports
+Type: context
+description: Use the imports API to import CRM records and activities, such as contacts, companies, and notes, into your HubSpot account.
+Share Tools: imports.yaml, github.com/gptscript-ai/context/cwd
+Share Context: imports-context.gpt
+
+---
+name: lineitems
+Type: context
+description: Use the line items API to add instances of products to deals and quotes. You can create line items from existing products or create them as custom line items with no product attached.
+Share Tools: lineitems.yaml
+
+---
+name: lists
+Type: context
+description: Use the lists API to manage list memberships for object lists.
+Share Tools: lists.yaml
+
+---
+name: owners
+Type: context
+description: Each user in a HubSpot account is assigned an owner ID, which HubSpot uses to map the user to their assigned CRM records, activities, and more. Use the owners API to retrieve owner IDs and other related information for users in the account. To assign an owner to a CRM record, you can use the properties API to set the hubspot_owner_id property.
+Share Tools: owners.yaml
+
+---
+name: pipelines
+Type: context
+description: Use the pipelines API to create and manage deal and ticket pipelines. Pipelines enable you to track the status or progress of deals and tickets, such as closing deals and opening support tickets.
+Share Tools: pipelines.yaml
+
+---
+name: products
+Type: context
+description: Use the products API to create and manage your product library, which is the collection of goods and services that your company offers. Products in your product library can be used as line items when creating deals, payment links, invoices, and quotes.
+Share Tools: products.yaml
+
+---
+name: properties
+Type: context
+description: Use the properties API to store information in fields on individual contact records. You can use this API to manage existing default and custom properties, create new custom properties, and more.
+Share Tools: properties.yaml
+
+---
+name: quotes
+Type: context
+description: Use the quotes API to create and manage sales quotes for sharing pricing information with potential buyers.
+Share Tools: quotes.yaml
+
+---
+name: timeline
+Type: context
+description: Use the timeline events API to add custom event information to CRM record timelines. You'll first need to create a public app, then an event template to display event data.
+Share Tools: timeline.yaml

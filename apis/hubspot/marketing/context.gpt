@@ -1,0 +1,9 @@
+Name: context
+tools: sys.http.html2text
+
+Read the documentation for working with Emails from here: https://developers.hubspot.com/beta-docs/guides/api/marketing/emails/marketing-emails
+Read the documentation for working with Events from here: https://developers.hubspot.com/beta-docs/guides/api/marketing/marketing-events
+Read the documentation for working with Forms from here: https://developers.hubspot.com/beta-docs/guides/api/marketing/forms
+Read the documentation for working with Single-send from here: https://developers.hubspot.com/beta-docs/guides/api/marketing/emails/single-send-api
+Read the documentation for working with Transactional Single-send from here: https://developers.hubspot.com/beta-docs/guides/api/marketing/emails/transactional-emails
+All calls will be made using Oauth authentication.

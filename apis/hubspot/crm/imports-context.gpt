@@ -1,0 +1,325 @@
+name: imports-context
+
+#!sys.echo
+
+Use the imports API to import CRM records and activities into your HubSpot account, such as contacts, companies, and notes. Once imported, you can access and update records and activities through the various CRM API endpoints, including the contacts API, associations API, and engagements APIs. You can also import records and activities using the guided import tool in HubSpot
+
+.
+
+Before starting your import, learn more about the objects and activities that can be imported, as well as file and property requirements.
+Start an import
+
+You can start an import by making a POST request to /crm/v3/imports with a request body that specifies how to map the columns of your import file to the associated CRM properties in HubSpot.
+
+API imports are sent as form-data type requests, with the request body containing following fields:
+
+    importRequest: a text field that contains the request JSON.
+    files: a file field that contains the import file.
+
+For the request header, add a Content-Type header with a value of multipart/form-data.
+
+The screenshot below shows what your request might look like when using an application like Postman:
+
+postman-import-request-no-response0
+Format the importRequest data
+
+In the request JSON, define the import file details, including mapping the spreadsheet's columns to HubSpot data. Your request JSON should include the following fields:
+
+    name: the name of the import. In HubSpot, this is the name displayed in the imports tool
+
+, as well as the name that you can reference in other tools, such as lists.
+
+importOperations: an optional field used to indicate whether the import should create and update, only create, or only update records
+
+for a certain object or activity. Include the objectTypeId for the object/activity and whether you want to UPSERT (create and update), CREATE, or UPDATE records. For example, the field would look like this in your request: "importOperations": {"0-1": "CREATE"}. If you don't include this field, the default value used for the import is UPSERT.
+
+dateFormat: the format for dates included in the file. By default, this is set to MONTH_DAY_YEAR, but you can also use DAY_MONTH_YEAR or YEAR_MONTH_DAY.
+
+marketableContactImport: an optional field to indicate the marketing status
+of contacts in your import file. This is only used when importing contacts into accounts that have access to marketing contacts
+
+. To set the contacts in the file as marketing, use the value true. To set the contacts in the file as non-marketing, use the value false.
+
+createContactListFromImport: an optional field to create a static list of the contacts
+
+    from your import. To create a list from your file, use the value true.
+
+    files: an array that contains your import file information.
+        fileName: the name of the import file.
+        fileFormat: the import file's format. For CSV files, use a value of CSV. For Excel files, use a value of SPREADSHEET.
+        fileImportPage: contains the columnMappings array required to map data from your import file to HubSpot data. Learn more about column mapping below.
+
+Map file columns to HubSpot properties
+
+Within the columnMappings array, include an entry for each column in your import file, matching the order of your spreadsheet. For each column, include the following fields:
+
+    columnObjectTypeId: the name or objectTypeId value of the object or activity to which the data belongs. Refer to this article for a full list of objectTypeId values.
+    columnName: the name of the column header.
+    propertyName: the internal name of the HubSpot property that the data will map to. For the common column in multi-file imports, propertyName should be null when the toColumnObjectTypeId field is used.
+    columnType: used to specify that a column contains a unique identifier property
+
+.-,Unique%20identifier,-%3A%20a%20property) Depending on the property and goal of the import, use one of the following values:
+
+    HUBSPOT_OBJECT_ID: the ID of a record. For example, your contact import file might contain a Record ID column that stores the ID of the company you want to associate the contacts with.
+    HUBSPOT_ALTERNATE_ID: a unique identifier other than the record ID. For example, your contact import file might contain an Email column that stores the contacts' email addresses.
+    FLEXIBLE_ASSOCIATION_LABEL: include this column type to indicate the column contains association labels.
+    ASSOCIATION_KEYS: for same object association imports only, include this column type for the unique identifier of the same object records you're associating. For example, in your request for a contacts association import, the Associated contact [email/Record ID] column must have a columnType of ASSOCIATION_KEYS. Learn more about setting up your import file for a same object association import
+
+    .
+
+toColumnObjectTypeId: for multi-file or multiple object imports, the name or objectTypeId of the object the common column
+
+    property or association label belongs to. Include this field for the common column property in the file of the object the property does not belong to. For example, if you're associating contacts and companies in two files with the contact property Email as the common column, include the toColumnObjectTypeId for the Email column in the company file.
+    foreignKeyType: for multi-file imports only, the type of association the common column should use, specified by the associationTypeId and associationCategory. Include this field for the common column property in the file of the object the property does not belong to. For example, if you're associating contacts and companies in two files with the contact property Email as the common column, include the foreignKeyType for the Email column in the company file.
+    associationIdentifierColumn: for multi-file imports only, indicates the property used in the common column to associate the records. Include this field for the common column property in the file of the object the property belongs to. For example, if you're associating contacts and companies in two files with contact property Email as the common column, set the associationIdentifierColumn as true for the Email column in the contact file.
+
+Import one file with one object
+Below is an example request body of importing one file to create contacts:
+
+```
+// Example POST to https://api.hubspot.com/crm/v3/imports
+// Content-Type header set to multipart/form-data
+
+{
+  "name": "November Marketing Event Leads",
+  "importOperations": {
+    "0-1": "CREATE"
+  },
+  "dateFormat": "DAY_MONTH_YEAR",
+  "files": [
+    {
+      "fileName": "Nov-event-leads.csv",
+      "fileFormat": "CSV",
+      "fileImportPage": {
+        "hasHeader": true,
+        "columnMappings": [
+          {
+            "columnObjectTypeId": "0-1",
+            "columnName": "First Name",
+            "propertyName": "firstname"
+          },
+          {
+            "columnObjectTypeId": "0-1",
+            "columnName": "Last Name",
+            "propertyName": "lastname"
+          },
+          {
+            "columnObjectTypeId": "0-1",
+            "columnName": "Email",
+            "propertyName": "email",
+            "columnType": "HUBSPOT_ALTERNATE_ID"
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+Import one file with multiple objects
+Below is an example request body of importing and associating contacts and companies in one file with association labels:
+
+```
+// Example POST to https://api.hubspot.com/crm/v3/imports
+// Content-Type header set to multipart/form-data
+
+{
+  "name": "Association Label Import",
+  "dateFormat": "DAY_MONTH_YEAR",
+  "files": [
+    {
+      "fileName": "association label example.xlsx",
+      "fileFormat": "SPREADSHEET",
+      "fileImportPage": {
+        "hasHeader": true,
+        "columnMappings": [
+          {
+            "columnObjectTypeId": "0-1",
+            "columnName": "Email",
+            "propertyName": "email"
+          },
+          {
+            "columnObjectTypeId": "0-2",
+            "columnName": "Domain",
+            "propertyName": "domain"
+          },
+          {
+            "columnName": "Association Label",
+            "columnType": "FLEXIBLE_ASSOCIATION_LABEL",
+            "columnObjectTypeId": "0-1",
+            "toColumnObjectTypeId": "0-2"
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+Import multiple files
+Below is an example request body of importing and associating contacts and companies in two files, where the contact property Email is the common column in the files:
+
+```
+// Example POST to https://api.hubspot.com/crm/v3/imports
+// Content-Type header set to multipart/form-data
+
+{
+  "name": "Contact Company import",
+  "dateFormat": "YEAR_MONTH_DAY",
+  "files": [
+    {
+      "fileName": "contact-import-file.csv",
+      "fileFormat": "CSV",
+      "fileImportPage": {
+        "hasHeader": true,
+        "columnMappings": [
+          {
+            "columnObjectTypeId": "0-1",
+            "columnName": "First name",
+            "propertyName": "firstname"
+          },
+          {
+            "columnObjectTypeId": "0-1",
+            "columnName": "Last name",
+            "propertyName": "lastname"
+          },
+          {
+            "columnObjectTypeId": "0-1",
+            "columnName": "Email",
+            "propertyName": "email",
+            "associationIdentifierColumn": true
+          }
+        ]
+      }
+    },
+    {
+      "fileName": "company-import-file.csv",
+      "fileFormat": "CSV",
+      "fileImportPage": {
+        "hasHeader": true,
+        "columnMappings": [
+          {
+            "columnObjectTypeId": "0-2",
+            "columnName": "Company name",
+            "propertyName": "name"
+          },
+          {
+            "columnObjectTypeId": "0-2",
+            "columnName": "Company domain name",
+            "propertyName": "domain",
+            "columnType": "HUBSPOT_ALTERNATE_ID"
+          },
+          {
+            "columnObjectTypeId": "0-2",
+            "toColumnObjectTypeId": "0-1",
+            "columnName": "Email",
+            "propertyName": null,
+            "foreignKeyType": {
+              "associationTypeId": 280,
+              "associationCategory": "HUBSPOT_DEFINED"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+On a successful request, the response will include an importId which you can use to retrieve or cancel the import. Once completed, you can view the import in HubSpot
+
+, but imports completed via API will not be available as an option when filtering records by import in views, lists, reports, or workflows.
+Get previous imports
+
+To retrieve all imports from your HubSpot account, make a GET request to /crm/v3/imports/. To retrieve information for a specific import, make a GET request to /crm/v3/imports/{importId}.
+
+When you retrieve imports, information will be returned including the import's name, source, file format, language, date format, and column mappings. The import's state will also be returned, which can be any of the following:
+
+    STARTED: HubSpot recognizes that the import exists, but the import hasn't started processing yet.
+    PROCESSING: The import is actively being processed.
+    DONE: The import is complete. All the objects, activities, or associations have been updated or created.
+    FAILED: There was an error that was not detected when the import was started. The import was not completed.
+    CANCELED: User cancelled the export while it was in any of the STARTED, PROCESSING, or DEFERRED states.
+    DEFERRED: The maximum number of imports (three) are processing at the same time. The import will start once one of the other imports finishes processing.
+
+Learn more about paging and limiting results in the Endpoints tab at the top of this article.
+
+Please note: when retrieving imports using a private app access token, the response will only include imports performed by that private app. Imports completed in HubSpot or via another private app will not be returned.
+Cancel an import
+
+To cancel an active import, make a POST request to /crm/v3/imports/{importId}/cancel.
+View and troubleshoot import errors
+To view errors for a specific import, make a GET request to /crm/v3/imports/{importId}/errors. Learn more about common import errors and how to resolve them
+
+.
+
+For errors such as Incorrect number of columns, Unable to parse JSON or 404 text/html is not accepted:
+
+    Ensure that there is a column header for each column in your file, and that the request body contains a columnMapping entry for each column. The following criteria should be met:
+        The column order in the request body and import file should match. If the column order doesn't match, the system will attempt to automatically reorder but may be unsuccessful, resulting in an error when the import is started.
+        Every column needs to be mapped. If a column is not mapped, the import request may still be successful, but would result in the Incorrect number of columns error when the import is started.
+    Ensure that the file's name and the fileName field in your request JSON match, and that you've included the file extension in the fileName field. For example, import_name.csv.
+    Ensure that your header includes Content-Type with a value of multipart/form-data.
+
+
+```
+Example POST URL:
+https://api.hubapi.com/crm/v3/imports?
+
+Example importRequest JSON data:
+This example contains 3 columns:
+ - First name, mapped to the firstname contact property
+ - Email, mapped to the email contact property
+ - Company ID, which contains a list of company record IDs
+   that the contact will be assocated with.
+{
+  "name": "test_import",
+  "files": [
+    {
+      "fileName": "final_emails.csv",
+      "fileImportPage": {
+        "hasHeader": true,
+        "columnMappings": [
+          {
+            "ignored": false,
+            "columnName": "First Name",
+            "idColumnType": null,
+            "propertyName": "firstname",
+            "foreignKeyType": null,
+            "columnObjectType": "CONTACT",
+            "associationIdentifierColumn": false
+          },
+          {
+            "ignored": false,
+            "columnName": "Email",
+            "idColumnType": "HUBSPOT_ALTERNATE_ID",
+            "propertyName": "email",
+            "foreignKeyType": null,
+            "columnObjectType": "CONTACT",
+            "associationIdentifierColumn": false
+          },
+          {
+            "ignored": false,
+            "columnName": "Company ID",
+            "idColumnType": "HUBSPOT_OBJECT_ID",
+            "propertyName": null,
+            "foreignKeyType": {
+              "associationCategory": "HUBSPOT_DEFINED",
+              "associationTypeId": 1
+            },
+            "columnObjectType": "CONTACT",
+            "associationIdentifierColumn": false
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+Please note: if you receive an error, check if there are any duplicate headers, such as Content-Type. This may occur if you're using Postman or if it's included in the header of your Python script. Remove the duplicate before completing the request.
+Limits
+
+When using the imports API, you can import up to 80,000,000 rows per day. However, individual import files are limited to 1,048,576 rows or 512 MB, whichever is reached first.
+
+If your request exceeds either the row or size limit, HubSpot will respond with a 429 HTTP error. When approaching these limits, it's recommended to split your import into multiple requests.
