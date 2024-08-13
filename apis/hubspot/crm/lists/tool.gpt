@@ -1,0 +1,4 @@
+Name: HubSpot CRM Lists
+Share Tools: openapi.yaml
+Share Context: context.gpt
+Share Credential: github.com/gptscript-ai/gateway-oauth2 as hubspot.crm.lists with GPTSCRIPT_API_HUBAPI_COM_BEARER_TOKEN as env and hubspot as integration and "crm.lists.read crm.lists.write " as optional_scope and "oauth" as scope

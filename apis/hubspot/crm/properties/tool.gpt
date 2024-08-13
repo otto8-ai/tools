@@ -1,0 +1,4 @@
+Name: HubSpot CRM Properties
+Share Tools: openapi.yaml
+Share Context: context.gpt
+Share Credential: github.com/gptscript-ai/gateway-oauth2 as hubspot.crm.properties with GPTSCRIPT_API_HUBAPI_COM_BEARER_TOKEN as env and hubspot as integration and "crm.objects.contacts.read crm.objects.contacts.write crm.objects.companies.read crm.objects.companies.write crm.objects.deals.read crm.objects.deals.write tickets e-commerce" as optional_scope and "oauth" as scope

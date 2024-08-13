@@ -1,0 +1,5 @@
+name: context
+tools: sys.http.html2text
+
+Read the documentation for working with HubSpot CRM Products from here: https://developers.hubspot.com/beta-docs/guides/api/crm/objects/products
+All calls will be made using Oauth authentication.

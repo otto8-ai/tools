@@ -1,0 +1,5 @@
+name: context
+tools: sys.http.html2text
+
+Read the documentation for working with HubSpot CRM Line Items from here: https://developers.hubspot.com/beta-docs/reference/api/crm/objects/line-items
+All calls will be made using Oauth authentication.

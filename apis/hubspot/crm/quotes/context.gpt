@@ -1,0 +1,5 @@
+name: context
+tools: sys.http.html2text
+
+Read the documentation for working with HubSpot CRM Quotes from here: https://developers.hubspot.com/docs/api/crm/quotes
+All calls will be made using Oauth authentication.
