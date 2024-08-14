@@ -1,0 +1,36 @@
+Name: avncli
+Description: Interact with Aiven cloud with the avn cli.
+Type: context
+Share Context: avn_help
+Share Credential: github.com/gptscript-ai/credential as aivenToken with AIVEN_AUTH_TOKEN as env and "Enter Aiven token" as message and token as field
+Share Tool: avn_cli
+
+#!sys.echo
+
+You have access to the avn cli. 
+
+Helpful hints:
+Always check the help of subcommmands by using --help
+Use the --project {Project Name} flag
+Once the cloud is known use the --cloud {cloud_name} flag
+When Passing the plan do NOT pass in the service prefix, so if listed pg:free-1-5gb you would pass free-1-5gb
+---
+Name: avn_help
+
+#!/usr/bin/env python3 -m aiven.client help
+---
+Name: avn_cli
+Description: Provides access to the aiven cli
+Params: command: All the args and flags to pass to the avn cli
+
+#!/usr/bin/env python3 -m aiven.client --auth-token ${AIVEN_AUTH_TOKEN} ${COMMAND}
+---
+!metadata:avn_*:requirements.txt
+
+aiven-client==4.2.1
+certifi==2024.7.4
+charset-normalizer==3.3.2
+idna==3.7
+requests==2.32.3
+requests-toolbelt==1.0.0
+urllib3==2.2.2
