@@ -1,6 +1,6 @@
 openapi: 3.0.1
 info:
-  title: OData Service for namespace microsoft.graph
+  title: Microsoft Outlook Email API
   description: This OData service is located at https://graph.microsoft.com/v1.0
   version: v1.0
   x-ms-generated-by:
