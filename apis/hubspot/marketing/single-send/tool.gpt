@@ -1,0 +1,4 @@
+Name: HubSpot Marketing Single-send
+Share Tools: openapi.yaml
+Share Context: context.gpt
+Share Credential: github.com/gptscript-ai/gateway-oauth2 as hubspot.marketing.single-send with GPTSCRIPT_API_HUBAPI_COM_BEARER_TOKEN as env and hubspot as integration and "marketing-email" as optional_scope and "oauth" as scope
