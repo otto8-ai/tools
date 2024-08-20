@@ -1,3 +1,4 @@
 Name: Supabase API(Read-Write)
+Description: Provides access to the Supabase API
 Share Credential: github.com/gptscript-ai/credential as api.supabase.combearer with GPTSCRIPT_API_SUPABASE_COM_BEARER as env and "Please read the instructions [here](https://supabase.com/docs/reference/api/introduction) and provide your supabase API key" as message and key as field
 Share Tools: * from ./openapi.json
