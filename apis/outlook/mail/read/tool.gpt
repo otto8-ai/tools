@@ -1,3 +1,4 @@
 Name: Read Outlook Mail
+Description: Provides access to the Microsoft Outlook Mail API (read-only)
 Share Tools: openapi.yaml
 Share Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.mail.read with GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN as env and microsoft365 as integration and "Mail.Read User.Read offline_access" as scope

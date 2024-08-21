@@ -1,4 +1,5 @@
 Name: redis
+Description: Provides the ability to interact with Redis using the Redis CLI
 Type: context
 Share Credential: github.com/gptscript-ai/credential as cli.redis.auth with REDISCLI_AUTH as env and "Enter redis-cli password for no password enter in two single quotes '':" as message and password as field
 Share Context: github.com/gptscript-ai/context/os
