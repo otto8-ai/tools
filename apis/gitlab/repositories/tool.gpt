@@ -3,6 +3,6 @@ Context: ../context/tool.gpt
 Description: Work with GitLab repository elements, issues and merge requests
 Credentials: github.com/gptscript-ai/gateway-oauth2 as gitlab.comBearerAuth with GPTSCRIPT_GITLAB_COM_BEARER_TOKEN as env and GitLab as integration and "api read_user"
 
-Tools: *ApiV4ProjectsIdRepository* from ../openapi.yaml
+Tools: *ApiV4ProjectsIdRepository* from ../repositories.yaml
 
 help the user with their repository requests

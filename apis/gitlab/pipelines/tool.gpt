@@ -4,10 +4,7 @@ Context: pipeline_context
 Description: Operations related to creating, listing, updating, and deleting pipelines and jobs in GitLab.
 Credentials: github.com/gptscript-ai/gateway-oauth2 as gitlab.comBearerAuth with GPTSCRIPT_GITLAB_COM_BEARER_TOKEN as env and GitLab as integration and "api read_user"
 
-Tools: *ApiV4ProjectsIdPipeline from ../openapi.yaml
-Tools: *ApiV4ProjectsIdPipelines from ../openapi.yaml
-Tools: *ApiV4ProjectsIdPipelines* from ../openapi.yaml
-Tools: *ApiV4ProjectsIdJobs* from ../openapi.yaml
+Tools: *ApiV4ProjectsIdPipeline|*ApiV4ProjectsIdPipelines|*ApiV4ProjectsIdPipelines*|*ApiV4ProjectsIdJobs* from ../pipelines.yaml
 
 Help the user with their pipeline requests
 ---
