@@ -12,6 +12,7 @@ General Instructions:
 - For operations that require an `Id`, first use a tool to search by name if the user does not provide the Id.
 - Before making destructive changes, confirm with the user.
 - When searching by name, always use `CONTAINS_TOKEN` as the filter operator.
+- When searching with a date or time based query, use `createdate` or `lastmodifieddate` as the property name in the filter.
 - When creating a resource that has the `associations` field, it is always required, even if it is empty.
 - If the user does not specify a value for the `associations` field, supply an empty string.
 - Take the current date and time into account when being asked to perform time-based operations.
