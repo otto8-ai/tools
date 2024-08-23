@@ -181,6 +181,8 @@ paths:
     post:
       tags:
         - Search
+      summary: Search
+      description: Search for a engagement calls using the query schema.
       operationId: SearchEngagementCalls
       parameters: []
       requestBody:
@@ -396,6 +398,8 @@ paths:
     post:
       tags:
         - Search
+      summary: Search
+      description: Search for a engagement emails using the query schema.
       operationId: SearchEngagementEmails
       parameters: []
       requestBody:
@@ -599,6 +603,8 @@ paths:
     post:
       tags:
         - Search
+      summary: Search
+      description: Search for a engagement meetings using the query schema.
       operationId: SearchEngagementMeetings
       parameters: []
       requestBody:
@@ -798,6 +804,8 @@ paths:
     post:
       tags:
         - Search
+      summary: Search
+      description: Search for engagement notes using the query schema.
       operationId: SearchEngagementNotes
       parameters: []
       requestBody:
@@ -1075,6 +1083,8 @@ paths:
     post:
       tags:
         - Search
+      summary: Search
+      description: Search for companies using the query schema.
       operationId: SearchCompanies
       parameters: []
       requestBody:
@@ -1336,6 +1346,8 @@ paths:
     post:
       tags:
         - Search
+      summary: Search
+      description: Search for contacts using the query schema.
       operationId: SearchContacts
       parameters: []
       requestBody:
@@ -1613,6 +1625,8 @@ paths:
     post:
       tags:
         - Search
+      summary: Search
+      description: Search for deals using the query schema.
       operationId: SearchDeals
       parameters: []
       requestBody:
@@ -1920,6 +1934,8 @@ paths:
     post:
       tags:
         - Search
+      summary: Search
+      description: Search for tickets using the query schema.
       operationId: SearchTickets
       parameters: []
       requestBody:
