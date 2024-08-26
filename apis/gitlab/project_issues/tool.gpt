@@ -2,9 +2,8 @@ Name: project_issues
 Context: ../context/tool.gpt
 Context: project_issues_context
 Description: This tool can work with issues in a GitLab project
-Tools: ./openapi.yaml
-Tools: *ApiV4ProjectsIdIssues* from ../openapi.yaml
-Tools: getApiV4ProjectsIdMergeRequestsMergeRequestIidClosesIssues from ../openapi.yaml
+Tools: ./project_issues.yaml
+Tools: *ApiV4ProjectsIdIssues*|getApiV4ProjectsIdMergeRequestsMergeRequestIidClosesIssues from ../project_issues_main.yaml
 Credentials: github.com/gptscript-ai/gateway-oauth2 as gitlab.comBearerAuth with GPTSCRIPT_GITLAB_COM_BEARER_TOKEN as env and GitLab as integration and "api read_user"
 
 Help the user with GitLab project issues
