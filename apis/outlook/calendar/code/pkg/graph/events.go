@@ -20,17 +20,17 @@ type CreateEventInfo struct {
 	Start, End                  time.Time
 }
 
-func GetEvent(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, eventId, calendarID string, owner OwnerType) (models.Eventable, error) {
+func GetEvent(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, eventID, calendarID string, owner OwnerType) (models.Eventable, error) {
 	if calendarID != "" {
 		switch owner {
 		case OwnerTypeUser:
-			resp, err := client.Me().Calendars().ByCalendarId(calendarID).Events().ByEventId(eventId).Get(ctx, &users.ItemCalendarsItemEventsEventItemRequestBuilderGetRequestConfiguration{})
+			resp, err := client.Me().Calendars().ByCalendarId(calendarID).Events().ByEventId(eventID).Get(ctx, &users.ItemCalendarsItemEventsEventItemRequestBuilderGetRequestConfiguration{})
 			if err != nil {
 				return nil, fmt.Errorf("failed to get event: %w", err)
 			}
 			return resp, nil
 		case OwnerTypeGroup:
-			resp, err := client.Groups().ByGroupId(calendarID).Events().ByEventId(eventId).Get(ctx, &groups.ItemEventsEventItemRequestBuilderGetRequestConfiguration{})
+			resp, err := client.Groups().ByGroupId(calendarID).Events().ByEventId(eventID).Get(ctx, &groups.ItemEventsEventItemRequestBuilderGetRequestConfiguration{})
 			if err != nil {
 				return nil, fmt.Errorf("failed to get event: %w", err)
 			}
@@ -38,7 +38,7 @@ func GetEvent(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, even
 		}
 	}
 
-	resp, err := client.Me().Events().ByEventId(eventId).Get(ctx, &users.ItemEventsEventItemRequestBuilderGetRequestConfiguration{})
+	resp, err := client.Me().Events().ByEventId(eventID).Get(ctx, &users.ItemEventsEventItemRequestBuilderGetRequestConfiguration{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get event: %w", err)
 	}
@@ -138,23 +138,23 @@ func InviteUserToEvent(ctx context.Context, client *msgraphsdkgo.GraphServiceCli
 	return nil
 }
 
-func DeleteEvent(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, eventId, calendarId string, owner OwnerType) error {
-	if calendarId != "" {
+func DeleteEvent(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, eventID, calendarID string, owner OwnerType) error {
+	if calendarID != "" {
 		switch owner {
 		case OwnerTypeUser:
-			if err := client.Me().Calendars().ByCalendarId(calendarId).Events().ByEventId(eventId).Delete(ctx, nil); err != nil {
+			if err := client.Me().Calendars().ByCalendarId(calendarID).Events().ByEventId(eventID).Delete(ctx, nil); err != nil {
 				return fmt.Errorf("failed to delete event: %w", err)
 			}
 			return nil
 		case OwnerTypeGroup:
-			if err := client.Groups().ByGroupId(calendarId).Events().ByEventId(eventId).Delete(ctx, nil); err != nil {
+			if err := client.Groups().ByGroupId(calendarID).Events().ByEventId(eventID).Delete(ctx, nil); err != nil {
 				return fmt.Errorf("failed to delete event: %w", err)
 			}
 			return nil
 		}
 	}
 
-	if err := client.Me().Events().ByEventId(eventId).Delete(ctx, nil); err != nil {
+	if err := client.Me().Events().ByEventId(eventID).Delete(ctx, nil); err != nil {
 		return fmt.Errorf("failed to delete event: %w", err)
 	}
 
