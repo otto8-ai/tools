@@ -16,4 +16,5 @@ else
   else
     echo "The user has version 2 of the aws cli installed. Use version 2 syntax."
   fi
+    echo "Quote the command arguments to be shell safe"
 fi
