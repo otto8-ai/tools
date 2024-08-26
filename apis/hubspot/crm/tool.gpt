@@ -21,6 +21,7 @@ General Instructions:
 - When creating a resource that has the `associations` field, it is always required, even if it is empty.
 - If the user does not specify a value for the `associations` field, supply an empty string.
 - Take the current date and time into account when being asked to perform time-based operations.
+- When asked for information about a resource, please return as much information as possible unless told otherwise.
 
 Instructions for Delete Resources:
 - Ensure the `Id` used to delete any resource maps to the correct name that the user wants to delete.
