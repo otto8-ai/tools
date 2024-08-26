@@ -1,6 +1,6 @@
 openapi: 3.0.1
 info:
-  title: Tickets
+  title: HubSpot CRM
   description: ''
   version: v3
 servers:
