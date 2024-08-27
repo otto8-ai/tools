@@ -14,7 +14,6 @@ Param: folder_id: The ID of the folder to list messages in.
 Name: getMessageDetails
 Description: Get the details of a message.
 Param: message_id: The ID of the message to get details for.
-Param: folder_id: The ID of the folder the message is in.
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool getMessageDetails
 

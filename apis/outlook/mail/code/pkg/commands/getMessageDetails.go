@@ -10,13 +10,13 @@ import (
 	"github.com/gptscript-ai/tools/apis/outlook/mail/code/pkg/printers"
 )
 
-func GetMessageDetails(ctx context.Context, folderID, messageID string) error {
+func GetMessageDetails(ctx context.Context, messageID string) error {
 	c, err := client.NewClient(global.ReadOnlyScopes)
 	if err != nil {
 		return fmt.Errorf("failed to create client: %w", err)
 	}
 
-	result, err := graph.GetMessageDetails(ctx, c, folderID, messageID)
+	result, err := graph.GetMessageDetails(ctx, c, messageID)
 	if err != nil {
 		return fmt.Errorf("failed to get message details: %w", err)
 	}

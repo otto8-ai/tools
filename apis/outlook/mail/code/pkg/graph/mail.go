@@ -26,8 +26,8 @@ func ListMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, 
 	return result.GetValue(), nil
 }
 
-func GetMessageDetails(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, folderID, messageID string) (models.Messageable, error) {
-	result, err := client.Me().MailFolders().ByMailFolderId(folderID).Messages().ByMessageId(messageID).Get(ctx, nil)
+func GetMessageDetails(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, messageID string) (models.Messageable, error) {
+	result, err := client.Me().Messages().ByMessageId(messageID).Get(ctx, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get message details: %w", err)
 	}

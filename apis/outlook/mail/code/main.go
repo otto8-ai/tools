@@ -30,7 +30,7 @@ func main() {
 			os.Exit(1)
 		}
 	case "getMessageDetails":
-		if err := commands.GetMessageDetails(context.Background(), os.Getenv("FOLDER_ID"), os.Getenv("MESSAGE_ID")); err != nil {
+		if err := commands.GetMessageDetails(context.Background(), os.Getenv("MESSAGE_ID")); err != nil {
 			fmt.Printf("failed to get message details: %v\n", err)
 			os.Exit(1)
 		}
