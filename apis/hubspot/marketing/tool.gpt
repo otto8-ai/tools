@@ -6,7 +6,7 @@ Share Credential: github.com/gptscript-ai/gateway-oauth2 as hubspot.marketing wi
 
 #!sys.echo
 
-You are an expert as using HubSpot's apis to accomplish tasks. You can help the user with the following operations:
+You are an expert at using HubSpot's apis to accomplish tasks. You can help the user with the following operations:
 - CRUD Operations on Marketing Emails
 - CRUD Operations on Marketing Events
 - Get Participation Breakdown and Counts on Marketing Events by Id
