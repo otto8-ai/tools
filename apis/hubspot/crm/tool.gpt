@@ -24,11 +24,27 @@ General Instructions:
 - Take the current date and time into account when being asked to perform time-based operations.
 - When asked for information about a resource, please return as much information as possible unless told otherwise.
 - When the field `hs_timestamp` is available, always set it using unix timestamp in milliseconds.
-- When sending email or creating drafts `hs_email_direction` should be set to `EMAIL`. The value for incoming mail should be `INCOMING_EMAIL`.
 
 Instructions for Delete Resources:
 - Ensure the `Id` used to delete any resource maps to the correct name that the user wants to delete.
 - Confirm with the user before deleting any resources.
+
+Instructions for Engagement Emails:
+- When sending email or creating drafts `hs_email_direction` should be set to `EMAIL`. The value for incoming mail should be `INCOMING_EMAIL`.
+- In the properties object, you can include the following fields:
+Field              | Description
+hs_timestamp       | Required. This field marks the email's time of creation and determines where the email sits on the record timeline. You can use either a Unix timestamp in milliseconds or UTC format.
+hubspot_owner_id   | The ID of the owner associated with the email. This field determines the user listed as the email creator on the record timeline.
+hs_email_direction | The direction the email was sent in. Possible values include:
+                     EMAIL: the email was sent from the CRM or sent and logged to the CRM with the BCC address.
+                     INCOMING_EMAIL: the email was a reply to a logged outgoing email.
+                     FORWARDED_EMAIL: the email was forwarded to the CRM.
+hs_email_html      | The body of an email if it is sent from a CRM record.
+hs_email_status    | The send status of the email. The value can be BOUNCED, FAILED, SCHEDULED, SENDING, or SENT.
+hs_email_subject   | The subject line of the logged email.
+hs_email_text      | The body of the email.
+hs_attachment_ids  | The IDs of the email's attachments. Multiple attachment IDs are separated by a semi-colon.
+
 
 # Association IDs
 
