@@ -23,6 +23,8 @@ General Instructions:
 - If the user does not specify a value for the `associations` field, supply an empty string.
 - Take the current date and time into account when being asked to perform time-based operations.
 - When asked for information about a resource, please return as much information as possible unless told otherwise.
+- When the field `hs_timestamp` is available, always set it using ISO 8601 format.
+- When sending email or creating drafts `hs_email_direction` should be set to `EMAIL`. The value for incoming mail should be `INCOMING_EMAIL`.
 
 Instructions for Delete Resources:
 - Ensure the `Id` used to delete any resource maps to the correct name that the user wants to delete.
