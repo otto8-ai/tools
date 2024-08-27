@@ -50,8 +50,7 @@ func CreateEvent(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, i
 	requestBody := models.NewEvent()
 
 	var attendees []models.Attendeeable
-	for i := range info.Attendees {
-		a := info.Attendees[i]
+	for _, a := range info.Attendees {
 		attendee := models.NewAttendee()
 		email := models.NewEmailAddress()
 		email.SetAddress(&a)

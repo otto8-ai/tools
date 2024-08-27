@@ -41,7 +41,7 @@ func main() {
 			os.Exit(1)
 		}
 
-		if err := commands.ListEvents(context.Background(), *start, *end); err != nil {
+		if err := commands.ListEvents(context.Background(), start, end); err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
@@ -77,8 +77,8 @@ func main() {
 			os.Exit(1)
 		}
 
-		info.Start = *start
-		info.End = *end
+		info.Start = start
+		info.End = end
 
 		if err := commands.CreateEvent(context.Background(), info); err != nil {
 			fmt.Println(err)
@@ -101,7 +101,7 @@ func main() {
 			os.Exit(1)
 		}
 
-		if err := commands.SearchEvents(context.Background(), os.Getenv("QUERY"), *start, *end); err != nil {
+		if err := commands.SearchEvents(context.Background(), os.Getenv("QUERY"), start, end); err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
@@ -116,31 +116,30 @@ func main() {
 	}
 }
 
-func parseStartEnd(start, end string, optional bool) (*time.Time, *time.Time, error) {
+func parseStartEnd(start, end string, optional bool) (time.Time, time.Time, error) {
 	var (
-		startPtr *time.Time
-		endPtr   *time.Time
+		startTime time.Time
+		endTime   time.Time
+		err       error
 	)
 
 	if start != "" {
-		startTime, err := time.Parse(time.RFC3339, start)
+		startTime, err = time.Parse(time.RFC3339, start)
 		if err != nil {
-			return nil, nil, fmt.Errorf("failed to parse start time: %w", err)
+			return time.Time{}, time.Time{}, fmt.Errorf("failed to parse start time: %w", err)
 		}
-		startPtr = &startTime
 	} else if !optional {
-		return nil, nil, fmt.Errorf("start time is required")
+		return time.Time{}, time.Time{}, fmt.Errorf("start time is required")
 	}
 
 	if end != "" {
-		endTime, err := time.Parse(time.RFC3339, end)
+		endTime, err = time.Parse(time.RFC3339, end)
 		if err != nil {
-			return nil, nil, fmt.Errorf("failed to parse end time: %w", err)
+			return time.Time{}, time.Time{}, fmt.Errorf("failed to parse end time: %w", err)
 		}
-		endPtr = &endTime
 	} else if !optional {
-		return nil, nil, fmt.Errorf("end time is required")
+		return time.Time{}, time.Time{}, fmt.Errorf("end time is required")
 	}
 
-	return startPtr, endPtr, nil
+	return startTime, endTime, nil
 }
