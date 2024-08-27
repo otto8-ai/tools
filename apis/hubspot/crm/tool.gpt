@@ -26,3 +26,192 @@ General Instructions:
 Instructions for Delete Resources:
 - Ensure the `Id` used to delete any resource maps to the correct name that the user wants to delete.
 - Confirm with the user before deleting any resources.
+
+# Association IDs
+
+## Contact to object
+TYPE ID	| Association type
+449 | Contact to contact
+279 | Contact to company
+1 | Contact to company (Primary)
+4 | Contact to deal
+15 | Contact to ticket
+193 | Contact to call
+197 | Contact to email
+199 | Contact to meeting
+201 | Contact to note
+203 | Contact to task
+82 | Contact to communication (SMS, WhatsApp, or LinkedIn message)
+454 | Contact to postal mail
+587 | Contact to cart
+508 | Contact to order
+178 | Contact to invoice
+388 | Contact to payment
+296 | Contact to subscription
+
+## Company to object
+TYPE ID	| Association type
+450 | Company to company
+14 | Child to parent company
+13 | Parent to child company
+280 | Company to contact
+2 | Company to contact (Primary)
+342 | Company to deal
+6 | Company to deal (Primary)
+340 | Company to ticket
+25 | Company to ticket (Primary)
+181 | Company to call
+185 | Company to email
+187 | Company to meeting
+189 | Company to note
+191 | Company to task
+88 | Company to communication (SMS, WhatsApp, or LinkedIn message)
+460 | Company to postal mail
+180 | Company to invoice
+510 | Company to order
+390 | Company to payment
+298 | Company to subscription
+
+## Deal to object
+TYPE ID	| Association type
+451 | Deal to deal
+3 | Deal to contact
+341 | Deal to company
+5 | Deal to company (Primary)
+27 | Deal to ticket
+205 | Deal to call
+209 | Deal to email
+211 | Deal to meeting
+213 | Deal to note
+215 | Deal to task
+86 | Deal to communication (SMS, WhatsApp, or LinkedIn message)
+458 | Deal to postal mail
+313 | Deal to deal split
+19 | Deal to line item
+176 | Deal to invoice
+511 | Deal to order
+392 | Deal to payment
+630 | Deal to product
+63 | Deal to quote
+300 | Deal to subscription
+
+## Ticket to object
+TYPE ID	| Association type
+452 | Ticket to ticket
+16 | Ticket to contact
+339 | Ticket to company
+26 | Ticket to company (Primary)
+28 | Ticket to deal
+219 | Ticket to call
+223 | Ticket to email
+225 | Ticket to meeting
+227 | Ticket to note
+229 | Ticket to task
+84 | Ticket to communication (SMS, WhatsApp, or LinkedIn message)
+456 | Ticket to postal mail
+32 | Ticket to thread
+278 | Ticket to conversation
+526 | Ticket to order
+
+## Lead to object
+TYPE ID | Association type
+578 | Lead to primary contact
+596 | Lead to call
+598 | Lead to email
+600 | Lead to meeting
+602 | Lead to communication
+608 | Lead to contact
+610 | Lead to company
+646 | Lead to task
+
+## Call to object
+TYPE ID | Association type
+194 | Call to contact
+182 | Call to company
+206 | Call to deal
+220 | Call to ticket
+
+## Email to object
+TYPE ID | Association type
+198 | Email to contact
+186 | Email to company
+210 | Email to deal
+224 | Email to ticket
+
+## Meeting to object
+TYPE ID	| Association type
+200 | Meeting to contact
+188 | Meeting to company
+212 | Meeting to deal
+226 | Meeting to ticket
+
+# Note to object
+TYPE ID | Association type
+202 | Note to contact
+190 | Note to company
+214 | Note to deal
+228 | Note to ticket
+
+## Postal mail to object
+TYPE ID	| Association type
+453 | Postal mail to contact
+459 | Postal mail to company
+457 | Postal mail to deal
+455 | Postal mail to ticket
+
+## Quote to object
+TYPE ID	| Association type
+69 | Quote to contact
+71 | Quote to company
+64 | Quote to deal
+67 | Quote to line item
+286 | Quote to quote template
+362 | Quote to discount
+364 | Quote to fee
+366 | Quote to tax
+702 | Contact signer (for e-signatures)
+733 | Quote to cart
+408 | Quote to invoice
+731 | Quote to order
+398 | Quote to payment
+304 | Quote to subscription
+
+## Task to object
+TYPE ID | Association type
+204 | Task to contact
+192 | Task to company
+216 | Task to deal
+230 | Task to ticket
+
+## Communication (SMS, WhatsApp, or LinkedIn message) to object
+TYPE ID	| Association type
+81 | Communication (SMS, WhatsApp, or LinkedIn Message) to contact
+87 | Communication (SMS, WhatsApp, or LinkedIn Message) to company
+85 | Communication (SMS, WhatsApp, or LinkedIn Message) to deal
+83 | Communication (SMS, WhatsApp, or LinkedIn Message) to ticket
+
+## Cart to object
+TYPE ID | Association type
+586 | Cart to contact
+588 | Cart to discount
+590 | Cart to line item
+592 | Cart to order
+732 | Cart to quote
+728 | Cart to task
+594 | Cart to ticket
+
+## Order to object
+TYPE ID | Association type
+593 | Order to cart
+507 | Order to contact
+509 | Order to company
+512 | Order to deal
+519 | Order to discount
+521 | Order to discount code
+518 | Order to invoice
+513 | Order to line item
+523 | Order to payment
+730 | Order to quote
+516 | Order to subscription
+726 | Order to task
+525 | Order to ticket
