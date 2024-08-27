@@ -3,14 +3,18 @@ module github.com/gptscript-ai/tools/apis/outlook/mail/code
 go 1.23.0
 
 require (
-	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.14.0 // indirect
+	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.14.0
+	github.com/jaytaylor/html2text v0.0.0-20230321000545-74c2419ad056
+	github.com/microsoftgraph/msgraph-sdk-go v1.47.0
+)
+
+require (
 	github.com/Azure/azure-sdk-for-go/sdk/internal v1.10.0 // indirect
 	github.com/cjlapao/common-go v0.0.39 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/jaytaylor/html2text v0.0.0-20230321000545-74c2419ad056 // indirect
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/microsoft/kiota-abstractions-go v1.6.1 // indirect
 	github.com/microsoft/kiota-authentication-azure-go v1.0.2 // indirect
@@ -19,7 +23,6 @@ require (
 	github.com/microsoft/kiota-serialization-json-go v1.0.7 // indirect
 	github.com/microsoft/kiota-serialization-multipart-go v1.0.0 // indirect
 	github.com/microsoft/kiota-serialization-text-go v1.0.0 // indirect
-	github.com/microsoftgraph/msgraph-sdk-go v1.47.0 // indirect
 	github.com/microsoftgraph/msgraph-sdk-go-core v1.2.0 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
