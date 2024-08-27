@@ -1,11 +1,34 @@
 openapi: 3.0.1
 info:
   title: HubSpot CRM
-  description: ''
   version: v3
+  description: ''
 servers:
   - url: https://api.hubapi.com
 paths:
+  /oauth/v1/access-tokens/{token}:
+    get:
+      tags:
+        - Access_Tokens
+      operationId: GetCurrentUserInfo
+      parameters:
+        - name: token
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessTokenInfoResponse'
+        default:
+          $ref: '#/components/responses/Error'
+      security: []
   /crm/v3/objects/calls/{callId}:
     get:
       tags:
@@ -1837,6 +1860,132 @@ paths:
             - crm.objects.owners.read
 components:
   schemas:
+    ErrorDetail:
+      required:
+        - message
+      type: object
+      properties:
+        subCategory:
+          type: string
+          description: A specific category that contains more specific detail about the error
+        code:
+          type: string
+          description: The status code associated with the error detail
+        in:
+          type: string
+          description: The name of the field or parameter in which the error was found.
+        context:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          description: Context about the error condition
+          example:
+            missingScopes:
+              - scope1
+              - scope2
+        message:
+          type: string
+          description: A human readable message describing the error along with remediation steps where appropriate
+    Error:
+      required:
+        - category
+        - correlationId
+        - message
+      type: object
+      properties:
+        subCategory:
+          type: string
+          description: A specific category that contains more specific detail about the error
+        context:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          description: Context about the error condition
+          example:
+            missingScopes:
+              - scope1
+              - scope2
+            invalidPropertyName:
+              - propertyValue
+        correlationId:
+          type: string
+          description: A unique identifier for the request. Include this value with any error reports or support tickets
+          format: uuid
+          example: aeb5f871-7f07-4993-9211-075dc63e7cbf
+        links:
+          type: object
+          additionalProperties:
+            type: string
+          description: A map of link names to associated URIs containing documentation about the error or recommended remediation steps
+          example:
+            knowledge-base: https://www.hubspot.com/products/service/knowledge-base
+        message:
+          type: string
+          description: A human readable message describing the error along with remediation steps where appropriate
+          example: Invalid input (details will vary based on the error)
+        category:
+          type: string
+          description: The error category
+          example: VALIDATION_ERROR
+        errors:
+          type: array
+          description: further information about the error
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+      example:
+        message: Invalid input (details will vary based on the error)
+        correlationId: aeb5f871-7f07-4993-9211-075dc63e7cbf
+        category: VALIDATION_ERROR
+        links:
+          knowledge-base: https://www.hubspot.com/products/service/knowledge-base
+    AccessTokenInfoResponse:
+      required:
+        - app_id
+        - expires_in
+        - hub_id
+        - scopes
+        - token
+        - token_type
+        - user_id
+      type: object
+      properties:
+        hub_id:
+          type: integer
+          description: ''
+          format: int32
+        user_id:
+          type: integer
+          description: ''
+          format: int32
+        scopes:
+          type: array
+          description: ''
+          items:
+            type: string
+        token_type:
+          type: string
+          description: ''
+        user:
+          type: string
+          description: ''
+        hub_domain:
+          type: string
+          description: ''
+        app_id:
+          type: integer
+          description: ''
+          format: int32
+        expires_in:
+          type: integer
+          description: ''
+          format: int32
+        token:
+          type: string
+          description: ''
     CollectionResponseAssociatedId:
       required:
         - results
@@ -1869,34 +2018,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Filter'
-    ErrorDetail:
-      required:
-        - message
-      type: object
-      properties:
-        subCategory:
-          type: string
-          description: A specific category that contains more specific detail about the error
-        code:
-          type: string
-          description: The status code associated with the error detail
-        in:
-          type: string
-          description: The name of the field or parameter in which the error was found.
-        context:
-          type: object
-          additionalProperties:
-            type: array
-            items:
-              type: string
-          description: Context about the error condition
-          example:
-            missingScopes:
-              - scope1
-              - scope2
-        message:
-          type: string
-          description: A human readable message describing the error along with remediation steps where appropriate
     ForwardPaging:
       type: object
       properties:
@@ -2079,60 +2200,6 @@ components:
         - limit
         - properties
         - sorts
-    Error:
-      required:
-        - category
-        - correlationId
-        - message
-      type: object
-      properties:
-        subCategory:
-          type: string
-          description: A specific category that contains more specific detail about the error
-        context:
-          type: object
-          additionalProperties:
-            type: array
-            items:
-              type: string
-          description: Context about the error condition
-          example:
-            missingScopes:
-              - scope1
-              - scope2
-            invalidPropertyName:
-              - propertyValue
-        correlationId:
-          type: string
-          description: A unique identifier for the request. Include this value with any error reports or support tickets
-          format: uuid
-          example: aeb5f871-7f07-4993-9211-075dc63e7cbf
-        links:
-          type: object
-          additionalProperties:
-            type: string
-          description: A map of link names to associated URIs containing documentation about the error or recommended remediation steps
-          example:
-            knowledge-base: https://www.hubspot.com/products/service/knowledge-base
-        message:
-          type: string
-          description: A human readable message describing the error along with remediation steps where appropriate
-          example: Invalid input (details will vary based on the error)
-        category:
-          type: string
-          description: The error category
-          example: VALIDATION_ERROR
-        errors:
-          type: array
-          description: further information about the error
-          items:
-            $ref: '#/components/schemas/ErrorDetail'
-      example:
-        message: Invalid input (details will vary based on the error)
-        correlationId: aeb5f871-7f07-4993-9211-075dc63e7cbf
-        category: VALIDATION_ERROR
-        links:
-          knowledge-base: https://www.hubspot.com/products/service/knowledge-base
     SimplePublicObjectInput:
       required:
         - properties
