@@ -6,29 +6,29 @@ info:
 servers:
   - url: https://api.hubapi.com
 paths:
-  /oauth/v1/access-tokens/{token}:
-    get:
-      tags:
-        - Access_Tokens
-      operationId: GetCurrentUserInfo
-      parameters:
-        - name: token
-          in: path
-          required: true
-          style: simple
-          explode: false
-          schema:
-            type: string
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AccessTokenInfoResponse'
-        default:
-          $ref: '#/components/responses/Error'
-      security: []
+#  /oauth/v1/access-tokens/{token}:
+#    get:
+#      tags:
+#        - Access_Tokens
+#      operationId: GetCurrentUserInfo
+#      parameters:
+#        - name: token
+#          in: path
+#          required: true
+#          style: simple
+#          explode: false
+#          schema:
+#            type: string
+#      responses:
+#        '200':
+#          description: successful operation
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/AccessTokenInfoResponse'
+#        default:
+#          $ref: '#/components/responses/Error'
+#      security: []
   /crm/v3/objects/calls/{callId}:
     get:
       tags:
