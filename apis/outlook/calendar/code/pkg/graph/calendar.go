@@ -103,14 +103,6 @@ func ListCalendars(ctx context.Context, client *msgraphsdkgo.GraphServiceClient)
 	return calendars, nil
 }
 
-func ListCalendarViewToday(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, id string, owner OwnerType) ([]models.Eventable, error) {
-	now := time.Now()
-	start := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
-	end := time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, time.Local)
-
-	return ListCalendarView(ctx, client, id, owner, &start, &end)
-}
-
 func ListCalendarView(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, id string, owner OwnerType, start, end *time.Time) ([]models.Eventable, error) {
 	if owner == OwnerTypeUser {
 		resp, err := client.Me().Calendars().ByCalendarId(id).CalendarView().Get(ctx, &users.ItemCalendarsItemCalendarViewRequestBuilderGetRequestConfiguration{

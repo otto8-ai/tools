@@ -27,7 +27,10 @@ func main() {
 			os.Exit(1)
 		}
 	case "listEventsToday":
-		if err := commands.ListEventsToday(context.Background()); err != nil {
+		now := time.Now()
+		start := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+		end := time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, now.Location())
+		if err := commands.ListEvents(context.Background(), start, end); err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}

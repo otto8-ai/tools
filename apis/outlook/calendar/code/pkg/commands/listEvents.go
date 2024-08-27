@@ -33,20 +33,13 @@ func ListEvents(ctx context.Context, start, end time.Time) error {
 			return fmt.Errorf("failed to list events for calendar %s: %w", util.Deref(cal.Calendar.GetName()), err)
 		}
 
-		switch cal.Owner {
-		case graph.OwnerTypeUser:
-			fmt.Printf("Events for calendar %s:\n\n", util.Deref(cal.Calendar.GetName()))
-			printers.PrintEvents(events, false)
-		case graph.OwnerTypeGroup:
-			groupName, err := graph.GetGroupNameFromID(ctx, c, cal.ID)
-			if err != nil {
-				return fmt.Errorf("failed to get group name: %w", err)
-			}
-			fmt.Printf("Events for group calendar %s:\n\n", groupName)
-			printers.PrintEvents(events, false)
+		if len(events) == 0 {
+			continue
 		}
 
-		fmt.Println()
+		if err := printers.PrintEventsForCalendar(ctx, c, cal, events, false); err != nil {
+			return fmt.Errorf("failed to print events: %w", err)
+		}
 	}
 
 	return nil

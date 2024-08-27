@@ -1,13 +1,32 @@
 package printers
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
+	"github.com/gptscript-ai/tools/apis/outlook/calendar/code/pkg/graph"
 	"github.com/gptscript-ai/tools/apis/outlook/calendar/code/pkg/util"
 	"github.com/jaytaylor/html2text"
+	msgraphsdkgo "github.com/microsoftgraph/msgraph-sdk-go"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 )
+
+func PrintEventsForCalendar(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, calendar graph.CalendarInfo, events []models.Eventable, detailed bool) error {
+	if calendar.Owner == graph.OwnerTypeUser {
+		fmt.Printf("Found events for calendar %s (ID %s):\n", util.Deref(calendar.Calendar.GetName()), calendar.ID)
+	} else {
+		groupName, err := graph.GetGroupNameFromID(ctx, client, calendar.ID)
+		if err != nil {
+			return fmt.Errorf("failed to get group name: %w", err)
+		}
+		fmt.Printf("Found events for calendar %s (ID %s):\n", groupName, calendar.ID)
+	}
+
+	PrintEvents(events, detailed)
+	fmt.Println()
+	return nil
+}
 
 func PrintEvents(events []models.Eventable, detailed bool) {
 	for _, event := range events {

@@ -9,7 +9,6 @@ import (
 	"github.com/gptscript-ai/tools/apis/outlook/calendar/code/pkg/global"
 	"github.com/gptscript-ai/tools/apis/outlook/calendar/code/pkg/graph"
 	"github.com/gptscript-ai/tools/apis/outlook/calendar/code/pkg/printers"
-	"github.com/gptscript-ai/tools/apis/outlook/calendar/code/pkg/util"
 )
 
 func SearchEvents(ctx context.Context, query string, start, end time.Time) error {
@@ -28,17 +27,9 @@ func SearchEvents(ctx context.Context, query string, start, end time.Time) error
 			continue
 		}
 
-		if cal.Owner == graph.OwnerTypeUser {
-			fmt.Printf("Found events for calendar %s (ID %s):\n", util.Deref(cal.Calendar.GetName()), cal.ID)
-		} else {
-			groupName, err := graph.GetGroupNameFromID(ctx, c, cal.ID)
-			if err != nil {
-				return fmt.Errorf("failed to get group name: %w", err)
-			}
-			fmt.Printf("Found events for calendar %s (ID %s):\n", groupName, cal.ID)
+		if err := printers.PrintEventsForCalendar(ctx, c, cal, events, false); err != nil {
+			return fmt.Errorf("failed to print events: %w", err)
 		}
-		printers.PrintEvents(events, false)
-		fmt.Println()
 	}
 
 	return nil

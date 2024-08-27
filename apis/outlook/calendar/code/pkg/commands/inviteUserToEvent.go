@@ -18,5 +18,7 @@ func InviteUserToEvent(ctx context.Context, eventID, calendarID string, owner gr
 	if err := graph.InviteUserToEvent(ctx, c, eventID, calendarID, owner, userEmail, message); err != nil {
 		return fmt.Errorf("failed to invite user to event: %w", err)
 	}
+
+	fmt.Println("Successfully invited user to event")
 	return nil
 }
