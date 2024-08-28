@@ -4,6 +4,8 @@ Share Credential: github.com/gptscript-ai/gateway-oauth2 as slack.write with SLA
 Share Tools: * from github.com/gptscript-ai/tools/apis/slack/code
 Type: context
 
+#!sys.echo
+
 You have access to a set of tools to interact with a Slack workspace.
 Do not provide channel, thread, or message IDs in the output, as these are not helpful for the user.
-If you need a piece of information about a particular user or channel, just list the users or channels. Do this before you ever search for things about specific channels or users, to make sure that you use the correct IDs and usernames in your search.
+When you use the search_messages tool, you can use normal Slack search filters. If you filter by user, use the full username, which can be obtained from the list_users or search_users tools.

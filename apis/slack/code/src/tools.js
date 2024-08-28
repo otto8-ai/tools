@@ -199,26 +199,13 @@ function threadID(message) {
     return message.ts
 }
 
-async function userMapF(webClient, user) {
+async function getUserName(webClient, user) {
     const res = await webClient.users.info({user: user})
-    return res.name
-}
-
-async function getUserMap(webClient) {
-    // Get the list of users. We will need this in order to look up usernames.
-    const users = await webClient.users.list()
-    if (!users.ok) {
-        console.error(`Failed to retrieve user list: ${users.error}`)
-        process.exit(1)
+    if (!res.ok) {
+        // If the request didn't work for some reason, just return the user ID again.
+        return user
     }
-
-    // Create a map of user IDs to usernames.
-    const userMap = {}
-    users.members.forEach(user => {
-        userMap[user.id] = user.name
-    })
-
-    return userMap
+    return res.user.name
 }
 
 // Printer functions below
@@ -227,12 +214,17 @@ function printUser(user) {
     console.log(user.name)
     console.log(`  ID: ${user.id}`)
     console.log(`  Full name: ${user.profile.real_name}`)
-    console.log(`  Account deleted: ${user.deleted}`)
+    if (user.deleted === true) {
+        console.log(`  Account deleted: true`)
+    }
 }
 
 async function printMessage(webClient, message) {
     const time = new Date(parseFloat(message.ts) * 1000)
-    const userName = await userMapF(webClient, message.user)
+    let userName = message.user
+    try {
+        userName = await getUserName(webClient, message.user)
+    } catch (e) {}
     console.log(`${time.toLocaleString()}: ${userName}: ${message.text}`)
     console.log(`  message ID: ${message.ts}`)
 }
