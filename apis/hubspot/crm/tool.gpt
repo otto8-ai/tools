@@ -44,6 +44,30 @@ hs_email_status    | The send status of the email. The value can be BOUNCED, FAI
 hs_email_subject   | The subject line of the logged email.
 hs_email_text      | The body of the email.
 hs_attachment_ids  | The IDs of the email's attachments. Multiple attachment IDs are separated by a semi-colon.
+hs_email_headers   | The email's headers. The value for this property will automatically populate certain read only email properties.
+
+##Set email headers
+Since headers automatically populate the read only properties, you may want to manually set the email headers. To set the hs_email_headers value, you can use a JSON escaped string with the following data:
+
+```json
+//Example data
+{
+  "from": {
+    "email": "from@domain.com",
+    "firstName": "FromFirst",
+    "lastName": "FromLast"
+  },
+  "to": [
+    {
+      "email": "ToFirst ToLast<to@test.com>",
+      "firstName": "ToFirst",
+      "lastName": "ToLast"
+    }
+  ],
+  "cc": [],
+  "bcc": []
+}
+```
 
 
 # Association IDs
