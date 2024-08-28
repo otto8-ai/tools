@@ -12,6 +12,15 @@ Param: limit: the number of messages to return
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js getChannelHistory
 
 ---
+Name: get_thread_history
+Description: Get the chat history for a particular thread
+Param: channelid: the ID of the channel containing the thread
+Param: threadid: the ID of the thread to get the history for
+Param: limit: the number of messages to return
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js getThreadHistory
+
+---
 Name: search_messages
 Description: Search for messages in the Slack workspace
 Param: query: the search query
@@ -25,3 +34,32 @@ Param: channelid: the ID of the channel to send the message to
 Param: text: the text to send
 
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js sendMessage
+
+---
+Name: send_message_in_thread
+Description: Send a message in a thread in the Slack workspace
+Param: channelid: the ID of the channel containing the thread
+Param: threadid: the ID of the thread to send the message to
+Param: text: the text to send
+
+---
+Name: list_users
+Description: List all users in the Slack workspace.
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js listUsers
+
+---
+Name: send_dm
+Description: Send a direct message to a user.
+Param: userid: the ID of the user to send the message to
+Param: text: the text to send
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js sendDM
+
+---
+Name: get_message_link
+Description: Get the permalink for a message
+Param: channelid: the ID of the channel containing the message
+Param: messageid: the ID of the message
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js getMessageLink

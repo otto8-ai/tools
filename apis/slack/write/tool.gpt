@@ -1,7 +1,9 @@
 Name: Slack
 Description: Provides access to the Slack API
-Share Credential: github.com/gptscript-ai/gateway-oauth2 as slack.write with SLACK_TOKEN as env and slack as integration and "channels:history channels:read files:read im:read search:read team:read users:read chat:write" as scope
-Share Tools: list_channels from github.com/gptscript-ai/tools/apis/slack/code
-Share Tools: get_channel_history from github.com/gptscript-ai/tools/apis/slack/code
-Share Tools: search_messages from github.com/gptscript-ai/tools/apis/slack/code
-Share Tools: send_message from github.com/gptscript-ai/tools/apis/slack/code
+Share Credential: github.com/gptscript-ai/gateway-oauth2 as slack.write with SLACK_TOKEN as env and slack as integration and "channels:history groups:history im:history mpim:history channels:read files:read im:read search:read team:read users:read groups:read chat:write groups:write mpim:write im:write" as scope
+Share Tools: * from github.com/gptscript-ai/tools/apis/slack/code
+Type: context
+
+You have access to a set of tools to interact with a Slack workspace.
+Do not provide channel, thread, or message IDs in the output, as these are not helpful for the user.
+If you need a piece of information about a particular user or channel, just list the users or channels. Do this before you ever search for things about specific channels or users, to make sure that you use the correct IDs and usernames in your search.
