@@ -1,0 +1,81 @@
+Name: listCalendars
+Description: List all calendars available to the user.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listCalendars
+
+---
+Name: listEventsToday
+Description: List all events for today in all calendars available to the user.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listEventsToday
+
+---
+Name: listEvents
+Description: List all events in the given time frame in all calendars available to the user.
+Param: start: The start date and time of the time frame, in RFC 3339 format.
+Param: end: The end date and time of the time frame, in RFC 3339 format.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listEvents
+
+---
+Name: getEventDetails
+Description: Get the details for a particular event.
+Param: event_id: The unique ID of the event.
+Param: calendar_id: The unique ID of the calendar or group the event belongs to. If unset, uses the default calendar.
+Param: owner_type: The type of the owner of the calendar or group. Possible values are "user" or "group". Required if calendar_id is set.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool getEventDetails
+
+---
+Name: createEvent
+Description: Create a new event.
+Param: subject: (Required) The title of the event.
+Param: location: (Required) The location of the event.
+Param: body: (Required) The details of the event.
+Param: attendees: (Required) A comma-separated list of the email addresses of people to invite to the event.
+Param: is_online: (Required) (boolean) Whether the event is online (true) or in person (false).
+Param: start: (Required) The start date and time of the event, in RFC 3339 format.
+Param: end: (Required) The end date and time of the event, in RFC 3339 format.
+Param: calendar_id: The unique ID of the calendar or group to add the event to. If unset, adds the event to the default calendar.
+Param: owner_type: The type of the owner of the calendar or group. Possible values are "user" or "group". Required if calendar_id is set.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool createEvent
+
+---
+Name: inviteUserToEvent
+Description: Invites another person to an existing event.
+Param: event_id: The unique ID of the event.
+Param: calendar_id: The unique ID of the calendar or group the event belongs to. If unset, uses the default calendar.
+Param: owner_type: The type of the owner of the calendar or group. Possible values are "user" or "group". Required if calendar_id is set.
+Param: user_email: The email address of the person to invite.
+Param: message: The message to send along with the invite.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool inviteUserToEvent
+
+---
+Name: deleteEvent
+Description: Deletes an event.
+Param: event_id: The unique ID of the event.
+Param: calendar_id: The unique ID of the calendar or group the event belongs to. If unset, uses the default calendar.
+Param: owner_type: The type of the owner of the calendar or group. Possible values are "user" or "group". Required if calendar_id is set.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool deleteEvent
+
+---
+Name: searchEvents
+Description: Search for events based on a query string.
+Param: query: (Required) The search query.
+Param: start: (Required) The start date and time of the time frame to search within, in RFC 3339 format.
+Param: end: (Required) The end date and time of the time frame to search within, in RFC 3339 format.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool searchEvents
+
+---
+Name: respondToEvent
+Description: Accept, tentatively accept, or decline an event invitation.
+Param: event_id: The unique ID of the event.
+Param: calendar_id: The unique ID of the calendar or group the event belongs to. If unset, uses the default calendar.
+Param: owner_type: The type of the owner of the calendar or group. Possible values are "user" or "group". Required if calendar_id is set.
+Param: response: The response to the invitation. Possible values are "accept", "tentative", or "decline".
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool respondToEvent
