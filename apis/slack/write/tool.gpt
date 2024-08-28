@@ -5,3 +5,4 @@ Share Tools: list_channels from github.com/gptscript-ai/tools/apis/slack/code
 Share Tools: get_channel_history from github.com/gptscript-ai/tools/apis/slack/code
 Share Tools: search_messages from github.com/gptscript-ai/tools/apis/slack/code
 Share Tools: send_message from github.com/gptscript-ai/tools/apis/slack/code
+Share Tools: send_direct_message from github.com/gptscript-ai/tools/apis/slack/code

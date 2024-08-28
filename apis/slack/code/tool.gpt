@@ -25,3 +25,11 @@ Param: channelid: the ID of the channel to send the message to
 Param: text: the text to send
 
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js sendMessage
+
+---
+Name: send_direct_message
+Description: Send a direct message to users in a Slack workspace
+Param: usernames: the usernames of the users to send the message to
+Param: text: the text to send
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js sendDirectMessage

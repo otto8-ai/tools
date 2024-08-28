@@ -72,6 +72,55 @@ export async function sendMessage(webClient, channelId, text) {
     console.log('Message sent successfully')
 }
 
+export async function sendDirectMessage(webClient, userNames, text) {
+    const userNamesArray = userNames.split(',').map(name => name.trim());
+    const userIds = [];
+    for (const userName of userNamesArray) {
+        try {
+            const userInfo = await webClient.users.lookupByEmail({
+                email: `${userName}@example.com`  // Adjust the domain as needed
+            });
+            if (userInfo.ok) {
+                userIds.push(userInfo.user.id);
+            } else {
+                console.error(`Failed to find user ${userName}: ${userInfo.error}`);
+            }
+        } catch (error) {
+            console.error(`Error looking up user ${userName}: ${error.message}`);
+        }
+    }
+
+    if (userIds.length === 0) {
+        console.error('No valid users found');
+        process.exit(1);
+    }
+
+    try {
+        const conversationResponse = await webClient.conversations.open({
+            users: userIds
+        });
+
+        if (!conversationResponse.ok) {
+            throw new Error(`Failed to open conversation: ${conversationResponse.error}`);
+        }
+
+        const channelId = conversationResponse.channel.id;
+        const messageResponse = await webClient.chat.postMessage({
+            channel: channelId,
+            text: text,
+        });
+
+        if (!messageResponse.ok) {
+            throw new Error(`Failed to send direct message: ${messageResponse.error}`);
+        }
+
+        console.log('Direct message sent successfully');
+    } catch (error) {
+        console.error(`Error sending direct message: ${error.message}`);
+        process.exit(1);
+    }
+}
+
 // Helper functions below
 
 function replyString(count) {
@@ -94,3 +143,5 @@ async function getUserMap(webClient) {
 
     return userMap
 }
+
+

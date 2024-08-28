@@ -1,5 +1,5 @@
 import {WebClient} from '@slack/web-api'
-import {getChannelHistory, listChannels, search, sendMessage} from "./src/tools.js";
+import {getChannelHistory, listChannels, search, sendMessage, sendDirectMessage} from "./src/tools.js";
 
 if (process.argv.length !== 3) {
     console.error('Usage: node index.js <command>')
@@ -23,6 +23,9 @@ switch (command) {
         break
     case "sendMessage":
         await sendMessage(webClient, process.env.CHANNELID, process.env.TEXT)
+        break
+    case "sendDirectMessage":
+        await sendDirectMessage(webClient, process.env.USERNAMES, process.env.TEXT)
         break
     default:
         console.error(`Unknown command: ${command}`)

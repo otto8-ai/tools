@@ -1,11 +1,11 @@
 {
-  "name": "gptscript-slack-read",
+  "name": "gptscript-slack",
   "version": "0.1.0",
-  "description": "GPTScript tool for read-only access to the Slack API.",
+  "description": "GPTScript tool for access to the Slack API.",
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "github.com/gptscript-ai/integrations"
+    "url": "github.com/gptscript-ai/tools"
   },
   "author": "Acorn Labs",
   "license": "Apache-2.0",
