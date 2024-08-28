@@ -137,6 +137,18 @@ export async function listUsers(webClient) {
     })
 }
 
+export async function searchUsers(webClient, query) {
+    const users = await webClient.users.list()
+    users.members.forEach(user => {
+        if (user.name.includes(query) || user.profile.real_name.includes(query)) {
+            console.log(user.name)
+            console.log(`  ID: ${user.id}`)
+            console.log(`  Full name: ${user.profile.real_name}`)
+            console.log(`  Account deleted: ${user.deleted}`)
+        }
+    })
+}
+
 export async function sendDM(webClient, userId, text) {
     const res = await webClient.conversations.open({
         users: userId,

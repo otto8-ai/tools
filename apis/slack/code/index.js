@@ -5,7 +5,7 @@ import {
   getThreadHistory,
   listChannels,
   listUsers,
-  search,
+  search, searchUsers,
   sendDM,
   sendMessage,
   sendMessageInThread,
@@ -42,6 +42,9 @@ switch (command) {
     break
   case "listUsers":
     await listUsers(webClient)
+    break
+  case "searchUsers":
+    await searchUsers(webClient, process.env.QUERY)
     break
   case "sendDM":
     await sendDM(webClient, process.env.USERID, process.env.TEXT)
