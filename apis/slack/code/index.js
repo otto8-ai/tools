@@ -5,7 +5,7 @@ import {
   getThreadHistory,
   listChannels,
   listUsers,
-  search, searchUsers,
+  search, searchChannels, searchUsers,
   sendDM,
   sendMessage,
   sendMessageInThread,
@@ -24,6 +24,9 @@ const webClient = new WebClient(token)
 switch (command) {
   case "listChannels":
     await listChannels(webClient)
+    break
+  case "searchChannels":
+    await searchChannels(webClient, process.env.QUERY)
     break
   case "getChannelHistory":
     await getChannelHistory(webClient, process.env.CHANNELID, process.env.LIMIT)

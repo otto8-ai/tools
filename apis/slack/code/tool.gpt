@@ -4,6 +4,13 @@ Description: List all channels in the Slack workspace. Returns the name and ID f
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js listChannels
 
 ---
+Name: search_channels
+Description: Search for channels in the Slack workspace
+Param: query: the search query
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js searchChannels
+
+---
 Name: get_channel_history
 Description: Get the chat history for a channel in the Slack workspace
 Param: channelid: the ID of the channel to get the history for

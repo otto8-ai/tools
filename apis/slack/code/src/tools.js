@@ -21,6 +21,30 @@ export async function listChannels(webClient) {
     })
 }
 
+export async function searchChannels(webClient, query) {
+    const channels = await webClient.conversations.list({limit: 100, types: 'public_channel'})
+    channels.channels.forEach(channel => {
+        if (channel.name.includes(query)) {
+            let printStr = `${channel.name} (ID: ${channel.id})`
+            if (channel.is_archived === true) {
+                printStr += ' (archived)'
+            }
+            console.log(printStr)
+        }
+    })
+
+    const privateChannels = await webClient.conversations.list({limit: 100, types: 'private_channel'})
+    privateChannels.channels.forEach(channel => {
+        if (channel.name.includes(query)) {
+            let printStr = `${channel.name} (ID: ${channel.id})`
+            if (channel.is_archived === true) {
+                printStr += ' (archived)'
+            }
+            console.log(printStr)
+        }
+    })
+}
+
 export async function getChannelHistory(webClient, channelId, limit) {
     const history = await webClient.conversations.history({channel: channelId, limit: limit})
     if (!history.ok) {
