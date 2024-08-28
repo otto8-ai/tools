@@ -11,6 +11,7 @@ import {
   searchChannels,
   searchUsers,
   sendDM,
+  sendDMInThread,
   sendMessage,
   sendMessageInThread,
 } from "./src/tools.js"
@@ -55,6 +56,9 @@ switch (command) {
     break
   case "sendDM":
     await sendDM(webClient, process.env.USERIDS, process.env.TEXT)
+    break
+  case "sendDMInThread":
+    await sendDMInThread(webClient, process.env.USERIDS, process.env.TEXT)
     break
   case "getMessageLink":
     await getMessageLink(webClient, process.env.CHANNELID, process.env.MESSAGEID)

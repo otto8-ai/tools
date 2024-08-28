@@ -71,6 +71,15 @@ Param: text: the text to send
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js sendDM
 
 ---
+Name: send_dm_in_thread
+Description: Send a message in a thread in a direct message conversation
+Param: userids: comma-separated list of user IDs for the conversation (example: USER1ID,USER2ID), or just one ID for an individual conversation
+Param: threadid: the ID of the thread to send the message to
+Param: text: the text to send
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js sendDMInThread
+
+---
 Name: get_message_link
 Description: Get the permalink for a message
 Param: channelid: the ID of the channel containing the message

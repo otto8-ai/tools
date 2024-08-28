@@ -150,6 +150,20 @@ export async function sendDM(webClient, userIds, text) {
     console.log('Message sent successfully')
 }
 
+export async function sendDMInThread(webClient, userIds, threadId, text) {
+    const res = await webClient.conversations.open({
+        users: userIds,
+    })
+
+    await webClient.chat.postMessage({
+        channel: res.channel.id,
+        text,
+        thread_ts: threadId,
+    })
+
+    console.log('Thread message sent successfully')
+}
+
 export async function getMessageLink(webClient, channelId, messageId) {
     const result = await webClient.chat.getPermalink({
         channel: channelId,
