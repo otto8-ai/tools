@@ -1,7 +1,7 @@
 Name: HubSpot CRM
 Type: context
 Description: Tools for working with HubSpot CRM
-Share Tools: ./hubspot-crm.yaml, github.com/gptscript-ai/context/current-time, ./getMe
+Share Tools: ./hubspot-crm.yaml, github.com/gptscript-ai/context/current-time, ./getMe, unixTimestamp
 Share Credential: github.com/gptscript-ai/gateway-oauth2 as hubspot.crm with GPTSCRIPT_API_HUBAPI_COM_BEARER_TOKEN as env and hubspot as integration and "crm.lists.read crm.lists.write crm.objects.companies.read crm.objects.companies.write crm.objects.contacts.read crm.objects.contacts.write crm.objects.deals.read crm.objects.deals.write sales-email-read tickets" as optional_scope and "oauth" as scope
 
 #!sys.echo
@@ -22,7 +22,7 @@ General Instructions:
 - When creating a resource that has the `associations` field, it is always required, even if it is an empty string.
 - Take the current date and time into account when being asked to perform time-based operations.
 - When asked for information about a resource, please return as much information as possible unless told otherwise.
-- When the field `hs_timestamp` is available, always set it using unix timestamp in milliseconds.
+- When the field `hs_timestamp` is available, always set it using the current unix timestamp in milliseconds.
 - Ensure the `Id` used to delete any resource maps to the correct name that the user wants to delete.
 
 Instructions for Engagement Emails:
@@ -124,3 +124,17 @@ TYPE ID	| Association type
 192 | Task to company
 216 | Task to deal
 230 | Task to ticket
+
+
+---
+name: unixTimestamp
+description: Get the current Unix timestamp in milliseconds
+
+#!/usr/bin/env python3
+
+from datetime import datetime
+
+current_time = datetime.now()
+unix_timestamp_ms = int(current_time.timestamp() * 1000)
+
+print(unix_timestamp_ms)
