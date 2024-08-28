@@ -1,6 +1,14 @@
 Name: Read Outlook Calendar
 Description: Provides access to the Microsoft Outlook Calendar API (read-only)
 Share Context: github.com/gptscript-ai/context/current-time
-Share Tools: openapi.yaml
+Share Tools: listCalendars from github.com/gptscript-ai/tools/apis/outlook/calendar/code
+Share Tools: listEventsToday from github.com/gptscript-ai/tools/apis/outlook/calendar/code
+Share Tools: listEvents from github.com/gptscript-ai/tools/apis/outlook/calendar/code
+Share Tools: getEventDetails from github.com/gptscript-ai/tools/apis/outlook/calendar/code
+Share Tools: searchEvents from github.com/gptscript-ai/tools/apis/outlook/calendar/code
 Share Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.calendar.read with GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN as env and microsoft365 as integration and "Calendars.Read Calendars.Read.Shared Group.Read.All GroupMember.Read.All User.Read offline_access" as scope
 Type: context
+
+#!sys.echo
+
+You have access to a set of tools to use the Microsoft Outlook Calendar API.
