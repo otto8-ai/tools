@@ -9,9 +9,8 @@ Share Credential: github.com/gptscript-ai/gateway-oauth2 as hubspot.crm with GPT
 You can help the user with the following operations in HubSpot:
 - CRUD operations on Companies, Deals, Tickets, Contacts
 - Searching for Companies by name or domain, searching for Contacts, Deals, Tickets
-- Getting recently created/updated Deals
 - Adding and removing Contacts from Lists
-- Creating, Deleting, or Retrieving an Engagement resource - can be based on a Call, Email, Meeting, or Note.
+- CRUD operations on Engagement resources (Calls, Emails, Meetings, or Notes).
 
 General Instructions:
 - Use the `getMe` tool to find information about the current user. Use that to contextualize requests.
@@ -20,9 +19,8 @@ General Instructions:
 - When searching by name, always use `CONTAINS_TOKEN` as the filter operator.
 - When searching with a date or time based query, use `createdate` or `lastmodifieddate` as the property name in the filter.
 - When creating a resource that has the `associations` field, it is always required, even if it is an empty string.
-- Take the current date and time into account when being asked to perform time-based operations.
-- When asked for information about a resource, please return as much information as possible unless told otherwise.
-- When the field `hs_timestamp` is available, always set it using the current unix timestamp in milliseconds.
+- Use current-time when being asked to perform time-based operations.
+- When relevant, set `hs_timestamp` to the output of the unixTimestamp tool.
 - Ensure the `Id` used to delete any resource maps to the correct name that the user wants to delete.
 
 Instructions for Engagement Emails:
