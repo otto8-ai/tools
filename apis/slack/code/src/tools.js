@@ -2,22 +2,14 @@ export async function listChannels(webClient) {
     const channels = await webClient.conversations.list({limit: 100, types: 'public_channel'})
     console.log('Public channels:')
     channels.channels.forEach(channel => {
-        let printStr = `${channel.name} (ID: ${channel.id})`
-        if (channel.is_archived === true) {
-            printStr += ' (archived)'
-        }
-        console.log(printStr)
+        printChannel(channel)
     })
     console.log('')
 
     const privateChannels = await webClient.conversations.list({limit: 100, types: 'private_channel'})
     console.log('Private channels:')
     privateChannels.channels.forEach(channel => {
-        let printStr = `${channel.name} (ID: ${channel.id})`
-        if (channel.is_archived === true) {
-            printStr += ' (archived)'
-        }
-        console.log(printStr)
+        printChannel(channel)
     })
 }
 
@@ -25,22 +17,14 @@ export async function searchChannels(webClient, query) {
     const channels = await webClient.conversations.list({limit: 100, types: 'public_channel'})
     channels.channels.forEach(channel => {
         if (channel.name.includes(query)) {
-            let printStr = `${channel.name} (ID: ${channel.id})`
-            if (channel.is_archived === true) {
-                printStr += ' (archived)'
-            }
-            console.log(printStr)
+            printChannel(channel)
         }
     })
 
     const privateChannels = await webClient.conversations.list({limit: 100, types: 'private_channel'})
     privateChannels.channels.forEach(channel => {
         if (channel.name.includes(query)) {
-            let printStr = `${channel.name} (ID: ${channel.id})`
-            if (channel.is_archived === true) {
-                printStr += ' (archived)'
-            }
-            console.log(printStr)
+            printChannel(channel)
         }
     })
 }
@@ -55,12 +39,8 @@ export async function getChannelHistory(webClient, channelId, limit) {
         return
     }
 
-    const userMap = await getUserMap(webClient)
-
     for (const message of history.messages) {
-        const time = new Date(parseFloat(message.ts) * 1000)
-        console.log(`${time.toLocaleString()}: ${userMap[message.user]}: ${message.text}`)
-        console.log(`  message ID: ${message.ts}`)
+        await printMessage(webClient, message)
         if (message.reply_count > 0) {
             console.log(`  thread ID ${threadID(message)} - ${message.reply_count} ${replyString(message.reply_count)}:`)
             const replies = await webClient.conversations.replies({channel: channelId, ts: message.ts, limit: 10})
@@ -69,9 +49,7 @@ export async function getChannelHistory(webClient, channelId, limit) {
                     continue
                 }
 
-                const replyTime = new Date(parseFloat(reply.ts) * 1000)
-                console.log(`  ${replyTime.toLocaleString()}: ${userMap[reply.user]}: ${reply.text}`)
-                console.log(`    message ID: ${reply.ts}`)
+                await printMessage(webClient, reply)
             }
             if (replies.has_more) {
                 console.log('  More replies exist')
@@ -90,12 +68,8 @@ export async function getThreadHistory(webClient, channelId, threadId, limit) {
         return
     }
 
-    const userMap = await getUserMap(webClient)
-
     for (const reply of replies.messages) {
-        const time = new Date(parseFloat(reply.ts) * 1000)
-        console.log(`${time.toLocaleString()}: ${userMap[reply.user]}: ${reply.text}`)
-        console.log(`  message ID: ${reply.ts}`)
+        await printMessage(webClient, reply)
     }
 }
 
@@ -115,12 +89,8 @@ export async function search(webClient, query) {
         return
     }
 
-    const userMap = await getUserMap(webClient)
-
     for (const message of result.messages.matches) {
-        const time = new Date(parseFloat(message.ts) * 1000)
-        console.log(`${time.toLocaleString()}: ${userMap[message.user]} in #${message.channel.name}: ${message.text}`)
-        console.log(`  message ID: ${message.ts}`)
+        await printMessage(webClient, message)
     }
 }
 
@@ -154,10 +124,7 @@ export async function sendMessageInThread(webClient, channelId, threadTs, text) 
 export async function listUsers(webClient) {
     const users = await webClient.users.list()
     users.members.forEach(user => {
-        console.log(user.name)
-        console.log(`  ID: ${user.id}`)
-        console.log(`  Full name: ${user.profile.real_name}`)
-        console.log(`  Account deleted: ${user.deleted}`)
+        printUser(user)
     })
 }
 
@@ -165,17 +132,14 @@ export async function searchUsers(webClient, query) {
     const users = await webClient.users.list()
     users.members.forEach(user => {
         if (user.name.includes(query) || user.profile.real_name.includes(query)) {
-            console.log(user.name)
-            console.log(`  ID: ${user.id}`)
-            console.log(`  Full name: ${user.profile.real_name}`)
-            console.log(`  Account deleted: ${user.deleted}`)
+            printUser(user)
         }
     })
 }
 
-export async function sendDM(webClient, userId, text) {
+export async function sendDM(webClient, userIds, text) {
     const res = await webClient.conversations.open({
-        users: userId,
+        users: userIds,
     })
 
     await webClient.chat.postMessage({
@@ -200,6 +164,31 @@ export async function getMessageLink(webClient, channelId, messageId) {
     console.log(result.permalink)
 }
 
+export async function getDMHistory(webClient, userIds, limit) {
+    const res = await webClient.conversations.open({
+        users: userIds,
+    })
+
+    const history = await webClient.conversations.history({
+        channel: res.channel.id,
+        limit: limit,
+    })
+
+    if (!history.ok) {
+        console.error(`Failed to retrieve chat history: ${history.error}`)
+        process.exit(1)
+    }
+
+    if (history.messages.length === 0) {
+        console.log('No messages found')
+        return
+    }
+
+    for (const message of history.messages) {
+        await printMessage(webClient, message)
+    }
+}
+
 // Helper functions below
 
 function replyString(count) {
@@ -208,6 +197,11 @@ function replyString(count) {
 
 function threadID(message) {
     return message.ts
+}
+
+async function userMapF(webClient, user) {
+    const res = await webClient.users.info({user: user})
+    return res.name
 }
 
 async function getUserMap(webClient) {
@@ -225,4 +219,28 @@ async function getUserMap(webClient) {
     })
 
     return userMap
+}
+
+// Printer functions below
+
+function printUser(user) {
+    console.log(user.name)
+    console.log(`  ID: ${user.id}`)
+    console.log(`  Full name: ${user.profile.real_name}`)
+    console.log(`  Account deleted: ${user.deleted}`)
+}
+
+async function printMessage(webClient, message) {
+    const time = new Date(parseFloat(message.ts) * 1000)
+    const userName = await userMapF(webClient, message.user)
+    console.log(`${time.toLocaleString()}: ${userName}: ${message.text}`)
+    console.log(`  message ID: ${message.ts}`)
+}
+
+function printChannel(channel) {
+    let printStr = `${channel.name} (ID: ${channel.id})`
+    if (channel.is_archived === true) {
+        printStr += ' (archived)'
+    }
+    console.log(printStr)
 }

@@ -1,6 +1,6 @@
 import { WebClient } from "@slack/web-api"
 import {
-  getChannelHistory,
+  getChannelHistory, getDMHistory,
   getMessageLink,
   getThreadHistory,
   listChannels,
@@ -50,10 +50,13 @@ switch (command) {
     await searchUsers(webClient, process.env.QUERY)
     break
   case "sendDM":
-    await sendDM(webClient, process.env.USERID, process.env.TEXT)
+    await sendDM(webClient, process.env.USERIDS, process.env.TEXT)
     break
   case "getMessageLink":
     await getMessageLink(webClient, process.env.CHANNELID, process.env.MESSAGEID)
+    break
+  case "getDMHistory":
+    await getDMHistory(webClient, process.env.USERIDS, process.env.LIMIT)
     break
   default:
     console.error(`Unknown command: ${command}`)
