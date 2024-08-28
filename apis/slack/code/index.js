@@ -58,7 +58,7 @@ switch (command) {
     await sendDM(webClient, process.env.USERIDS, process.env.TEXT)
     break
   case "sendDMInThread":
-    await sendDMInThread(webClient, process.env.USERIDS, process.env.TEXT)
+    await sendDMInThread(webClient, process.env.USERIDS, process.env.THREADID, process.env.TEXT)
     break
   case "getMessageLink":
     await getMessageLink(webClient, process.env.CHANNELID, process.env.MESSAGEID)
