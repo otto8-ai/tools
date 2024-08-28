@@ -6,29 +6,6 @@ info:
 servers:
   - url: https://api.hubapi.com
 paths:
-#  /oauth/v1/access-tokens/{token}:
-#    get:
-#      tags:
-#        - Access_Tokens
-#      operationId: GetCurrentUserInfo
-#      parameters:
-#        - name: token
-#          in: path
-#          required: true
-#          style: simple
-#          explode: false
-#          schema:
-#            type: string
-#      responses:
-#        '200':
-#          description: successful operation
-#          content:
-#            application/json:
-#              schema:
-#                $ref: '#/components/schemas/AccessTokenInfoResponse'
-#        default:
-#          $ref: '#/components/responses/Error'
-#      security: []
   /crm/v3/objects/calls/{callId}:
     get:
       tags:
@@ -1858,6 +1835,205 @@ paths:
             - crm.objects.owners.read
         - oauth2:
             - crm.objects.owners.read
+  /crm/v3/objects/tasks/{taskId}:
+    get:
+      tags:
+        - Basic
+      summary: Read
+      description: Read an Object identified by `{taskId}`. `{taskId}` refers to the internal object ID by default, or optionally any unique property value as specified by the `idProperty` query param.  Control what is returned via the `properties` query param.
+      operationId: GetTaskById
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: properties
+          in: query
+          description: A comma separated list of the properties to be returned in the response. If any of the specified properties are not present on the requested object(s), they will be ignored.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: propertiesWithHistory
+          in: query
+          description: A comma separated list of the properties to be returned along with their history of previous values. If any of the specified properties are not present on the requested object(s), they will be ignored.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: associations
+          in: query
+          description: A comma separated list of object types to retrieve associated IDs for. If any of the specified associations do not exist, they will be ignored.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: archived
+          in: query
+          description: Whether to return only results that have been archived.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: boolean
+            default: false
+        - name: idProperty
+          in: query
+          description: The name of a property whose values are unique for this object type
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimplePublicObjectWithAssociations'
+        default:
+          $ref: '#/components/responses/Error'
+      security:
+        - oauth2:
+            - crm.objects.contacts.read
+        - private_apps:
+            - crm.objects.contacts.read
+    delete:
+      tags:
+        - Basic
+      summary: Archive
+      description: Move an Object identified by `{taskId}` to the recycling bin.
+      operationId: DeleteTaskById
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No content
+          content: {}
+        default:
+          $ref: '#/components/responses/Error'
+      security:
+        - oauth2:
+            - crm.objects.contacts.write
+        - private_apps:
+            - crm.objects.contacts.write
+    patch:
+      tags:
+        - Basic
+      summary: Update
+      description: Perform a partial update of an Object identified by `{taskId}`. `{taskId}` refers to the internal object ID by default, or optionally any unique property value as specified by the `idProperty` query param. Provided property values will be overwritten. Read-only and non-existent properties will be ignored. Properties values can be cleared by passing an empty string.
+      operationId: UpdateTaskById
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: idProperty
+          in: query
+          description: The name of a property whose values are unique for this object type
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimplePublicObjectInput'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimplePublicObject'
+        default:
+          $ref: '#/components/responses/Error'
+      security:
+        - oauth2:
+            - crm.objects.contacts.write
+        - private_apps:
+            - crm.objects.contacts.write
+  /crm/v3/objects/tasks:
+    post:
+      tags:
+        - Basic
+      summary: Create
+      description: Create a task with the given properties and return a copy of the object, including the ID. Documentation and examples for creating standard tasks is provided.
+      operationId: CreateTask
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimplePublicObjectInputForCreate'
+        required: true
+      responses:
+        '201':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimplePublicObject'
+        default:
+          $ref: '#/components/responses/Error'
+      security:
+        - oauth2:
+            - crm.objects.contacts.write
+        - private_apps:
+            - crm.objects.contacts.write
+  /crm/v3/objects/tasks/search:
+    post:
+      tags:
+        - Search
+      operationId: SearchTasks
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublicObjectSearchRequest'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionResponseWithTotalSimplePublicObjectForwardPaging'
+        default:
+          $ref: '#/components/responses/Error'
+      security:
+        - oauth2:
+            - crm.objects.contacts.read
+        - private_apps:
+            - crm.objects.contacts.read
+      x-hubspot-rate-limit-exemptions:
+        - ten-secondly
 components:
   schemas:
     ErrorDetail:
@@ -2114,7 +2290,7 @@ components:
           hs_call_to_number: (509) 999 9999
           hs_lastmodifieddate: '2019-12-07T16:50:06.678Z'
           hs_timestamp: '2019-10-30T03:30:17.883Z'
-          hubspot_owner_id: '910901'
+          hubspot_owner_id: '64492917'
           hs_email_direction: EMAIL
           hs_email_sender_email: SalesPerson@hubspot.com
           hs_email_sender_firstname: Francis
@@ -2155,6 +2331,10 @@ components:
           hs_pipeline_stage: open
           hs_ticket_priority: HIGH
           subject: troubleshoot report
+          hs_task_body: Send Proposal
+          hs_task_priority: HIGH
+          hs_task_status: WAITING
+          hs_task_subject: Follow-up for Brian Buyer
         createdAt: '2019-10-30T03:30:17.883Z'
         updatedAt: '2019-12-07T16:50:06.678Z'
         archived: false
@@ -2224,7 +2404,7 @@ components:
           hs_call_title: Discovery call
           hs_call_status: COMPLETED
           hs_call_duration: '3800'
-          hubspot_owner_id: '910901'
+          hubspot_owner_id: '64492917'
           hs_call_to_number: (509) 999 9999
           hs_call_from_number: "(857)Ï829 5489"
           hs_call_recording_url: https://api.twilio.com/2010-04-01/Accounts/ex/Recordings/RE3079ac919116b2d22
@@ -2267,6 +2447,10 @@ components:
           hs_pipeline: support_pipeline
           hs_pipeline_stage: open
           hs_ticket_priority: HIGH
+          hs_task_body: Send Proposal
+          hs_task_status: WAITING
+          hs_task_subject: Follow-up for Brian Buyer
+          hs_task_priority: HIGH
         associations:
           - to:
               id: '101'
@@ -2354,7 +2538,7 @@ components:
           hs_call_to_number: (509) 999 9999
           hs_lastmodifieddate: '2019-12-07T16:50:06.678Z'
           hs_timestamp: '2019-10-30T03:30:17.883Z'
-          hubspot_owner_id: '910901'
+          hubspot_owner_id: '64492917'
           hs_email_direction: EMAIL
           hs_email_sender_email: SalesPerson@hubspot.com
           hs_email_sender_firstname: Francis
@@ -2395,6 +2579,10 @@ components:
           hs_pipeline_stage: open
           hs_ticket_priority: HIGH
           subject: troubleshoot report
+          hs_task_body: Send Proposal
+          hs_task_priority: HIGH
+          hs_task_status: WAITING
+          hs_task_subject: Follow-up for Brian Buyer
     Filter:
       required:
         - operator
@@ -2467,6 +2655,7 @@ components:
         link: ?after=NTI1Cg%3D%3D
     SimplePublicObjectInputForCreate:
       required:
+        - associations
         - properties
       type: object
       properties:
@@ -2503,7 +2692,7 @@ components:
           hs_call_title: Discovery call
           hs_call_status: COMPLETED
           hs_call_duration: '3800'
-          hubspot_owner_id: '910901'
+          hubspot_owner_id: '64492917'
           hs_call_to_number: (509) 999 9999
           hs_call_from_number: "(857)Ï829 5489"
           hs_call_recording_url: https://api.twilio.com/2010-04-01/Accounts/ex/Recordings/RE3079ac919116b2d22
@@ -2546,6 +2735,10 @@ components:
           hs_pipeline: support_pipeline
           hs_pipeline_stage: open
           hs_ticket_priority: HIGH
+          hs_task_body: Send Proposal
+          hs_task_status: WAITING
+          hs_task_subject: Follow-up for Brian Buyer
+          hs_task_priority: HIGH
         associations:
           - to:
               id: '101'
@@ -5024,5 +5217,3 @@ components:
   headers: {}
   links: {}
   callbacks: {}
-tags:
-  - name: Owners

@@ -1,16 +1,15 @@
 Name: HubSpot CRM
 Type: context
 Description: Tools for working with HubSpot CRM
-Share Tools: ./hubspot-crm.yaml, github.com/gptscript-ai/context/current-time, ./getMe, unixTimestamp
+Share Tools: ./hubspot-crm.yaml, github.com/gptscript-ai/context/current-time, ./getMe, unixTimestamp, getAssociationTypeId
 Share Credential: github.com/gptscript-ai/gateway-oauth2 as hubspot.crm with GPTSCRIPT_API_HUBAPI_COM_BEARER_TOKEN as env and hubspot as integration and "crm.lists.read crm.lists.write crm.objects.companies.read crm.objects.companies.write crm.objects.contacts.read crm.objects.contacts.write crm.objects.deals.read crm.objects.deals.write sales-email-read tickets" as optional_scope and "oauth" as scope
 
 #!sys.echo
 
 You can help the user with the following operations in HubSpot:
-- CRUD operations on Companies, Deals, Tickets, Contacts
-- Searching for Companies by name or domain, searching for Contacts, Deals, Tickets
+- CRUD operations on Companies, Deals, Tickets, Contacts, Tasks, Engagements (Calls, Emails, Meetings, or Notes)
+- Searching for Companies by name or domain, searching for Contacts, Deals, Tickets, Tasks
 - Adding and removing Contacts from Lists
-- CRUD operations on Engagement resources (Calls, Emails, Meetings, or Notes).
 
 General Instructions:
 - Use the `getMe` tool to find information about the current user. Use that to contextualize requests.
@@ -49,8 +48,15 @@ Since headers automatically populate the read only properties, you may want to m
 ```
 
 
-# Association IDs
+---
+name: getAssociationTypeId
+description: This tool returns the correct Id number for an associationTypeId
+params: from: The name of the object that is being mapped from
+params: to: The name of the object that is being mapped to
 
+Given the list of AssociationTypeIds below, return the correct TYPE ID that matches for "${from} to ${to}".
+
+# AssociationTypeIds
 TYPE ID	| Association type
 449 | Contact to contact
 279 | Contact to company
@@ -122,7 +128,6 @@ TYPE ID	| Association type
 192 | Task to company
 216 | Task to deal
 230 | Task to ticket
-
 
 ---
 name: unixTimestamp
