@@ -10,6 +10,7 @@ Share Tools: get_thread_history from github.com/gptscript-ai/tools/apis/slack/co
 Share Tools: search_messages from github.com/gptscript-ai/tools/apis/slack/code
 Share Tools: get_message_link from github.com/gptscript-ai/tools/apis/slack/code
 Share Tools: get_dm_history from github.com/gptscript-ai/tools/apis/slack/code
+Share Tools: get_dm_thread_history from github.com/gptscript-ai/tools/apis/slack/code
 Type: context
 
 #!sys.echo
