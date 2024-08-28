@@ -67,6 +67,7 @@ TYPE ID	| Association type
 197 | Contact to email
 199 | Contact to meeting
 201 | Contact to note
+203 | Contact to task
 450 | Company to company
 14 | Child to parent company
 13 | Parent to child company
@@ -80,6 +81,7 @@ TYPE ID	| Association type
 185 | Company to email
 187 | Company to meeting
 189 | Company to note
+191 | Company to task
 451 | Deal to deal
 3 | Deal to contact
 341 | Deal to company
@@ -101,6 +103,7 @@ TYPE ID	| Association type
 223 | Ticket to email
 225 | Ticket to meeting
 227 | Ticket to note
+229 | Ticket to task
 578 | Lead to primary contact
 596 | Lead to call
 598 | Lead to email
