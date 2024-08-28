@@ -1,11 +1,14 @@
 import { WebClient } from "@slack/web-api"
 import {
-  getChannelHistory, getDMHistory,
+  getChannelHistory,
+  getDMHistory,
   getMessageLink,
   getThreadHistory,
   listChannels,
   listUsers,
-  search, searchChannels, searchUsers,
+  search,
+  searchChannels,
+  searchUsers,
   sendDM,
   sendMessage,
   sendMessageInThread,
