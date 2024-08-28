@@ -189,6 +189,32 @@ export async function getDMHistory(webClient, userIds, limit) {
     }
 }
 
+export async function getDMThreadHistory(webClient, userIds, threadId, limit) {
+    const res = await webClient.conversations.open({
+        users: userIds,
+    })
+
+    const replies = await webClient.conversations.replies({
+        channel: res.channel.id,
+        ts: threadId,
+        limit: limit,
+    })
+
+    if (!replies.ok) {
+        console.error(`Failed to retrieve thread history: ${replies.error}`)
+        process.exit(1)
+    }
+
+    if (replies.messages.length === 0) {
+        console.log('No messages found')
+        return
+    }
+
+    for (const reply of replies.messages) {
+        await printMessage(webClient, reply)
+    }
+}
+
 // Helper functions below
 
 function replyString(count) {
