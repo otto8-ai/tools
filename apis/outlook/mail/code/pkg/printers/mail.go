@@ -44,7 +44,9 @@ func PrintMessages(messages []models.Messageable, detailed bool) {
 
 func PrintMessage(msg models.Messageable, detailed bool) error {
 	fmt.Printf("Subject: %s\n", util.Deref(msg.GetSubject()))
-	fmt.Printf("Sender: %s (email address: %s)\n", util.Deref(msg.GetSender().GetEmailAddress().GetName()), util.Deref(msg.GetSender().GetEmailAddress().GetAddress()))
+	if !util.Deref(msg.GetIsDraft()) {
+		fmt.Printf("Sender: %s (email address: %s)\n", util.Deref(msg.GetSender().GetEmailAddress().GetName()), util.Deref(msg.GetSender().GetEmailAddress().GetAddress()))
+	}
 	fmt.Printf("Message ID: %s\n", util.Deref(msg.GetId()))
 	fmt.Printf("Received: %s\n", msg.GetReceivedDateTime().Format(time.RFC3339))
 	fmt.Printf("Is unread: %t\n", !util.Deref(msg.GetIsRead()))
