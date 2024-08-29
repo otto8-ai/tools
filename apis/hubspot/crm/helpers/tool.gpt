@@ -1,0 +1,27 @@
+name: getMe
+Share Tools: getUnixTimestamp, getAssociationTypeId, github.com/gptscript-ai/context/current-time
+description: Gets details about the currently authenticated HubSpot user
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py
+
+---
+name: getAssociationTypeId
+description: This tool returns the correct Id number for an associationTypeId
+params: from: The name of the object that is being mapped from
+params: to: The name of the object that is being mapped to
+tool: ./associations.yaml
+
+Call tool `GetAssociationTypeIdFromObjectToObject` and return the value for `typeId` in the result.
+
+---
+name: getUnixTimestamp
+description: Get the current Unix timestamp in milliseconds
+
+#!/usr/bin/env python3
+
+from datetime import datetime
+
+current_time = datetime.now()
+unix_timestamp_ms = int(current_time.timestamp() * 1000)
+
+print(unix_timestamp_ms)
