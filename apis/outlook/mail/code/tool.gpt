@@ -1,0 +1,59 @@
+Name: listMailFolders
+Description: Lists all available mail folders.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listMailFolders
+
+---
+Name: listMessages
+Description: Lists all messages in a folder.
+Param: folder_id: The ID of the folder to list messages in.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listMessages
+
+---
+Name: getMessageDetails
+Description: Get the details of a message.
+Param: message_id: The ID of the message to get details for.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool getMessageDetails
+
+---
+Name: searchMessages
+Description: Search for messages.
+Param: query: The search query to use.
+Param: folder_id: (Optional) The ID of the folder to search in. If unset, will search all folders.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool searchMessages
+
+---
+Name: createDraft
+Description: Create (but do not send) a draft message.
+Param: subject: The subject of the message.
+Param: content: The content of the message in HTML.
+Param: recipients: A comma-separated list of email addresses to send the message to. No spaces. Example: person1@example.com,person2@example.com
+Param: cc: (Optional) A comma-separated list of email addresses to CC on the message. No spaces. Example: person1@example.com,person2@example.com
+Param: bcc: (Optional) A comma-separated list of email addresses to BCC on the message. No spaces. Example: person1@example.com,person2@example.com
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool createDraft
+
+---
+Name: sendDraft
+Description: Send an existing draft message.
+Param: draft_id: The ID of the draft to send.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool sendDraft
+
+---
+Name: deleteMessage
+Description: Delete a message.
+Param: message_id: The ID of the message to delete.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool deleteMessage
+
+---
+Name: moveMessage
+Description: Moves a message to a folder.
+Param: message_id: The ID of the message to move.
+Param: destination_folder_id: The ID of the folder to move the message into.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool moveMessage
