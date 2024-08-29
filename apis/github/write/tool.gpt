@@ -1,0 +1,4 @@
+Name: GitHub
+Description: Provides full access to the GitHub API
+Share Credential: github.com/gptscript-ai/gateway-oauth2 as github.write with GITHUB_TOKEN as env and GitHub as integration and "repo" as scope
+Share Tools: * from github.com/gptscript-ai/tools/apis/github/code

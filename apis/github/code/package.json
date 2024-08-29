@@ -1,0 +1,13 @@
+{
+  "name": "github-cli",
+  "version": "1.0.0",
+  "description": "A CLI tool to list issues and pull requests from a GitHub repository",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@octokit/rest": "^21.0.2"
+  }
+}
