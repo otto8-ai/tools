@@ -1,11 +1,10 @@
 Name: Manage Outlook Mail
 Description: Provides access to the Microsoft Outlook Mail API
 Share Context: github.com/gptscript-ai/context/current-time
-Share Tools: openapi.yaml
+Share Tools: * from github.com/g-linville/tools/apis/outlook/mail/code@update-mail-tools
 Share Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.mail.manage with GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN as env and microsoft365 as integration and "Mail.Read Mail.ReadWrite Mail.Send User.Read offline_access" as scope
 Type: context
 
 #!sys.echo
 
 You have access to a collection of operations in the Microsoft Outlook Mail API.
-When you provide the contents of an email, never print it in HTML. Convert to Markdown instead.
