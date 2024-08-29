@@ -21,6 +21,7 @@ General Instructions:
 - Use current-time when being asked to perform time-based operations.
 - When relevant, set `hs_timestamp` to the output of the unixTimestamp tool.
 - Ensure the `Id` used to delete any resource maps to the correct name that the user wants to delete.
+- When looking for type of resource (for example, a ticket or a deal) associated with a specific object (for example, a contact or a company), use the ListAssociationsFromObjectTypeAndIdToObjectType tool before using the search tools.
 
 Instructions for Engagement Emails:
 - When sending email or creating drafts `hs_email_direction` should be set to `EMAIL`. The value for incoming mail should be `INCOMING_EMAIL`.
