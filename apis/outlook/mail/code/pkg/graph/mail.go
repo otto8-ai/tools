@@ -36,26 +36,15 @@ func GetMessageDetails(ctx context.Context, client *msgraphsdkgo.GraphServiceCli
 	return result, nil
 }
 
-func SearchMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, query, fromAddress, fromName, folderID string) ([]models.Messageable, error) {
-	if query == "" && fromAddress == "" && fromName == "" {
-		return nil, fmt.Errorf("at least one of query, from_address, or from_name must be provided")
-	}
-
-	// We search specifically by subject using $filter and then using $search.
-	// The search results from $search are often not all that great for whatever reason. The subject line is probably more important.
-	// So we combine the results with the subject ones first, and then dedupe and return.
+func SearchMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, subject, fromAddress, fromName, folderID string) ([]models.Messageable, error) {
 	var (
-		subjectResult models.MessageCollectionResponseable
-		subjectErr    error
-		result        models.MessageCollectionResponseable
-		err           error
-		filter        []string
-		search        string
+		result models.MessageCollectionResponseable
+		err    error
+		filter []string
 	)
 
-	if query != "" {
-		search = query
-		filter = append(filter, fmt.Sprintf("contains(subject, '%s')", query))
+	if subject != "" {
+		filter = append(filter, fmt.Sprintf("contains(subject, '%s')", subject))
 	}
 	if fromAddress != "" {
 		filter = append(filter, fmt.Sprintf("contains(from/emailAddress/address, '%s')", fromAddress))
@@ -64,57 +53,31 @@ func SearchMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceClient
 		filter = append(filter, fmt.Sprintf("contains(from/emailAddress/name, '%s')", fromName))
 	}
 
+	if len(filter) == 0 {
+		return nil, fmt.Errorf("at least one of subject, from_address, or from_name must be provided")
+	}
+
 	if folderID != "" {
-		subjectResult, subjectErr = client.Me().MailFolders().ByMailFolderId(folderID).Messages().Get(ctx, &users.ItemMailFoldersItemMessagesRequestBuilderGetRequestConfiguration{
+		result, err = client.Me().MailFolders().ByMailFolderId(folderID).Messages().Get(ctx, &users.ItemMailFoldersItemMessagesRequestBuilderGetRequestConfiguration{
 			QueryParameters: &users.ItemMailFoldersItemMessagesRequestBuilderGetQueryParameters{
 				Filter: util.Ptr(strings.Join(filter, " and ")),
 				Top:    util.Ptr(int32(10)),
 			},
 		})
-
-		if search != "" {
-			result, err = client.Me().MailFolders().ByMailFolderId(folderID).Messages().Get(ctx, &users.ItemMailFoldersItemMessagesRequestBuilderGetRequestConfiguration{
-				QueryParameters: &users.ItemMailFoldersItemMessagesRequestBuilderGetQueryParameters{
-					Search: &search,
-					Top:    util.Ptr(int32(10)),
-				},
-			})
-		}
 	} else {
-		subjectResult, subjectErr = client.Me().Messages().Get(ctx, &users.ItemMessagesRequestBuilderGetRequestConfiguration{
+		result, err = client.Me().Messages().Get(ctx, &users.ItemMessagesRequestBuilderGetRequestConfiguration{
 			QueryParameters: &users.ItemMessagesRequestBuilderGetQueryParameters{
 				Filter: util.Ptr(strings.Join(filter, " and ")),
 				Top:    util.Ptr(int32(10)),
 			},
 		})
-
-		if search != "" {
-			result, err = client.Me().Messages().Get(ctx, &users.ItemMessagesRequestBuilderGetRequestConfiguration{
-				QueryParameters: &users.ItemMessagesRequestBuilderGetQueryParameters{
-					Search: &search,
-					Top:    util.Ptr(int32(10)),
-				},
-			})
-		}
 	}
 
-	if subjectErr != nil {
-		return nil, fmt.Errorf("failed to search messages by subject: %w", subjectErr)
-	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to search messages: %w", err)
 	}
 
-	var fullResults []models.Messageable
-	if subjectResult != nil && subjectResult.GetValue() != nil {
-		fullResults = append(fullResults, subjectResult.GetValue()...)
-	}
-	if result != nil && result.GetValue() != nil {
-		fullResults = append(fullResults, result.GetValue()...)
-	}
-	return util.Dedupe(fullResults, func(result models.Messageable) string {
-		return util.Deref(result.GetId())
-	}), nil
+	return result.GetValue(), nil
 }
 
 type DraftInfo struct {
