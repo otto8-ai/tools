@@ -1,3 +1,5 @@
+import {BlockType} from "@slack/web-api/dist/types/response/RtmStartResponse.js";
+
 export async function listChannels(webClient) {
     const channels = await webClient.conversations.list({limit: 100, types: 'public_channel'})
     console.log('Public channels:')
@@ -39,23 +41,22 @@ export async function getChannelHistory(webClient, channelId, limit) {
         return
     }
 
-    for (const message of history.messages) {
-        await printMessage(webClient, message)
-        if (message.reply_count > 0) {
-            console.log(`  thread ID ${threadID(message)} - ${message.reply_count} ${replyString(message.reply_count)}:`)
-            const replies = await webClient.conversations.replies({channel: channelId, ts: message.ts, limit: 10})
-            for (const reply of replies.messages) {
-                if (reply.ts === message.ts) {
-                    continue
-                }
+    await printHistory(webClient, channelId, history)
+}
 
-                await printMessage(webClient, reply)
-            }
-            if (replies.has_more) {
-                console.log('  More replies exist')
-            }
-        }
+export async function getChannelHistoryByTime(webClient, channelId, limit, start, end) {
+    const oldest = new Date(start).getTime() / 1000
+    const latest = new Date(end).getTime() / 1000
+    const history = await webClient.conversations.history({channel: channelId, limit: limit, oldest: oldest.toString(), latest: latest.toString()})
+    if (!history.ok) {
+        console.error(`Failed to retrieve chat history: ${history.error}`)
+        process.exit(1)
+    } else if (history.messages.length === 0) {
+        console.log('No messages found')
+        return
     }
+
+    await printHistory(webClient, channelId, history)
 }
 
 export async function getThreadHistory(webClient, channelId, threadId, limit) {
@@ -198,9 +199,7 @@ export async function getDMHistory(webClient, userIds, limit) {
         return
     }
 
-    for (const message of history.messages) {
-        await printMessage(webClient, message)
-    }
+    await printHistory(webClient, res.channel.id, history)
 }
 
 export async function getDMThreadHistory(webClient, userIds, threadId, limit) {
@@ -224,9 +223,7 @@ export async function getDMThreadHistory(webClient, userIds, threadId, limit) {
         return
     }
 
-    for (const reply of replies.messages) {
-        await printMessage(webClient, reply)
-    }
+    await printHistory(webClient, res.channel.id, replies)
 }
 
 // Helper functions below
@@ -265,8 +262,15 @@ async function printMessage(webClient, message) {
     try {
         userName = await getUserName(webClient, message.user)
     } catch (e) {}
+
     console.log(`${time.toLocaleString()}: ${userName}: ${message.text}`)
     console.log(`  message ID: ${message.ts}`)
+    if (message.blocks && message.blocks.length > 0) {
+        console.log(`  message blocks: ${JSON.stringify(message.blocks)}`)
+    }
+    if (message.attachments && message.attachments.length > 0) {
+        console.log(`  message attachments: ${JSON.stringify(message.attachments)}`)
+    }
 }
 
 function printChannel(channel) {
@@ -275,4 +279,24 @@ function printChannel(channel) {
         printStr += ' (archived)'
     }
     console.log(printStr)
+}
+
+async function printHistory(webClient, channelId, history) {
+    for (const message of history.messages) {
+        await printMessage(webClient, message)
+        if (message.reply_count > 0) {
+            console.log(`  thread ID ${threadID(message)} - ${message.reply_count} ${replyString(message.reply_count)}:`)
+            const replies = await webClient.conversations.replies({channel: channelId, ts: message.ts, limit: 3})
+            for (const reply of replies.messages) {
+                if (reply.ts === message.ts) {
+                    continue
+                }
+
+                await printMessage(webClient, reply)
+            }
+            if (replies.has_more) {
+                console.log('  More replies exist')
+            }
+        }
+    }
 }
