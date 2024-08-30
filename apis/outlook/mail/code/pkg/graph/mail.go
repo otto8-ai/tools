@@ -106,8 +106,12 @@ func SearchMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceClient
 	}
 
 	var fullResults []models.Messageable
-	fullResults = append(fullResults, subjectResult.GetValue()...)
-	fullResults = append(fullResults, result.GetValue()...)
+	if subjectResult != nil {
+		fullResults = append(fullResults, subjectResult.GetValue()...)
+	}
+	if result != nil {
+		fullResults = append(fullResults, result.GetValue()...)
+	}
 	return util.Dedupe(fullResults, func(result models.Messageable) string {
 		return util.Deref(result.GetId())
 	}), nil
