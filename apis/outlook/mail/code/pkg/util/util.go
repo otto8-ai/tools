@@ -18,3 +18,16 @@ func Map[T, U any](arr []T, f func(T) U) []U {
 	}
 	return out
 }
+
+func Dedupe[T any, U comparable](arr []T, f func(T) U) []T {
+	seen := make(map[U]struct{})
+	var out []T
+	for _, v := range arr {
+		key := f(v)
+		if _, ok := seen[key]; !ok {
+			seen[key] = struct{}{}
+			out = append(out, v)
+		}
+	}
+	return out
+}

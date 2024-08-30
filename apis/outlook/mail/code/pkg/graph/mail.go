@@ -37,22 +37,38 @@ func GetMessageDetails(ctx context.Context, client *msgraphsdkgo.GraphServiceCli
 
 func SearchMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, query, folderID string) ([]models.Messageable, error) {
 	var (
-		result models.MessageCollectionResponseable
-		err    error
+		subjectResult models.MessageCollectionResponseable
+		subjectErr    error
+		result        models.MessageCollectionResponseable
+		err           error
 	)
 
 	if folderID != "" {
+		subjectResult, subjectErr = client.Me().MailFolders().ByMailFolderId(folderID).Messages().Get(ctx, &users.ItemMailFoldersItemMessagesRequestBuilderGetRequestConfiguration{
+			QueryParameters: &users.ItemMailFoldersItemMessagesRequestBuilderGetQueryParameters{
+				Filter: util.Ptr(fmt.Sprintf("contains(subject, '%s')", query)),
+				Top:    util.Ptr(int32(10)),
+			},
+		})
+
 		result, err = client.Me().MailFolders().ByMailFolderId(folderID).Messages().Get(ctx, &users.ItemMailFoldersItemMessagesRequestBuilderGetRequestConfiguration{
 			QueryParameters: &users.ItemMailFoldersItemMessagesRequestBuilderGetQueryParameters{
 				Search: &query,
-				Top:    util.Ptr(int32(50)),
+				Top:    util.Ptr(int32(10)),
 			},
 		})
 	} else {
+		subjectResult, subjectErr = client.Me().Messages().Get(ctx, &users.ItemMessagesRequestBuilderGetRequestConfiguration{
+			QueryParameters: &users.ItemMessagesRequestBuilderGetQueryParameters{
+				Filter: util.Ptr(fmt.Sprintf("contains(subject, '%s')", query)),
+				Top:    util.Ptr(int32(10)),
+			},
+		})
+
 		result, err = client.Me().Messages().Get(ctx, &users.ItemMessagesRequestBuilderGetRequestConfiguration{
 			QueryParameters: &users.ItemMessagesRequestBuilderGetQueryParameters{
 				Search: &query,
-				Top:    util.Ptr(int32(50)),
+				Top:    util.Ptr(int32(10)),
 			},
 		})
 	}
@@ -61,7 +77,12 @@ func SearchMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceClient
 		return nil, fmt.Errorf("failed to search messages: %w", err)
 	}
 
-	return result.GetValue(), nil
+	var fullResults []models.Messageable
+	fullResults = append(fullResults, subjectResult.GetValue()...)
+	fullResults = append(fullResults, result.GetValue()...)
+	return util.Dedupe(fullResults, func(result models.Messageable) string {
+		return util.Deref(result.GetId())
+	}), nil
 }
 
 type DraftInfo struct {
