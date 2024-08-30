@@ -73,6 +73,9 @@ func SearchMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceClient
 		})
 	}
 
+	if subjectErr != nil {
+		return nil, fmt.Errorf("failed to search messages by subject: %w", subjectErr)
+	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to search messages: %w", err)
 	}
