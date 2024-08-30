@@ -197,7 +197,9 @@ export async function getDMHistory(webClient, userIds, limit) {
         return
     }
 
-    await printHistory(webClient, res.channel.id, history)
+    for (const message of history.messages) {
+        await printMessage(webClient, message)
+    }
 }
 
 export async function getDMThreadHistory(webClient, userIds, threadId, limit) {
@@ -221,7 +223,9 @@ export async function getDMThreadHistory(webClient, userIds, threadId, limit) {
         return
     }
 
-    await printHistory(webClient, res.channel.id, replies)
+    for (const reply of replies.messages) {
+        await printMessage(webClient, reply)
+    }
 }
 
 // Helper functions below
