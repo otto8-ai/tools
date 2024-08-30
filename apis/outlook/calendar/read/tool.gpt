@@ -12,3 +12,4 @@ Type: context
 #!sys.echo
 
 You have access to a set of tools to use the Microsoft Outlook Calendar API.
+Do not output calendar IDs or event IDs because they are not helpful for the user.

@@ -11,3 +11,4 @@ Type: context
 #!sys.echo
 
 You have access to a collection of operations in the Microsoft Outlook Mail API.
+Do not output mail folder IDs or message IDs because they are not helpful for the user.
