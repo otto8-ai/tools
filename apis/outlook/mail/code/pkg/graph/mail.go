@@ -3,6 +3,7 @@ package graph
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/gptscript-ai/tools/apis/outlook/mail/code/pkg/util"
 	msgraphsdkgo "github.com/microsoftgraph/msgraph-sdk-go"
@@ -44,28 +45,29 @@ func SearchMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceClient
 	// The search results from $search are often not all that great for whatever reason. The subject line is probably more important.
 	// So we combine the results with the subject ones first, and then dedupe and return.
 	var (
-		subjectResult  models.MessageCollectionResponseable = &models.MessageCollectionResponse{}
-		subjectErr     error
-		result         models.MessageCollectionResponseable = &models.MessageCollectionResponse{}
-		err            error
-		filter, search string
+		subjectResult models.MessageCollectionResponseable = &models.MessageCollectionResponse{}
+		subjectErr    error
+		result        models.MessageCollectionResponseable = &models.MessageCollectionResponse{}
+		err           error
+		filter        []string
+		search        string
 	)
 
 	if query != "" {
 		search = query
-		filter = fmt.Sprintf("contains(subject, '%s')", query)
+		filter = append(filter, fmt.Sprintf("contains(subject, '%s')", query))
 	}
 	if fromAddress != "" {
-		filter += fmt.Sprintf(" and contains(from/emailAddress/address, '%s')", fromAddress)
+		filter = append(filter, fmt.Sprintf("contains(from/emailAddress/address, '%s')", fromAddress))
 	}
 	if fromName != "" {
-		filter += fmt.Sprintf(" and contains(from/emailAddress/name, '%s')", fromName)
+		filter = append(filter, fmt.Sprintf("contains(from/emailAddress/name, '%s')", fromName))
 	}
 
 	if folderID != "" {
 		subjectResult, subjectErr = client.Me().MailFolders().ByMailFolderId(folderID).Messages().Get(ctx, &users.ItemMailFoldersItemMessagesRequestBuilderGetRequestConfiguration{
 			QueryParameters: &users.ItemMailFoldersItemMessagesRequestBuilderGetQueryParameters{
-				Filter: util.Ptr(filter),
+				Filter: util.Ptr(strings.Join(filter, " and ")),
 				Top:    util.Ptr(int32(10)),
 			},
 		})
@@ -81,7 +83,7 @@ func SearchMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceClient
 	} else {
 		subjectResult, subjectErr = client.Me().Messages().Get(ctx, &users.ItemMessagesRequestBuilderGetRequestConfiguration{
 			QueryParameters: &users.ItemMessagesRequestBuilderGetQueryParameters{
-				Filter: util.Ptr(filter),
+				Filter: util.Ptr(strings.Join(filter, " and ")),
 				Top:    util.Ptr(int32(10)),
 			},
 		})
