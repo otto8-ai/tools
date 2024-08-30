@@ -1,0 +1,11 @@
+Name: Read GitHub
+Description: Provides read-only access to the GitHub API
+Share Credential: github.com/gptscript-ai/gateway-oauth2 as github.read with GITHUB_TOKEN as env and GitHub as integration and "repo" as scope
+Share Tools: list_issues from github.com/gptscript-ai/tools/apis/github/code
+Share Tools: list_prs from github.com/gptscript-ai/tools/apis/github/code
+Share Tools: search_issues from github.com/gptscript-ai/tools/apis/github/code
+Share Tools: get_issue from github.com/gptscript-ai/tools/apis/github/code
+Share Tools: get_pr from github.com/gptscript-ai/tools/apis/github/code
+Share Tools: get_issue_comments from github.com/gptscript-ai/tools/apis/github/code
+Share Tools: get_pr_comments from github.com/gptscript-ai/tools/apis/github/code
+Share Tools: list_repos from github.com/gptscript-ai/tools/apis/github/code
