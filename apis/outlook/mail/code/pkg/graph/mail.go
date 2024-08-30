@@ -45,9 +45,9 @@ func SearchMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceClient
 	// The search results from $search are often not all that great for whatever reason. The subject line is probably more important.
 	// So we combine the results with the subject ones first, and then dedupe and return.
 	var (
-		subjectResult models.MessageCollectionResponseable = &models.MessageCollectionResponse{}
+		subjectResult models.MessageCollectionResponseable
 		subjectErr    error
-		result        models.MessageCollectionResponseable = &models.MessageCollectionResponse{}
+		result        models.MessageCollectionResponseable
 		err           error
 		filter        []string
 		search        string
@@ -106,10 +106,10 @@ func SearchMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceClient
 	}
 
 	var fullResults []models.Messageable
-	if subjectResult != nil {
+	if subjectResult != nil && subjectResult.GetValue() != nil {
 		fullResults = append(fullResults, subjectResult.GetValue()...)
 	}
-	if result != nil {
+	if result != nil && result.GetValue() != nil {
 		fullResults = append(fullResults, result.GetValue()...)
 	}
 	return util.Dedupe(fullResults, func(result models.Messageable) string {
