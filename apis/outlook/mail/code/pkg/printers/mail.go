@@ -52,6 +52,7 @@ func PrintMessage(msg models.Messageable, detailed bool) error {
 		fmt.Printf("Created: %s\n", msg.GetReceivedDateTime().Format(time.RFC3339))
 	}
 	fmt.Printf("Is unread: %t\n", !util.Deref(msg.GetIsRead()))
+	fmt.Printf("Link: %s\n", util.Deref(msg.GetWebLink()))
 
 	if detailed {
 		fmt.Printf("To: %s\n", strings.Join(util.Map(msg.GetToRecipients(), recipientableToString), ", "))
