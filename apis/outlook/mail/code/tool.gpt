@@ -19,7 +19,7 @@ Param: message_id: The ID of the message to get details for.
 
 ---
 Name: searchMessages
-Description: Search for messages. At least one of subject, fromAddress, or fromName must be specified.
+Description: Search for messages. At least one of subject, from_address, or from_name must be specified.
 Param: subject: (Optional) Search query for the subject of the message.
 Param: from_address: (Optional) Search query for the email address of the sender.
 Param: from_name: (Optional) Search query for the name of the sender.
