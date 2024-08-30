@@ -32,7 +32,7 @@ export async function searchChannels(webClient, query) {
 export async function getChannelHistory(webClient, channelId, limit) {
     const history = await webClient.conversations.history({channel: channelId, limit: limit})
     if (!history.ok) {
-        console.error(`Failed to retrieve chat history: ${history.error}`)
+        console.log(`Failed to retrieve chat history: ${history.error}`)
         process.exit(1)
     } else if (history.messages.length === 0) {
         console.log('No messages found')
@@ -47,7 +47,7 @@ export async function getChannelHistoryByTime(webClient, channelId, limit, start
     const latest = new Date(end).getTime() / 1000
     const history = await webClient.conversations.history({channel: channelId, limit: limit, oldest: oldest.toString(), latest: latest.toString()})
     if (!history.ok) {
-        console.error(`Failed to retrieve chat history: ${history.error}`)
+        console.log(`Failed to retrieve chat history: ${history.error}`)
         process.exit(1)
     } else if (history.messages.length === 0) {
         console.log('No messages found')
@@ -60,7 +60,7 @@ export async function getChannelHistoryByTime(webClient, channelId, limit, start
 export async function getThreadHistory(webClient, channelId, threadId, limit) {
     const replies = await webClient.conversations.replies({channel: channelId, ts: threadId, limit: limit})
     if (!replies.ok) {
-        console.error(`Failed to retrieve thread history: ${replies.error}`)
+        console.log(`Failed to retrieve thread history: ${replies.error}`)
         process.exit(1)
     } else if (replies.messages.length === 0) {
         console.log('No messages found')
@@ -79,7 +79,7 @@ export async function search(webClient, query) {
     })
 
     if (!result.ok) {
-        console.error(`Failed to search messages: ${result.error}`)
+        console.log(`Failed to search messages: ${result.error}`)
         process.exit(1)
     }
 
@@ -100,7 +100,7 @@ export async function sendMessage(webClient, channelId, text) {
     })
 
     if (!result.ok) {
-        console.error(`Failed to send message: ${result.error}`)
+        console.log(`Failed to send message: ${result.error}`)
         process.exit(1)
     }
     console.log('Message sent successfully')
@@ -114,7 +114,7 @@ export async function sendMessageInThread(webClient, channelId, threadTs, text) 
     })
 
     if (!result.ok) {
-        console.error(`Failed to send message: ${result.error}`)
+        console.log(`Failed to send message: ${result.error}`)
         process.exit(1)
     }
     console.log('Thread message sent successfully')
@@ -170,7 +170,7 @@ export async function getMessageLink(webClient, channelId, messageId) {
     })
 
     if (!result.ok) {
-        console.error(`Failed to get message link: ${result.error}`)
+        console.log(`Failed to get message link: ${result.error}`)
         process.exit(1)
     }
 
@@ -188,7 +188,7 @@ export async function getDMHistory(webClient, userIds, limit) {
     })
 
     if (!history.ok) {
-        console.error(`Failed to retrieve chat history: ${history.error}`)
+        console.log(`Failed to retrieve chat history: ${history.error}`)
         process.exit(1)
     }
 
@@ -212,7 +212,7 @@ export async function getDMThreadHistory(webClient, userIds, threadId, limit) {
     })
 
     if (!replies.ok) {
-        console.error(`Failed to retrieve thread history: ${replies.error}`)
+        console.log(`Failed to retrieve thread history: ${replies.error}`)
         process.exit(1)
     }
 
