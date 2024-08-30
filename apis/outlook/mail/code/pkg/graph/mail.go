@@ -36,6 +36,10 @@ func GetMessageDetails(ctx context.Context, client *msgraphsdkgo.GraphServiceCli
 }
 
 func SearchMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, query, folderID string) ([]models.Messageable, error) {
+	// We search specifically by subject using $filter and then using $search.
+	// The search results from $search are often not all that great for whatever reason. The subject line is probably more important.
+	// So we combine the results with the subject ones first, and then dedupe and return.
+
 	var (
 		subjectResult models.MessageCollectionResponseable
 		subjectErr    error
