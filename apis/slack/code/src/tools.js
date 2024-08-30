@@ -1,5 +1,3 @@
-import {BlockType} from "@slack/web-api/dist/types/response/RtmStartResponse.js";
-
 export async function listChannels(webClient) {
     const channels = await webClient.conversations.list({limit: 100, types: 'public_channel'})
     console.log('Public channels:')
