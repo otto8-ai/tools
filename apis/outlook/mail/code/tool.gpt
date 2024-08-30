@@ -19,8 +19,10 @@ Param: message_id: The ID of the message to get details for.
 
 ---
 Name: searchMessages
-Description: Search for messages.
-Param: query: The search query to use.
+Description: Search for messages. At least one of query, fromAddress, or fromName must be specified.
+Param: query: (Optional) The search query to use. Must be plaintext with no special characters. This field will only search subject and message body.
+Param: from_address: (Optional) The email address to search for in the "From" field.
+Param: from_name: (Optional) The name to search for in the "From" field.
 Param: folder_id: (Optional) The ID of the folder to search in. If unset, will search all folders.
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool searchMessages
