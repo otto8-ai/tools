@@ -1,18 +1,3 @@
-Name: list_issues
-Description: List all open issues in the specified GitHub repository. Returns the issue number, title, and ID for each issue
-Param: owner: the owner of the repository
-Param: repo: the name of the repository
-
-#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js listIssues
-
----
-Name: list_prs
-Description: List all open pull requests in the specified GitHub repository. Returns the PR number, title, and ID for each PR
-Param: owner: the owner of the repository
-Param: repo: the name of the repository
-
-#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js listPRs
-
 ---
 Name: create_issue
 Description: Create a new issue in the specified GitHub repository
@@ -44,13 +29,13 @@ Param: issueNumber: the number of the issue to delete
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js deleteIssue
 
 ---
-Name: search_issues
-Description: Search for issues in the specified GitHub repository
-Param: owner: the owner of the repository
-Param: repo: the name of the repository
-Param: query: the search query
+Name: search_issues_and_prs
+Description: Search for issues and PRs in GitHub
+Param: owner: (optional) the owner of the repository the issues or PRs belong to
+Param: repo: (optional) the name of the repository the issues or PRs belong to
+Param: query: the Github search query
 
-#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js searchIssues
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js searchIssuesAndPRs
 
 ---
 Name: create_pr

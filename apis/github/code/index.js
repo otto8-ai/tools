@@ -1,5 +1,5 @@
 import { Octokit } from '@octokit/rest';
-import { listIssues, listPRs, createIssue, modifyIssue, deleteIssue, searchIssues, createPR, modifyPR, deletePR, addCommentToIssue, addCommentToPR, getIssue, getPR, getIssueComments, getPRComments, listRepos, closeIssue } from './src/tools.js';
+import { createIssue, modifyIssue, deleteIssue, searchIssuesAndPRs, createPR, modifyPR, deletePR, addCommentToIssue, addCommentToPR, getIssue, getPR, getIssueComments, getPRComments, listRepos, closeIssue } from './src/tools.js';
 
 if (process.argv.length !== 3) {
     console.log('Usage: node index.js <command>');
@@ -18,12 +18,6 @@ const octokit = new Octokit({ auth: token });
 
 try {
     switch (command) {
-        case 'listIssues':
-            await listIssues(octokit, process.env.OWNER, process.env.REPO);
-            break;
-        case 'listPRs':
-            await listPRs(octokit, process.env.OWNER, process.env.REPO);
-            break;
         case 'createIssue':
             await createIssue(octokit, process.env.OWNER, process.env.REPO, process.env.TITLE, process.env.BODY);
             break;
@@ -33,8 +27,8 @@ try {
         case 'deleteIssue':
             await deleteIssue(octokit, process.env.OWNER, process.env.REPO, process.env.ISSUENUMBER);
             break;
-        case 'searchIssues':
-            await searchIssues(octokit, process.env.OWNER, process.env.REPO, process.env.QUERY);
+        case 'searchIssuesAndPRs':
+            await searchIssuesAndPRs(octokit, process.env.OWNER, process.env.REPO, process.env.QUERY);
             break;
         case 'createPR':
             await createPR(octokit, process.env.OWNER, process.env.REPO, process.env.TITLE, process.env.BODY, process.env.HEAD, process.env.BASE);

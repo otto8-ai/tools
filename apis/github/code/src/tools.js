@@ -19,32 +19,6 @@ export async function listRepos(octokit, owner) {
     });
 }
 
-export async function listIssues(octokit, owner, repo) {
-    const issues = await octokit.issues.listForRepo({
-        owner,
-        repo,
-        state: 'open',
-        per_page: 100
-    });
-
-    issues.data.forEach(issue => {
-        console.log(`#${issue.number} - ${issue.title} (ID: ${issue.id}) - https://github.com/${owner}/${repo}/issues/${issue.number}`);
-    });
-}
-
-export async function listPRs(octokit, owner, repo) {
-    const prs = await octokit.pulls.list({
-        owner,
-        repo,
-        state: 'open',
-        per_page: 100
-    });
-
-    prs.data.forEach(pr => {
-        console.log(`#${pr.number} - ${pr.title} (ID: ${pr.id}) - https://github.com/${owner}/${repo}/pull/${pr.number}`);
-    });
-}
-
 export async function createIssue(octokit, owner, repo, title, body) {
     const issue = await octokit.issues.create({
         owner,
@@ -79,13 +53,32 @@ export async function deleteIssue(octokit, owner, repo, issueNumber) {
     console.log(`Deleted issue #${issueNumber} - https://github.com/${owner}/${repo}/issues/${issueNumber}`);
 }
 
-export async function searchIssues(octokit, owner, repo, query) {
-    const issues = await octokit.search.issuesAndPullRequests({
-        q: `repo:${owner}/${repo} ${query}`
-    });
+export async function searchIssuesAndPRs(octokit, owner, repo, query) {
+    let q = '';
 
-    issues.data.items.forEach(issue => {
-        console.log(`#${issue.number} - ${issue.title} (ID: ${issue.id}) - https://github.com/${owner}/${repo}/issues/${issue.number}`);
+    if (owner) {
+        // Determine if the owner is a user or an organization
+        const { data: { type } } = await octokit.users.getByUsername({ username: owner });
+
+        // Construct the query based on the presence of repo and owner type
+        const ownerQualifier = type === 'User' ? `user:${owner}` : `org:${owner}`;
+        q = repo ? `repo:${owner}/${repo}` : ownerQualifier;
+    } else if (repo) {
+        throw new Error('Repository given without an owner. Please provide an owner.');
+    } else {
+        throw new Error('Owner and repository must be provided.');
+    }
+
+    if (query) {
+        q += ` ${query}`;
+    }
+
+    // Search for issues and pull requests
+    const { data: { items } } = await octokit.search.issuesAndPullRequests({ q: q.trim() });
+
+    // Log the results
+    items.forEach(issue => {
+        console.log(`#${issue.number} - ${issue.title} (ID: ${issue.id}) - ${issue.html_url}`);
     });
 }
 
