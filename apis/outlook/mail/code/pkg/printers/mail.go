@@ -5,19 +5,27 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gptscript-ai/tools/apis/outlook/common/id"
 	"github.com/gptscript-ai/tools/apis/outlook/mail/code/pkg/util"
 	"github.com/jaytaylor/html2text"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 )
 
-func PrintMailFolders(folders []models.MailFolderable) {
+func PrintMailFolders(folders []models.MailFolderable) error {
 	for _, folder := range folders {
-		PrintMailFolder(folder)
+		if err := PrintMailFolder(folder); err != nil {
+			return err
+		}
 		fmt.Println()
 	}
+	return nil
 }
 
-func PrintMailFolder(folder models.MailFolderable) {
+func PrintMailFolder(folder models.MailFolderable) error {
+	if err := fixMailFolder(&folder); err != nil {
+		return fmt.Errorf("failed to fix mail folder: %w", err)
+	}
+
 	fmt.Printf("Name: %s\n", util.Deref(folder.GetDisplayName()))
 	fmt.Printf("ID: %s\n", util.Deref(folder.GetId()))
 	if folder.GetParentFolderId() != nil {
@@ -25,24 +33,24 @@ func PrintMailFolder(folder models.MailFolderable) {
 	}
 	fmt.Printf("Unread item count: %d\n", util.Deref(folder.GetUnreadItemCount()))
 	fmt.Printf("Total item count: %d\n", util.Deref(folder.GetTotalItemCount()))
+	return nil
 }
 
-func PrintMessagesForFolder(folder models.MailFolderable, messages []models.Messageable, detailed bool) {
-	fmt.Printf("Messages in folder %s:\n", util.Deref(folder.GetDisplayName()))
-	PrintMessages(messages, detailed)
-	fmt.Println()
-}
-
-func PrintMessages(messages []models.Messageable, detailed bool) {
+func PrintMessages(messages []models.Messageable, detailed bool) error {
 	for _, msg := range messages {
 		if err := PrintMessage(msg, detailed); err != nil {
-			fmt.Printf("failed to print message: %v\n", err)
+			return fmt.Errorf("failed to print message: %w", err)
 		}
 		fmt.Println()
 	}
+	return nil
 }
 
 func PrintMessage(msg models.Messageable, detailed bool) error {
+	if err := fixMessage(&msg); err != nil {
+		return fmt.Errorf("failed to fix message: %w", err)
+	}
+
 	fmt.Printf("Subject: %s\n", util.Deref(msg.GetSubject()))
 	fmt.Printf("Message ID: %s\n", util.Deref(msg.GetId()))
 	if !util.Deref(msg.GetIsDraft()) {
@@ -73,4 +81,48 @@ func PrintMessage(msg models.Messageable, detailed bool) error {
 
 func recipientableToString(r models.Recipientable) string {
 	return fmt.Sprintf("%s (%s)", util.Deref(r.GetEmailAddress().GetName()), util.Deref(r.GetEmailAddress().GetAddress()))
+}
+
+func fixMailFolder(folder *models.MailFolderable) error {
+	if folder == nil {
+		return nil
+	}
+
+	newFolderID, err := id.SetOutlookID(util.Deref((*folder).GetId()))
+	if err != nil {
+		return fmt.Errorf("failed to set folder ID: %w", err)
+	}
+
+	(*folder).SetId(util.Ptr(newFolderID))
+
+	if (*folder).GetParentFolderId() != nil {
+		newParentFolderID, err := id.SetOutlookID(util.Deref((*folder).GetParentFolderId()))
+		if err != nil {
+			return fmt.Errorf("failed to set parent folder ID: %w", err)
+		}
+
+		(*folder).SetParentFolderId(util.Ptr(newParentFolderID))
+	}
+	return nil
+}
+
+func fixMessage(msg *models.Messageable) error {
+	if msg == nil {
+		return nil
+	}
+
+	newMessageID, err := id.SetOutlookID(util.Deref((*msg).GetId()))
+	if err != nil {
+		return fmt.Errorf("failed to set message ID: %w", err)
+	}
+
+	(*msg).SetId(util.Ptr(newMessageID))
+
+	newFolderID, err := id.SetOutlookID(util.Deref((*msg).GetParentFolderId()))
+	if err != nil {
+		return fmt.Errorf("failed to set folder ID: %w", err)
+	}
+
+	(*msg).SetParentFolderId(util.Ptr(newFolderID))
+	return nil
 }
