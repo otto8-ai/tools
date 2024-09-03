@@ -35,6 +35,10 @@ func loadDB() (*gorm.DB, error) {
 }
 
 func GetOutlookID(id string) (string, error) {
+	if id == "" {
+		return "", fmt.Errorf("ID is required")
+	}
+
 	idNum, err := strconv.Atoi(id)
 	if err != nil {
 		// If the ID does not convert to a number, it's most likely already an Outlook ID, so we just return it back.
@@ -55,6 +59,10 @@ func GetOutlookID(id string) (string, error) {
 }
 
 func SetOutlookID(outlookID string) (string, error) {
+	if outlookID == "" {
+		return "", fmt.Errorf("Outlook ID is required")
+	}
+
 	db, err := loadDB()
 	if err != nil {
 		return "", err
