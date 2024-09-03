@@ -3,6 +3,7 @@ package graph
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/gptscript-ai/tools/apis/outlook/mail/code/pkg/util"
 	msgraphsdkgo "github.com/microsoftgraph/msgraph-sdk-go"
@@ -35,24 +36,39 @@ func GetMessageDetails(ctx context.Context, client *msgraphsdkgo.GraphServiceCli
 	return result, nil
 }
 
-func SearchMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, query, folderID string) ([]models.Messageable, error) {
+func SearchMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, subject, fromAddress, fromName, folderID string) ([]models.Messageable, error) {
 	var (
 		result models.MessageCollectionResponseable
 		err    error
+		filter []string
 	)
+
+	if subject != "" {
+		filter = append(filter, fmt.Sprintf("contains(subject, '%s')", subject))
+	}
+	if fromAddress != "" {
+		filter = append(filter, fmt.Sprintf("contains(from/emailAddress/address, '%s')", fromAddress))
+	}
+	if fromName != "" {
+		filter = append(filter, fmt.Sprintf("contains(from/emailAddress/name, '%s')", fromName))
+	}
+
+	if len(filter) == 0 {
+		return nil, fmt.Errorf("at least one of subject, from_address, or from_name must be provided")
+	}
 
 	if folderID != "" {
 		result, err = client.Me().MailFolders().ByMailFolderId(folderID).Messages().Get(ctx, &users.ItemMailFoldersItemMessagesRequestBuilderGetRequestConfiguration{
 			QueryParameters: &users.ItemMailFoldersItemMessagesRequestBuilderGetQueryParameters{
-				Search: &query,
-				Top:    util.Ptr(int32(50)),
+				Filter: util.Ptr(strings.Join(filter, " and ")),
+				Top:    util.Ptr(int32(10)),
 			},
 		})
 	} else {
 		result, err = client.Me().Messages().Get(ctx, &users.ItemMessagesRequestBuilderGetRequestConfiguration{
 			QueryParameters: &users.ItemMessagesRequestBuilderGetQueryParameters{
-				Search: &query,
-				Top:    util.Ptr(int32(50)),
+				Filter: util.Ptr(strings.Join(filter, " and ")),
+				Top:    util.Ptr(int32(10)),
 			},
 		})
 	}
