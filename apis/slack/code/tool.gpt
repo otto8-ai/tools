@@ -14,9 +14,19 @@ Param: query: the search query
 Name: get_channel_history
 Description: Get the chat history for a channel in the Slack workspace
 Param: channelid: the ID of the channel to get the history for
-Param: limit: the number of messages to return
+Param: limit: the number of messages to return - recommend starting with 10 and increasing if necessary
 
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js getChannelHistory
+
+---
+Name: get_channel_history_by_time
+Description: Get the chat history for a channel in the Slack workspace within a specific time range
+Param: channelid: the ID of the channel to get the history for
+Param: limit: the maximum number of messages to return - recommend starting with 10 and increasing if necessary
+Param: start: the start time in RFC 3339 format
+Param: end: the end time in RFC 3339 format
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js getChannelHistoryByTime
 
 ---
 Name: get_thread_history

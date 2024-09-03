@@ -6,6 +6,7 @@ Share Tools: search_channels from github.com/gptscript-ai/tools/apis/slack/code
 Share Tools: list_users from github.com/gptscript-ai/tools/apis/slack/code
 Share Tools: search_users from github.com/gptscript-ai/tools/apis/slack/code
 Share Tools: get_channel_history from github.com/gptscript-ai/tools/apis/slack/code
+Share Tools: get_channel_history_by_time from github.com/gptscript-ai/tools/apis/slack/code
 Share Tools: get_thread_history from github.com/gptscript-ai/tools/apis/slack/code
 Share Tools: search_messages from github.com/gptscript-ai/tools/apis/slack/code
 Share Tools: get_message_link from github.com/gptscript-ai/tools/apis/slack/code
