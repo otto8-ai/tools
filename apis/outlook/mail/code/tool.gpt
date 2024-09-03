@@ -46,7 +46,7 @@ Param: draft_id: The ID of the draft to send.
 ---
 Name: deleteMessage
 Description: Delete a message.
-Param: message_id: The ID of the message to delete.
+Param: message_id: The ID of the message to delete. This is NOT a mail folder ID.
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool deleteMessage
 
