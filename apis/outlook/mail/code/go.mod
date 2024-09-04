@@ -2,11 +2,9 @@ module github.com/gptscript-ai/tools/apis/outlook/mail/code
 
 go 1.23.0
 
-replace github.com/gptscript-ai/tools/apis/outlook/common => github.com/g-linville/tools/apis/outlook/common v0.0.0-20240903203431-d7bfd26dc70d
-
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.14.0
-	github.com/gptscript-ai/tools/apis/outlook/common v0.0.0
+	github.com/gptscript-ai/tools/apis/outlook/common v0.0.0-20240904161731-0ba4310b0ca0
 	github.com/jaytaylor/html2text v0.0.0-20230321000545-74c2419ad056
 	github.com/microsoftgraph/msgraph-sdk-go v1.47.0
 )
