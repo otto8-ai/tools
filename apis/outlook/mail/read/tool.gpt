@@ -12,4 +12,4 @@ Type: context
 
 You have access to a collection of operations in the Microsoft Outlook Mail API.
 Do not output mail folder IDs or message IDs because they are not helpful for the user. The message IDs are needed for getting message details.
-When printing a list of messages for the user, include the body preview. When printing a single message and its details, print the full body.
+When printing a list of messages for the user, include the body preview. When printing a single message and its details, print the full body. Always include the email link.
