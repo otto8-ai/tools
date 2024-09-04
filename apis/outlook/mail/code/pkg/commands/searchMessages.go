@@ -30,7 +30,7 @@ func SearchMessages(ctx context.Context, subject, fromAddress, fromName, folderI
 	if len(messages) == 0 {
 		fmt.Println("no messages found")
 		return nil
-	} else {
-		return printers.PrintMessages(messages, false)
 	}
+
+	return printers.PrintMessages(messages, false)
 }

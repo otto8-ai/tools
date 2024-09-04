@@ -22,7 +22,7 @@ func PrintMailFolders(folders []models.MailFolderable) error {
 }
 
 func PrintMailFolder(folder models.MailFolderable) error {
-	if err := fixMailFolder(&folder); err != nil {
+	if err := replaceMailFolderIDs(&folder); err != nil {
 		return fmt.Errorf("failed to fix mail folder: %w", err)
 	}
 
@@ -47,7 +47,7 @@ func PrintMessages(messages []models.Messageable, detailed bool) error {
 }
 
 func PrintMessage(msg models.Messageable, detailed bool) error {
-	if err := fixMessage(&msg); err != nil {
+	if err := replaceMessageIDs(&msg); err != nil {
 		return fmt.Errorf("failed to fix message: %w", err)
 	}
 
@@ -83,7 +83,10 @@ func recipientableToString(r models.Recipientable) string {
 	return fmt.Sprintf("%s (%s)", util.Deref(r.GetEmailAddress().GetName()), util.Deref(r.GetEmailAddress().GetAddress()))
 }
 
-func fixMailFolder(folder *models.MailFolderable) error {
+// replaceMailFolderIDs replaces the ID values of the mail folder itself and its parent
+// with the corresponding numerical ID that we generate in the database.
+// This is necessary to do prior to printing it for the LLM.
+func replaceMailFolderIDs(folder *models.MailFolderable) error {
 	if folder == nil {
 		return nil
 	}
@@ -106,7 +109,10 @@ func fixMailFolder(folder *models.MailFolderable) error {
 	return nil
 }
 
-func fixMessage(msg *models.Messageable) error {
+// replaceMessageIDs replaces the ID values of the message itself and its parent folder
+// with the corresponding numerical ID that we generate in the database.
+// This is necessary to do prior to printing it for the LLM.
+func replaceMessageIDs(msg *models.Messageable) error {
 	if msg == nil {
 		return nil
 	}
