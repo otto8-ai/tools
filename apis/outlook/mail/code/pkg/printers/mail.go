@@ -86,25 +86,21 @@ func recipientableToString(r models.Recipientable) string {
 // replaceMailFolderIDs replaces the ID values of the mail folder itself and its parent
 // with the corresponding numerical ID that we generate in the database.
 // This is necessary to do prior to printing it for the LLM.
-func replaceMailFolderIDs(folder *models.MailFolderable) error {
-	if folder == nil {
-		return nil
-	}
-
-	newFolderID, err := id.SetOutlookID(util.Deref((*folder).GetId()))
+func replaceMailFolderIDs(folder models.MailFolderable) error {
+	newFolderID, err := id.SetOutlookID(util.Deref(folder.GetId()))
 	if err != nil {
 		return fmt.Errorf("failed to set folder ID: %w", err)
 	}
 
-	(*folder).SetId(util.Ptr(newFolderID))
+	folder.SetId(util.Ptr(newFolderID))
 
-	if (*folder).GetParentFolderId() != nil {
-		newParentFolderID, err := id.SetOutlookID(util.Deref((*folder).GetParentFolderId()))
+	if folder.GetParentFolderId() != nil {
+		newParentFolderID, err := id.SetOutlookID(util.Deref(folder.GetParentFolderId()))
 		if err != nil {
 			return fmt.Errorf("failed to set parent folder ID: %w", err)
 		}
 
-		(*folder).SetParentFolderId(util.Ptr(newParentFolderID))
+		folder.SetParentFolderId(util.Ptr(newParentFolderID))
 	}
 	return nil
 }
@@ -112,23 +108,19 @@ func replaceMailFolderIDs(folder *models.MailFolderable) error {
 // replaceMessageIDs replaces the ID values of the message itself and its parent folder
 // with the corresponding numerical ID that we generate in the database.
 // This is necessary to do prior to printing it for the LLM.
-func replaceMessageIDs(msg *models.Messageable) error {
-	if msg == nil {
-		return nil
-	}
-
-	newMessageID, err := id.SetOutlookID(util.Deref((*msg).GetId()))
+func replaceMessageIDs(msg models.Messageable) error {
+	newMessageID, err := id.SetOutlookID(util.Deref(msg.GetId()))
 	if err != nil {
 		return fmt.Errorf("failed to set message ID: %w", err)
 	}
 
-	(*msg).SetId(util.Ptr(newMessageID))
+	msg.SetId(util.Ptr(newMessageID))
 
-	newFolderID, err := id.SetOutlookID(util.Deref((*msg).GetParentFolderId()))
+	newFolderID, err := id.SetOutlookID(util.Deref(msg.GetParentFolderId()))
 	if err != nil {
 		return fmt.Errorf("failed to set folder ID: %w", err)
 	}
 
-	(*msg).SetParentFolderId(util.Ptr(newFolderID))
+	msg.SetParentFolderId(util.Ptr(newFolderID))
 	return nil
 }
