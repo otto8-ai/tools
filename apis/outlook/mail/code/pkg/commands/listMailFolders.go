@@ -21,6 +21,5 @@ func ListMailFolders(ctx context.Context) error {
 		return fmt.Errorf("failed to list mail folders: %w", err)
 	}
 
-	printers.PrintMailFolders(result)
-	return nil
+	return printers.PrintMailFolders(result)
 }
