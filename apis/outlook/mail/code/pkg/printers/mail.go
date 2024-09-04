@@ -22,7 +22,7 @@ func PrintMailFolders(folders []models.MailFolderable) error {
 }
 
 func PrintMailFolder(folder models.MailFolderable) error {
-	if err := replaceMailFolderIDs(&folder); err != nil {
+	if err := replaceMailFolderIDs(folder); err != nil {
 		return fmt.Errorf("failed to fix mail folder: %w", err)
 	}
 
@@ -47,7 +47,7 @@ func PrintMessages(messages []models.Messageable, detailed bool) error {
 }
 
 func PrintMessage(msg models.Messageable, detailed bool) error {
-	if err := replaceMessageIDs(&msg); err != nil {
+	if err := replaceMessageIDs(msg); err != nil {
 		return fmt.Errorf("failed to fix message: %w", err)
 	}
 
