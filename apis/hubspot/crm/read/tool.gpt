@@ -1,7 +1,7 @@
 Name: HubSpot CRM - Read only
 Type: context
 Description: Read-Only Tools for working with HubSpot CRM
-Share Tools: ./hubspot-crm-read.yaml, ../helpers
+Share Tools: ./hubspot-crm-read.yaml, github.com/gptscript-ai/tools/apis/hubspot/crm/helpers
 Share Credential: github.com/gptscript-ai/gateway-oauth2 as hubspot.crm.read with GPTSCRIPT_API_HUBAPI_COM_BEARER_TOKEN as env and hubspot as integration and "crm.lists.read crm.objects.companies.read crm.objects.contacts.read crm.objects.deals.read sales-email-read" as optional_scope and "oauth" as scope
 
 #!sys.echo
