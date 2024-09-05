@@ -1,7 +1,7 @@
 Name: HubSpot CRM
 Type: context
 Description: Read and Write Tools for working with HubSpot CRM
-Share Tools: ./hubspot-crm-write.yaml, ../read
+Share Tools: ./hubspot-crm-write.yaml, github.com/gptscript-ai/tools/apis/hubspot/crm/read
 Share Credential: github.com/gptscript-ai/gateway-oauth2 as hubspot.crm.write with GPTSCRIPT_API_HUBAPI_COM_BEARER_TOKEN as env and hubspot as integration and "crm.lists.read crm.lists.write crm.objects.companies.read crm.objects.companies.write crm.objects.contacts.read crm.objects.contacts.write crm.objects.deals.read crm.objects.deals.write sales-email-read tickets" as optional_scope and "oauth" as scope
 
 #!sys.echo
