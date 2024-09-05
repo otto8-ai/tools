@@ -1,4 +1,4 @@
-Name: HubSpot CRM Write
+Name: HubSpot CRM
 Type: context
 Description: Read and Write Tools for working with HubSpot CRM
 Share Tools: ./hubspot-crm-write.yaml, ../read

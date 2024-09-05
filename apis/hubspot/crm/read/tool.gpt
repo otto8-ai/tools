@@ -1,4 +1,4 @@
-Name: HubSpot CRM Read
+Name: HubSpot CRM - Read only
 Type: context
 Description: Read-Only Tools for working with HubSpot CRM
 Share Tools: ./hubspot-crm-read.yaml, ../helpers
