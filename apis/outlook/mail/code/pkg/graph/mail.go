@@ -144,8 +144,7 @@ func DeleteMessage(ctx context.Context, client *msgraphsdkgo.GraphServiceClient,
 			continue
 		}
 
-		_, err := MoveMessage(ctx, client, messageID, util.Deref(folder.GetId()))
-		if err != nil {
+		if _, err := MoveMessage(ctx, client, messageID, util.Deref(folder.GetId())); err != nil {
 			return fmt.Errorf("failed to move message to Deleted Items: %w", err)
 		}
 		return nil
