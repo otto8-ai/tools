@@ -134,11 +134,24 @@ func SendDraft(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, dra
 }
 
 func DeleteMessage(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, messageID string) error {
-	if err := client.Me().Messages().ByMessageId(messageID).Delete(ctx, nil); err != nil {
-		return fmt.Errorf("failed to delete message: %w", err)
+	folders, err := ListMailFolders(ctx, client)
+	if err != nil {
+		return fmt.Errorf("failed to list mail folders: %w", err)
 	}
 
-	return nil
+	for _, folder := range folders {
+		if util.Deref(folder.GetDisplayName()) != "Deleted Items" {
+			continue
+		}
+
+		_, err := MoveMessage(ctx, client, messageID, util.Deref(folder.GetId()))
+		if err != nil {
+			return fmt.Errorf("failed to move message to Deleted Items: %w", err)
+		}
+		return nil
+	}
+
+	return fmt.Errorf("failed to find Deleted Items folder")
 }
 
 func MoveMessage(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, messageID, destinationFolderID string) (models.Messageable, error) {
