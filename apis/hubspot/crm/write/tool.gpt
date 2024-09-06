@@ -15,6 +15,7 @@ General Instructions:
 - When creating a resource that has the `associations` field, it is always required, even if it is an empty string.
 - Ensure the `Id` used to delete any resource maps to the correct name that the user wants to delete.
 - When creating or updating a resource, use the `GetPropertyByName` tool to get information about fields and the values that are valid for them.
+- Always use the `getAssociationTypeId` tool to look up associationTypeIds between two objects. Do not guess.
 
 Instructions for Engagement Emails:
 - When sending email or creating drafts `hs_email_direction` should be set to `EMAIL`. The value for incoming mail should be `INCOMING_EMAIL`.
