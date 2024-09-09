@@ -1,4 +1,5 @@
 name: getMe
+type: context
 Share Tools: getUnixTimestamp, getAssociationTypeId, github.com/gptscript-ai/context/current-time
 description: Gets details about the currently authenticated HubSpot user
 
