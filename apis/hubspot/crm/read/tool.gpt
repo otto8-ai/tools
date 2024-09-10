@@ -1,7 +1,7 @@
 Name: HubSpot CRM - Read only
 Type: context
 Description: Read-Only Tools for working with HubSpot CRM
-Share Tools: ./hubspot-crm-read.yaml, github.com/gptscript-ai/tools/apis/hubspot/crm/helpers
+Share Tools: ./hubspot-crm-read.yaml, ../helpers
 Share Credential: github.com/gptscript-ai/gateway-oauth2 as hubspot.crm.read with GPTSCRIPT_API_HUBAPI_COM_BEARER_TOKEN as env and hubspot as integration and "crm.lists.read crm.objects.companies.read crm.objects.contacts.read crm.objects.deals.read sales-email-read" as optional_scope and "oauth" as scope
 
 #!sys.echo
@@ -11,7 +11,7 @@ You can help the user with the following operations in HubSpot:
 - Searching for Companies, Contacts, Deals, Tickets, Tasks
 
 General Instructions:
-- Use the `getMe` tool to identify me in HubSpot. Use that to contextualize requests.
+- Use the current user's ownerId when they ask for resources assigned to them.
 - For operations that require an `Id`, first use a tool to search by name if the user does not provide the Id.
 - When searching by name, always use `CONTAINS_TOKEN` as the filter operator.
 - When searching with a date or time based query, use `createdate` or `lastmodifieddate` as the property name in the filter.

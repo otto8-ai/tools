@@ -1,18 +1,17 @@
 name: getMe
 type: context
-Share Tools: getUnixTimestamp, getAssociationTypeId, github.com/gptscript-ai/context/current-time
+Share Tools: getUnixTimestamp, getAssociationTypeId, createEngagementEmail, createEngagementNote, createAssociation, github.com/gptscript-ai/context/current-time
 description: Gets details about the currently authenticated HubSpot user
 
-#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/getMe.py
 
 ---
 name: getAssociationTypeId
-description: This tool returns the correct Id number for an associationTypeId
-params: from: The name of the object that is being mapped from
-params: to: The name of the object that is being mapped to
-tool: ./associations.yaml
+description: This tool returns the correct Id number and category for a HubSpot associationTypeId
+params: from_object_type: The name of the object that is being mapped from
+params: to_object_type: The name of the object that is being mapped to
 
-Call tool `GetAssociationTypeIdFromObjectToObject` and return the value for `typeId` in the result.
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/getAssociationTypeIdFromObjectToObject.py
 
 ---
 name: getUnixTimestamp
@@ -20,9 +19,44 @@ description: Get the current Unix timestamp in milliseconds
 
 #!/usr/bin/env python3
 
-from datetime import datetime
+import time
 
-current_time = datetime.now()
-unix_timestamp_ms = int(current_time.timestamp() * 1000)
+unix_timestamp_ms = round(time.time() * 1000)
+print(f"The current unix timestamp in milliseconds is {unix_timestamp_ms}")
 
-print(unix_timestamp_ms)
+---
+name: createEngagementEmail
+description: Creates a HubSpot engagement email object and outputs the email id. You must call the `createAssociation` tool to associate the email this creates with another object.
+params: subject: The subject for the email
+params: owner_id: The ownerId of the hubspot user who is creating this email
+params: body: The contents of the email body
+params: timestamp: A unix timestamp in milliseconds, used to show when the engagement email was recorded
+params: from_email: The email address of the user who is sending the email
+params: from_firstname: The first name of the user who is sending the email
+params: from_lastname: The last name of the user who is sending the email
+params: to_firstname: The first name of the user that the email is being sent to
+params: to_lastname: The last name of the user that the email is being sent to
+params: to_email: The address that the email is being sent to
+params: to_cc: (optional) A comma separated list of email addresses to CC on the email
+params: to_bcc: (optional) A comma separated list of email addresses to BCC on the email
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/createEngagementEmail.py
+
+---
+name: createEngagementNote
+description: Creates a HubSpot engagement note object and outputs the note id. You must call the `createAssociation` tool to associate the note this creates with another object.
+params: timestamp: A unix timestamp in milliseconds, used to show when the engagement note was recorded
+params: owner_id: The ownerId of the hubspot user who is creating this note
+params: body: The contents of the note body
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/createEngagementNote.py
+
+---
+name: createAssociation
+description: Creates an association between two objects in HubSpot
+params: from_object_type: the type of the object that is being associated from - such as note, email, contact, company, deal, etc
+params: from_object_id: the ID of the object that is being associated from
+params: to_object_type: the type of the object that is being associated to - such as note, email, contact, company, deal, etc
+params: to_object_id: the ID of the object that is being associated to
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/createAssociation.py

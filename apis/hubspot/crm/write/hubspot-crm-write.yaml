@@ -192,40 +192,6 @@ paths:
         - sales-email-read
       - private_apps:
         - crm.objects.contacts.write
-  /crm/v3/objects/emails:
-    post:
-      tags:
-      - Basic
-      summary: Create
-      description: Create a email with the given properties and return a copy of the
-        object, including the ID. Documentation and examples for creating standard
-        emails is provided.
-      operationId: CreateEngagementEmail
-      parameters: []
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SimplePublicObjectInputForCreate'
-        required: true
-      responses:
-        '201':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SimplePublicObject'
-        default:
-          $ref: '#/components/responses/Error'
-      security:
-      - oauth2_legacy:
-        - sales-email-read
-      - oauth2:
-        - crm.objects.contacts.write
-      - private_apps_legacy:
-        - sales-email-read
-      - private_apps:
-        - crm.objects.contacts.write
   /crm/v3/objects/meetings/{meetingId}:
     delete:
       tags:
@@ -390,36 +356,6 @@ paths:
         required: true
       responses:
         '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SimplePublicObject'
-        default:
-          $ref: '#/components/responses/Error'
-      security:
-      - oauth2:
-        - crm.objects.contacts.write
-      - private_apps:
-        - crm.objects.contacts.write
-  /crm/v3/objects/notes:
-    post:
-      tags:
-      - Basic
-      summary: Create
-      description: Create a note with the given properties and return a copy of the
-        object, including the ID. Documentation and examples for creating standard
-        notes is provided.
-      operationId: CreateEngagementNote
-      parameters: []
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SimplePublicObjectInputForCreate'
-        required: true
-      responses:
-        '201':
           description: successful operation
           content:
             application/json:
