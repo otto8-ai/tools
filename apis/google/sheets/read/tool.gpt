@@ -1,0 +1,6 @@
+name: Read Google Sheets
+Share Credential: github.com/gptscript-ai/gateway-oauth2 as google.sheets.read with GOOGLE_OAUTH_TOKEN as env and google as integration and "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/documents.readonly https://www.googleapis.com/auth/drive.readonly openid" as scope
+Share Tools: readSheet from ../code
+Share Tools: readTablesFromSheet from ../code
+Share Tools: listSheets from ../code
+Type: context
