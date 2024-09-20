@@ -140,3 +140,11 @@ Param: repo: the name of the repository
 Param: issueNumber: the number of the issue to close
 
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js closeIssue
+
+---
+Name: get_star_count
+Description: Return the star count for the specified repo. 
+Param: owner: the owner of the repository
+Param: repo: the name of the repository
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js getStarCount

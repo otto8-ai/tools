@@ -1,5 +1,5 @@
 import { Octokit } from '@octokit/rest';
-import { createIssue, modifyIssue, deleteIssue, searchIssuesAndPRs, createPR, modifyPR, deletePR, addCommentToIssue, addCommentToPR, getIssue, getPR, getIssueComments, getPRComments, listRepos, closeIssue } from './src/tools.js';
+import { createIssue, modifyIssue, deleteIssue, searchIssuesAndPRs, createPR, modifyPR, deletePR, addCommentToIssue, addCommentToPR, getIssue, getPR, getIssueComments, getPRComments, listRepos, closeIssue, getStarCount} from './src/tools.js';
 
 if (process.argv.length !== 3) {
     console.log('Usage: node index.js <command>');
@@ -62,6 +62,9 @@ try {
             break;
         case 'closeIssue':
             await closeIssue(octokit, process.env.OWNER, process.env.REPO, process.env.ISSUENUMBER);
+            break;
+        case 'getStarCount':
+            await getStarCount(octokit, process.env.OWNER, process.env.REPO);
             break;
         default:
             throw new Error(`Unknown command: ${command}`);

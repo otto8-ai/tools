@@ -181,3 +181,11 @@ export async function getPRComments(octokit, owner, repo, prNumber) {
         console.log(`Comment by ${comment.user.login}: ${comment.body} - https://github.com/${owner}/${repo}/pull/${prNumber}#issuecomment-${comment.id}`);
     });
 }
+
+export async function getStarCount(octokit, owner, repo) {
+    const { data } = await octokit.repos.get({
+        owner,
+        repo,
+    });
+    console.log(data.stargazers_count);
+}
