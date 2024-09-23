@@ -1,63 +1,58 @@
 import os
 
-from googleapiclient.errors import HttpError
-
-from auth import client
+from auth import gspread_client
 
 
 def main():
     spreadsheet_id = os.getenv('SPREADSHEET_ID')
-    if spreadsheet_id is None:
-        raise ValueError("spreadsheet_id is not set")
+    spreadsheet_name = os.getenv('SPREADSHEET_NAME')
+    if spreadsheet_id is None and spreadsheet_name is None:
+        raise ValueError("Either spreadsheet_id or spreadsheet_name parameter must be set")
+
     range = os.getenv('RANGE')
     if range is None:
         range = "A:Z"
+
     sheet_name = os.getenv('SHEET_NAME')
     if sheet_name is not None:
         range = f"{sheet_name}!{range}"
 
-    service = client('sheets', 'v4')
+    service = gspread_client()
     try:
-        # Call the Sheets API
-        sheet = service.spreadsheets()
-        result = (
-            sheet.values()
-            .get(spreadsheetId=spreadsheet_id, range=range)
-            .execute()
-        )
-        values = result.get("values", [])
+        spreadsheet = service.open(spreadsheet_name) if spreadsheet_name is not None else service.open_by_key(
+            spreadsheet_id)
+
+        if sheet_name is None:
+            sheet = spreadsheet.sheet1
+        else:
+            sheet = spreadsheet.worksheet(sheet_name)
+
+        if range is None:
+            values = sheet.get_all_values()
+        else:
+            values = sheet.get(range)
 
         if not values:
             print("No data found.")
             return
 
-        # Variables to store the start and end of each table
         tables = []
         current_table = []
-
-        # Iterate over each row in the sheet
         for i, row in enumerate(values):
-            # Check if the row is completely empty
             if not any(cell.strip() for cell in row):
-                # If there's a current table being built, finalize it
                 if current_table:
                     tables.append(current_table)
                     current_table = []
             else:
-                # Non-empty row, so add it to the current table
                 current_table.append(row)
-
-        # If there's a table still being built at the end, add it
         if current_table:
             tables.append(current_table)
-
-        # Output the detected tables
         for index, table in enumerate(tables):
             print(f"Table {index + 1}:")
             for row in table:
                 print(row)
             print("-" * 40)
-    except HttpError as err:
+    except Exception as err:
         print(err)
 
 

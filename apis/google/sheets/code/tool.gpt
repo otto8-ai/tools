@@ -1,40 +1,52 @@
-name: readSheet
-description: Read data from a Google Sheet
-param: spreadsheet_id: The ID of the Spreadsheet
-param: range: The range of cells on the Sheet to read (Optional, by default reads the entire Sheet)
-param: sheet_name: The name of the Sheet page to read from (Optional, by default reads the first Sheet page)
-
-#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/readSheet.py
-
----
-name: readTablesFromSheet
-description: Detect multiple tables and read data from a Google Sheet
-param: spreadsheet_id: The ID of the Spreadsheet
-param: range: The range of cells on the Sheet to read (Optional, by default reads the entire Sheet)
-param: sheet_name: The name of the Sheet page to read from (Optional, by default reads the first Sheet page)
-
-#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/readTablesFromSheet.py
-
----
-Name: listSheets
-Description: List all Google Sheets in current user's Google Drive
-
-#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/listSheets.py
-
----
-Name: createSheet
-Description: Create a new Google Spreadsheet
-param: sheet_name: The name of the spreadsheet to create
-
-#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/createSheet.py
-
----
-name: writeCellsToSheet
-Description: Write data to a Google Sheet. spreadsheet_id is required if the spreadsheet does not belong to the user.
+name: readSpreadsheet
+description: Read data from a Google Sheet. spreadsheet_id is required if the spreadsheet does not belong to the user.
 param: spreadsheet_id: The ID of the Spreadsheet (Optional, if not provided, the spreadsheet_name is required)
 param: spreadsheet_name: The name of the Spreadsheet (Optional, if not provided, the spreadsheet_id is required)
-param: data: The data to write to the Spreadsheet. Columns are separated by commas and rows are separated by newlines. Quote the data in each of the cells and escape any characters that would break csv parsing (e.g. '"A1","B1, ""this is a quoted string"","C1"\n"A2","B2","C2"')
+param: range: The range of cells on the Spreadsheet to read (Optional, by default reads the entire Spreadsheet)
+param: sheet_name: The name of the page to read from (Optional, by default reads the first page)
+param: show_cell_ref: Show the cell reference in the output. Value must be true or false. (Optional, by default shows the cell references)
 
-#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/writeCellsToSheet.py
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/readSpreadsheet.py
 
+---
+name: readTablesFromSpreadsheet
+description: Detect multiple tables and read data from a Google Sheet. spreadsheet_id is required if the spreadsheet does not belong to the user.
+param: spreadsheet_id: The ID of the Spreadsheet (Optional, if not provided, the spreadsheet_name is required)
+param: spreadsheet_name: The name of the Spreadsheet (Optional, if not provided, the spreadsheet_id is required)
+param: range: The range of cells on the Spreadsheet to read (Optional, by default reads the entire Spreadsheet)
+param: sheet_name: The name of the page to read from (Optional, by default reads the first page)
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/readTablesFromSpreadsheet.py
+
+---
+Name: listSpreadsheets
+Description: List all Google Sheets in current user's Google Drive
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/listSpreadsheets.py
+
+---
+Name: createSpreadsheet
+Description: Create a new Google Sheet
+param: spreadsheet_name: The name of the spreadsheet to create
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/createSpreadsheet.py
+
+---
+name: appendCellsToSpreadsheet
+Description: Append data to a Google Sheet. spreadsheet_id is required if the spreadsheet does not belong to the user.
+param: spreadsheet_id: The ID of the Spreadsheet (Optional, if not provided, the spreadsheet_name is required)
+param: spreadsheet_name: The name of the Spreadsheet (Optional, if not provided, the spreadsheet_id is required)
+param: data: The data to append to the Spreadsheet. Columns are separated by commas and rows are separated by newlines. Quote the data in each of the cells and escape any characters that would break csv parsing (e.g. '"A1","B1, ""this is a quoted string"","C1"\n"A2","B2","C2"')
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/appendCellsToSpreadsheet.py
+
+---
+name: updateCellInSpreadsheet
+Description: Update data within a specific cell in a Google Sheet. spreadsheet_id is required if the spreadsheet does not belong to the user.
+param: spreadsheet_id: The ID of the Spreadsheet (Optional, if not provided, the spreadsheet_name is required)
+param: spreadsheet_name: The name of the Spreadsheet (Optional, if not provided, the spreadsheet_id is required)
+param: cell: The cell to update in A1 notation (e.g. A1, B2, C3)
+param: data: The data to update to the Spreadsheet.
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/updateCellInSpreadsheet.py
 
