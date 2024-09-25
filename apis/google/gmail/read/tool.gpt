@@ -1,5 +1,4 @@
 name: Read Gmail
-shared credential: github.com/gptscript-ai/gateway-oauth2 as google.gmail.read with GMAIL_GOOGLE_OAUTH_TOKEN as env and google as integration and "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/gmail.readonly openid" as scope
 Share Tools: listInbox from ../code
 Share Tools: readEmail from ../code
 Share Tools: searchEmails from ../code
