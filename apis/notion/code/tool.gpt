@@ -56,3 +56,14 @@ Args: id: the ID of the database to add the row to
 Args: properties: a JSON string containing all of the key-value pairs for the new row
 
 #!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js addDatabaseRow
+
+---
+name: updateDatabaseRow
+Description: Updates an existing row in a database in Notion. Call getDatabaseProperties prior to this to get the properties of the database.
+Credential: github.com/gptscript-ai/gateway-oauth2 as notion.write with NOTION_TOKEN as env and notion as integration
+Share Context: addDatabaseRowInstructions from context.gpt
+Args: id: the ID of the database that contains the row
+Args: rowId: the ID of the row to update
+Args: properties: a JSON string containing all of the key-value pairs to update
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js updateDatabaseRow

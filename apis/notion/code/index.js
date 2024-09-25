@@ -1,6 +1,6 @@
 import {APIResponseError, Client} from "@notionhq/client"
 import {createPage, printPageProperties, recursivePrintChildBlocks} from "./src/pages.js"
-import {addDatabaseRow, describeProperty, printDatabaseRow} from "./src/database.js";
+import {addDatabaseRow, describeProperty, printDatabaseRow, updateDatabaseRow} from "./src/database.js";
 import {printSearchResults} from "./src/search.js";
 import {listUsers} from "./src/users.js";
 
@@ -31,11 +31,17 @@ async function main() {
             case "addDatabaseRow":
                 await addDatabaseRow(notion, process.env.ID, JSON.parse(process.env.PROPERTIES))
                 break
+            case "updateDatabaseRow":
+                await updateDatabaseRow(notion, process.env.ID, process.env.ROWID, JSON.parse(process.env.PROPERTIES))
+                break
             case "getDatabaseProperties":
                 const retrieval = await notion.databases.retrieve({database_id: process.env.ID})
                 console.log(`Properties for database ${retrieval.title[0].plain_text}:`)
                 for (const [name, property] of Object.entries(retrieval.properties)) {
-                    console.log(describeProperty(name, property))
+                    const description = describeProperty(name, property)
+                    if (description !== "") {
+                        console.log(description)
+                    }
                 }
                 break
             case "getDatabase":
@@ -58,7 +64,7 @@ async function main() {
         if (error instanceof APIResponseError) {
             console.log(error.message)
         } else {
-            console.log("Got an unknown error:", error)
+            console.log("Got an error:", error.message)
         }
     }
 }

@@ -2,13 +2,9 @@ import {richTextArrayToString} from "./pages.js";
 
 export async function printDatabaseRow(client, row) {
     let title = ""
-    let result = ""
+    let result = `Row ID: ${row.id} |`
     for (const [propertyName, property] of Object.entries(row.properties)) {
-        if (property.type === "title") {
-            title = `| ${richTextArrayToString(property.title)}(ID: ${row.id}) |`
-        } else {
-            result += ` ${propertyName}: ${await getPropertyString(client, property)} |`
-        }
+        result += ` ${propertyName}: ${await getPropertyString(client, property)} |`
     }
     console.log(title + result)
 }
@@ -140,27 +136,13 @@ export function describeProperty(name, property) {
         case "email":
             return `${name} - email (string)`
         case "files":
-            // TODO
-            break
-        case "formula":
-            switch (property.formula.type) {
-                case "number":
-                    return `${name} - formula (number)`
-                case "string":
-                    return `${name} - formula (string)`
-                case "date":
-                    return `${name} - formula (date)`
-                case "boolean":
-                    return `${name} - formula (boolean)`
-                default:
-                    return `${name} - formula (${property.formula.type})` // shouldn't be possible
-            }
+            return `${name} - files (list of file URLs)`
         case "multi_select":
             return `${name} - multi-select (list) - options: ${property.multi_select.options.map(ms => ms.name).join(", ")}`
         case "number":
             return `${name} - number (number)`
         case "people":
-            return `${name} - people (list)`
+            return `${name} - people (list of user IDs)`
         case "phone_number":
             return `${name} - phone number (string)`
         case "rich_text":
@@ -174,7 +156,7 @@ export function describeProperty(name, property) {
         case "url":
             return `${name} - url (string)`
         default:
-            return `${name} - ${property.type}`
+            return ""
     }
 }
 
@@ -210,19 +192,32 @@ async function getPageNameByID(client, id) {
     return response.properties.Name.title[0].plain_text
 }
 
-export async function addDatabaseRow(client, databaseID, properties) {
-    const retrieval = await client.databases.retrieve({database_id: databaseID})
+async function getPropertyObjects(client, databaseID, properties) {
     let props = {}
+    const retrieval = await client.databases.retrieve({database_id: databaseID})
     for (const [name, property] of Object.entries(properties)) {
         const propertyType = retrieval.properties[name].type
-        let subType = ""
-        if (propertyType === "formula") {
-            subType = retrieval.properties[name].formula.type
+        const prop = propertyToObject(propertyType, property)
+        if (prop) {
+            props[name] = prop
         }
-
-        props[name] = propertyToObject(propertyType, subType, property)
     }
+    return props
+}
 
+export async function updateDatabaseRow(client, databaseID, rowID, properties) {
+    const props = await getPropertyObjects(client, databaseID, properties)
+    const response = await client.pages.update({
+        page_id: rowID,
+        properties: {
+            ...props
+        }
+    })
+    console.log(`Updated database entry with ID: ${response.id}`)
+}
+
+export async function addDatabaseRow(client, databaseID, properties) {
+    const props = await getPropertyObjects(client, databaseID, properties)
     const response = await client.pages.create({
         parent: {
             type: "database_id",
@@ -235,7 +230,7 @@ export async function addDatabaseRow(client, databaseID, properties) {
     console.log(`Created database entry with ID: ${response.id}`)
 }
 
-function propertyToObject(type, subType, value) {
+function propertyToObject(type, value) {
     switch (type) {
         case "checkbox":
             return {checkbox: value}
@@ -244,11 +239,31 @@ function propertyToObject(type, subType, value) {
         case "email":
             return {email: value}
         case "files":
-            // TODO
-            break
-        case "formula":
-            return {formula: {type: subType, subType: value}}
+            // Check to make sure that value is an array of strings.
+            // If we let the Notion API respond with its error, it will confuse the LLM, so we want to catch the invalid input here.
+            if (!Array.isArray(value) || value.some(v => typeof v !== "string")) {
+                throw new Error("Files property must be an array of file URLs")
+            }
+
+            let files = {files: []}
+            for (const f of value) {
+                try {
+                    new URL(f)
+                } catch (e) {
+                    throw new Error(`File URL ${f} is not a valid URL`)
+                }
+
+                const urlPieces = f.split("/")
+                files.files.push({name: urlPieces[urlPieces.length - 1], type: "external", external: {url: f}})
+            }
+            return files
         case "multi_select":
+            // Check to make sure that value is an array of strings.
+            // If we let the Notion API respond with its error, it will confuse the LLM, so we want to catch the invalid input here.
+            if (!Array.isArray(value) || value.some(v => typeof v !== "string")) {
+                throw new Error("Multi-select property must be an array of strings")
+            }
+
             let val = {multi_select: []}
             for (const v of value) {
                 val.multi_select.push({name: v})
@@ -257,6 +272,13 @@ function propertyToObject(type, subType, value) {
         case "number":
             return {number: value}
         case "people":
+            // Check to make sure that value is an array of strings.
+            // If we let the Notion API respond with its error, it will confuse the LLM, so we want to catch the invalid input here.
+            // All user IDs include five sections separated by -, so we look for that here too.
+            if (!Array.isArray(value) || value.some(v => typeof v !== "string" || v.split("-").length !== 5)) {
+                throw new Error("People property must be an array of user ID strings")
+            }
+
             let people = {people: []}
             for (const p of value) {
                 people.people.push({object: "user", id: p})
