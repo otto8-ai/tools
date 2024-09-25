@@ -1,7 +1,8 @@
 import {APIResponseError, Client} from "@notionhq/client"
 import {createPage, printPageProperties, recursivePrintChildBlocks} from "./src/pages.js"
-import {printDatabaseRow} from "./src/database.js";
+import {addDatabaseRow, describeProperty, printDatabaseRow} from "./src/database.js";
 import {printSearchResults} from "./src/search.js";
+import {listUsers} from "./src/users.js";
 
 if (process.argv.length !== 3) {
     console.error('Usage: node index.js <command>')
@@ -16,6 +17,9 @@ const notion = new Client({auth: token})
 async function main() {
     try {
         switch (command) {
+            case "listUsers":
+                await listUsers(notion, process.env.MAX)
+                break
             case "search":
                 printSearchResults(await notion.search({query: process.env.QUERY}))
                 break
@@ -23,6 +27,16 @@ async function main() {
                 await printPageProperties(notion, process.env.ID)
                 console.log("Page Contents:")
                 await recursivePrintChildBlocks(notion, process.env.ID)
+                break
+            case "addDatabaseRow":
+                await addDatabaseRow(notion, process.env.ID, JSON.parse(process.env.PROPERTIES))
+                break
+            case "getDatabaseProperties":
+                const retrieval = await notion.databases.retrieve({database_id: process.env.ID})
+                console.log(`Properties for database ${retrieval.title[0].plain_text}:`)
+                for (const [name, property] of Object.entries(retrieval.properties)) {
+                    console.log(describeProperty(name, property))
+                }
                 break
             case "getDatabase":
                 const response = await notion.databases.query({database_id: process.env.ID})
@@ -44,7 +58,7 @@ async function main() {
         if (error instanceof APIResponseError) {
             console.log(error.message)
         } else {
-            console.log("Got an unknown error")
+            console.log("Got an unknown error:", error)
         }
     }
 }

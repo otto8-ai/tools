@@ -131,6 +131,53 @@ export async function getPropertyString(client, property) {
     return result
 }
 
+export function describeProperty(name, property) {
+    switch (property.type) {
+        case "checkbox":
+            return `${name} - checkbox (boolean)`
+        case "date":
+            return `${name} - date (date)`
+        case "email":
+            return `${name} - email (string)`
+        case "files":
+            // TODO
+            break
+        case "formula":
+            switch (property.formula.type) {
+                case "number":
+                    return `${name} - formula (number)`
+                case "string":
+                    return `${name} - formula (string)`
+                case "date":
+                    return `${name} - formula (date)`
+                case "boolean":
+                    return `${name} - formula (boolean)`
+                default:
+                    return `${name} - formula (${property.formula.type})` // shouldn't be possible
+            }
+        case "multi_select":
+            return `${name} - multi-select (list) - options: ${property.multi_select.options.map(ms => ms.name).join(", ")}`
+        case "number":
+            return `${name} - number (number)`
+        case "people":
+            return `${name} - people (list)`
+        case "phone_number":
+            return `${name} - phone number (string)`
+        case "rich_text":
+            return `${name} - string (string)`
+        case "select":
+            return `${name} - select (string) - options: ${property.select.options.map(o => o.name).join(", ")}`
+        case "status":
+            return `${name} - status (string) - options: ${property.status.options.map(o => o.name).join(", ")}`
+        case "title":
+            return `${name} - title (string)`
+        case "url":
+            return `${name} - url (string)`
+        default:
+            return `${name} - ${property.type}`
+    }
+}
+
 function fileToString(file) {
     let result = ""
     if (file.type === "file") {
@@ -161,4 +208,73 @@ function dateToString(date) {
 async function getPageNameByID(client, id) {
     const response = await client.pages.retrieve({page_id: id})
     return response.properties.Name.title[0].plain_text
+}
+
+export async function addDatabaseRow(client, databaseID, properties) {
+    const retrieval = await client.databases.retrieve({database_id: databaseID})
+    let props = {}
+    for (const [name, property] of Object.entries(properties)) {
+        const propertyType = retrieval.properties[name].type
+        let subType = ""
+        if (propertyType === "formula") {
+            subType = retrieval.properties[name].formula.type
+        }
+
+        props[name] = propertyToObject(propertyType, subType, property)
+    }
+
+    const response = await client.pages.create({
+        parent: {
+            type: "database_id",
+            database_id: databaseID
+        },
+        properties: {
+            ...props
+        }
+    })
+    console.log(`Created database entry with ID: ${response.id}`)
+}
+
+function propertyToObject(type, subType, value) {
+    switch (type) {
+        case "checkbox":
+            return {checkbox: value}
+        case "date":
+            return {date: value}
+        case "email":
+            return {email: value}
+        case "files":
+            // TODO
+            break
+        case "formula":
+            return {formula: {type: subType, subType: value}}
+        case "multi_select":
+            let val = {multi_select: []}
+            for (const v of value) {
+                val.multi_select.push({name: v})
+            }
+            return val
+        case "number":
+            return {number: value}
+        case "people":
+            let people = {people: []}
+            for (const p of value) {
+                people.people.push({object: "user", id: p})
+            }
+            return people
+        case "phone_number":
+            return {phone_number: value}
+        case "rich_text":
+            return {rich_text: [{type: "text", text: {content: value}}]}
+        case "select":
+            return {select: {name: value}}
+        case "status":
+            return {status: {name: value}}
+        case "title":
+            return {title: [{type: "text", text: {content: value}}]}
+        case "url":
+            return {url: value}
+        default:
+            return {}
+    }
 }
