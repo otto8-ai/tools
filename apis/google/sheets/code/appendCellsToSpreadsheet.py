@@ -3,6 +3,7 @@ import io
 import os
 
 from gspread.exceptions import APIError
+from gspread.utils import ValueInputOption
 
 from auth import gspread_client
 
@@ -21,13 +22,12 @@ def main():
         data_csv = csv.reader(data_csv_io)
         data = [row for row in data_csv]
 
-
     service = gspread_client()
     try:
         spreadsheet = service.open(spreadsheet_name) if spreadsheet_name is not None else service.open_by_key(
             spreadsheet_id)
         sheet = spreadsheet.sheet1
-        sheet.append_rows(data)
+        sheet.append_rows(data, value_input_option=ValueInputOption.raw)
     except APIError as err:
         print(err)
 
