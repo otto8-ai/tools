@@ -1,0 +1,49 @@
+Name: listWorkbooks
+Description: Lists all workbooks available to the user.
+Credential: github.com/gptscript-ai/gateway-oauth2 as excel.read with GPTSCRIPT_MICROSOFT_EXCEL_TOKEN as env and microsoft365 as integration and "Files.Read Files.Read.All User.Read offline_access" as scope
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listWorkbooks
+
+---
+Name: listWorksheets
+Description: Lists all worksheets available in a workbook.
+Credential: github.com/gptscript-ai/gateway-oauth2 as excel.read with GPTSCRIPT_MICROSOFT_EXCEL_TOKEN as env and microsoft365 as integration and "Files.Read Files.Read.All User.Read offline_access" as scope
+Param: workbook_id: ID of the workbook to list worksheets from
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listWorksheets
+
+---
+Name: getWorksheetData
+Description: Get the data of a worksheet in a workbook.
+Credential: github.com/gptscript-ai/gateway-oauth2 as excel.read with GPTSCRIPT_MICROSOFT_EXCEL_TOKEN as env and microsoft365 as integration and "Files.Read Files.Read.All User.Read offline_access" as scope
+Param: workbook_id: ID of the workbook to get worksheet data from
+Param: worksheet_id: ID of the worksheet to get data from
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool getWorksheetData
+
+---
+Name: addWorksheetRow
+Description: Adds a row to an existing worksheet in a workbook.
+Credential: github.com/gptscript-ai/gateway-oauth2 as excel.write with GPTSCRIPT_MICROSOFT_EXCEL_TOKEN as env and microsoft365 as integration and "Files.Read Files.ReadWrite Files.Read.All User.Read offline_access" as scope
+Param: workbook_id: ID of the workbook to add row to
+Param: worksheet_id: ID of the worksheet to add row to
+Param: contents: comma-separated values to add as a new row
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool addWorksheetRow
+
+---
+Name: createWorkbook
+Description: Creates a new workbook file at the root of the user's OneDrive.
+Credential: github.com/gptscript-ai/gateway-oauth2 as excel.write with GPTSCRIPT_MICROSOFT_EXCEL_TOKEN as env and microsoft365 as integration and "Files.Read Files.ReadWrite Files.Read.All User.Read offline_access" as scope
+Param: name: Name of the new workbook file
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool createWorkbook
+
+---
+Name: createWorksheet
+Description: Creates a new worksheet in a workbook.
+Credential: github.com/gptscript-ai/gateway-oauth2 as excel.write with GPTSCRIPT_MICROSOFT_EXCEL_TOKEN as env and microsoft365 as integration and "Files.Read Files.ReadWrite Files.Read.All User.Read offline_access" as scope
+Param: workbook_id: ID of the workbook to create worksheet in
+Param: name: Name of the new worksheet
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool createWorksheet
