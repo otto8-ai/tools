@@ -41,7 +41,7 @@ Description: Append data to a Google Sheet. spreadsheet_id is required if the sp
 credential: github.com/gptscript-ai/gateway-oauth2 as google.sheets.write with SHEETS_GOOGLE_OAUTH_TOKEN as env and google-sheets as integration and "https://www.googleapis.com/auth/userinfo.email openid https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/documents https://www.googleapis.com/auth/drive" as scope
 param: spreadsheet_id: The ID of the Spreadsheet (Optional, if not provided, the spreadsheet_name is required)
 param: spreadsheet_name: The name of the Spreadsheet (Optional, if not provided, the spreadsheet_id is required)
-param: data: The data to append to the Spreadsheet. Columns are separated by commas and rows are separated by newlines. The data in each cell must be wrapped in double quotes and escape any characters that would break csv parsing (e.g. '"A1","B1, ""this is a quoted string"","C1"\n"A2","B2","C2"')
+param: data: The data to append to the Spreadsheet. Columns are separated by commas and rows are separated by newlines. Newlines inside a cell should be represented by CR LF characters. The data in each cell must be wrapped in double quotes and escape any characters that would break csv parsing (e.g. '"A1","B1, ""this is a quoted string""","C1"\n"A2","B2","C2"\n"A3","B3","C3\r\nwith newline"')
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/appendCellsToSpreadsheet.py
 
