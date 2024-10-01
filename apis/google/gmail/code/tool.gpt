@@ -26,7 +26,7 @@ param: max_results: Maximum number of emails to list (Optional: Default will lis
 ---
 name: sendEmail
 description: Send an email from the user's Gmail account
-credential: github.com/gptscript-ai/gateway-oauth2 as google.gmail.write with GMAIL_GOOGLE_OAUTH_TOKEN as env and google-gmail as integration and "https://www.googleapis.com/auth/userinfo.email openid https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.compose" as scope
+credential: github.com/gptscript-ai/gateway-oauth2 as google.gmail.write with GMAIL_GOOGLE_OAUTH_TOKEN as env and google-gmail as integration and "https://www.googleapis.com/auth/userinfo.email openid https://www.googleapis.com/auth/userinfo.profile https://mail.google.com/ https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.compose" as scope
 param: to_emails: A comma separated list of email addresses to send the email to
 param: cc_emails: A comma separated list of email addresses to cc the email to (Optional)
 param: bcc_emails: A comma separated list of email addresses to bcc the email to (Optional)
@@ -38,7 +38,7 @@ param: message: Message body of the email
 ---
 name: deleteEmail
 description: Delete an email in a user's Gmail account.
-credential: github.com/gptscript-ai/gateway-oauth2 as google.gmail.write with GMAIL_GOOGLE_OAUTH_TOKEN as env and google-gmail as integration and "https://www.googleapis.com/auth/userinfo.email openid https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.compose" as scope
+credential: github.com/gptscript-ai/gateway-oauth2 as google.gmail.write with GMAIL_GOOGLE_OAUTH_TOKEN as env and google-gmail as integration and "https://www.googleapis.com/auth/userinfo.email openid https://www.googleapis.com/auth/userinfo.profile https://mail.google.com/ https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.compose" as scope
 param: email_id: The ID of the email to delete
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/deleteEmail.py
@@ -46,7 +46,7 @@ param: email_id: The ID of the email to delete
 ---
 name: createDraft
 description: Create a draft email in a user's Gmail account
-credential: github.com/gptscript-ai/gateway-oauth2 as google.gmail.write with GMAIL_GOOGLE_OAUTH_TOKEN as env and google-gmail as integration and "https://www.googleapis.com/auth/userinfo.email openid https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.compose" as scope
+credential: github.com/gptscript-ai/gateway-oauth2 as google.gmail.write with GMAIL_GOOGLE_OAUTH_TOKEN as env and google-gmail as integration and "https://www.googleapis.com/auth/userinfo.email openid https://www.googleapis.com/auth/userinfo.profile https://mail.google.com/ https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.compose" as scope
 param: to_emails: A comma separated list of email addresses to send the email to
 param: cc_emails: A comma separated list of email addresses to cc the email to (Optional)
 param: bcc_emails: A comma separated list of email addresses to bcc the email to (Optional)
@@ -58,7 +58,7 @@ param: message: Message body of the email
 ---
 name: updateDraft
 description: Update a draft email in a user's Gmail account. Make sure you call readEmail to get the contents of the current draft before updating the draft.
-credential: github.com/gptscript-ai/gateway-oauth2 as google.gmail.write with GMAIL_GOOGLE_OAUTH_TOKEN as env and google-gmail as integration and "https://www.googleapis.com/auth/userinfo.email openid https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.compose" as scope
+credential: github.com/gptscript-ai/gateway-oauth2 as google.gmail.write with GMAIL_GOOGLE_OAUTH_TOKEN as env and google-gmail as integration and "https://www.googleapis.com/auth/userinfo.email openid https://www.googleapis.com/auth/userinfo.profile https://mail.google.com/ https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.compose" as scope
 param: draft_id: The ID of the draft email to update
 param: to_emails: A comma separated list of email addresses to send the email to
 param: cc_emails: A comma separated list of email addresses to cc the email to (Optional)
@@ -71,7 +71,7 @@ param: message: Message body of the email
 ---
 name: deleteDraft
 description: Delete a draft email in a user's Gmail account.
-credential: github.com/gptscript-ai/gateway-oauth2 as google.gmail.write with GMAIL_GOOGLE_OAUTH_TOKEN as env and google-gmail as integration and "https://www.googleapis.com/auth/userinfo.email openid https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.compose" as scope
+credential: github.com/gptscript-ai/gateway-oauth2 as google.gmail.write with GMAIL_GOOGLE_OAUTH_TOKEN as env and google-gmail as integration and "https://www.googleapis.com/auth/userinfo.email openid https://www.googleapis.com/auth/userinfo.profile https://mail.google.com/ https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.compose" as scope
 param: draft_id: The ID of the draft email to delete
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/deleteDraft.py
@@ -79,7 +79,7 @@ param: draft_id: The ID of the draft email to delete
 ---
 name: sendDraft
 description: Send a draft email in a user's Gmail account. Assumes the draft email has already been created and has all the required fields filled out.
-credential: github.com/gptscript-ai/gateway-oauth2 as google.gmail.write with GMAIL_GOOGLE_OAUTH_TOKEN as env and google-gmail as integration and "https://www.googleapis.com/auth/userinfo.email openid https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.compose" as scope
+credential: github.com/gptscript-ai/gateway-oauth2 as google.gmail.write with GMAIL_GOOGLE_OAUTH_TOKEN as env and google-gmail as integration and "https://www.googleapis.com/auth/userinfo.email openid https://www.googleapis.com/auth/userinfo.profile https://mail.google.com/ https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.compose" as scope
 param: draft_id: The ID of the draft email to send
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/sendDraft.py
