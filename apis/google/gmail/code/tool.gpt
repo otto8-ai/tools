@@ -25,15 +25,31 @@ param: max_results: Maximum number of emails to list (Optional: Default will lis
 
 ---
 name: sendEmail
-description: Send an email from the user's Gmail account
+description: Send an email from the user's Gmail account.
+context: forwardEmailContext
 credential: github.com/gptscript-ai/gateway-oauth2 as google.gmail.write with GMAIL_GOOGLE_OAUTH_TOKEN as env and google-gmail as integration and "https://www.googleapis.com/auth/userinfo.email openid https://www.googleapis.com/auth/userinfo.profile https://mail.google.com/ https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.compose" as scope
 param: to_emails: A comma separated list of email addresses to send the email to
 param: cc_emails: A comma separated list of email addresses to cc the email to (Optional)
 param: bcc_emails: A comma separated list of email addresses to bcc the email to (Optional)
-param: subject: Subject of the email
-param: message: Message body of the email
+param: subject: Subject of the email.
+param: message: Message body of the email.
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/sendEmail.py
+
+---
+name: forwardEmailContext
+type: context
+
+#!sys.echo
+
+## Instructions for sending a forwarded email with the sendEmail tool
+When forwarding an email, retrieve the contents of the original email using the readEmail tool.
+Call the `sendEmail` tool using this data with the following modifications:
+- prepend `Fwd: ` to the subject
+- add the original message as a quoted reply in the message body, with the following template prepended to the original message: `---------- Forwarded message ---------\nFrom: <original_sender>\nDate: <original_date>\nSubject: <original_subject>\nTo: <original_recipient>`
+- if the user has an additional message to add, include it above the quoted reply
+
+## End of instructions for sending a forwarded email with the sendEmail tool
 
 ---
 name: deleteEmail
