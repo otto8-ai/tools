@@ -82,9 +82,9 @@ def display_list_messages(service, messages: list):
             '%Y-%m-%d %H:%M:%S')
 
         for header in msg['payload']['headers']:
-            if header['name'] == 'Subject':
+            if header['name'].lower() == 'subject':
                 subject = header['value']
-            if header['name'] == 'From':
+            if header['name'].lower() == 'from':
                 sender = header['value']
 
         print(f"ID: {msg_id} From: {sender}, Subject: {subject}, Received: {date}")
