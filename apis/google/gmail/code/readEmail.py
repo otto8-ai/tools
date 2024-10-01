@@ -23,6 +23,7 @@ def main():
 
         msg = service.users().messages().get(userId='me', id=email_id, format='full').execute()
         body = get_email_body(msg)
+        attachment = has_attachment(msg)
 
         subject = None
         sender = None
@@ -34,9 +35,27 @@ def main():
 
         print(f'From: {sender}, Subject: {subject}')
         print(f'Body:\n{body}')
+        if attachment:
+            print('Email has attachment(s)')
+            link='https://mail.google.com/mail/u/0/#inbox/' + email_id
+            print(f'Link: {link}')
 
     except HttpError as err:
         print(err)
+
+
+def has_attachment(message):
+    def parse_parts(parts):
+        for part in parts:
+            if part['filename'] and part['body'].get('attachmentId'):
+                return True
+        return False
+
+    parts = message['payload'].get('parts', [])
+    if parts:
+        return parse_parts(parts)
+    else:
+        return False
 
 
 def get_email_body(message):
