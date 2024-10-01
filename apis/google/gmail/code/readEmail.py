@@ -1,3 +1,4 @@
+import base64
 import os
 
 from googleapiclient.errors import HttpError
@@ -20,7 +21,7 @@ def main():
                 raise ValueError(f"No emails found with subject: {email_subject}")
             email_id = response['messages'][0]['id']
 
-        msg = service.users().messages().get(userId='me', id=email_id).execute()
+        msg = service.users().messages().get(userId='me', id=email_id, format='full').execute()
         body = get_email_body(msg)
 
         subject = None
@@ -39,15 +40,21 @@ def main():
 
 
 def get_email_body(message):
-    import base64
+    def parse_parts(parts):
+        for part in parts:
+            mime_type = part['mimeType']
+            if mime_type == 'text/plain' or mime_type == 'text/html':
+                body_data = part['body']['data']
+                decoded_body = base64.urlsafe_b64decode(body_data).decode('utf-8')
+                return decoded_body
+            if mime_type == 'multipart/alternative' or mime_type == 'multipart/mixed':
+                return parse_parts(part['parts'])
+        return None
+
     try:
-        if 'parts' in message['payload']:
-            for part in message['payload']['parts']:
-                mime_type = part['mimeType']
-                if mime_type == 'text/plain' or mime_type == 'text/html':
-                    body_data = part['body']['data']
-                    decoded_body = base64.urlsafe_b64decode(body_data).decode('utf-8')
-                    return decoded_body
+        parts = message['payload'].get('parts', [])
+        if parts:
+            return parse_parts(parts)
         else:
             body_data = message['payload']['body']['data']
             decoded_body = base64.urlsafe_b64decode(body_data).decode('utf-8')
