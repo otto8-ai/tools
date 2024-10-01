@@ -1,6 +1,7 @@
 Name: Read Notion
 Description: Provides access to the Notion API (read-only)
-Share Credential: github.com/gptscript-ai/gateway-oauth2 as notion.read with NOTION_TOKEN as env and notion as integration
-Share Tools: getPage from github.com/gptscript-ai/tools/apis/notion/code
-Share Tools: getDatabase from github.com/gptscript-ai/tools/apis/notion/code
-Share Tools: search from github.com/gptscript-ai/tools/apis/notion/code
+Share Tools: getPage from ../code
+Share Tools: getDatabase from ../code
+Share Tools: getDatabaseProperties from ../code
+Share Tools: search from ../code
+Share Tools: listUsers from ../code

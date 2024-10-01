@@ -11,6 +11,12 @@ export function printSearchResults(res) {
                 break
         }
     }
+
+    if (pages.length === 0 && databases.length === 0) {
+        console.log("No results found")
+        return
+    }
+
     if (pages.length > 0) {
         printPages(pages)
     }

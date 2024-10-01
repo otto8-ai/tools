@@ -1,0 +1,18 @@
+name: addDatabaseRowInstructions
+type: context
+
+#!sys.echo
+
+## Instructions for using the addDatabaseRow or updateDatabaseRow tool
+
+When you set the properties argument, the properties you provide must match the properties of the database you are adding a row to.
+You MUST call the getDatabaseProperties tool to get the properties of a database before adding or updating a row.
+There are several types of properties, but each one is ultimately one of five basic types: string, number, boolean, list, and date.
+
+Strings, numbers, and booleans are all their normal types in JSON. List is an array of strings.
+Date is an object with a start key that is an ISO 8601 date string and an optional end key that is also an ISO 8601 date string.
+
+Here is a full example of the properties JSON:
+{"Title": "my database entry", "Quantity": 3, "In stock": true, "Tags": ["tag1", "tag2"], "Due date": {"start": "2020-12-08T12:00:00Z"}}
+
+## End of instructions for addDatabaseRow or updateDatabaseRow tool
