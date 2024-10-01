@@ -28,9 +28,9 @@ def main():
         subject = None
         sender = None
         for header in msg['payload']['headers']:
-            if header['name'] == 'Subject':
+            if header['name'].lower() == 'subject':
                 subject = header['value']
-            if header['name'] == 'From':
+            if header['name'].lower() == 'from':
                 sender = header['value']
 
         print(f'From: {sender}, Subject: {subject}')

@@ -12,7 +12,7 @@ def main():
 
     service = client('gmail', 'v1')
     try:
-        service.users().messages().delete(userId='me', id=email_id).execute()
+        service.users().messages().trash(userId='me', id=email_id).execute()
         print(f"Email Id: {email_id} deleted successfully!")
     except HttpError as err:
         print(err)
