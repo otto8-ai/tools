@@ -1,6 +1,6 @@
-Tools: listWorkbooks from ../code
-Tools: listWorksheets from ../code
-Tools: getWorksheetData from ../code
+Share Tools: listWorkbooks from ../code
+Share Tools: listWorksheets from ../code
+Share Tools: getWorksheetData from ../code
 Type: context
 
 #!sys.echo
