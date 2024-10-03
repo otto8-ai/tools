@@ -16,8 +16,9 @@ elif parsed.netloc == 'youtu.be':
 else:
     raise ValueError(f"Invalid YouTube URL: {video_url}")
 
-transcript_list = YouTubeTranscriptApi.get_transcript(video_id)
-
-transcript_text = ' '.join(item['text'] for item in transcript_list)
-
-print(transcript_text)
+try:
+    transcript_list = YouTubeTranscriptApi.get_transcript(video_id)
+    transcript_text = ' '.join(item['text'] for item in transcript_list)
+    print(transcript_text)
+except Exception as e:
+    print(f"Error: {e}")
