@@ -1,6 +1,5 @@
 Name: Slack
 Description: Provides access to the Slack API
-Share Credential: github.com/gptscript-ai/gateway-oauth2 as slack.write with SLACK_TOKEN as env and slack as integration and "channels:history groups:history im:history mpim:history channels:read files:read im:read search:read team:read users:read groups:read chat:write groups:write mpim:write im:write" as scope
 Share Tools: * from github.com/gptscript-ai/tools/apis/slack/code
 Type: context
 
