@@ -3,6 +3,7 @@ import urllib.parse as urlparse
 from urllib.parse import parse_qs
 
 from youtube_transcript_api import YouTubeTranscriptApi
+from youtube_transcript_api._errors import TranscriptsDisabled, NoTranscriptAvailable
 
 video_url = os.getenv('VIDEO_URL')
 if video_url is None:
@@ -20,5 +21,9 @@ try:
     transcript_list = YouTubeTranscriptApi.get_transcript(video_id)
     transcript_text = ' '.join(item['text'] for item in transcript_list)
     print(transcript_text)
+except NoTranscriptAvailable:
+    print(f"Error: No transcript was available for video {video_id}")
+except TranscriptsDisabled:
+    print(f"Error: Transcripts are disabled for video {video_id}")
 except Exception as e:
     print(f"Error: {e}")
