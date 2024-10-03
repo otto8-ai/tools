@@ -1,6 +1,5 @@
 Name: Read Slack
 Description: Provides access to the Slack API (read-only)
-Share Credential: github.com/gptscript-ai/gateway-oauth2 as slack.read with SLACK_TOKEN as env and slack as integration and "channels:history groups:history im:history mpim:history channels:read files:read im:read search:read team:read users:read groups:read" as scope
 Share Tools: list_channels from github.com/gptscript-ai/tools/apis/slack/code
 Share Tools: search_channels from github.com/gptscript-ai/tools/apis/slack/code
 Share Tools: list_users from github.com/gptscript-ai/tools/apis/slack/code
