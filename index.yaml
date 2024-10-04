@@ -1,0 +1,31 @@
+tools:
+  excel: 
+    reference: github.com/gptscript-ai/tools/apis/excel/code
+    all: true
+  slack: 
+    reference: github.com/gptscript-ai/tools/apis/slack/code
+    all: true
+  notion: 
+    reference: github.com/gptscript-ai/tools/apis/notion/code
+    all: true
+  google: 
+    reference: github.com/gptscript-ai/tools/apis/google/gmail/code
+    all: true
+  google: 
+    reference: github.com/gptscript-ai/tools/apis/google/sheets/code
+    all: true
+  google: 
+    reference: github.com/gptscript-ai/tools/apis/google/youtube/code
+    all: true
+  outlook: 
+    reference: github.com/gptscript-ai/tools/apis/outlook/mail/code
+    all: true
+  outlook: 
+    reference: github.com/gptscript-ai/tools/apis/outlook/calendar/code
+    all: true
+  github: 
+    reference: github.com/gptscript-ai/tools/apis/github/code
+    all: true
+
+# Add one day... Same format as above
+stepTemplates: {}
