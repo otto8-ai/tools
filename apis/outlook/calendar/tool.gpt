@@ -1,20 +1,25 @@
 Name: listCalendars
 Description: List all calendars available to the user.
-Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.calendar.read with GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN as env and microsoft365 as integration and "Calendars.Read Calendars.Read.Shared Group.Read.All GroupMember.Read.All User.Read offline_access" as scope
+Share Context: Outlook Calendar Context
+Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.calendar.manage with GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN as env and microsoft365 as integration and "Calendars.Read Calendars.Read.Shared Calendars.ReadWrite Calendars.ReadWrite.Shared Group.Read.All Group.ReadWrite.All GroupMember.Read.All User.Read offline_access" as scope
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listCalendars
 
 ---
 Name: listEventsToday
 Description: List all events for today in all calendars available to the user.
-Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.calendar.read with GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN as env and microsoft365 as integration and "Calendars.Read Calendars.Read.Shared Group.Read.All GroupMember.Read.All User.Read offline_access" as scope
+Share Context: Outlook Calendar Context
+Share Context: github.com/gptscript-ai/context/current-time
+Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.calendar.manage with GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN as env and microsoft365 as integration and "Calendars.Read Calendars.Read.Shared Calendars.ReadWrite Calendars.ReadWrite.Shared Group.Read.All Group.ReadWrite.All GroupMember.Read.All User.Read offline_access" as scope
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listEventsToday
 
 ---
 Name: listEvents
 Description: List all events in the given time frame in all calendars available to the user.
-Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.calendar.read with GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN as env and microsoft365 as integration and "Calendars.Read Calendars.Read.Shared Group.Read.All GroupMember.Read.All User.Read offline_access" as scope
+Share Context: Outlook Calendar Context
+Share Context: github.com/gptscript-ai/context/current-time
+Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.calendar.manage with GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN as env and microsoft365 as integration and "Calendars.Read Calendars.Read.Shared Calendars.ReadWrite Calendars.ReadWrite.Shared Group.Read.All Group.ReadWrite.All GroupMember.Read.All User.Read offline_access" as scope
 Param: start: The start date and time of the time frame, in RFC 3339 format.
 Param: end: The end date and time of the time frame, in RFC 3339 format.
 
@@ -23,7 +28,8 @@ Param: end: The end date and time of the time frame, in RFC 3339 format.
 ---
 Name: getEventDetails
 Description: Get the details for a particular event.
-Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.calendar.read with GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN as env and microsoft365 as integration and "Calendars.Read Calendars.Read.Shared Group.Read.All GroupMember.Read.All User.Read offline_access" as scope
+Share Context: Outlook Calendar Context
+Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.calendar.manage with GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN as env and microsoft365 as integration and "Calendars.Read Calendars.Read.Shared Calendars.ReadWrite Calendars.ReadWrite.Shared Group.Read.All Group.ReadWrite.All GroupMember.Read.All User.Read offline_access" as scope
 Param: event_id: The unique ID of the event.
 Param: calendar_id: The unique ID of the calendar or group the event belongs to. If unset, uses the default calendar.
 Param: owner_type: The type of the owner of the calendar or group. Possible values are "user" or "group". Required if calendar_id is set.
@@ -33,6 +39,8 @@ Param: owner_type: The type of the owner of the calendar or group. Possible valu
 ---
 Name: createEvent
 Description: Create a new event.
+Share Context: Outlook Calendar Context
+Share Context: github.com/gptscript-ai/context/current-time
 Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.calendar.manage with GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN as env and microsoft365 as integration and "Calendars.Read Calendars.Read.Shared Calendars.ReadWrite Calendars.ReadWrite.Shared Group.Read.All Group.ReadWrite.All GroupMember.Read.All User.Read offline_access" as scope
 Param: subject: (Required) The title of the event.
 Param: location: (Required) The location of the event.
@@ -49,6 +57,7 @@ Param: owner_type: The type of the owner of the calendar or group. Possible valu
 ---
 Name: inviteUserToEvent
 Description: Invites another person to an existing event.
+Share Context: Outlook Calendar Context
 Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.calendar.manage with GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN as env and microsoft365 as integration and "Calendars.Read Calendars.Read.Shared Calendars.ReadWrite Calendars.ReadWrite.Shared Group.Read.All Group.ReadWrite.All GroupMember.Read.All User.Read offline_access" as scope
 Param: event_id: The unique ID of the event.
 Param: calendar_id: The unique ID of the calendar or group the event belongs to. If unset, uses the default calendar.
@@ -61,6 +70,8 @@ Param: message: The message to send along with the invite.
 ---
 Name: deleteEvent
 Description: Deletes an event.
+Share Context: Outlook Calendar Context
+Share Context: github.com/gptscript-ai/context/current-time
 Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.calendar.manage with GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN as env and microsoft365 as integration and "Calendars.Read Calendars.Read.Shared Calendars.ReadWrite Calendars.ReadWrite.Shared Group.Read.All Group.ReadWrite.All GroupMember.Read.All User.Read offline_access" as scope
 Param: event_id: The unique ID of the event.
 Param: calendar_id: The unique ID of the calendar or group the event belongs to. If unset, uses the default calendar.
@@ -71,7 +82,9 @@ Param: owner_type: The type of the owner of the calendar or group. Possible valu
 ---
 Name: searchEvents
 Description: Search for events based on a query string.
-Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.calendar.read with GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN as env and microsoft365 as integration and "Calendars.Read Calendars.Read.Shared Group.Read.All GroupMember.Read.All User.Read offline_access" as scope
+Share Context: Outlook Calendar Context
+Share Context: github.com/gptscript-ai/context/current-time
+Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.calendar.manage with GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN as env and microsoft365 as integration and "Calendars.Read Calendars.Read.Shared Calendars.ReadWrite Calendars.ReadWrite.Shared Group.Read.All Group.ReadWrite.All GroupMember.Read.All User.Read offline_access" as scope
 Param: query: (Required) The search query.
 Param: start: (Required) The start date and time of the time frame to search within, in RFC 3339 format.
 Param: end: (Required) The end date and time of the time frame to search within, in RFC 3339 format.
@@ -81,6 +94,8 @@ Param: end: (Required) The end date and time of the time frame to search within,
 ---
 Name: respondToEvent
 Description: Accept, tentatively accept, or decline an event invitation.
+Share Context: Outlook Calendar Context
+Share Context: github.com/gptscript-ai/context/current-time
 Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.calendar.manage with GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN as env and microsoft365 as integration and "Calendars.Read Calendars.Read.Shared Calendars.ReadWrite Calendars.ReadWrite.Shared Group.Read.All Group.ReadWrite.All GroupMember.Read.All User.Read offline_access" as scope
 Param: event_id: The unique ID of the event.
 Param: calendar_id: The unique ID of the calendar or group the event belongs to. If unset, uses the default calendar.
@@ -88,3 +103,17 @@ Param: owner_type: The type of the owner of the calendar or group. Possible valu
 Param: response: The response to the invitation. Possible values are "accept", "tentative", or "decline".
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool respondToEvent
+
+---
+Name: Outlook Calendar Context
+Type: context
+
+#!sys.echo
+
+## Instructions for using the Microsoft Outlook Calendar tools
+
+You have access to tools for the Microsoft Outlook Calendar API.
+
+Do not output calendar IDs or event IDs because they are not helpful for the user.
+
+## End of instructions for using the Microsoft Outlook Calendar tools
