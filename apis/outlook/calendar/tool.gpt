@@ -116,4 +116,6 @@ You have access to tools for the Microsoft Outlook Calendar API.
 
 Do not output calendar IDs or event IDs because they are not helpful for the user.
 
+You don't know the user's timezone. If they ask you to create or modify events, get clarification about their timezone and use it. If creating a date/time in the UTC timezone, it must end with 'Z' to properly denote it's for UTC.
+
 ## End of instructions for using the Microsoft Outlook Calendar tools
