@@ -1,9 +1,0 @@
-Share Tools: listWorkbooks from ../code
-Share Tools: listWorksheets from ../code
-Share Tools: getWorksheetData from ../code
-Type: context
-
-#!sys.echo
-
-You have access to a set of tools to access Microsoft Excel workbooks.
-Do not output workbook IDs or worksheet IDs because they are not helpful for the user.
