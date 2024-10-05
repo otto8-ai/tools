@@ -1,7 +1,0 @@
-Name: Merge Request Agent
-Context: ../context/tool.gpt
-Description: Interact with MergeRequest Objects in GitLab
-Tools: *MergeRequests* from ../merge_requests.yaml
-Credentials: github.com/gptscript-ai/gateway-oauth2 as gitlab.comBearerAuth with GPTSCRIPT_GITLAB_COM_BEARER_TOKEN as env and GitLab as integration and "api read_user"
-
-Help the user with merge request tasks
