@@ -1,6 +1,6 @@
 Name: getPage
 Description: Gets the contents of a page in Notion
-Credential: github.com/gptscript-ai/gateway-oauth2 as notion.read with NOTION_TOKEN as env and notion as integration
+Credential: github.com/gptscript-ai/gateway-oauth2 as notion.write with NOTION_TOKEN as env and notion as integration
 Args: id: the ID of the page to get
 
 #!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js getPage
@@ -8,7 +8,7 @@ Args: id: the ID of the page to get
 ---
 Name: getDatabase
 Description: Gets the contents of a database in Notion
-Credential: github.com/gptscript-ai/gateway-oauth2 as notion.read with NOTION_TOKEN as env and notion as integration
+Credential: github.com/gptscript-ai/gateway-oauth2 as notion.write with NOTION_TOKEN as env and notion as integration
 Args: id: the ID of the database to get
 
 #!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js getDatabase
@@ -16,7 +16,7 @@ Args: id: the ID of the database to get
 ---
 Name: search
 Description: Searches a Notion workspace for pages and databases
-Credential: github.com/gptscript-ai/gateway-oauth2 as notion.read with NOTION_TOKEN as env and notion as integration
+Credential: github.com/gptscript-ai/gateway-oauth2 as notion.write with NOTION_TOKEN as env and notion as integration
 Args: query: the search query
 
 #!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js search
@@ -34,7 +34,7 @@ Args: parentPageId: ID of the page that will be the parent of the new page
 ---
 Name: listUsers
 Description: Lists all users in the Notion workspace, including their IDs
-Credential: github.com/gptscript-ai/gateway-oauth2 as notion.read with NOTION_TOKEN as env and notion as integration
+Credential: github.com/gptscript-ai/gateway-oauth2 as notion.write with NOTION_TOKEN as env and notion as integration
 Args: max: the maximum number of users to list (default: unlimited)
 
 #!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js listUsers
@@ -42,7 +42,7 @@ Args: max: the maximum number of users to list (default: unlimited)
 ---
 Name: getDatabaseProperties
 Description: Lists the properties of a database in Notion
-Credential: github.com/gptscript-ai/gateway-oauth2 as notion.read with NOTION_TOKEN as env and notion as integration
+Credential: github.com/gptscript-ai/gateway-oauth2 as notion.write with NOTION_TOKEN as env and notion as integration
 Args: id: the ID of the database to get properties for
 
 #!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js getDatabaseProperties
