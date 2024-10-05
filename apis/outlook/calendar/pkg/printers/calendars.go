@@ -10,8 +10,13 @@ import (
 func PrintCalendar(calendar graph.CalendarInfo) {
 	fmt.Printf("Name: %s\n", util.Deref(calendar.Calendar.GetName()))
 	fmt.Printf("  ID: %s\n", calendar.ID)
-	fmt.Printf("  Owner: %s (%s)\n", util.Deref(calendar.Calendar.GetOwner().GetName()), util.Deref(calendar.Calendar.GetOwner().GetAddress()))
-	fmt.Printf("  Owner Type: %s\n", string(calendar.Owner))
+	if calendar.Calendar.GetOwner() != nil {
+		fmt.Printf("  Owner: %s (%s)\n", util.Deref(calendar.Calendar.GetOwner().GetName()), util.Deref(calendar.Calendar.GetOwner().GetAddress()))
+		fmt.Printf("  Owner Type: %s\n", string(calendar.Owner))
+	} else {
+		fmt.Printf("  Owner: unknown\n")
+		fmt.Printf("  Owner Type: unknown\n")
+	}
 	fmt.Println()
 }
 
