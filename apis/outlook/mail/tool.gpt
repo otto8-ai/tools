@@ -43,7 +43,7 @@ Name: createDraft
 Description: Create (but do not send) a draft message.
 Share Context: Outlook Mail Context
 Share Context: github.com/gptscript-ai/context/current-time
-Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.mail.manage with GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN as env and microsoft365 as integration and "Mail.Read Mail.ReadWrite Mail.Send User.Read offline_access" as scope
+Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.mail.write with GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN as env and microsoft365 as integration and "Mail.Read Mail.ReadWrite Mail.Send User.Read offline_access" as scope
 Param: subject: The subject of the message.
 Param: content: The content of the message in HTML.
 Param: recipients: A comma-separated list of email addresses to send the message to. No spaces. Example: person1@example.com,person2@example.com
@@ -57,7 +57,7 @@ Name: sendDraft
 Description: Send an existing draft message.
 Share Context: Outlook Mail Context
 Share Context: github.com/gptscript-ai/context/current-time
-Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.mail.manage with GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN as env and microsoft365 as integration and "Mail.Read Mail.ReadWrite Mail.Send User.Read offline_access" as scope
+Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.mail.write with GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN as env and microsoft365 as integration and "Mail.Read Mail.ReadWrite Mail.Send User.Read offline_access" as scope
 Param: draft_id: The ID of the draft to send.
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool sendDraft
@@ -67,7 +67,7 @@ Name: deleteMessage
 Description: Delete a message.
 Share Context: Outlook Mail Context
 Share Context: github.com/gptscript-ai/context/current-time
-Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.mail.manage with GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN as env and microsoft365 as integration and "Mail.Read Mail.ReadWrite Mail.Send User.Read offline_access" as scope
+Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.mail.write with GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN as env and microsoft365 as integration and "Mail.Read Mail.ReadWrite Mail.Send User.Read offline_access" as scope
 Param: message_id: The ID of the message to delete. This is NOT a mail folder ID.
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool deleteMessage
@@ -77,7 +77,7 @@ Name: moveMessage
 Description: Moves a message to a folder.
 Share Context: Outlook Mail Context
 Share Context: github.com/gptscript-ai/context/current-time
-Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.mail.manage with GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN as env and microsoft365 as integration and "Mail.Read Mail.ReadWrite Mail.Send User.Read offline_access" as scope
+Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.mail.write with GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN as env and microsoft365 as integration and "Mail.Read Mail.ReadWrite Mail.Send User.Read offline_access" as scope
 Param: message_id: The ID of the message to move.
 Param: destination_folder_id: The ID of the folder to move the message into.
 
