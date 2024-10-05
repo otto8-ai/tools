@@ -1,5 +1,0 @@
-name: Read Gmail
-Share Tools: listInbox from ../code
-Share Tools: readEmail from ../code
-Share Tools: searchEmails from ../code
-Type: context

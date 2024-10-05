@@ -69,6 +69,7 @@ Param: newBody: the new body content of the pull request
 ---
 Name: delete_pr
 Description: Delete an existing pull request in the specified GitHub repository
+Credential: github.com/gptscript-ai/gateway-oauth2 as github.write with GITHUB_TOKEN as env and GitHub as integration and "repo" as scope
 Param: owner: the owner of the repository
 Param: repo: the name of the repository
 Param: prNumber: the number of the pull request to delete
@@ -140,6 +141,7 @@ Param: prNumber: the number of the pull request to retrieve comments for
 ---
 Name: list_repos
 Description: List all repositories for a given owner
+Credential: github.com/gptscript-ai/gateway-oauth2 as github.write with GITHUB_TOKEN as env and GitHub as integration and "repo" as scope
 Param: owner: the owner of the repositories
 
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js listRepos
