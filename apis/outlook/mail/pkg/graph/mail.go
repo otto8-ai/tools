@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gptscript-ai/tools/apis/outlook/mail/code/pkg/util"
+	"github.com/gptscript-ai/tools/apis/outlook/mail/pkg/util"
 	msgraphsdkgo "github.com/microsoftgraph/msgraph-sdk-go"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	"github.com/microsoftgraph/msgraph-sdk-go/users"

@@ -1,4 +1,4 @@
-module github.com/gptscript-ai/tools/apis/outlook/mail/code
+module github.com/gptscript-ai/tools/apis/outlook/mail
 
 go 1.23.0
 

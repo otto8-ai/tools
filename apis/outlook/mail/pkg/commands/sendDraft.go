@@ -5,9 +5,9 @@ import (
 	"fmt"
 
 	"github.com/gptscript-ai/tools/apis/outlook/common/id"
-	"github.com/gptscript-ai/tools/apis/outlook/mail/code/pkg/client"
-	"github.com/gptscript-ai/tools/apis/outlook/mail/code/pkg/global"
-	"github.com/gptscript-ai/tools/apis/outlook/mail/code/pkg/graph"
+	"github.com/gptscript-ai/tools/apis/outlook/mail/pkg/client"
+	"github.com/gptscript-ai/tools/apis/outlook/mail/pkg/global"
+	"github.com/gptscript-ai/tools/apis/outlook/mail/pkg/graph"
 )
 
 func SendDraft(ctx context.Context, draftID string) error {

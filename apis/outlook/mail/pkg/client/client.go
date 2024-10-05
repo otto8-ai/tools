@@ -6,7 +6,7 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
-	"github.com/gptscript-ai/tools/apis/outlook/mail/code/pkg/global"
+	"github.com/gptscript-ai/tools/apis/outlook/mail/pkg/global"
 	msgraphsdkgo "github.com/microsoftgraph/msgraph-sdk-go"
 )
 

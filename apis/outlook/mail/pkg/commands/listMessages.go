@@ -5,10 +5,10 @@ import (
 	"fmt"
 
 	"github.com/gptscript-ai/tools/apis/outlook/common/id"
-	"github.com/gptscript-ai/tools/apis/outlook/mail/code/pkg/client"
-	"github.com/gptscript-ai/tools/apis/outlook/mail/code/pkg/global"
-	"github.com/gptscript-ai/tools/apis/outlook/mail/code/pkg/graph"
-	"github.com/gptscript-ai/tools/apis/outlook/mail/code/pkg/printers"
+	"github.com/gptscript-ai/tools/apis/outlook/mail/pkg/client"
+	"github.com/gptscript-ai/tools/apis/outlook/mail/pkg/global"
+	"github.com/gptscript-ai/tools/apis/outlook/mail/pkg/graph"
+	"github.com/gptscript-ai/tools/apis/outlook/mail/pkg/printers"
 )
 
 func ListMessages(ctx context.Context, folderID string) error {

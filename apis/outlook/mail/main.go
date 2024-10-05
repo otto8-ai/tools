@@ -6,8 +6,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/gptscript-ai/tools/apis/outlook/mail/code/pkg/commands"
-	"github.com/gptscript-ai/tools/apis/outlook/mail/code/pkg/graph"
+	"github.com/gptscript-ai/tools/apis/outlook/mail/pkg/commands"
+	"github.com/gptscript-ai/tools/apis/outlook/mail/pkg/graph"
 )
 
 func main() {

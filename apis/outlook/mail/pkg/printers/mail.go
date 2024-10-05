@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/gptscript-ai/tools/apis/outlook/common/id"
-	"github.com/gptscript-ai/tools/apis/outlook/mail/code/pkg/util"
+	"github.com/gptscript-ai/tools/apis/outlook/mail/pkg/util"
 	"github.com/jaytaylor/html2text"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 )
