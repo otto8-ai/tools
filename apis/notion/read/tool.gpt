@@ -1,7 +1,0 @@
-Name: Read Notion
-Description: Provides access to the Notion API (read-only)
-Share Tools: getPage from ../code
-Share Tools: getDatabase from ../code
-Share Tools: getDatabaseProperties from ../code
-Share Tools: search from ../code
-Share Tools: listUsers from ../code
