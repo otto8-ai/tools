@@ -1,4 +1,4 @@
-Name: list_channels
+Name: List Channels
 Description: List all channels in the Slack workspace. Returns the name and ID for each channel
 Share Context: Slack Context
 Credential: github.com/gptscript-ai/gateway-oauth2 as slack.write with SLACK_TOKEN as env and slack as integration and "channels:history groups:history im:history mpim:history channels:read files:read im:read search:read team:read users:read groups:read chat:write groups:write mpim:write im:write" as scope
@@ -6,7 +6,7 @@ Credential: github.com/gptscript-ai/gateway-oauth2 as slack.write with SLACK_TOK
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js listChannels
 
 ---
-Name: search_channels
+Name: Search Channels
 Description: Search for channels in the Slack workspace
 Share Context: Slack Context
 Credential: github.com/gptscript-ai/gateway-oauth2 as slack.write with SLACK_TOKEN as env and slack as integration and "channels:history groups:history im:history mpim:history channels:read files:read im:read search:read team:read users:read groups:read chat:write groups:write mpim:write im:write" as scope
@@ -15,7 +15,7 @@ Param: query: the search query
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js searchChannels
 
 ---
-Name: get_channel_history
+Name: Get Channel History
 Description: Get the chat history for a channel in the Slack workspace
 Share Context: Slack Context
 Credential: github.com/gptscript-ai/gateway-oauth2 as slack.write with SLACK_TOKEN as env and slack as integration and "channels:history groups:history im:history mpim:history channels:read files:read im:read search:read team:read users:read groups:read chat:write groups:write mpim:write im:write" as scope
@@ -25,7 +25,7 @@ Param: limit: the number of messages to return - recommend starting with 10 and 
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js getChannelHistory
 
 ---
-Name: get_channel_history_by_time
+Name: Get Channel History by Time
 Description: Get the chat history for a channel in the Slack workspace within a specific time range
 Share Context: Slack Context
 Credential: github.com/gptscript-ai/gateway-oauth2 as slack.write with SLACK_TOKEN as env and slack as integration and "channels:history groups:history im:history mpim:history channels:read files:read im:read search:read team:read users:read groups:read chat:write groups:write mpim:write im:write" as scope
@@ -37,7 +37,7 @@ Param: end: the end time in RFC 3339 format
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js getChannelHistoryByTime
 
 ---
-Name: get_thread_history
+Name: Get Thread History
 Description: Get the chat history for a particular thread
 Share Context: Slack Context
 Credential: github.com/gptscript-ai/gateway-oauth2 as slack.write with SLACK_TOKEN as env and slack as integration and "channels:history groups:history im:history mpim:history channels:read files:read im:read search:read team:read users:read groups:read chat:write groups:write mpim:write im:write" as scope
@@ -48,7 +48,7 @@ Param: limit: the number of messages to return
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js getThreadHistory
 
 ---
-Name: search_messages
+Name: Search Messages
 Description: Search for messages in the Slack workspace
 Share Context: Slack Context
 Credential: github.com/gptscript-ai/gateway-oauth2 as slack.write with SLACK_TOKEN as env and slack as integration and "channels:history groups:history im:history mpim:history channels:read files:read im:read search:read team:read users:read groups:read chat:write groups:write mpim:write im:write" as scope
@@ -57,7 +57,7 @@ Param: query: the search query
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js searchMessages
 
 ---
-Name: send_message
+Name: Send Message
 Description: Send a message to a channel in the Slack workspace
 Share Context: Slack Context
 Credential: github.com/gptscript-ai/gateway-oauth2 as slack.write with SLACK_TOKEN as env and slack as integration and "channels:history groups:history im:history mpim:history channels:read files:read im:read search:read team:read users:read groups:read chat:write groups:write mpim:write im:write" as scope
@@ -67,7 +67,7 @@ Param: text: the text to send
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js sendMessage
 
 ---
-Name: send_message_in_thread
+Name: Send Message in Thread
 Description: Send a message in a thread in the Slack workspace
 Share Context: Slack Context
 Credential: github.com/gptscript-ai/gateway-oauth2 as slack.write with SLACK_TOKEN as env and slack as integration and "channels:history groups:history im:history mpim:history channels:read files:read im:read search:read team:read users:read groups:read chat:write groups:write mpim:write im:write" as scope
@@ -76,7 +76,7 @@ Param: threadid: the ID of the thread to send the message to
 Param: text: the text to send
 
 ---
-Name: list_users
+Name: List Users
 Description: List all users in the Slack workspace.
 Share Context: Slack Context
 Credential: github.com/gptscript-ai/gateway-oauth2 as slack.write with SLACK_TOKEN as env and slack as integration and "channels:history groups:history im:history mpim:history channels:read files:read im:read search:read team:read users:read groups:read chat:write groups:write mpim:write im:write" as scope
@@ -84,7 +84,7 @@ Credential: github.com/gptscript-ai/gateway-oauth2 as slack.write with SLACK_TOK
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js listUsers
 
 ---
-Name: search_users
+Name: Search Users
 Description: Search for users in the Slack workspace
 Share Context: Slack Context
 Credential: github.com/gptscript-ai/gateway-oauth2 as slack.write with SLACK_TOKEN as env and slack as integration and "channels:history groups:history im:history mpim:history channels:read files:read im:read search:read team:read users:read groups:read chat:write groups:write mpim:write im:write" as scope
@@ -93,7 +93,7 @@ Param: query: the search query
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js searchUsers
 
 ---
-Name: send_dm
+Name: Send DM
 Description: Send a direct message to a user.
 Share Context: Slack Context
 Credential: github.com/gptscript-ai/gateway-oauth2 as slack.write with SLACK_TOKEN as env and slack as integration and "channels:history groups:history im:history mpim:history channels:read files:read im:read search:read team:read users:read groups:read chat:write groups:write mpim:write im:write" as scope
@@ -103,7 +103,7 @@ Param: text: the text to send
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js sendDM
 
 ---
-Name: send_dm_in_thread
+Name: Send DM in Thread
 Description: Send a message in a thread in a direct message conversation
 Share Context: Slack Context
 Credential: github.com/gptscript-ai/gateway-oauth2 as slack.write with SLACK_TOKEN as env and slack as integration and "channels:history groups:history im:history mpim:history channels:read files:read im:read search:read team:read users:read groups:read chat:write groups:write mpim:write im:write" as scope
@@ -114,7 +114,7 @@ Param: text: the text to send
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js sendDMInThread
 
 ---
-Name: get_message_link
+Name: Get Message Link
 Description: Get the permalink for a message
 Share Context: Slack Context
 Credential: github.com/gptscript-ai/gateway-oauth2 as slack.write with SLACK_TOKEN as env and slack as integration and "channels:history groups:history im:history mpim:history channels:read files:read im:read search:read team:read users:read groups:read chat:write groups:write mpim:write im:write" as scope
@@ -124,7 +124,7 @@ Param: messageid: the ID of the message
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js getMessageLink
 
 ---
-Name: get_dm_history
+Name: Get DM History
 Description: Get the chat history for a direct message conversation
 Share Context: Slack Context
 Credential: github.com/gptscript-ai/gateway-oauth2 as slack.write with SLACK_TOKEN as env and slack as integration and "channels:history groups:history im:history mpim:history channels:read files:read im:read search:read team:read users:read groups:read chat:write groups:write mpim:write im:write" as scope
@@ -134,7 +134,7 @@ Param: limit: the number of messages to return
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js getDMHistory
 
 ---
-Name: get_dm_thread_history
+Name: Get DM Thread History
 Description: Get the chat history for a thread in a direct message conversation
 Share Context: Slack Context
 Credential: github.com/gptscript-ai/gateway-oauth2 as slack.write with SLACK_TOKEN as env and slack as integration and "channels:history groups:history im:history mpim:history channels:read files:read im:read search:read team:read users:read groups:read chat:write groups:write mpim:write im:write" as scope

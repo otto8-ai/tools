@@ -1,4 +1,4 @@
-Name: listCalendars
+Name: List Calendars
 Description: List all calendars available to the user.
 Share Context: Outlook Calendar Context
 Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.calendar.write with GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN as env and microsoft365 as integration and "Calendars.Read Calendars.Read.Shared Calendars.ReadWrite Calendars.ReadWrite.Shared Group.Read.All Group.ReadWrite.All GroupMember.Read.All User.Read offline_access" as scope
@@ -6,7 +6,7 @@ Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.calendar.write wit
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listCalendars
 
 ---
-Name: listEventsToday
+Name: List Events Today
 Description: List all events for today in all calendars available to the user.
 Share Context: Outlook Calendar Context
 Share Context: github.com/gptscript-ai/context/current-time
@@ -15,7 +15,7 @@ Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.calendar.write wit
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listEventsToday
 
 ---
-Name: listEvents
+Name: List Events
 Description: List all events in the given time frame in all calendars available to the user.
 Share Context: Outlook Calendar Context
 Share Context: github.com/gptscript-ai/context/current-time
@@ -26,7 +26,7 @@ Param: end: The end date and time of the time frame, in RFC 3339 format.
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listEvents
 
 ---
-Name: getEventDetails
+Name: Get Event Details
 Description: Get the details for a particular event.
 Share Context: Outlook Calendar Context
 Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.calendar.write with GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN as env and microsoft365 as integration and "Calendars.Read Calendars.Read.Shared Calendars.ReadWrite Calendars.ReadWrite.Shared Group.Read.All Group.ReadWrite.All GroupMember.Read.All User.Read offline_access" as scope
@@ -37,7 +37,7 @@ Param: owner_type: The type of the owner of the calendar or group. Possible valu
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool getEventDetails
 
 ---
-Name: createEvent
+Name: Create Event
 Description: Create a new event.
 Share Context: Outlook Calendar Context
 Share Context: github.com/gptscript-ai/context/current-time
@@ -55,7 +55,7 @@ Param: owner_type: The type of the owner of the calendar or group. Possible valu
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool createEvent
 
 ---
-Name: inviteUserToEvent
+Name: Invite User To Event
 Description: Invites another person to an existing event.
 Share Context: Outlook Calendar Context
 Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.calendar.write with GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN as env and microsoft365 as integration and "Calendars.Read Calendars.Read.Shared Calendars.ReadWrite Calendars.ReadWrite.Shared Group.Read.All Group.ReadWrite.All GroupMember.Read.All User.Read offline_access" as scope
@@ -68,7 +68,7 @@ Param: message: The message to send along with the invite.
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool inviteUserToEvent
 
 ---
-Name: deleteEvent
+Name: Delete Event
 Description: Deletes an event.
 Share Context: Outlook Calendar Context
 Share Context: github.com/gptscript-ai/context/current-time
@@ -80,7 +80,7 @@ Param: owner_type: The type of the owner of the calendar or group. Possible valu
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool deleteEvent
 
 ---
-Name: searchEvents
+Name: Search Events
 Description: Search for events based on a query string.
 Share Context: Outlook Calendar Context
 Share Context: github.com/gptscript-ai/context/current-time
@@ -92,7 +92,7 @@ Param: end: (Required) The end date and time of the time frame to search within,
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool searchEvents
 
 ---
-Name: respondToEvent
+Name: Respond To Event
 Description: Accept, tentatively accept, or decline an event invitation.
 Share Context: Outlook Calendar Context
 Share Context: github.com/gptscript-ai/context/current-time

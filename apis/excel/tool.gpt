@@ -1,4 +1,4 @@
-Name: listWorkbooks
+Name: List Workbooks
 Description: Lists all workbooks available to the user.
 Share Context: Excel Context
 Credential: github.com/gptscript-ai/gateway-oauth2 as excel.write with GPTSCRIPT_MICROSOFT_EXCEL_TOKEN as env and microsoft365 as integration and "Files.Read Files.ReadWrite Files.Read.All User.Read offline_access" as scope
@@ -6,7 +6,7 @@ Credential: github.com/gptscript-ai/gateway-oauth2 as excel.write with GPTSCRIPT
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listWorkbooks
 
 ---
-Name: listWorksheets
+Name: List Worksheets
 Description: Lists all worksheets available in a workbook.
 Share Context: Excel Context
 Credential: github.com/gptscript-ai/gateway-oauth2 as excel.write with GPTSCRIPT_MICROSOFT_EXCEL_TOKEN as env and microsoft365 as integration and "Files.Read Files.ReadWrite Files.Read.All User.Read offline_access" as scope
@@ -15,7 +15,7 @@ Param: workbook_id: ID of the workbook to list worksheets from
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listWorksheets
 
 ---
-Name: getWorksheetData
+Name: Get Worksheet Data
 Description: Get the data of a worksheet in a workbook.
 Share Context: Excel Context
 Credential: github.com/gptscript-ai/gateway-oauth2 as excel.write with GPTSCRIPT_MICROSOFT_EXCEL_TOKEN as env and microsoft365 as integration and "Files.Read Files.ReadWrite Files.Read.All User.Read offline_access" as scope
@@ -25,7 +25,7 @@ Param: worksheet_id: ID of the worksheet to get data from
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool getWorksheetData
 
 ---
-Name: addWorksheetRow
+Name: Add Worksheet Row
 Description: Adds a row to an existing worksheet in a workbook.
 Share Context: Excel Context
 Credential: github.com/gptscript-ai/gateway-oauth2 as excel.write with GPTSCRIPT_MICROSOFT_EXCEL_TOKEN as env and microsoft365 as integration and "Files.Read Files.ReadWrite Files.Read.All User.Read offline_access" as scope
@@ -36,7 +36,7 @@ Param: contents: comma-separated values to add as a new row
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool addWorksheetRow
 
 ---
-Name: createWorkbook
+Name: Create Workbook
 Description: Creates a new workbook file at the root of the user's OneDrive.
 Share Context: Excel Context
 Credential: github.com/gptscript-ai/gateway-oauth2 as excel.write with GPTSCRIPT_MICROSOFT_EXCEL_TOKEN as env and microsoft365 as integration and "Files.Read Files.ReadWrite Files.Read.All User.Read offline_access" as scope
@@ -45,7 +45,7 @@ Param: name: Name of the new workbook file
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool createWorkbook
 
 ---
-Name: createWorksheet
+Name: Create Worksheet
 Description: Creates a new worksheet in a workbook.
 Share Context: Excel Context
 Credential: github.com/gptscript-ai/gateway-oauth2 as excel.write with GPTSCRIPT_MICROSOFT_EXCEL_TOKEN as env and microsoft365 as integration and "Files.Read Files.ReadWrite Files.Read.All User.Read offline_access" as scope

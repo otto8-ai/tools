@@ -1,4 +1,4 @@
-Name: listMailFolders
+Name: List Mail Folders
 Description: Lists all available mail folders.
 Share Context: Outlook Mail Context
 Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.mail.read with GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN as env and microsoft365 as integration and "Mail.Read User.Read offline_access" as scope
@@ -6,7 +6,7 @@ Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.mail.read with GPT
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listMailFolders
 
 ---
-Name: listMessages
+Name: List Messages
 Description: Lists all messages in a folder.
 Share Context: Outlook Mail Context
 Share Context: github.com/gptscript-ai/context/current-time
@@ -16,7 +16,7 @@ Param: folder_id: The ID of the folder to list messages in.
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listMessages
 
 ---
-Name: getMessageDetails
+Name: Get Message Details
 Description: Get the details of a message.
 Share Context: Outlook Mail Context
 Share Context: github.com/gptscript-ai/context/current-time
@@ -26,7 +26,7 @@ Param: message_id: The ID of the message to get details for.
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool getMessageDetails
 
 ---
-Name: searchMessages
+Name: Search Messages
 Description: Search for messages. At least one of subject, from_address, or from_name must be specified.
 Share Context: Outlook Mail Context
 Share Context: github.com/gptscript-ai/context/current-time
@@ -39,7 +39,7 @@ Param: folder_id: (Optional) The ID of the folder to search in. If unset, will s
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool searchMessages
 
 ---
-Name: createDraft
+Name: Create Draft
 Description: Create (but do not send) a draft message.
 Share Context: Outlook Mail Context
 Share Context: github.com/gptscript-ai/context/current-time
@@ -53,7 +53,7 @@ Param: bcc: (Optional) A comma-separated list of email addresses to BCC on the m
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool createDraft
 
 ---
-Name: sendDraft
+Name: Send Draft
 Description: Send an existing draft message.
 Share Context: Outlook Mail Context
 Share Context: github.com/gptscript-ai/context/current-time
@@ -63,7 +63,7 @@ Param: draft_id: The ID of the draft to send.
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool sendDraft
 
 ---
-Name: deleteMessage
+Name: Delete Message
 Description: Delete a message.
 Share Context: Outlook Mail Context
 Share Context: github.com/gptscript-ai/context/current-time
@@ -73,7 +73,7 @@ Param: message_id: The ID of the message to delete. This is NOT a mail folder ID
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool deleteMessage
 
 ---
-Name: moveMessage
+Name: Move Message
 Description: Moves a message to a folder.
 Share Context: Outlook Mail Context
 Share Context: github.com/gptscript-ai/context/current-time
