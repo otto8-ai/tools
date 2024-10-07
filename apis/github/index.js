@@ -28,7 +28,7 @@ try {
             await deleteIssue(octokit, process.env.OWNER, process.env.REPO, process.env.ISSUENUMBER);
             break;
         case 'searchIssuesAndPRs':
-            await searchIssuesAndPRs(octokit, process.env.OWNER, process.env.REPO, process.env.QUERY);
+            await searchIssuesAndPRs(octokit, process.env.OWNER, process.env.REPO, process.env.QUERY, process.env.PERPAGE, process.env.PAGE);
             break;
         case 'createPR':
             await createPR(octokit, process.env.OWNER, process.env.REPO, process.env.TITLE, process.env.BODY, process.env.HEAD, process.env.BASE);

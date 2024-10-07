@@ -33,11 +33,13 @@ Param: issueNumber: the number of the issue to delete
 
 ---
 Name: Search Issues and PRs
-Description: Search for issues and PRs in GitHub
+Description: Search for issues and PRs in GitHub. Results are paginated, so in order to get all results for a search, call this function with the `page` parameter incremented by 1 until no results are returned.
 Credential: github.com/gptscript-ai/gateway-oauth2 as github.write with GITHUB_TOKEN as env and GitHub as integration and "repo" as scope
 Param: owner: (optional) the owner of the repository the issues or PRs belong to
 Param: repo: (optional) the name of the repository the issues or PRs belong to
 Param: query: the Github search query
+Param: perPage: (optional) number of results per page (default is 100)
+Param: page: (optional) page number of the results to fetch (default is 1)
 
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js searchIssuesAndPRs
 

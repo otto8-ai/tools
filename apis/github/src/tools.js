@@ -53,14 +53,11 @@ export async function deleteIssue(octokit, owner, repo, issueNumber) {
     console.log(`Deleted issue #${issueNumber} - https://github.com/${owner}/${repo}/issues/${issueNumber}`);
 }
 
-export async function searchIssuesAndPRs(octokit, owner, repo, query) {
+export async function searchIssuesAndPRs(octokit, owner, repo, query, perPage = 100, page = 1) {
     let q = '';
 
     if (owner) {
-        // Determine if the owner is a user or an organization
         const { data: { type } } = await octokit.users.getByUsername({ username: owner });
-
-        // Construct the query based on the presence of repo and owner type
         const ownerQualifier = type === 'User' ? `user:${owner}` : `org:${owner}`;
         q = repo ? `repo:${owner}/${repo}` : ownerQualifier;
     } else if (repo) {
@@ -73,10 +70,12 @@ export async function searchIssuesAndPRs(octokit, owner, repo, query) {
         q += ` ${query}`;
     }
 
-    // Search for issues and pull requests
-    const { data: { items } } = await octokit.search.issuesAndPullRequests({ q: q.trim() });
+    const { data: { items } } = await octokit.search.issuesAndPullRequests({
+        q: q.trim(),
+        per_page: perPage,
+        page: page
+    });
 
-    // Log the results
     items.forEach(issue => {
         console.log(`#${issue.number} - ${issue.title} (ID: ${issue.id}) - ${issue.html_url}`);
     });
