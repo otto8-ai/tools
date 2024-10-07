@@ -27,7 +27,7 @@ def main():
         spreadsheet = service.open(spreadsheet_name) if spreadsheet_name is not None else service.open_by_key(
             spreadsheet_id)
         sheet = spreadsheet.sheet1
-        sheet.append_rows(data, value_input_option=ValueInputOption.raw)
+        sheet.append_rows(data, value_input_option=ValueInputOption.user_entered)
     except APIError as err:
         print(err)
 
