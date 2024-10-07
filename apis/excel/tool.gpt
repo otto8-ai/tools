@@ -66,3 +66,11 @@ You have access to a set of tools to access, create, and modify Microsoft Excel 
 Do not output workbook IDs or worksheet IDs because they are not helpful for the user.
 
 ## End of instructions for using Excel tools
+
+---
+!metadata:*:category
+Excel
+
+---
+!metadata:*:icon
+https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/duotone/microsoft-excel-logo-duotone.svg

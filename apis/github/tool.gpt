@@ -166,3 +166,11 @@ Param: owner: the owner of the repository
 Param: repo: the name of the repository
 
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js getStarCount
+
+---
+!metadata:*:category
+GitHub
+
+---
+!metadata:*:icon
+https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/github.svg

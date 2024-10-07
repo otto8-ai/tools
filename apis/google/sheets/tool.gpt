@@ -74,3 +74,11 @@ You have access to a set of tools to access, create, and modify Google Sheets.
 Do not output sheet IDs because they are not helpful for the user.
 
 ## End of instructions for using Google Sheets tools
+
+---
+!metadata:*:category
+Google Sheets
+
+---
+!metadata:*:icon
+https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/googlesheets.svg
