@@ -158,3 +158,11 @@ Do not provide channel, thread, or message IDs in the output, as these are not h
 When you use the search_messages tool, you can use normal Slack search filters. If you filter by user, use the full username, which can be obtained from the list_users or search_users tools.
 
 ## End of instructions for using Slack tools
+
+---
+!metadata:*:category
+Slack
+
+---
+!metadata:*:icon
+https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/slack.svg

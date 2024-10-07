@@ -98,3 +98,11 @@ When printing a list of messages for the user, include the body preview. When pr
 When printing a single message or a list of messages, use Markdown formatting.
 
 ## End of instructions for using the Microsoft Outlook Mail tools
+
+---
+!metadata:*:category
+Outlook Mail
+
+---
+!metadata:*:icon
+https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/duotone/microsoft-outlook-logo-duotone.svg

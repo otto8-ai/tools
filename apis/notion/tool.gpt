@@ -67,3 +67,11 @@ Args: rowId: the ID of the row to update
 Args: properties: a JSON string containing all of the key-value pairs to update
 
 #!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js updateDatabaseRow
+
+---
+!metadata:*:category
+Notion
+
+---
+!metadata:*:icon
+https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/notion.svg

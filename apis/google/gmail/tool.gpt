@@ -99,3 +99,11 @@ Credential: github.com/gptscript-ai/gateway-oauth2 as google.gmail.write with GM
 Param: draft_id: The ID of the draft email to send
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/sendDraft.py
+
+---
+!metadata:*:category
+Gmail
+
+---
+!metadata:*:icon
+https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/gmail.svg

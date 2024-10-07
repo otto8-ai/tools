@@ -24,3 +24,11 @@ Tools: github.com/gptscript-ai/context/workspace
 param: video_url: The URL of a YouTube video. (e.g. https://www.youtube.com/watch?v=VIDEO_ID or https://youtu.be/VIDEO_ID)
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/advTranscriber.py
+
+---
+!metadata:*:category
+YouTube
+
+---
+!metadata:*:icon
+https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/youtube.svg
