@@ -1,7 +1,0 @@
-Share Tools: * from ../code
-Type: context
-
-#!sys.echo
-
-You have access to a set of tools to access, create, and modify Microsoft Excel workbooks.
-Do not output workbook IDs or worksheet IDs because they are not helpful for the user.

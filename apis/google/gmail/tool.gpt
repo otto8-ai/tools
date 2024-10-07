@@ -1,0 +1,101 @@
+Name: List Inbox
+Description: List emails in the user's Gmail inbox
+Credential: github.com/gptscript-ai/gateway-oauth2 as google.gmail.write with GMAIL_GOOGLE_OAUTH_TOKEN as env and google-gmail as integration and "https://www.googleapis.com/auth/userinfo.email openid https://www.googleapis.com/auth/userinfo.profile https://mail.google.com/ https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.compose" as scope
+Param: max_results: Maximum number of emails to list (Optional: Default will list all emails in the inbox)
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/listInbox.py
+
+---
+Name: Read Email
+Description: Read an email from the user's Gmail account
+Credential: github.com/gptscript-ai/gateway-oauth2 as google.gmail.write with GMAIL_GOOGLE_OAUTH_TOKEN as env and google-gmail as integration and "https://www.googleapis.com/auth/userinfo.email openid https://www.googleapis.com/auth/userinfo.profile https://mail.google.com/ https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.compose" as scope
+Param: email_id: Email ID to read (Optional: If not provided, email_subject is required)
+Param: email_subject: Email subject to read (Optional: If not provided, email_id is required)
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/readEmail.py
+
+---
+Name: Search Emails
+Description: Search a user's Gmail account for emails. Will return the email_id for each message. Can also be used to list emails in a folder or with a label.
+Credential: github.com/gptscript-ai/gateway-oauth2 as google.gmail.write with GMAIL_GOOGLE_OAUTH_TOKEN as env and google-gmail as integration and "https://www.googleapis.com/auth/userinfo.email openid https://www.googleapis.com/auth/userinfo.profile https://mail.google.com/ https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.compose" as scope
+Param: query: Search query to find emails in the user's Gmail account. Uses Gmail search syntax (e.g., "from:someuser@example.com rfc822msgid:<somemsgid@example.com> is:unread")
+Param: max_results: Maximum number of emails to list (Optional: Default will list all emails that match the query)
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/searchEmails.py
+
+---
+Name: Send Email
+Description: Send an email from the user's Gmail account.
+Context: Forward Email Context
+Credential: github.com/gptscript-ai/gateway-oauth2 as google.gmail.write with GMAIL_GOOGLE_OAUTH_TOKEN as env and google-gmail as integration and "https://www.googleapis.com/auth/userinfo.email openid https://www.googleapis.com/auth/userinfo.profile https://mail.google.com/ https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.compose" as scope
+Param: to_emails: A comma separated list of email addresses to send the email to
+Param: cc_emails: A comma separated list of email addresses to cc the email to (Optional)
+Param: bcc_emails: A comma separated list of email addresses to bcc the email to (Optional)
+Param: subject: Subject of the email.
+Param: message: Message body of the email.
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/sendEmail.py
+
+---
+Name: Forward Email Context
+Type: context
+
+#!sys.echo
+
+## Instructions for sending a forwarded email with the Send Email tool
+When forwarding an email, retrieve the contents of the original email using the Read Email tool.
+Call the `Send Email` tool using this data with the following modifications:
+- prepend `Fwd: ` to the subject
+- add the original message as a quoted reply in the message body, with the following template prepended to the original message: `---------- Forwarded message ---------\nFrom: <original_sender>\nDate: <original_date>\nSubject: <original_subject>\nTo: <original_recipient>`
+- if the user has an additional message to add, include it above the quoted reply
+
+## End of instructions for sending a forwarded email with the Send Email tool
+
+---
+Name: Delete Email
+Description: Delete an email in a user's Gmail account.
+Credential: github.com/gptscript-ai/gateway-oauth2 as google.gmail.write with GMAIL_GOOGLE_OAUTH_TOKEN as env and google-gmail as integration and "https://www.googleapis.com/auth/userinfo.email openid https://www.googleapis.com/auth/userinfo.profile https://mail.google.com/ https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.compose" as scope
+Param: email_id: The ID of the email to delete
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/deleteEmail.py
+
+---
+Name: Create Draft
+Description: Create a draft email in a user's Gmail account
+Credential: github.com/gptscript-ai/gateway-oauth2 as google.gmail.write with GMAIL_GOOGLE_OAUTH_TOKEN as env and google-gmail as integration and "https://www.googleapis.com/auth/userinfo.email openid https://www.googleapis.com/auth/userinfo.profile https://mail.google.com/ https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.compose" as scope
+Param: to_emails: A comma separated list of email addresses to send the email to
+Param: cc_emails: A comma separated list of email addresses to cc the email to (Optional)
+Param: bcc_emails: A comma separated list of email addresses to bcc the email to (Optional)
+Param: subject: Subject of the email
+Param: message: Message body of the email
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/createDraft.py
+
+---
+Name: Update Draft
+Description: Update a draft email in a user's Gmail account. Make sure you call Read Email to get the contents of the current draft before updating the draft.
+Credential: github.com/gptscript-ai/gateway-oauth2 as google.gmail.write with GMAIL_GOOGLE_OAUTH_TOKEN as env and google-gmail as integration and "https://www.googleapis.com/auth/userinfo.email openid https://www.googleapis.com/auth/userinfo.profile https://mail.google.com/ https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.compose" as scope
+Param: draft_id: The ID of the draft email to update
+Param: to_emails: A comma separated list of email addresses to send the email to
+Param: cc_emails: A comma separated list of email addresses to cc the email to (Optional)
+Param: bcc_emails: A comma separated list of email addresses to bcc the email to (Optional)
+Param: subject: Subject of the email
+Param: message: Message body of the email
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/updateDraft.py
+
+---
+Name: Delete Draft
+Description: Delete a draft email in a user's Gmail account.
+Credential: github.com/gptscript-ai/gateway-oauth2 as google.gmail.write with GMAIL_GOOGLE_OAUTH_TOKEN as env and google-gmail as integration and "https://www.googleapis.com/auth/userinfo.email openid https://www.googleapis.com/auth/userinfo.profile https://mail.google.com/ https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.compose" as scope
+Param: draft_id: The ID of the draft email to delete
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/deleteDraft.py
+
+---
+Name: Send Draft
+Description: Send a draft email in a user's Gmail account. Assumes the draft email has already been created and has all the required fields filled out.
+Credential: github.com/gptscript-ai/gateway-oauth2 as google.gmail.write with GMAIL_GOOGLE_OAUTH_TOKEN as env and google-gmail as integration and "https://www.googleapis.com/auth/userinfo.email openid https://www.googleapis.com/auth/userinfo.profile https://mail.google.com/ https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.compose" as scope
+Param: draft_id: The ID of the draft email to send
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/sendDraft.py

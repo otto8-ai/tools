@@ -1,0 +1,17 @@
+Name: Transcribe Youtube Video
+Description: Get a text transcript of a YouTube video and clean it up.
+Param: video_url: The URL of a YouTube video. (e.g. https://www.youtube.com/watch?v=VIDEO_ID or https://youtu.be/VIDEO_ID)
+Tool: YouTube Transcriber, github.com/gptscript-ai/context/workspace
+
+First, take the video_url parameter and pass it to the YouTube Transcriber tool.
+Process that transcript and add the missing punctuation. Clean up any misspellings or errors in the transcript.
+Do not truncate or reword any of the text, just add punctuation and correct mistakes.
+Write the corrected text to a file in the $GPTSCRIPT_WORKSPACE_DIR with a filename based on the VIDEO_ID.
+Let the user know where the file is located, and give a short 2 sentence summary of the video.
+
+---
+Name: YouTube Transcriber
+Description: Get a text transcript of a YouTube video
+Param: video_url: The URL of a YouTube video. (e.g. https://www.youtube.com/watch?v=VIDEO_ID or https://youtu.be/VIDEO_ID)
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/transcriber.py

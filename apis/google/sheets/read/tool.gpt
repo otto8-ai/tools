@@ -1,5 +1,0 @@
-name: Read Google Sheets
-Share Tools: readSpreadsheet from ../code
-Share Tools: readTablesFromSpreadsheet from ../code
-Share Tools: listSpreadsheets from ../code
-Type: context

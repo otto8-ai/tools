@@ -1,30 +1,30 @@
 tools:
   excel:
-    reference: github.com/gptscript-ai/tools/apis/excel/code
+    reference: github.com/gptscript-ai/tools/apis/excel
     all: true
   slack:
-    reference: github.com/gptscript-ai/tools/apis/slack/code
+    reference: github.com/gptscript-ai/tools/apis/slack
     all: true
   notion:
-    reference: github.com/gptscript-ai/tools/apis/notion/code
+    reference: github.com/gptscript-ai/tools/apis/notion
     all: true
   google-gmail:
-    reference: github.com/gptscript-ai/tools/apis/google/gmail/code
+    reference: github.com/gptscript-ai/tools/apis/google/gmail
     all: true
   google-sheets:
-    reference: github.com/gptscript-ai/tools/apis/google/sheets/code
+    reference: github.com/gptscript-ai/tools/apis/google/sheets
     all: true
   google-youtube:
-    reference: github.com/gptscript-ai/tools/apis/google/youtube/code
+    reference: github.com/gptscript-ai/tools/apis/google/youtube
     all: true
   outlook-mail:
-    reference: github.com/gptscript-ai/tools/apis/outlook/mail/code
+    reference: github.com/gptscript-ai/tools/apis/outlook/mail
     all: true
   outlook-calender:
-    reference: github.com/gptscript-ai/tools/apis/outlook/calendar/code
+    reference: github.com/gptscript-ai/tools/apis/outlook/calendar
     all: true
   github:
-    reference: github.com/gptscript-ai/tools/apis/github/code
+    reference: github.com/gptscript-ai/tools/apis/github
     all: true
 
 # Add one day... Same format as above

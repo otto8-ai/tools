@@ -1,0 +1,76 @@
+Name: Read Spreadsheet
+Description: Read data from a Google Sheet. Spreadsheet ID is required if the spreadsheet does not belong to the user.
+Share Context: Google Sheets Context
+Credential: github.com/gptscript-ai/gateway-oauth2 as google.sheets.write with SHEETS_GOOGLE_OAUTH_TOKEN as env and google-sheets as integration and "https://www.googleapis.com/auth/userinfo.email openid https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/documents https://www.googleapis.com/auth/drive" as scope
+Param: spreadsheet_id: The ID of the Spreadsheet (Optional, if not provided, the spreadsheet_name is required)
+Param: spreadsheet_name: The name of the Spreadsheet (Optional, if not provided, the spreadsheet_id is required)
+Param: range: The range of cells on the Spreadsheet to read (Optional, by default reads the entire Spreadsheet)
+Param: sheet_name: The name of the page to read from (Optional, by default reads the first page)
+Param: show_cell_ref: Show the cell reference in the output. Value must be true or false. (Optional, by default shows the cell references)
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/readSpreadsheet.py
+
+---
+Name: Read Tables From Spreadsheet
+Description: Detect multiple tables and read data from a Google Sheet. Spreadsheet ID is required if the spreadsheet does not belong to the user.
+Share Context: Google Sheets Context
+Credential: github.com/gptscript-ai/gateway-oauth2 as google.sheets.write with SHEETS_GOOGLE_OAUTH_TOKEN as env and google-sheets as integration and "https://www.googleapis.com/auth/userinfo.email openid https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/documents https://www.googleapis.com/auth/drive" as scope
+Param: spreadsheet_id: The ID of the Spreadsheet (Optional, if not provided, the spreadsheet_name is required)
+Param: spreadsheet_name: The name of the Spreadsheet (Optional, if not provided, the spreadsheet_id is required)
+Param: range: The range of cells on the Spreadsheet to read (Optional, by default reads the entire Spreadsheet)
+Param: sheet_name: The name of the page to read from (Optional, by default reads the first page)
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/readTablesFromSpreadsheet.py
+
+---
+Name: List Spreadsheets
+Description: List all Google Sheets in current user's Google Drive
+Share Context: Google Sheets Context
+Credential: github.com/gptscript-ai/gateway-oauth2 as google.sheets.write with SHEETS_GOOGLE_OAUTH_TOKEN as env and google-sheets as integration and "https://www.googleapis.com/auth/userinfo.email openid https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/documents https://www.googleapis.com/auth/drive" as scope
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/listSpreadsheets.py
+
+---
+Name: Create Spreadsheet
+Description: Create a new Google Sheet
+Share Context: Google Sheets Context
+Credential: github.com/gptscript-ai/gateway-oauth2 as google.sheets.write with SHEETS_GOOGLE_OAUTH_TOKEN as env and google-sheets as integration and "https://www.googleapis.com/auth/userinfo.email openid https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/documents https://www.googleapis.com/auth/drive" as scope
+Param: spreadsheet_name: The name of the spreadsheet to create
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/createSpreadsheet.py
+
+---
+Name: Append Cells To Spreadsheet
+Description: Append data to a Google Sheet. Spreadsheet ID is required if the spreadsheet does not belong to the user.
+Share Context: Google Sheets Context
+Credential: github.com/gptscript-ai/gateway-oauth2 as google.sheets.write with SHEETS_GOOGLE_OAUTH_TOKEN as env and google-sheets as integration and "https://www.googleapis.com/auth/userinfo.email openid https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/documents https://www.googleapis.com/auth/drive" as scope
+Param: spreadsheet_id: The ID of the Spreadsheet (Optional, if not provided, the spreadsheet_name is required)
+Param: spreadsheet_name: The name of the Spreadsheet (Optional, if not provided, the spreadsheet_id is required)
+Param: data: The data to append to the Spreadsheet. Columns are separated by commas and rows are separated by newlines. Newlines inside a cell should be represented by CR LF characters. The data in each cell must be wrapped in double quotes and escape any characters that would break csv parsing (e.g. '"A1","B1, ""this is a quoted string""","C1"\n"A2","B2","C2"\n"A3","B3","C3\r\nwith newline"')
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/appendCellsToSpreadsheet.py
+
+---
+Name: Update Cell In Spreadsheet
+Description: Update data within a specific cell in a Google Sheet. Spreadsheet ID is required if the spreadsheet does not belong to the user.
+Share Context: Google Sheets Context
+Credential: github.com/gptscript-ai/gateway-oauth2 as google.sheets.write with SHEETS_GOOGLE_OAUTH_TOKEN as env and google-sheets as integration and "https://www.googleapis.com/auth/userinfo.email openid https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/documents https://www.googleapis.com/auth/drive" as scope
+Param: spreadsheet_id: The ID of the Spreadsheet (Optional, if not provided, the spreadsheet_name is required)
+Param: spreadsheet_name: The name of the Spreadsheet (Optional, if not provided, the spreadsheet_id is required)
+Param: cell: The cell to update in A1 notation (e.g. A1, B2, C3)
+Param: data: The data to update to the Spreadsheet. The data must be wrapped in double quotes and escape any characters that would break csv parsing (e.g. "this is a quoted string")
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/updateCellInSpreadsheet.py
+
+---
+Name: Google Sheets Context
+Type: context
+
+#!sys.echo
+
+## Instructions for using Google Sheets tools
+
+You have access to a set of tools to access, create, and modify Google Sheets.
+Do not output sheet IDs because they are not helpful for the user.
+
+## End of instructions for using Google Sheets tools
