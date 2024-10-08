@@ -1,3 +1,0 @@
-hubspot-api-client
-# setuptools dep fixes https://github.com/HubSpot/hubspot-api-python/issues/303
-setuptools
