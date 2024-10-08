@@ -4,7 +4,7 @@ go 1.23.0
 
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.14.0
-	github.com/gptscript-ai/tools/outlook/common v0.0.0-20240904161731-0ba4310b0ca0
+	github.com/gptscript-ai/tools/outlook/common v0.0.0-20241008222508-3c6174b443e7
 	github.com/jaytaylor/html2text v0.0.0-20230321000545-74c2419ad056
 	github.com/microsoftgraph/msgraph-sdk-go v1.47.0
 )
