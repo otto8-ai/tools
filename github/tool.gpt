@@ -1,4 +1,32 @@
 ---
+Name: GitHub
+Description: Tools for interacting with GitHub
+Share Tools: Search Issues and PRs, Get Issue, Create Issue, Modify Issue, Close Issue, List Issue Comments, Add Comment to Issue, Get PR, Create PR, Modify PR, Close PR, List PR Comments, Add Comment to PR, List Repos, Get Star Count
+
+---
+Name: Search Issues and PRs
+Description: Search for issues and PRs in GitHub. Results are paginated, so in order to get all results for a search, call this function with the `page` parameter incremented by 1 until no results are returned.
+Credential: github.com/gptscript-ai/gateway-oauth2 as github.write with GITHUB_TOKEN as env and GitHub as integration and "repo" as scope
+Param: owner: (optional) the owner of the repository the issues or PRs belong to
+Param: repo: (optional) the name of the repository the issues or PRs belong to
+Param: query: the Github search query
+Param: perPage: (optional) number of results per page (default is 100)
+Param: page: (optional) page number of the results to fetch (default is 1)
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js searchIssuesAndPRs
+
+---
+Name: Get Issue
+Description: Get details of a specific issue by its number in the specified GitHub repository
+Credential: github.com/gptscript-ai/gateway-oauth2 as github.write with GITHUB_TOKEN as env and GitHub as integration and "repo" as scope
+Share Tools: Search Issues and PRs
+Param: owner: the owner of the repository
+Param: repo: the name of the repository
+Param: issueNumber: the number of the issue to retrieve
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js getIssue
+
+---
 Name: Create Issue
 Description: Create a new issue in the specified GitHub repository
 Credential: github.com/gptscript-ai/gateway-oauth2 as github.write with GITHUB_TOKEN as env and GitHub as integration and "repo" as scope
@@ -13,6 +41,7 @@ Param: body: the body content of the issue
 Name: Modify Issue
 Description: Modify an existing issue in the specified GitHub repository
 Credential: github.com/gptscript-ai/gateway-oauth2 as github.write with GITHUB_TOKEN as env and GitHub as integration and "repo" as scope
+Share Tools: Search Issues and PRs
 Param: owner: the owner of the repository
 Param: repo: the name of the repository
 Param: issueNumber: the number of the issue to modify
@@ -22,26 +51,49 @@ Param: newBody: the new body content of the issue
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js modifyIssue
 
 ---
-Name: Delete Issue
-Description: Delete an existing issue in the specified GitHub repository
+Name: Close Issue
+Description: Close an existing issue in the specified GitHub repository
 Credential: github.com/gptscript-ai/gateway-oauth2 as github.write with GITHUB_TOKEN as env and GitHub as integration and "repo" as scope
+Share Tools: Search Issues and PRs
 Param: owner: the owner of the repository
 Param: repo: the name of the repository
-Param: issueNumber: the number of the issue to delete
+Param: issueNumber: the number of the issue to close 
 
-#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js deleteIssue
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js closeIssue
 
 ---
-Name: Search Issues and PRs
-Description: Search for issues and PRs in GitHub. Results are paginated, so in order to get all results for a search, call this function with the `page` parameter incremented by 1 until no results are returned.
+Name: List Issue Comments
+Description: List comments for a specific issue by its number in the specified GitHub repository
 Credential: github.com/gptscript-ai/gateway-oauth2 as github.write with GITHUB_TOKEN as env and GitHub as integration and "repo" as scope
-Param: owner: (optional) the owner of the repository the issues or PRs belong to
-Param: repo: (optional) the name of the repository the issues or PRs belong to
-Param: query: the Github search query
-Param: perPage: (optional) number of results per page (default is 100)
-Param: page: (optional) page number of the results to fetch (default is 1)
+Share Tools: Search Issues and PRs
+Param: owner: the owner of the repository
+Param: repo: the name of the repository
+Param: issueNumber: the number of the issue to list comments for
 
-#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js searchIssuesAndPRs
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js listIssueComments
+
+---
+Name: Add Comment to Issue
+Description: Add a comment to an existing issue in the specified GitHub repository
+Credential: github.com/gptscript-ai/gateway-oauth2 as github.write with GITHUB_TOKEN as env and GitHub as integration and "repo" as scope
+Share Tools: Search Issues and PRs
+Param: owner: the owner of the repository
+Param: repo: the name of the repository
+Param: issueNumber: the number of the issue to comment on
+Param: comment: the comment to add
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js addCommentToIssue
+
+---
+Name: Get PR
+Description: Get details of a specific pull request by its number in the specified GitHub repository
+Credential: github.com/gptscript-ai/gateway-oauth2 as github.write with GITHUB_TOKEN as env and GitHub as integration and "repo" as scope
+Share Tools: Search Issues and PRs
+Param: owner: the owner of the repository
+Param: repo: the name of the repository
+Param: prNumber: the number of the pull request to retrieve
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js getPR
 
 ---
 Name: Create PR
@@ -60,6 +112,7 @@ Param: base: the name of the branch you want the changes pulled into
 Name: Modify PR
 Description: Modify an existing pull request in the specified GitHub repository
 Credential: github.com/gptscript-ai/gateway-oauth2 as github.write with GITHUB_TOKEN as env and GitHub as integration and "repo" as scope
+Share Tools: Search Issues and PRs
 Param: owner: the owner of the repository
 Param: repo: the name of the repository
 Param: prNumber: the number of the pull request to modify
@@ -69,30 +122,32 @@ Param: newBody: the new body content of the pull request
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js modifyPR
 
 ---
-Name: Delete PR
-Description: Delete an existing pull request in the specified GitHub repository
+Name: Close PR
+Description: Close an existing pull request in the specified GitHub repository
 Credential: github.com/gptscript-ai/gateway-oauth2 as github.write with GITHUB_TOKEN as env and GitHub as integration and "repo" as scope
+Share Tools: Search Issues and PRs
 Param: owner: the owner of the repository
 Param: repo: the name of the repository
-Param: prNumber: the number of the pull request to delete
+Param: prNumber: the number of the pull request to close 
 
-#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js deletePR
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js closePR
 
 ---
-Name: Add Comment to Issue
-Description: Add a comment to an existing issue in the specified GitHub repository
+Name: List PR Comments
+Description: List comments for a specific pull request by its number in the specified GitHub repository
 Credential: github.com/gptscript-ai/gateway-oauth2 as github.write with GITHUB_TOKEN as env and GitHub as integration and "repo" as scope
+Share Tools: Search Issues and PRs
 Param: owner: the owner of the repository
 Param: repo: the name of the repository
-Param: issueNumber: the number of the issue to comment on
-Param: comment: the comment to add
+Param: prNumber: the number of the pull request to list comments for
 
-#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js addCommentToIssue
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js listPRComments
 
 ---
 Name: Add Comment to PR
 Description: Add a comment to an existing pull request in the specified GitHub repository
 Credential: github.com/gptscript-ai/gateway-oauth2 as github.write with GITHUB_TOKEN as env and GitHub as integration and "repo" as scope
+Share Tools: Search Issues and PRs
 Param: owner: the owner of the repository
 Param: repo: the name of the repository
 Param: prNumber: the number of the pull request to comment on
@@ -101,62 +156,12 @@ Param: comment: the comment to add
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js addCommentToPR
 
 ---
-Name: Get Issue
-Description: Get details of a specific issue by its number in the specified GitHub repository
-Credential: github.com/gptscript-ai/gateway-oauth2 as github.write with GITHUB_TOKEN as env and GitHub as integration and "repo" as scope
-Param: owner: the owner of the repository
-Param: repo: the name of the repository
-Param: issueNumber: the number of the issue to retrieve
-
-#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js getIssue
-
----
-Name: Get PR
-Description: Get details of a specific pull request by its number in the specified GitHub repository
-Credential: github.com/gptscript-ai/gateway-oauth2 as github.write with GITHUB_TOKEN as env and GitHub as integration and "repo" as scope
-Param: owner: the owner of the repository
-Param: repo: the name of the repository
-Param: prNumber: the number of the pull request to retrieve
-
-#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js getPR
-
----
-Name: Get Issue Comments
-Description: Get comments for a specific issue by its number in the specified GitHub repository
-Credential: github.com/gptscript-ai/gateway-oauth2 as github.write with GITHUB_TOKEN as env and GitHub as integration and "repo" as scope
-Param: owner: the owner of the repository
-Param: repo: the name of the repository
-Param: issueNumber: the number of the issue to retrieve comments for
-
-#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js getIssueComments
-
----
-Name: Get PR Comments
-Description: Get comments for a specific pull request by its number in the specified GitHub repository
-Credential: github.com/gptscript-ai/gateway-oauth2 as github.write with GITHUB_TOKEN as env and GitHub as integration and "repo" as scope
-Param: owner: the owner of the repository
-Param: repo: the name of the repository
-Param: prNumber: the number of the pull request to retrieve comments for
-
-#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js getPRComments
-
----
 Name: List Repos
 Description: List all repositories for a given owner
 Credential: github.com/gptscript-ai/gateway-oauth2 as github.write with GITHUB_TOKEN as env and GitHub as integration and "repo" as scope
 Param: owner: the owner of the repositories
 
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js listRepos
-
----
-Name: Close Issue
-Description: Close an existing issue in the specified GitHub repository
-Credential: github.com/gptscript-ai/gateway-oauth2 as github.write with GITHUB_TOKEN as env and GitHub as integration and "repo" as scope
-Param: owner: the owner of the repository
-Param: repo: the name of the repository
-Param: issueNumber: the number of the issue to close
-
-#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js closeIssue
 
 ---
 Name: Get Star Count
@@ -174,3 +179,7 @@ GitHub
 ---
 !metadata:*:icon
 https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/github.svg
+
+---
+!metadata:GitHub:bundle
+true

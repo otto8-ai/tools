@@ -1,5 +1,21 @@
 import { Octokit } from '@octokit/rest';
-import { createIssue, modifyIssue, deleteIssue, searchIssuesAndPRs, createPR, modifyPR, deletePR, addCommentToIssue, addCommentToPR, getIssue, getPR, getIssueComments, getPRComments, listRepos, closeIssue, getStarCount} from './src/tools.js';
+import {
+    searchIssuesAndPRs,
+    getIssue,
+    createIssue,
+    modifyIssue,
+    closeIssue,
+    listIssueComments,
+    addCommentToIssue,
+    getPR,
+    createPR,
+    modifyPR,
+    closePR,
+    listPRComments,
+    addCommentToPR,
+    listRepos,
+    getStarCount
+} from './src/tools.js';
 
 if (process.argv.length !== 3) {
     console.log('Usage: node index.js <command>');
@@ -18,17 +34,29 @@ const octokit = new Octokit({ auth: token });
 
 try {
     switch (command) {
+        case 'searchIssuesAndPRs':
+            await searchIssuesAndPRs(octokit, process.env.OWNER, process.env.REPO, process.env.QUERY, process.env.PERPAGE, process.env.PAGE);
+            break;
+        case 'getIssue':
+            await getIssue(octokit, process.env.OWNER, process.env.REPO, process.env.ISSUENUMBER);
+            break;
         case 'createIssue':
             await createIssue(octokit, process.env.OWNER, process.env.REPO, process.env.TITLE, process.env.BODY);
             break;
         case 'modifyIssue':
             await modifyIssue(octokit, process.env.OWNER, process.env.REPO, process.env.ISSUENUMBER, process.env.NEWTITLE, process.env.NEWBODY);
             break;
-        case 'deleteIssue':
-            await deleteIssue(octokit, process.env.OWNER, process.env.REPO, process.env.ISSUENUMBER);
+        case 'closeIssue':
+            await closeIssue(octokit, process.env.OWNER, process.env.REPO, process.env.ISSUENUMBER);
             break;
-        case 'searchIssuesAndPRs':
-            await searchIssuesAndPRs(octokit, process.env.OWNER, process.env.REPO, process.env.QUERY, process.env.PERPAGE, process.env.PAGE);
+        case 'listIssueComments':
+            await listIssueComments(octokit, process.env.OWNER, process.env.REPO, process.env.ISSUENUMBER);
+            break;
+        case 'addCommentToIssue':
+            await addCommentToIssue(octokit, process.env.OWNER, process.env.REPO, process.env.ISSUENUMBER, process.env.COMMENT);
+            break;
+        case 'getPR':
+            await getPR(octokit, process.env.OWNER, process.env.REPO, process.env.PRNUMBER);
             break;
         case 'createPR':
             await createPR(octokit, process.env.OWNER, process.env.REPO, process.env.TITLE, process.env.BODY, process.env.HEAD, process.env.BASE);
@@ -36,32 +64,17 @@ try {
         case 'modifyPR':
             await modifyPR(octokit, process.env.OWNER, process.env.REPO, process.env.PRNUMBER, process.env.NEWTITLE, process.env.NEWBODY);
             break;
-        case 'deletePR':
-            await deletePR(octokit, process.env.OWNER, process.env.REPO, process.env.PRNUMBER);
+        case 'closePR':
+            await closePR(octokit, process.env.OWNER, process.env.REPO, process.env.PRNUMBER);
             break;
-        case 'addCommentToIssue':
-            await addCommentToIssue(octokit, process.env.OWNER, process.env.REPO, process.env.ISSUENUMBER, process.env.COMMENT);
+        case 'listPRComments':
+            await listPRComments(octokit, process.env.OWNER, process.env.REPO, process.env.PRNUMBER);
             break;
         case 'addCommentToPR':
             await addCommentToPR(octokit, process.env.OWNER, process.env.REPO, process.env.PRNUMBER, process.env.COMMENT);
             break;
-        case 'getIssue':
-            await getIssue(octokit, process.env.OWNER, process.env.REPO, process.env.ISSUENUMBER);
-            break;
-        case 'getPR':
-            await getPR(octokit, process.env.OWNER, process.env.REPO, process.env.PRNUMBER);
-            break;
-        case 'getIssueComments':
-            await getIssueComments(octokit, process.env.OWNER, process.env.REPO, process.env.ISSUENUMBER);
-            break;
-        case 'getPRComments':
-            await getPRComments(octokit, process.env.OWNER, process.env.REPO, process.env.PRNUMBER);
-            break;
         case 'listRepos':
             await listRepos(octokit, process.env.OWNER);
-            break;
-        case 'closeIssue':
-            await closeIssue(octokit, process.env.OWNER, process.env.REPO, process.env.ISSUENUMBER);
             break;
         case 'getStarCount':
             await getStarCount(octokit, process.env.OWNER, process.env.REPO);
