@@ -30,6 +30,7 @@ Name: Get Event Details
 Description: Get the details for a particular event.
 Share Context: Outlook Calendar Context
 Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.calendar.write with GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN as env and microsoft365 as integration and "Calendars.Read Calendars.Read.Shared Calendars.ReadWrite Calendars.ReadWrite.Shared Group.Read.All Group.ReadWrite.All GroupMember.Read.All User.Read offline_access" as scope
+Share Tools: List Calendars, List Events, Search Events
 Param: event_id: The unique ID of the event.
 Param: calendar_id: The unique ID of the calendar or group the event belongs to. If unset, uses the default calendar.
 Param: owner_type: The type of the owner of the calendar or group. Possible values are "user" or "group". Required if calendar_id is set.
@@ -42,6 +43,7 @@ Description: Create a new event.
 Share Context: Outlook Calendar Context
 Share Context: github.com/gptscript-ai/context/current-time
 Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.calendar.write with GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN as env and microsoft365 as integration and "Calendars.Read Calendars.Read.Shared Calendars.ReadWrite Calendars.ReadWrite.Shared Group.Read.All Group.ReadWrite.All GroupMember.Read.All User.Read offline_access" as scope
+Share Tools: List Calendars
 Param: subject: (Required) The title of the event.
 Param: location: (Required) The location of the event.
 Param: body: (Required) The details of the event.
@@ -59,6 +61,7 @@ Name: Invite User To Event
 Description: Invites another person to an existing event.
 Share Context: Outlook Calendar Context
 Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.calendar.write with GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN as env and microsoft365 as integration and "Calendars.Read Calendars.Read.Shared Calendars.ReadWrite Calendars.ReadWrite.Shared Group.Read.All Group.ReadWrite.All GroupMember.Read.All User.Read offline_access" as scope
+Share Tools: List Calendars, List Events, Search Events,Get Event Details
 Param: event_id: The unique ID of the event.
 Param: calendar_id: The unique ID of the calendar or group the event belongs to. If unset, uses the default calendar.
 Param: owner_type: The type of the owner of the calendar or group. Possible values are "user" or "group". Required if calendar_id is set.
@@ -73,6 +76,7 @@ Description: Deletes an event.
 Share Context: Outlook Calendar Context
 Share Context: github.com/gptscript-ai/context/current-time
 Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.calendar.write with GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN as env and microsoft365 as integration and "Calendars.Read Calendars.Read.Shared Calendars.ReadWrite Calendars.ReadWrite.Shared Group.Read.All Group.ReadWrite.All GroupMember.Read.All User.Read offline_access" as scope
+Share Tools: List Calendars, List Events, Search Events, Get Event Details
 Param: event_id: The unique ID of the event.
 Param: calendar_id: The unique ID of the calendar or group the event belongs to. If unset, uses the default calendar.
 Param: owner_type: The type of the owner of the calendar or group. Possible values are "user" or "group". Required if calendar_id is set.
@@ -97,6 +101,7 @@ Description: Accept, tentatively accept, or decline an event invitation.
 Share Context: Outlook Calendar Context
 Share Context: github.com/gptscript-ai/context/current-time
 Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.calendar.write with GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN as env and microsoft365 as integration and "Calendars.Read Calendars.Read.Shared Calendars.ReadWrite Calendars.ReadWrite.Shared Group.Read.All Group.ReadWrite.All GroupMember.Read.All User.Read offline_access" as scope
+Share Tools: List Calendars, List Events, Search Events, Get Event Details
 Param: event_id: The unique ID of the event.
 Param: calendar_id: The unique ID of the calendar or group the event belongs to. If unset, uses the default calendar.
 Param: owner_type: The type of the owner of the calendar or group. Possible values are "user" or "group". Required if calendar_id is set.
