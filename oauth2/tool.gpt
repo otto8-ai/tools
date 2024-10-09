@@ -1,0 +1,7 @@
+Name: oauth2
+Param: integration: Name of the integration to use
+Param: env: Name of the environment variable to set with the token
+Param: scope: Space-separated list of scopes to request
+Param: optional_scope: (optional) Space-separated list of scopes to request (HubSpot-specific)
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool
