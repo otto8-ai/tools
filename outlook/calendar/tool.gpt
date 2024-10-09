@@ -1,3 +1,9 @@
+---
+Name: Outlook Calendar
+Description: Tools for interacting with Microsoft Outlook Calendar.
+Share Tools: List Calendars, List Events Today, List Events, Get Event Details, Create Event, Invite User To Event, Delete Event, Search Events, Respond To Event
+
+---
 Name: List Calendars
 Description: List all calendars available to the user.
 Share Context: Outlook Calendar Context
@@ -61,7 +67,7 @@ Name: Invite User To Event
 Description: Invites another person to an existing event.
 Share Context: Outlook Calendar Context
 Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.calendar.write with GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN as env and microsoft365 as integration and "Calendars.Read Calendars.Read.Shared Calendars.ReadWrite Calendars.ReadWrite.Shared Group.Read.All Group.ReadWrite.All GroupMember.Read.All User.Read offline_access" as scope
-Share Tools: List Calendars, List Events, Search Events,Get Event Details
+Share Tools: List Calendars, List Events, Search Events, Get Event Details
 Param: event_id: The unique ID of the event.
 Param: calendar_id: The unique ID of the calendar or group the event belongs to. If unset, uses the default calendar.
 Param: owner_type: The type of the owner of the calendar or group. Possible values are "user" or "group". Required if calendar_id is set.
@@ -124,6 +130,10 @@ Do not output calendar IDs or event IDs because they are not helpful for the use
 You don't know the user's timezone. If they ask you to create or modify events, get clarification about their timezone and use it. If creating a date/time in the UTC timezone, it must end with 'Z' to properly denote it's for UTC.
 
 ## End of instructions for using the Microsoft Outlook Calendar tools
+
+---
+!metadata:Outlook Calendar:bundle
+true
 
 ---
 !metadata:*:category
