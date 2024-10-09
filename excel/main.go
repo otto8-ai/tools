@@ -26,8 +26,6 @@ func main() {
 		err = commands.GetWorksheetData(context.Background(), os.Getenv("WORKBOOK_ID"), os.Getenv("WORKSHEET_ID"))
 	case "addWorksheetRow":
 		err = commands.AddWorksheetRow(context.Background(), os.Getenv("WORKBOOK_ID"), os.Getenv("WORKSHEET_ID"), os.Getenv("CONTENTS"))
-	case "createWorkbook":
-		err = commands.CreateWorkbook(context.Background(), os.Getenv("NAME"))
 	case "createWorksheet":
 		err = commands.CreateWorksheet(context.Background(), os.Getenv("WORKBOOK_ID"), os.Getenv("NAME"))
 	default:

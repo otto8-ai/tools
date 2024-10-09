@@ -41,38 +41,6 @@ func ListWorkbooks(ctx context.Context, c *msgraphsdkgo.GraphServiceClient) ([]W
 	return infos, nil
 }
 
-func CreateWorkbook(ctx context.Context, name string) (string, error) {
-	if !strings.HasSuffix(name, ".xlsx") {
-		name += ".xlsx"
-	}
-
-	// There didn't seem to be a usable method in the SDK for this, so once again we need to make a raw HTTP request.
-	req, err := http.NewRequestWithContext(ctx, http.MethodPut, fmt.Sprintf("https://graph.microsoft.com/v1.0/me/drive/root:/%s:/content", name), strings.NewReader(""))
-	if err != nil {
-		return "", fmt.Errorf("failed to create request: %w", err)
-	}
-	req.Header.Set("Authorization", "Bearer"+os.Getenv(global.CredentialEnv))
-	req.Header.Set("Content-Type", "text/plain") // We're not actually sending any content, so the content-type doesn't really matter.
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return "", fmt.Errorf("failed to send request: %w", err)
-	}
-
-	if resp.StatusCode != http.StatusCreated {
-		return "", fmt.Errorf("unexpected status code: %d", resp.StatusCode)
-	}
-
-	var result struct {
-		ID string `json:"id"`
-	}
-	if err = json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return "", fmt.Errorf("failed to decode response: %w", err)
-	}
-
-	return result.ID, nil
-}
-
 func CreateWorksheet(ctx context.Context, c *msgraphsdkgo.GraphServiceClient, workbookID, name string) (string, error) {
 	drive, err := c.Me().Drive().Get(ctx, nil)
 	if err != nil {
