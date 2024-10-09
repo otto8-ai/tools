@@ -1,3 +1,9 @@
+---
+Name: Outlook Mail
+Description: Tools for interacting with Microsoft Outlook Mail.
+Share Tools: List Mail Folders, List Messages, Get Message Details, Search Messages, Create Draft, Send Draft, Delete Message, Move Message
+
+---
 Name: List Mail Folders
 Description: Lists all available mail folders.
 Share Context: Outlook Mail Context
@@ -104,6 +110,10 @@ When printing a list of messages for the user, include the body preview. When pr
 When printing a single message or a list of messages, use Markdown formatting.
 
 ## End of instructions for using the Microsoft Outlook Mail tools
+
+---
+!metadata:Outlook Mail:bundle
+true
 
 ---
 !metadata:*:category
