@@ -1,3 +1,9 @@
+---
+Name: Excel
+Description: Tools for interacting with Microsoft Excel workbooks.
+Share Tools: List Workbooks, List Worksheets, Get Worksheet Data, Add Worksheet Row, Create Worksheet
+
+---
 Name: List Workbooks
 Description: Lists all workbooks available to the user.
 Share Context: Excel Context
@@ -61,6 +67,10 @@ You have access to a set of tools to access, create, and modify Microsoft Excel 
 Do not output workbook IDs or worksheet IDs because they are not helpful for the user.
 
 ## End of instructions for using Excel tools
+
+---
+!metadata:Excel:bundle
+true
 
 ---
 !metadata:*:category
