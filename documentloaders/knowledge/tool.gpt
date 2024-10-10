@@ -5,4 +5,4 @@ Params: output: Path to output file where the extracted markdown content should 
 metadata: supported-file-type: pdf
 
 Always call the Knowledge Load tool with the input and output parameters set to the input and output parameters of the PDF Document Loader tool.
-Explicitly set the Loader parameter to pdf.
+Explicitly set the Loader parameter to mupdf.

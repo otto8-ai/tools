@@ -1,0 +1,10 @@
+Name: LlamaIndex PDF Document Loader
+Tools: LlamaIndex Document Loader from ./simpledirectoryreader/tool.gpt
+Params: input: Path to input PDF file
+Params: output: Path to output file where the extracted markdown content should be written to. Should end with .md
+metadata: supported-file-type: pdf
+
+Always call the "LlamaIndex Document Loader" tool with the input and output parameters set to the input and output parameters of the PDF Document Loader tool.
+
+
+

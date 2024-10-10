@@ -1,0 +1,5 @@
+Name: LlamaIndex Document Loader
+Params: Input: Input File
+Params: Output: Output File
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/load.py
