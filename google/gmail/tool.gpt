@@ -7,9 +7,10 @@ Param: max_results: Maximum number of emails to list (Optional: Default will lis
 
 ---
 Name: Read Email
-Description: Read an email from the user's Gmail account
+Description: Read an email or draft from the user's Gmail account
 Credential: github.com/gptscript-ai/gateway-oauth2 as google.gmail.write with GMAIL_GOOGLE_OAUTH_TOKEN as env and google-gmail as integration and "https://www.googleapis.com/auth/userinfo.email openid https://www.googleapis.com/auth/userinfo.profile https://mail.google.com/ https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.compose" as scope
-Param: email_id: Email ID to read (Optional: If not provided, email_subject is required)
+Share Tools: Search Emails, List Inbox, List Drafts
+Param: email_id: Email or Draft ID to read (Optional: If not provided, email_subject is required)
 Param: email_subject: Email subject to read (Optional: If not provided, email_id is required)
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/readEmail.py
@@ -55,9 +56,18 @@ Call the `Send Email` tool using this data with the following modifications:
 Name: Delete Email
 Description: Delete an email in a user's Gmail account.
 Credential: github.com/gptscript-ai/gateway-oauth2 as google.gmail.write with GMAIL_GOOGLE_OAUTH_TOKEN as env and google-gmail as integration and "https://www.googleapis.com/auth/userinfo.email openid https://www.googleapis.com/auth/userinfo.profile https://mail.google.com/ https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.compose" as scope
+Share Tools: Search Emails, List Inbox
 Param: email_id: The ID of the email to delete
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/deleteEmail.py
+
+---
+Name: List Drafts
+Description: List drafts in a user's Gmail account
+Credential: github.com/gptscript-ai/gateway-oauth2 as google.gmail.write with GMAIL_GOOGLE_OAUTH_TOKEN as env and google-gmail as integration and "https://www.googleapis.com/auth/userinfo.email openid https://www.googleapis.com/auth/userinfo.profile https://mail.google.com/ https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.compose" as scope
+Param: max_results: Maximum number of drafts to list (Optional: Default will list all drafts)
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/listDrafts.py
 
 ---
 Name: Create Draft
@@ -73,8 +83,10 @@ Param: message: Message body of the email
 
 ---
 Name: Update Draft
-Description: Update a draft email in a user's Gmail account. Make sure you call Read Email to get the contents of the current draft before updating the draft.
+Description: Update a draft email in a user's Gmail account.
+Share Context: Draft Context
 Credential: github.com/gptscript-ai/gateway-oauth2 as google.gmail.write with GMAIL_GOOGLE_OAUTH_TOKEN as env and google-gmail as integration and "https://www.googleapis.com/auth/userinfo.email openid https://www.googleapis.com/auth/userinfo.profile https://mail.google.com/ https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.compose" as scope
+Share Tools: List Drafts, Read Email
 Param: draft_id: The ID of the draft email to update
 Param: to_emails: A comma separated list of email addresses to send the email to
 Param: cc_emails: A comma separated list of email addresses to cc the email to (Optional)
@@ -84,21 +96,40 @@ Param: message: Message body of the email
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/updateDraft.py
 
+
+
 ---
 Name: Delete Draft
 Description: Delete a draft email in a user's Gmail account.
+Share Context: Draft Context
 Credential: github.com/gptscript-ai/gateway-oauth2 as google.gmail.write with GMAIL_GOOGLE_OAUTH_TOKEN as env and google-gmail as integration and "https://www.googleapis.com/auth/userinfo.email openid https://www.googleapis.com/auth/userinfo.profile https://mail.google.com/ https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.compose" as scope
+Share Tools: List Drafts, Read Email
 Param: draft_id: The ID of the draft email to delete
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/deleteDraft.py
 
 ---
 Name: Send Draft
-Description: Send a draft email in a user's Gmail account. Assumes the draft email has already been created and has all the required fields filled out.
+Description: Send a draft email in a user's Gmail account.
+Share Context: Draft Context
 Credential: github.com/gptscript-ai/gateway-oauth2 as google.gmail.write with GMAIL_GOOGLE_OAUTH_TOKEN as env and google-gmail as integration and "https://www.googleapis.com/auth/userinfo.email openid https://www.googleapis.com/auth/userinfo.profile https://mail.google.com/ https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.compose" as scope
+Share Tools: List Drafts, Read Email, Create Draft, Update Draft
 Param: draft_id: The ID of the draft email to send
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/sendDraft.py
+
+---
+Name: Draft Context
+Type: context
+
+#!sys.echo
+
+## Instructions for Updating, Deleting, or Sending a Draft Email
+
+If more information about a draft email is required before updating, deleting, or sending it,
+retrieve the contents of the current draft using the Read Email tool.
+
+## End of instructions for Updating, Deleting, or Sending a Draft Email
 
 ---
 !metadata:*:category
