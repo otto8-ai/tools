@@ -1,3 +1,10 @@
+---
+Name: Gmail
+Metadata: bundle: true
+Description: Tools for interacting with a user's Gmail account
+Share Tools: List Inbox, Read Email, Search Emails, Send Email, Delete Email, List Drafts, Create Draft, Update Draft, Delete Draft, Send Draft
+
+---
 Name: List Inbox
 Description: List emails in the user's Gmail inbox
 Credential: github.com/gptscript-ai/gateway-oauth2 as google.gmail.write with GMAIL_GOOGLE_OAUTH_TOKEN as env and google-gmail as integration and "https://www.googleapis.com/auth/userinfo.email openid https://www.googleapis.com/auth/userinfo.profile https://mail.google.com/ https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.compose" as scope
@@ -95,8 +102,6 @@ Param: subject: Subject of the email
 Param: message: Message body of the email
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/updateDraft.py
-
-
 
 ---
 Name: Delete Draft
