@@ -1,3 +1,10 @@
+---
+Name: Google Sheets
+Metadata: bundle: true
+Description: Tools for accessing, creating, and modifying Google Sheets
+Share Tools: Read Spreadsheet, Read Tables From Spreadsheet, List Spreadsheets, Create Spreadsheet, Append Cells To Spreadsheet, Update Cell In Spreadsheet
+
+---
 Name: Read Spreadsheet
 Description: Read data from a Google Sheet. Spreadsheet ID is required if the spreadsheet does not belong to the user.
 Share Context: Google Sheets Context
