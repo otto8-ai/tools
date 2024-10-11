@@ -7,7 +7,7 @@ Share Tools: List Mail Folders, List Messages, Get Message Details, Search Messa
 Name: List Mail Folders
 Description: Lists all available mail folders.
 Share Context: Outlook Mail Context
-Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.mail.read with GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN as env and microsoft365 as integration and "Mail.Read User.Read offline_access" as scope
+Credential: Outlook Mail OAuth Read Credential from ./credential
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listMailFolders
 
@@ -16,7 +16,7 @@ Name: List Messages
 Description: Lists all messages in a folder.
 Share Context: Outlook Mail Context
 Share Context: github.com/gptscript-ai/context/current-time
-Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.mail.read with GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN as env and microsoft365 as integration and "Mail.Read User.Read offline_access" as scope
+Credential: Outlook Mail OAuth Read Credential from ./credential
 Share Tools: List Mail Folders
 Param: folder_id: The ID of the folder to list messages in.
 
@@ -27,7 +27,7 @@ Name: Get Message Details
 Description: Get the details of a message.
 Share Context: Outlook Mail Context
 Share Context: github.com/gptscript-ai/context/current-time
-Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.mail.read with GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN as env and microsoft365 as integration and "Mail.Read User.Read offline_access" as scope
+Credential: Outlook Mail OAuth Read Credential from ./credential
 Share Tools: List Messages, Search Messages
 Param: message_id: The ID of the message to get details for.
 
@@ -38,7 +38,7 @@ Name: Search Messages
 Description: Search for messages. At least one of subject, from_address, or from_name must be specified.
 Share Context: Outlook Mail Context
 Share Context: github.com/gptscript-ai/context/current-time
-Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.mail.read with GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN as env and microsoft365 as integration and "Mail.Read User.Read offline_access" as scope
+Credential: Outlook Mail OAuth Read Credential from ./credential
 Share Tools: List Mail Folders
 Param: subject: (Optional) Search query for the subject of the message.
 Param: from_address: (Optional) Search query for the email address of the sender.
@@ -52,7 +52,7 @@ Name: Create Draft
 Description: Create (but do not send) a draft message.
 Share Context: Outlook Mail Context
 Share Context: github.com/gptscript-ai/context/current-time
-Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.mail.write with GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN as env and microsoft365 as integration and "Mail.Read Mail.ReadWrite Mail.Send User.Read offline_access" as scope
+Credential: Outlook Mail OAuth Write Credential from ./credential
 Param: subject: The subject of the message.
 Param: content: The content of the message in HTML.
 Param: recipients: A comma-separated list of email addresses to send the message to. No spaces. Example: person1@example.com,person2@example.com
@@ -66,7 +66,7 @@ Name: Send Draft
 Description: Send an existing draft message.
 Share Context: Outlook Mail Context
 Share Context: github.com/gptscript-ai/context/current-time
-Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.mail.write with GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN as env and microsoft365 as integration and "Mail.Read Mail.ReadWrite Mail.Send User.Read offline_access" as scope
+Credential: Outlook Mail OAuth Write Credential from ./credential
 Share Tools: Create Draft
 Param: draft_id: The ID of the draft to send.
 
@@ -77,7 +77,7 @@ Name: Delete Message
 Description: Delete a message.
 Share Context: Outlook Mail Context
 Share Context: github.com/gptscript-ai/context/current-time
-Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.mail.write with GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN as env and microsoft365 as integration and "Mail.Read Mail.ReadWrite Mail.Send User.Read offline_access" as scope
+Credential: Outlook Mail OAuth Write Credential from ./credential
 Share Tools: List Messages, Search Messages
 Param: message_id: The ID of the message to delete. This is NOT a mail folder ID.
 
@@ -88,7 +88,7 @@ Name: Move Message
 Description: Moves a message to a folder.
 Share Context: Outlook Mail Context
 Share Context: github.com/gptscript-ai/context/current-time
-Credential: github.com/gptscript-ai/gateway-oauth2 as outlook.mail.write with GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN as env and microsoft365 as integration and "Mail.Read Mail.ReadWrite Mail.Send User.Read offline_access" as scope
+Credential: Outlook Mail OAuth Write Credential from ./credential
 Share Tools: List Mail Folders, List Messages, Search Messages
 Param: message_id: The ID of the message to move.
 Param: destination_folder_id: The ID of the folder to move the message into.
