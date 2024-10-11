@@ -7,7 +7,7 @@ Share Tools: List Workbooks, List Worksheets, Get Worksheet Data, Add Worksheet 
 Name: List Workbooks
 Description: Lists all workbooks available to the user.
 Share Context: Excel Context
-Credential: github.com/gptscript-ai/gateway-oauth2 as excel.write with GPTSCRIPT_MICROSOFT_EXCEL_TOKEN as env and microsoft365 as integration and "Files.Read Files.ReadWrite Files.Read.All User.Read offline_access" as scope
+Credential: ./credential
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listWorkbooks
 
@@ -15,7 +15,7 @@ Credential: github.com/gptscript-ai/gateway-oauth2 as excel.write with GPTSCRIPT
 Name: List Worksheets
 Description: Lists all worksheets available in a workbook.
 Share Context: Excel Context
-Credential: github.com/gptscript-ai/gateway-oauth2 as excel.write with GPTSCRIPT_MICROSOFT_EXCEL_TOKEN as env and microsoft365 as integration and "Files.Read Files.ReadWrite Files.Read.All User.Read offline_access" as scope
+Credential: ./credential
 Share Tools: List Workbooks
 Param: workbook_id: ID of the workbook to list worksheets from
 
@@ -25,7 +25,7 @@ Param: workbook_id: ID of the workbook to list worksheets from
 Name: Get Worksheet Data
 Description: Get the data of a worksheet in a workbook.
 Share Context: Excel Context
-Credential: github.com/gptscript-ai/gateway-oauth2 as excel.write with GPTSCRIPT_MICROSOFT_EXCEL_TOKEN as env and microsoft365 as integration and "Files.Read Files.ReadWrite Files.Read.All User.Read offline_access" as scope
+Credential: ./credential
 Share Tools: List Workbooks, List Worksheets
 Param: workbook_id: ID of the workbook to get worksheet data from
 Param: worksheet_id: ID of the worksheet to get data from
@@ -36,7 +36,7 @@ Param: worksheet_id: ID of the worksheet to get data from
 Name: Add Worksheet Row
 Description: Adds a row to an existing worksheet in a workbook.
 Share Context: Excel Context
-Credential: github.com/gptscript-ai/gateway-oauth2 as excel.write with GPTSCRIPT_MICROSOFT_EXCEL_TOKEN as env and microsoft365 as integration and "Files.Read Files.ReadWrite Files.Read.All User.Read offline_access" as scope
+Credential: ./credential
 Share Tools: List Workbooks, List Worksheets, Get Worksheet Data
 Param: workbook_id: ID of the workbook to add row to
 Param: worksheet_id: ID of the worksheet to add row to
@@ -48,7 +48,7 @@ Param: contents: comma-separated values to add as a new row
 Name: Create Worksheet
 Description: Creates a new worksheet in a workbook.
 Share Context: Excel Context
-Credential: github.com/gptscript-ai/gateway-oauth2 as excel.write with GPTSCRIPT_MICROSOFT_EXCEL_TOKEN as env and microsoft365 as integration and "Files.Read Files.ReadWrite Files.Read.All User.Read offline_access" as scope
+Credential: ./credential
 Share Tools: List Workbooks
 Param: workbook_id: ID of the workbook to create worksheet in
 Param: name: Name of the new worksheet
