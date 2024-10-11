@@ -1,0 +1,7 @@
+Name: Sync Notion Pages
+Description: Provides access to the Notion API (read-only)
+Credential: github.com/gptscript-ai/gateway-oauth2 as notion.sync-file with NOTION_TOKEN as env and notion as integration
+
+#!/usr/bin/env npm --prefix ${GPTSCRIPT_TOOL_DIR} run start
+
+

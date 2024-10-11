@@ -26,6 +26,15 @@ tools:
   github:
     reference: github.com/gptscript-ai/tools/github
     all: true
+  knowledge-syncer-notion:
+    reference: github.com/gptscript-ai/tools/knowledge-syncer/notion
+    all: true
+  knowledge-syncer-onedrive:
+    reference: github.com/gptscript-ai/tools/knowledge-syncer/onedrive
+    all: true
+  knowledge-syncer-website:
+    reference: github.com/gptscript-ai/tools/knowledge-syncer/website
+    all: true
 
 # Add one day... Same format as above
 stepTemplates: {}
