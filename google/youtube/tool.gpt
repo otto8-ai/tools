@@ -30,7 +30,7 @@ Param: video_url: The URL of a YouTube video. (e.g. https://www.youtube.com/watc
 Name: Generate Raw YouTube Transcript
 Metadata: index: false
 Description: Generates and returns a raw text transcript of a YouTube video.
-Tools: github.com/gptscript-ai/credentials/model-provider
+Credential: github.com/gptscript-ai/credentials/model-provider
 Tools: github.com/gptscript-ai/context/workspace
 param: video_url: The URL of a YouTube video. (e.g. https://www.youtube.com/watch?v=VIDEO_ID or https://youtu.be/VIDEO_ID)
 
