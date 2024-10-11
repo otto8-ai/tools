@@ -1,0 +1,5 @@
+Name: Sync OneDrive Files
+Description: Provides access to sync files from OneDrive
+Credential: github.com/gptscript-ai/gateway-oauth2 as onedrive.sync-file with GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN as env and microsoft365 as integration and "Files.ReadWrite.All offline_access" as scope
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool
