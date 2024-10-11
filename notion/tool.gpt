@@ -6,7 +6,7 @@ Share Tools: Get Page, Get Database, Search, Create Page, List Users, Get Databa
 ---
 Name: Get Page
 Description: Gets the contents of a page in Notion
-Credential: github.com/gptscript-ai/gateway-oauth2 as notion.write with NOTION_TOKEN as env and notion as integration
+Credential: ./credential
 Share Tools: Search
 Args: id: the ID of the page to get
 
@@ -15,7 +15,7 @@ Args: id: the ID of the page to get
 ---
 Name: Get Database
 Description: Gets the contents of a database in Notion
-Credential: github.com/gptscript-ai/gateway-oauth2 as notion.write with NOTION_TOKEN as env and notion as integration
+Credential: ./credential
 Share Tools: Search
 Args: id: the ID of the database to get
 
@@ -24,7 +24,7 @@ Args: id: the ID of the database to get
 ---
 Name: Search
 Description: Searches a Notion workspace for pages and databases
-Credential: github.com/gptscript-ai/gateway-oauth2 as notion.write with NOTION_TOKEN as env and notion as integration
+Credential: ./credential
 Args: query: the search query
 
 #!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js search
@@ -32,7 +32,7 @@ Args: query: the search query
 ---
 Name: Create Page
 Description: Creates a new page in Notion
-Credential: github.com/gptscript-ai/gateway-oauth2 as notion.write with NOTION_TOKEN as env and notion as integration
+Credential: ./credential
 Share Tools: Search
 Args: name: the name of the page to create
 Args: contents: the contents of the page in plain text
@@ -43,7 +43,7 @@ Args: parentPageId: ID of the page that will be the parent of the new page
 ---
 Name: List Users
 Description: Lists all users in the Notion workspace, including their IDs
-Credential: github.com/gptscript-ai/gateway-oauth2 as notion.write with NOTION_TOKEN as env and notion as integration
+Credential: ./credential
 Args: max: the maximum number of users to list (default: unlimited)
 
 #!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js listUsers
@@ -51,7 +51,7 @@ Args: max: the maximum number of users to list (default: unlimited)
 ---
 Name: Get Database Properties
 Description: Lists the properties of a database in Notion
-Credential: github.com/gptscript-ai/gateway-oauth2 as notion.write with NOTION_TOKEN as env and notion as integration
+Credential: ./credential
 Share Tools: Search
 Args: id: the ID of the database to get properties for
 
@@ -60,7 +60,7 @@ Args: id: the ID of the database to get properties for
 ---
 Name: Add Database Row
 Description: Adds a new row to an existing database in Notion. Call Get Database Properties prior to this to get the properties of the database.
-Credential: github.com/gptscript-ai/gateway-oauth2 as notion.write with NOTION_TOKEN as env and notion as integration
+Credential: ./credential
 Share Tools: Search, Get Database Properties
 Share Context: addDatabaseRowInstructions from context.gpt
 Args: id: the ID of the database to add the row to
@@ -71,7 +71,7 @@ Args: properties: a JSON string containing all of the key-value pairs for the ne
 ---
 Name: Update Database Row
 Description: Updates an existing row in a database in Notion. Call Get Database Properties prior to this to get the properties of the database.
-Credential: github.com/gptscript-ai/gateway-oauth2 as notion.write with NOTION_TOKEN as env and notion as integration
+Credential: ./credential
 Share Context: addDatabaseRowInstructions from context.gpt
 Share Tools: Search, Get Database Properties, Get Database
 Args: id: the ID of the database that contains the row
