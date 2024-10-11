@@ -6,7 +6,7 @@ Share Tools: Search Issues and PRs, Get Issue, Create Issue, Modify Issue, Close
 ---
 Name: Search Issues and PRs
 Description: Search for issues and PRs in GitHub. Results are paginated, so in order to get all results for a search, call this function with the `page` parameter incremented by 1 until no results are returned.
-Credential: github.com/gptscript-ai/gateway-oauth2 as github.write with GITHUB_TOKEN as env and GitHub as integration and "repo" as scope
+Credential: ./credential
 Param: owner: (optional) the owner of the repository the issues or PRs belong to
 Param: repo: (optional) the name of the repository the issues or PRs belong to
 Param: query: the Github search query
@@ -18,7 +18,7 @@ Param: page: (optional) page number of the results to fetch (default is 1)
 ---
 Name: Get Issue
 Description: Get details of a specific issue by its number in the specified GitHub repository
-Credential: github.com/gptscript-ai/gateway-oauth2 as github.write with GITHUB_TOKEN as env and GitHub as integration and "repo" as scope
+Credential: ./credential
 Share Tools: Search Issues and PRs
 Param: owner: the owner of the repository
 Param: repo: the name of the repository
@@ -29,7 +29,7 @@ Param: issueNumber: the number of the issue to retrieve
 ---
 Name: Create Issue
 Description: Create a new issue in the specified GitHub repository
-Credential: github.com/gptscript-ai/gateway-oauth2 as github.write with GITHUB_TOKEN as env and GitHub as integration and "repo" as scope
+Credential: ./credential
 Param: owner: the owner of the repository
 Param: repo: the name of the repository
 Param: title: the title of the issue
@@ -40,7 +40,7 @@ Param: body: the body content of the issue
 ---
 Name: Modify Issue
 Description: Modify an existing issue in the specified GitHub repository
-Credential: github.com/gptscript-ai/gateway-oauth2 as github.write with GITHUB_TOKEN as env and GitHub as integration and "repo" as scope
+Credential: ./credential
 Share Tools: Search Issues and PRs
 Param: owner: the owner of the repository
 Param: repo: the name of the repository
@@ -53,7 +53,7 @@ Param: newBody: the new body content of the issue
 ---
 Name: Close Issue
 Description: Close an existing issue in the specified GitHub repository
-Credential: github.com/gptscript-ai/gateway-oauth2 as github.write with GITHUB_TOKEN as env and GitHub as integration and "repo" as scope
+Credential: ./credential
 Share Tools: Search Issues and PRs
 Param: owner: the owner of the repository
 Param: repo: the name of the repository
@@ -64,7 +64,7 @@ Param: issueNumber: the number of the issue to close
 ---
 Name: List Issue Comments
 Description: List comments for a specific issue by its number in the specified GitHub repository
-Credential: github.com/gptscript-ai/gateway-oauth2 as github.write with GITHUB_TOKEN as env and GitHub as integration and "repo" as scope
+Credential: ./credential
 Share Tools: Search Issues and PRs
 Param: owner: the owner of the repository
 Param: repo: the name of the repository
@@ -75,7 +75,7 @@ Param: issueNumber: the number of the issue to list comments for
 ---
 Name: Add Comment to Issue
 Description: Add a comment to an existing issue in the specified GitHub repository
-Credential: github.com/gptscript-ai/gateway-oauth2 as github.write with GITHUB_TOKEN as env and GitHub as integration and "repo" as scope
+Credential: ./credential
 Share Tools: Search Issues and PRs
 Param: owner: the owner of the repository
 Param: repo: the name of the repository
@@ -87,7 +87,7 @@ Param: comment: the comment to add
 ---
 Name: Get PR
 Description: Get details of a specific pull request by its number in the specified GitHub repository
-Credential: github.com/gptscript-ai/gateway-oauth2 as github.write with GITHUB_TOKEN as env and GitHub as integration and "repo" as scope
+Credential: ./credential
 Share Tools: Search Issues and PRs
 Param: owner: the owner of the repository
 Param: repo: the name of the repository
@@ -98,7 +98,7 @@ Param: prNumber: the number of the pull request to retrieve
 ---
 Name: Create PR
 Description: Create a new pull request in the specified GitHub repository
-Credential: github.com/gptscript-ai/gateway-oauth2 as github.write with GITHUB_TOKEN as env and GitHub as integration and "repo" as scope
+Credential: ./credential
 Param: owner: the owner of the repository
 Param: repo: the name of the repository
 Param: title: the title of the pull request
@@ -111,7 +111,7 @@ Param: base: the name of the branch you want the changes pulled into
 ---
 Name: Modify PR
 Description: Modify an existing pull request in the specified GitHub repository
-Credential: github.com/gptscript-ai/gateway-oauth2 as github.write with GITHUB_TOKEN as env and GitHub as integration and "repo" as scope
+Credential: ./credential
 Share Tools: Search Issues and PRs
 Param: owner: the owner of the repository
 Param: repo: the name of the repository
@@ -124,7 +124,7 @@ Param: newBody: the new body content of the pull request
 ---
 Name: Close PR
 Description: Close an existing pull request in the specified GitHub repository
-Credential: github.com/gptscript-ai/gateway-oauth2 as github.write with GITHUB_TOKEN as env and GitHub as integration and "repo" as scope
+Credential: ./credential
 Share Tools: Search Issues and PRs
 Param: owner: the owner of the repository
 Param: repo: the name of the repository
@@ -135,7 +135,7 @@ Param: prNumber: the number of the pull request to close
 ---
 Name: List PR Comments
 Description: List comments for a specific pull request by its number in the specified GitHub repository
-Credential: github.com/gptscript-ai/gateway-oauth2 as github.write with GITHUB_TOKEN as env and GitHub as integration and "repo" as scope
+Credential: ./credential
 Share Tools: Search Issues and PRs
 Param: owner: the owner of the repository
 Param: repo: the name of the repository
@@ -146,7 +146,7 @@ Param: prNumber: the number of the pull request to list comments for
 ---
 Name: Add Comment to PR
 Description: Add a comment to an existing pull request in the specified GitHub repository
-Credential: github.com/gptscript-ai/gateway-oauth2 as github.write with GITHUB_TOKEN as env and GitHub as integration and "repo" as scope
+Credential: ./credential
 Share Tools: Search Issues and PRs
 Param: owner: the owner of the repository
 Param: repo: the name of the repository
@@ -158,7 +158,7 @@ Param: comment: the comment to add
 ---
 Name: List Repos
 Description: List all repositories for a given owner
-Credential: github.com/gptscript-ai/gateway-oauth2 as github.write with GITHUB_TOKEN as env and GitHub as integration and "repo" as scope
+Credential: ./credential
 Param: owner: the owner of the repositories
 
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js listRepos
@@ -166,7 +166,7 @@ Param: owner: the owner of the repositories
 ---
 Name: Get Star Count
 Description: Return the star count for the specified repo. 
-Credential: github.com/gptscript-ai/gateway-oauth2 as github.write with GITHUB_TOKEN as env and GitHub as integration and "repo" as scope
+Credential: ./credential
 Param: owner: the owner of the repository
 Param: repo: the name of the repository
 
