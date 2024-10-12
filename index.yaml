@@ -1,39 +1,39 @@
 tools:
   excel:
-    reference: github.com/gptscript-ai/tools/excel
+    reference: github.com/otto8-ai/tools/excel
     all: true
   slack:
-    reference: github.com/gptscript-ai/tools/slack
+    reference: github.com/otto8-ai/tools/slack
     all: true
   notion:
-    reference: github.com/gptscript-ai/tools/notion
+    reference: github.com/otto8-ai/tools/notion
     all: true
   google-gmail:
-    reference: github.com/gptscript-ai/tools/google/gmail
+    reference: github.com/otto8-ai/tools/google/gmail
     all: true
   google-sheets:
-    reference: github.com/gptscript-ai/tools/google/sheets
+    reference: github.com/otto8-ai/tools/google/sheets
     all: true
   google-youtube:
-    reference: github.com/gptscript-ai/tools/google/youtube
+    reference: github.com/otto8-ai/tools/google/youtube
     all: true
   outlook-mail:
-    reference: github.com/gptscript-ai/tools/outlook/mail
+    reference: github.com/otto8-ai/tools/outlook/mail
     all: true
   outlook-calender:
-    reference: github.com/gptscript-ai/tools/outlook/calendar
+    reference: github.com/otto8-ai/tools/outlook/calendar
     all: true
   github:
-    reference: github.com/gptscript-ai/tools/github
+    reference: github.com/otto8-ai/tools/github
     all: true
   knowledge-syncer-notion:
-    reference: github.com/gptscript-ai/tools/knowledge-syncer/notion
+    reference: github.com/otto8-ai/tools/knowledge-syncer/notion
     all: true
   knowledge-syncer-onedrive:
-    reference: github.com/gptscript-ai/tools/knowledge-syncer/onedrive
+    reference: github.com/otto8-ai/tools/knowledge-syncer/onedrive
     all: true
   knowledge-syncer-website:
-    reference: github.com/gptscript-ai/tools/knowledge-syncer/website
+    reference: github.com/otto8-ai/tools/knowledge-syncer/website
     all: true
 
 # Add one day... Same format as above
