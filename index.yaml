@@ -1,40 +1,43 @@
 tools:
   excel:
-    reference: github.com/otto8-ai/tools/excel
+    reference: ./excel
     all: true
   slack:
-    reference: github.com/otto8-ai/tools/slack
+    reference: ./slack
     all: true
   notion:
-    reference: github.com/otto8-ai/tools/notion
+    reference: ./notion
     all: true
   google-gmail:
-    reference: github.com/otto8-ai/tools/google/gmail
+    reference: ./google/gmail
     all: true
   google-sheets:
-    reference: github.com/otto8-ai/tools/google/sheets
+    reference: ./google/sheets
     all: true
   google-youtube:
-    reference: github.com/otto8-ai/tools/google/youtube
+    reference: ./google/youtube
     all: true
   outlook-mail:
-    reference: github.com/otto8-ai/tools/outlook/mail
+    reference: ./outlook/mail
     all: true
   outlook-calender:
-    reference: github.com/otto8-ai/tools/outlook/calendar
+    reference: ./outlook/calendar
     all: true
   github:
-    reference: github.com/otto8-ai/tools/github
+    reference: ./github
     all: true
-  knowledge-syncer-notion:
-    reference: github.com/otto8-ai/tools/knowledge-syncer/notion
-    all: true
-  knowledge-syncer-onedrive:
-    reference: github.com/otto8-ai/tools/knowledge-syncer/onedrive
-    all: true
-  knowledge-syncer-website:
-    reference: github.com/otto8-ai/tools/knowledge-syncer/website
-    all: true
+
+knowledgeDataSources:
+  notion-data-source:
+    reference: ./knowledge/data-sources/notion
+  onedrive-data-source:
+    reference: ./knowledge/data-sources/onedrive
+  website-data-source:
+    reference: ./knowledge/data-sources/website
 
 # Add one day... Same format as above
 stepTemplates: {}
+
+system:
+  knowledge:
+    reference: ./knowledge

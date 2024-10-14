@@ -1,0 +1,7 @@
+name: Tool Index
+description: The upstream Otto tool registry
+
+# This a silly hack to get the gptscript client to load this file using it's loader
+# and also print it's contents if you run this tool
+outputfilter: index.yaml
+#!sys.echo
