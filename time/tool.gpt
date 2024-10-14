@@ -1,0 +1,16 @@
+Name: Current Date and Time
+Description: Context that provides the current date and time in ISO 8601 format.
+Type: context
+
+#!python3
+from datetime import datetime, timezone
+
+print("The current date and time is ", datetime.now(timezone.utc).isoformat())
+
+---
+!metadata:*:category
+Time
+
+---
+!metadata:*:icon
+https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/duotone/hourglass-duotone.svg
