@@ -1,4 +1,5 @@
 Name: Sync and scrape website 
 Description: Scrape website and sync down as markdown files
+Metadata: discoverable: false
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool
