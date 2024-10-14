@@ -39,5 +39,9 @@ knowledgeDataSources:
 stepTemplates: {}
 
 system:
-  knowledge:
-    reference: ./knowledge
+  knowledge-retrieval:
+    reference: github.com/gptscript-ai/knowledge
+  knowledge-ingest:
+    reference: github.com/gptscript-ai/knowledge/ingest.gpt
+  knowledge-delete:
+    reference: github.com/gptscript-ai/knowledge/delete.gpt
