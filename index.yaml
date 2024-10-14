@@ -40,7 +40,7 @@ stepTemplates: {}
 
 system:
   knowledge-retrieval:
-    reference: github.com/gptscript-ai/knowledge
+    reference: github.com/gptscript-ai/knowledge@main
   knowledge-ingest:
     reference: github.com/gptscript-ai/knowledge/ingest.gpt
   knowledge-delete:
