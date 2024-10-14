@@ -42,6 +42,6 @@ system:
   knowledge-retrieval:
     reference: github.com/gptscript-ai/knowledge@main
   knowledge-ingest:
-    reference: github.com/gptscript-ai/knowledge/ingest.gpt
+    reference: github.com/gptscript-ai/knowledge/ingest.gpt@main
   knowledge-delete:
-    reference: github.com/gptscript-ai/knowledge/delete.gpt
+    reference: github.com/gptscript-ai/knowledge/delete.gpt@main
