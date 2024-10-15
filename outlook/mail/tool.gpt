@@ -7,6 +7,7 @@ Share Tools: List Mail Folders, List Messages, Get Message Details, Search Messa
 Name: List Mail Folders
 Description: Lists all available mail folders.
 Share Context: Outlook Mail Context
+Share Context: github.com/gptscript-ai/datasets/context
 Credential: Outlook Mail OAuth Read Credential from ./credential
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listMailFolders
@@ -16,6 +17,7 @@ Name: List Messages
 Description: Lists all messages in a folder.
 Share Context: Outlook Mail Context
 Share Context: github.com/gptscript-ai/context/current-time
+Share Context: github.com/gptscript-ai/datasets/context
 Credential: Outlook Mail OAuth Read Credential from ./credential
 Share Tools: List Mail Folders
 Param: folder_id: The ID of the folder to list messages in.

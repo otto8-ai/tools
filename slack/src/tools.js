@@ -35,15 +35,44 @@ export async function listChannels(webClient) {
 }
 
 export async function searchChannels(webClient, query) {
-    const channels = await webClient.conversations.list({limit: 100, types: 'public_channel'})
-    channels.channels.forEach(channel => {
+    const publicResult = await webClient.conversations.list({limit: 100, types: 'public_channel'})
+    const privateResult = await webClient.conversations.list({limit: 100, types: 'private_channel'})
+
+    const publicChannels = publicResult.channels.filter(channel => channel.name.includes(query))
+    const privateChannels = privateResult.channels.filter(channel => channel.name.includes(query))
+
+    if (publicChannels.length + privateChannels.length === 0) {
+        console.log('No channels found')
+        return
+    } else if (publicChannels.length + privateChannels.length > 10) {
+        try {
+            const gptscriptClient = new GPTScript()
+            const dataset = await gptscriptClient.createDataset(process.env.GPTSCRIPT_WORKSPACE_DIR, `${query}_slack_channels`, `list of slack channels matching search query "${query}"`)
+
+            for (const channel of [...publicChannels, ...privateChannels]) {
+                await gptscriptClient.addDatasetElement(
+                    process.env.GPTSCRIPT_WORKSPACE_DIR,
+                    dataset.id,
+                    channel.name,
+                    channel.purpose.value || '',
+                    channelToString(channel))
+            }
+
+            console.log(`Created dataset with ID ${dataset.id} with ${publicChannels.length + privateChannels.length} channels`)
+            return
+        } catch (e) {
+            console.log("error while creating dataset: ", e)
+            process.exit(1)
+        }
+    }
+
+    publicChannels.forEach(channel => {
         if (channel.name.includes(query)) {
             console.log(channelToString(channel))
         }
     })
-
-    const privateChannels = await webClient.conversations.list({limit: 100, types: 'private_channel'})
-    privateChannels.channels.forEach(channel => {
+    console.log("")
+    privateChannels.forEach(channel => {
         if (channel.name.includes(query)) {
             console.log(channelToString(channel))
         }
@@ -89,7 +118,7 @@ export async function getThreadHistory(webClient, channelId, threadId, limit) {
     }
 
     for (const reply of replies.messages) {
-        await printMessage(webClient, reply)
+        console.log(await messageToString(webClient, reply))
     }
 }
 
@@ -107,10 +136,26 @@ export async function search(webClient, query) {
     if (result.messages.matches.length === 0) {
         console.log('No messages found')
         return
+    } else if (result.messages.matches.length > 10) {
+        const gptscriptClient = new GPTScript()
+        const dataset = await gptscriptClient.createDataset(process.env.GPTSCRIPT_WORKSPACE_DIR, `slack_search_${query}`, `search results for query "${query}"`)
+
+        for (const message of result.messages.matches) {
+            await gptscriptClient.addDatasetElement(
+                process.env.GPTSCRIPT_WORKSPACE_DIR,
+                dataset.id,
+                `${message.iid}_${message.ts}`,
+                "",
+                await messageToString(webClient, message)
+            )
+        }
+
+        console.log(`Created dataset with ID ${dataset.id} with ${result.messages.matches.length} search results`)
+        return
     }
 
     for (const message of result.messages.matches) {
-        await printMessage(webClient, message)
+        console.log(await messageToString(webClient, message))
     }
 }
 
@@ -256,7 +301,7 @@ export async function getDMHistory(webClient, userIds, limit) {
     }
 
     for (const message of history.messages) {
-        await printMessage(webClient, message)
+        console.log(await messageToString(webClient, message))
     }
 }
 
@@ -282,7 +327,7 @@ export async function getDMThreadHistory(webClient, userIds, threadId, limit) {
     }
 
     for (const reply of replies.messages) {
-        await printMessage(webClient, reply)
+        console.log(await messageToString(webClient, reply))
     }
 }
 
@@ -317,21 +362,22 @@ function userToString(user) {
     return str
 }
 
-async function printMessage(webClient, message) {
+async function messageToString(webClient, message) {
     const time = new Date(parseFloat(message.ts) * 1000)
     let userName = message.user
     try {
         userName = await getUserName(webClient, message.user)
     } catch (e) {}
 
-    console.log(`${time.toLocaleString()}: ${userName}: ${message.text}`)
-    console.log(`  message ID: ${message.ts}`)
+    let str = `${time.toLocaleString()}: ${userName}: ${message.text}\n`
+    str += `  message ID: ${message.ts}\n`
     if (message.blocks && message.blocks.length > 0) {
-        console.log(`  message blocks: ${JSON.stringify(message.blocks)}`)
+        str += `  message blocks: ${JSON.stringify(message.blocks)}\n`
     }
     if (message.attachments && message.attachments.length > 0) {
-        console.log(`  message attachments: ${JSON.stringify(message.attachments)}`)
+        str += `  message attachments: ${JSON.stringify(message.attachments)}\n`
     }
+    return str
 }
 
 function channelToString(channel) {
@@ -344,7 +390,7 @@ function channelToString(channel) {
 
 async function printHistory(webClient, channelId, history) {
     for (const message of history.messages) {
-        await printMessage(webClient, message)
+        console.log(await messageToString(webClient, message))
         if (message.reply_count > 0) {
             console.log(`  thread ID ${threadID(message)} - ${message.reply_count} ${replyString(message.reply_count)}:`)
             const replies = await webClient.conversations.replies({channel: channelId, ts: message.ts, limit: 3})
@@ -353,7 +399,7 @@ async function printHistory(webClient, channelId, history) {
                     continue
                 }
 
-                await printMessage(webClient, reply)
+                console.log(await messageToString(webClient, reply))
             }
             if (replies.has_more) {
                 console.log('  More replies exist')

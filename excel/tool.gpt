@@ -25,6 +25,7 @@ Param: workbook_id: ID of the workbook to list worksheets from
 Name: Get Worksheet Data
 Description: Get the data of a worksheet in a workbook.
 Share Context: Excel Context
+Share Context: github.com/gptscript-ai/datasets/context
 Credential: ./credential
 Share Tools: List Workbooks, List Worksheets
 Param: workbook_id: ID of the workbook to get worksheet data from

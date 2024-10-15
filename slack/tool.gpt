@@ -7,6 +7,7 @@ Share Tools: List Channels, Search Channels, Get Channel History, Get Channel Hi
 Name: List Channels
 Description: List all channels in the Slack workspace. Returns the name and ID for each channel
 Share Context: Slack Context
+Share Context: github.com/gptscript-ai/datasets/context
 Credential: ./credential
 
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js listChannels
@@ -15,6 +16,7 @@ Credential: ./credential
 Name: Search Channels
 Description: Search for channels in the Slack workspace
 Share Context: Slack Context
+Share Context: github.com/gptscript-ai/datasets/context
 Credential: ./credential
 Param: query: the search query
 
@@ -60,6 +62,7 @@ Param: limit: the number of messages to return
 Name: Search Messages
 Description: Search for messages in the Slack workspace
 Share Context: Slack Context
+Share Context: github.com/gptscript-ai/datasets/context
 Credential: ./credential
 Param: query: the search query
 
@@ -90,6 +93,7 @@ Param: text: the text to send
 Name: List Users
 Description: List all users in the Slack workspace.
 Share Context: Slack Context
+Share Context: github.com/gptscript-ai/datasets/context
 Credential: ./credential
 
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js listUsers
@@ -98,6 +102,7 @@ Credential: ./credential
 Name: Search Users
 Description: Search for users in the Slack workspace
 Share Context: Slack Context
+Share Context: github.com/gptscript-ai/datasets/context
 Credential: ./credential
 Param: query: the search query
 
