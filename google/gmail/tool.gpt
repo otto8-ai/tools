@@ -33,8 +33,7 @@ Param: max_results: Maximum number of emails to list (Optional: Default will lis
 
 ---
 Name: Send Email
-Description: Send an email from the user's Gmail account.
-Context: Forward Email Context
+Description: Send an email from the user's Gmail account. Do not attempt to forward or reply to emails using this tool.
 Credential: ./credential
 Param: to_emails: A comma separated list of email addresses to send the email to
 Param: cc_emails: A comma separated list of email addresses to cc the email to (Optional)
@@ -43,21 +42,6 @@ Param: subject: Subject of the email.
 Param: message: Message body of the email.
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/sendEmail.py
-
----
-Name: Forward Email Context
-Type: context
-
-#!sys.echo
-
-## Instructions for sending a forwarded email with the Send Email tool
-When forwarding an email, retrieve the contents of the original email using the Read Email tool.
-Call the `Send Email` tool using this data with the following modifications:
-- prepend `Fwd: ` to the subject
-- add the original message as a quoted reply in the message body, with the following template prepended to the original message: `---------- Forwarded message ---------\nFrom: <original_sender>\nDate: <original_date>\nSubject: <original_subject>\nTo: <original_recipient>`
-- if the user has an additional message to add, include it above the quoted reply
-
-## End of instructions for sending a forwarded email with the Send Email tool
 
 ---
 Name: Delete Email
