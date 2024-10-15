@@ -1,15 +1,36 @@
+import {GPTScript} from "@gptscript-ai/gptscript";
+
 export async function listChannels(webClient) {
-    const channels = await webClient.conversations.list({limit: 100, types: 'public_channel'})
+    const publicChannels = await webClient.conversations.list({limit: 100, types: 'public_channel'})
+    const privateChannels = await webClient.conversations.list({limit: 100, types: 'private_channel'})
+
+    if (publicChannels.channels.length + privateChannels.channels.length > 10) {
+        try {
+            const gptscriptClient = new GPTScript()
+            const dataset = await gptscriptClient.createDataset(process.env.GPTSCRIPT_WORKSPACE_DIR, 'slack_channels', 'list of slack channels')
+
+            for (const channel of [...publicChannels.channels, ...privateChannels.channels]) {
+                await gptscriptClient.addDatasetElement(process.env.GPTSCRIPT_WORKSPACE_DIR, dataset.id, channel.name, channel.purpose.value || '', channelToString(channel))
+            }
+
+            console.log(`Created dataset with ID ${dataset.id} with ${publicChannels.channels.length + privateChannels.channels.length} channels`)
+            return
+        } catch (e) {
+            console.log("error while creating dataset: ", e)
+            process.exit(1)
+        }
+    }
+
     console.log('Public channels:')
-    channels.channels.forEach(channel => {
-        printChannel(channel)
+    publicChannels.channels.forEach(channel => {
+        console.log(channelToString(channel))
     })
     console.log('')
 
-    const privateChannels = await webClient.conversations.list({limit: 100, types: 'private_channel'})
+
     console.log('Private channels:')
     privateChannels.channels.forEach(channel => {
-        printChannel(channel)
+        console.log(channelToString(channel))
     })
 }
 
@@ -17,14 +38,14 @@ export async function searchChannels(webClient, query) {
     const channels = await webClient.conversations.list({limit: 100, types: 'public_channel'})
     channels.channels.forEach(channel => {
         if (channel.name.includes(query)) {
-            printChannel(channel)
+            console.log(channelToString(channel))
         }
     })
 
     const privateChannels = await webClient.conversations.list({limit: 100, types: 'private_channel'})
     privateChannels.channels.forEach(channel => {
         if (channel.name.includes(query)) {
-            printChannel(channel)
+            console.log(channelToString(channel))
         }
     })
 }
@@ -122,16 +143,53 @@ export async function sendMessageInThread(webClient, channelId, threadTs, text) 
 
 export async function listUsers(webClient) {
     const users = await webClient.users.list()
+
+    if (users.members.length > 10) {
+        try {
+            const gptscriptClient = new GPTScript()
+            const dataset = await gptscriptClient.createDataset(process.env.GPTSCRIPT_WORKSPACE_DIR, 'slack_users', 'list of slack users')
+
+            for (const user of users.members) {
+                await gptscriptClient.addDatasetElement(process.env.GPTSCRIPT_WORKSPACE_DIR, dataset.id, user.name, user.profile.real_name, userToString(user))
+            }
+
+            console.log(`Created dataset with ID ${dataset.id} with ${users.members.length} users`)
+            return
+        } catch (e) {
+            console.log("error while creating dataset: ", e)
+            process.exit(1)
+        }
+    }
+
     users.members.forEach(user => {
-        printUser(user)
+        console.log(userToString(user))
     })
 }
 
 export async function searchUsers(webClient, query) {
     const users = await webClient.users.list()
-    users.members.forEach(user => {
+    const matchingUsers = users.members.filter(user => user.name.includes(query) || user.profile.real_name.includes(query))
+
+    if (matchingUsers.length > 10) {
+        try {
+            const gptscriptClient = new GPTScript()
+            const dataset = await gptscriptClient.createDataset(process.env.GPTSCRIPT_WORKSPACE_DIR, `${query}_slack_users`, `list of slack users matching search query "${query}"`)
+
+            for (const user of matchingUsers) {
+                await gptscriptClient.addDatasetElement(process.env.GPTSCRIPT_WORKSPACE_DIR, dataset.id, user.name, user.profile.real_name, userToString(user))
+            }
+
+            console.log(`Created dataset with ID ${dataset.id} with ${matchingUsers.length} users`)
+            return
+        } catch (e) {
+            console.log("error while creating dataset: ", e)
+            process.exit(1)
+        }
+    }
+
+    matchingUsers.forEach(user => {
         if (user.name.includes(query) || user.profile.real_name.includes(query)) {
-            printUser(user)
+            console.log(userToString(user))
         }
     })
 }
@@ -249,13 +307,14 @@ async function getUserName(webClient, user) {
 
 // Printer functions below
 
-function printUser(user) {
-    console.log(user.name)
-    console.log(`  ID: ${user.id}`)
-    console.log(`  Full name: ${user.profile.real_name}`)
+function userToString(user) {
+    let str = `${user.name}`
+    str += `  ID: ${user.id}`
+    str += `  Full name: ${user.profile.real_name}`
     if (user.deleted === true) {
-        console.log(`  Account deleted: true`)
+        str += '  Account deleted: true'
     }
+    return str
 }
 
 async function printMessage(webClient, message) {
@@ -275,12 +334,12 @@ async function printMessage(webClient, message) {
     }
 }
 
-function printChannel(channel) {
-    let printStr = `${channel.name} (ID: ${channel.id})`
+function channelToString(channel) {
+    let str = `${channel.name} (ID: ${channel.id})`
     if (channel.is_archived === true) {
-        printStr += ' (archived)'
+        str += ' (archived)'
     }
-    console.log(printStr)
+    return str
 }
 
 async function printHistory(webClient, channelId, history) {
