@@ -13,7 +13,7 @@ async def main():
         # Query Google Drive for all Google Sheets files
         query = "mimeType='application/vnd.google-apps.spreadsheet'"
         page_token = None
-        sheets = dict() # mapping of ID to name
+        sheets = dict() # mapping of sheet name to sheet ID
         while True:
             results = service.files().list(q=query,
                                            pageSize=10,
