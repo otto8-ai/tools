@@ -47,7 +47,7 @@ const tool: gptscript.ToolDef = {
     required: ['search']
   },
   chat: false,
-  context: [],
+  context: ['Current Date and Time from github.com/otto8-ai/tools/time'],
   credentials: [],
   description: '',
   export: [],
