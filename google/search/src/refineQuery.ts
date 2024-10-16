@@ -5,7 +5,7 @@ export async function refineQuery(query: string): Promise<string> {
     agents: [],
     arguments: { type: 'object' },
     chat: false,
-    context: [],
+    context: ['Current Date and Time from github.com/otto8-ai/tools/time'],
     credentials: [],
     description: '',
     export: [],
@@ -19,8 +19,8 @@ export async function refineQuery(query: string): Promise<string> {
     tools: [],
     modelName: 'gpt-4o-mini',
     instructions: `
-    Refine the query below to improve its Google Search results.
-    The refined query should preserve the inferred intent of the original query.
+    Refine the query below to improve the quality of its Google Search results if necessary.
+    Be conservative with refinements so that the original meaning is more or less preserved.
     Do not quote the output.
 
     Query: ${query}
