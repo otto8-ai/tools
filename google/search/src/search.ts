@@ -32,7 +32,6 @@ export async function search(
 
       const url = $(element).attr('href') ?? '';
       if (url && !url.includes('youtube.com/watch?v') && !foundURLs.has(url)) {
-        console.warn(url)
         foundURLs.add(url);
         contentsPromises.push(getMarkdown(noJSPages[contentsPromises.length], url).then(content => {
           return content ? { url, content } : null;
