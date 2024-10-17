@@ -61,20 +61,23 @@ async def list_messages(service, query, max_results):
 
         if len(all_messages) > 10:
             gptscript_client = gptscript.GPTScript()
-            dataset = await gptscript_client.create_dataset(
-                os.getenv("GPTSCRIPT_WORKSPACE_DIR"),
-                f"gmail_{query}",
-                f"list of emails in Gmail for query {query}")
-            for message in all_messages:
-                msg_id, msg_str = message_to_string(service, message)
-                await gptscript_client.add_dataset_element(
+            try:
+                dataset = await gptscript_client.create_dataset(
                     os.getenv("GPTSCRIPT_WORKSPACE_DIR"),
-                    dataset.id,
-                    msg_id,
-                    msg_str
-                )
-            print(f"Created dataset with ID {dataset.id} with {len(all_messages)} emails")
-            return
+                    f"gmail_{query}",
+                    f"list of emails in Gmail for query {query}")
+                for message in all_messages:
+                    msg_id, msg_str = message_to_string(service, message)
+                    await gptscript_client.add_dataset_element(
+                        os.getenv("GPTSCRIPT_WORKSPACE_DIR"),
+                        dataset.id,
+                        msg_id,
+                        msg_str
+                    )
+                print(f"Created dataset with ID {dataset.id} with {len(all_messages)} emails")
+                return
+            except Exception:
+                pass  # Ignore errors if we got any, and just print the results.
 
         display_list_messages(service, all_messages)
 
@@ -126,21 +129,24 @@ async def list_drafts(service, max_results=None):
                 break
 
         if len(all_drafts) > 10:
-            gptscript_client = gptscript.GPTScript()
-            dataset = await gptscript_client.create_dataset(
-                os.getenv("GPTSCRIPT_WORKSPACE_DIR"),
-                "gmail_drafts",
-                "list of drafts in Gmail")
-            for draft in all_drafts:
-                draft_id, draft_str = draft_to_string(service, draft)
-                await gptscript_client.add_dataset_element(
+            try:
+                gptscript_client = gptscript.GPTScript()
+                dataset = await gptscript_client.create_dataset(
                     os.getenv("GPTSCRIPT_WORKSPACE_DIR"),
-                    dataset.id,
-                    draft_id,
-                    draft_str
-                )
-            print(f"Created dataset with ID {dataset.id} with {len(all_drafts)} drafts")
-            return
+                    "gmail_drafts",
+                    "list of drafts in Gmail")
+                for draft in all_drafts:
+                    draft_id, draft_str = draft_to_string(service, draft)
+                    await gptscript_client.add_dataset_element(
+                        os.getenv("GPTSCRIPT_WORKSPACE_DIR"),
+                        dataset.id,
+                        draft_id,
+                        draft_str
+                    )
+                print(f"Created dataset with ID {dataset.id} with {len(all_drafts)} drafts")
+                return
+            except Exception:
+                pass  # Ignore errors if we got any, and just print the results.
 
         display_list_drafts(service, all_drafts)
 

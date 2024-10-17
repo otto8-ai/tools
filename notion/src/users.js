@@ -31,10 +31,7 @@ export async function listUsers(client, max) {
             }
             console.log(`Created dataset with ID ${dataset.id} with ${min(users.length, max)} users`)
             return
-        } catch (e) {
-            console.log("Error initializing GPTScript client: ", e)
-            process.exit(1)
-        }
+        } catch (e) {} // Ignore errors if we got any. We'll just print the results below.
     }
 
     for (let i = 0; i < max && i < users.length; i++) {

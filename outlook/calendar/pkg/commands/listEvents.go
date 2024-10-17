@@ -51,29 +51,28 @@ func ListEvents(ctx context.Context, start, end time.Time) error {
 		}
 
 		dataset, err := gptscriptClient.CreateDataset(ctx, workspace, "event list", "List of Outlook Calendar events")
-		if err != nil {
-			return fmt.Errorf("failed to create dataset: %w", err)
-		}
+		// If we got back an error, we just print the events. Otherwise, write them to the dataset.
+		if err == nil {
+			for cal, events := range calendarEvents {
+				for _, event := range events {
+					eventString := printers.EventToString(ctx, c, cal, event)
+					if _, err := gptscriptClient.AddDatasetElement(ctx, workspace, dataset.ID,
+						util.Deref(event.GetSubject())+"_"+util.Deref(cal.Calendar.GetName())+"_"+util.Deref(event.GetStart().GetDateTime()),
+						util.Deref(event.GetBodyPreview()), eventString); err != nil {
+						if strings.Contains(err.Error(), "already exists") {
+							// We can hit this error pretty easily. I think it has to do with events that span multiple days.
+							// It makes the most sense to just skip it and move on to the next event.
+							continue
+						}
 
-		for cal, events := range calendarEvents {
-			for _, event := range events {
-				eventString := printers.EventToString(ctx, c, cal, event)
-				if _, err := gptscriptClient.AddDatasetElement(ctx, workspace, dataset.ID,
-					util.Deref(event.GetSubject())+"_"+util.Deref(cal.Calendar.GetName())+"_"+util.Deref(event.GetStart().GetDateTime()),
-					util.Deref(event.GetBodyPreview()), eventString); err != nil {
-					if strings.Contains(err.Error(), "already exists") {
-						// We can hit this error pretty easily. I think it has to do with events that span multiple days.
-						// It makes the most sense to just skip it and move on to the next event.
-						continue
+						return fmt.Errorf("failed to add event to dataset: %w", err)
 					}
-
-					return fmt.Errorf("failed to add event to dataset: %w", err)
 				}
 			}
-		}
 
-		fmt.Printf("Created dataset with ID %s with %d events\n", dataset.ID, len(util.Flatten(util.MapValues(calendarEvents))))
-		return nil
+			fmt.Printf("Created dataset with ID %s with %d events\n", dataset.ID, len(util.Flatten(util.MapValues(calendarEvents))))
+			return nil
+		}
 	}
 
 	for cal, events := range calendarEvents {

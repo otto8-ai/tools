@@ -23,6 +23,11 @@ func GetWorksheetData(ctx context.Context, workbookID, worksheetID string) error
 		return err
 	}
 
+	// For 10 or fewer rows, there's no need to create a dataset.
+	if len(data) <= 10 {
+		return printWorksheetData(data)
+	}
+
 	gptscriptClient, err := gptscript.NewGPTScript()
 	if err != nil {
 		return fmt.Errorf("failed to create gptscript client: %w", err)
@@ -36,7 +41,8 @@ func GetWorksheetData(ctx context.Context, workbookID, worksheetID string) error
 		fmt.Sprintf("Data from Excel worksheet %s in workbook %s", worksheetID, workbookID),
 	)
 	if err != nil {
-		return fmt.Errorf("failed to create dataset: %w", err)
+		// If we're unable to create the dataset, it's better to just print all the data than fail.
+		return printWorksheetData(data)
 	}
 
 	for i, row := range data {
@@ -55,5 +61,14 @@ func GetWorksheetData(ctx context.Context, workbookID, worksheetID string) error
 	}
 
 	fmt.Printf("Dataset created with ID: %s\n", dataset.ID)
+	return nil
+}
+
+func printWorksheetData(data [][]any) error {
+	dataBytes, err := json.Marshal(data)
+	if err != nil {
+		return fmt.Errorf("failed to marshal data: %w", err)
+	}
+	fmt.Println(string(dataBytes))
 	return nil
 }

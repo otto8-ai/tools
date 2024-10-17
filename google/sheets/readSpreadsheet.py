@@ -39,19 +39,22 @@ async def main():
                 cell_values[cell_reference] = value
 
         if len(cell_values) > 10:
-            gptscript_client = GPTScript()
-            dataset = await gptscript_client.create_dataset(
-                os.getenv("GPTSCRIPT_WORKSPACE_DIR"),
-                f"{spreadsheet.id}_data",
-                f"data for Google Sheet with ID {spreadsheet.id}",
-            )
-
-            for cell_reference, value in cell_values.items():
-                await gptscript_client.add_dataset_element(
-                    os.getenv("GPTSCRIPT_WORKSPACE_DIR"), dataset.id, cell_reference, value if value != "" else " "
+            try:
+                gptscript_client = GPTScript()
+                dataset = await gptscript_client.create_dataset(
+                    os.getenv("GPTSCRIPT_WORKSPACE_DIR"),
+                    f"{spreadsheet.id}_data",
+                    f"data for Google Sheet with ID {spreadsheet.id}",
                 )
-            print(f"Dataset created with ID {dataset.id} with {len(cell_values)} elements")
-            return
+
+                for cell_reference, value in cell_values.items():
+                    await gptscript_client.add_dataset_element(
+                        os.getenv("GPTSCRIPT_WORKSPACE_DIR"), dataset.id, cell_reference, value if value != "" else " "
+                    )
+                print(f"Dataset created with ID {dataset.id} with {len(cell_values)} elements")
+                return
+            except Exception:
+                pass  # Ignore errors if we got any, and just print the results.
 
         for cell_reference, value in cell_values.items():
             if show_cell_ref:

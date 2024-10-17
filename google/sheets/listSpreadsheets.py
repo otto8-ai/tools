@@ -34,24 +34,27 @@ async def main():
                 break
 
         if len(sheets) > 10:
-            gptscript_client = GPTScript()
-            dataset = await gptscript_client.create_dataset(
-                os.getenv("GPTSCRIPT_WORKSPACE_DIR"),
-                "google_sheets_list",
-                "list of Google Sheets in Google Drive"
-            )
-
-            for sheet_name, sheet_id in sheets.items():
-                await gptscript_client.add_dataset_element(
+            try:
+                gptscript_client = GPTScript()
+                dataset = await gptscript_client.create_dataset(
                     os.getenv("GPTSCRIPT_WORKSPACE_DIR"),
-                    dataset.id,
-                    sheet_name,
-                    f"ID: {sheet_id}",
-                    "sheet ID"
+                    "google_sheets_list",
+                    "list of Google Sheets in Google Drive"
                 )
 
-            print(f"Created dataset with ID {dataset.id} with {len(sheets)} Google Sheets")
-            return
+                for sheet_name, sheet_id in sheets.items():
+                    await gptscript_client.add_dataset_element(
+                        os.getenv("GPTSCRIPT_WORKSPACE_DIR"),
+                        dataset.id,
+                        sheet_name,
+                        f"ID: {sheet_id}",
+                        "sheet ID"
+                    )
+
+                print(f"Created dataset with ID {dataset.id} with {len(sheets)} Google Sheets")
+                return
+            except Exception:
+                pass  # Ignore errors if we got any, and just print the results.
 
         for sheet_name, sheet_id in sheets.items():
             print(f"{sheet_name} (ID: {sheet_id})")

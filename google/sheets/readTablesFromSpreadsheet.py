@@ -52,19 +52,22 @@ async def main():
             tables.append(current_table)
 
         if len(tables) > 10:
-            gptscript_client = GPTScript()
-            dataset = await gptscript_client.create_dataset(
-                os.getenv("GPTSCRIPT_WORKSPACE_DIR"), f"{spreadsheet.id}_tables", ""
-            )
-
-            for index, table in enumerate(tables):
-                table_text = "\n".join([f"[{', '.join(row)}]" for row in table])
-                await gptscript_client.add_dataset_element(
-                    os.getenv("GPTSCRIPT_WORKSPACE_DIR"), dataset.id, f"Table {index + 1}", table_text
+            try:
+                gptscript_client = GPTScript()
+                dataset = await gptscript_client.create_dataset(
+                    os.getenv("GPTSCRIPT_WORKSPACE_DIR"), f"{spreadsheet.id}_tables", ""
                 )
 
-            print(f"Created dataset with ID {dataset.id} with {len(tables)} tables")
-            return
+                for index, table in enumerate(tables):
+                    table_text = "\n".join([f"[{', '.join(row)}]" for row in table])
+                    await gptscript_client.add_dataset_element(
+                        os.getenv("GPTSCRIPT_WORKSPACE_DIR"), dataset.id, f"Table {index + 1}", table_text
+                    )
+
+                print(f"Created dataset with ID {dataset.id} with {len(tables)} tables")
+                return
+            except Exception:
+                pass  # Ignore errors if we got any, and just print the results.
 
         for index, table in enumerate(tables):
             print(f"Table {index + 1}:")

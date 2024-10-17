@@ -36,10 +36,7 @@ export async function search(client, query, max) {
             }
             console.log(`Created dataset with ID ${dataset.id} with ${min(results.length, max)} search results`)
             return
-        } catch (e) {
-            console.log("Error initializing GPTScript client: ", e)
-            process.exit(1)
-        }
+        } catch (e) {} // Ignore errors if we got any. We'll just print the results below.
     }
 
     if (results.length === 0) {

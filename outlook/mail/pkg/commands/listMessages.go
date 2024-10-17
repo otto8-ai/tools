@@ -44,23 +44,22 @@ func ListMessages(ctx context.Context, folderID string) error {
 		}
 
 		dataset, err := gptscriptClient.CreateDataset(ctx, os.Getenv("GPTSCRIPT_WORKSPACE_DIR"), fmt.Sprintf("%s_outlook_mail", folderID), "Outlook mail messages in folder "+folderID)
-		if err != nil {
-			return fmt.Errorf("failed to create dataset: %w", err)
-		}
+		// If we got back an error, we just print the messages. Otherwise, write them to the dataset.
+		if err == nil {
+			for _, message := range messages {
+				messageStr, err := printers.MessageToString(message, false)
+				if err != nil {
+					return fmt.Errorf("failed to convert message to string: %w", err)
+				}
 
-		for _, message := range messages {
-			messageStr, err := printers.MessageToString(message, false)
-			if err != nil {
-				return fmt.Errorf("failed to convert message to string: %w", err)
+				if _, err = gptscriptClient.AddDatasetElement(ctx, os.Getenv("GPTSCRIPT_WORKSPACE_DIR"), dataset.ID, util.Deref(message.GetId()), util.Deref(message.GetSubject()), messageStr); err != nil {
+					return fmt.Errorf("failed to add element: %w", err)
+				}
 			}
 
-			if _, err = gptscriptClient.AddDatasetElement(ctx, os.Getenv("GPTSCRIPT_WORKSPACE_DIR"), dataset.ID, util.Deref(message.GetId()), util.Deref(message.GetSubject()), messageStr); err != nil {
-				return fmt.Errorf("failed to add element: %w", err)
-			}
+			fmt.Printf("Created dataset with ID %s with %d messages\n", dataset.ID, len(messages))
+			return nil
 		}
-
-		fmt.Printf("Created dataset with ID %s with %d messages\n", dataset.ID, len(messages))
-		return nil
 	}
 
 	return printers.PrintMessages(messages, false)
