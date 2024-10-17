@@ -8,14 +8,17 @@ tools:
   notion:
     reference: ./notion
     all: true
+  google-docs:
+    reference: ./google/docs
+    all: true
   google-gmail:
     reference: ./google/gmail
     all: true
-  google-sheets:
-    reference: ./google/sheets
-    all: true
   google-search:
     reference: ./google/search
+    all: true
+  google-sheets:
+    reference: ./google/sheets
     all: true
   google-youtube:
     reference: ./google/youtube
