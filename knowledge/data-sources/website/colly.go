@@ -156,6 +156,8 @@ func (c *Colly) Crawl(metadata *Metadata, metadataPath string, workingDir string
 						parsedLink.Path = ""
 					}
 					e.Request.Visit(parsedLink.String())
+				} else if !strings.HasPrefix(link, "#") {
+					e.Request.Visit(linkURL.String())
 				}
 			}
 		})
