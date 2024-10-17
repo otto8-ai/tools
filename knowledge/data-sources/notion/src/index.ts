@@ -15,9 +15,7 @@ interface Metadata {
 }
 
 interface InputMetadata {
-  notionConfig: {
-    pages: string[];
-  };
+  notionConfig: {};
   exclude: string[];
 }
 
@@ -144,6 +142,7 @@ async function main() {
       filter: { property: "object", value: "page" },
     });
 
+    const pageIds = new Set();
     for (const page of allPages.results) {
       let p = page as PageObjectResponse;
       if (p.archived) {
@@ -152,7 +151,7 @@ async function main() {
       const pageId = p.id;
       const pageUrl = p.url;
       const pageTitle = getTitle(p);
-
+      pageIds.add(pageId);
       let folderPath = "";
       while (p.parent && p.parent.type === "page_id") {
         try {
@@ -181,35 +180,30 @@ async function main() {
       }
     }
 
-    if (metadata.input?.notionConfig?.pages) {
-      for (const pageId of metadata.input.notionConfig.pages) {
-        if (metadata.input.exclude?.includes(pageId)) {
-          continue;
-        }
-        const page = await getPage(client, pageId);
-        if (
-          !metadata.output.files[pageId] ||
-          metadata.output.files[pageId].updatedAt !== page.last_edited_time
-        ) {
-          await writePageToFile(client, page, workingDir);
-          syncedCount++;
-          metadata.output.files[pageId] = {
-            url: page.url,
-            filePath: getPath(workingDir, page!),
-            updatedAt: page.last_edited_time,
-          };
-        }
-        metadata.output.status = `${syncedCount}/${
-          Object.keys(metadata.input.notionConfig.pages).length
-        } number of pages have been synced`;
-        await writeFile(metadataPath, JSON.stringify(metadata, null, 2));
+    for (const pageId of Object.keys(metadata.output.state.notionState.pages)) {
+      if (metadata.input.exclude?.includes(pageId)) {
+        continue;
       }
+      const page = await getPage(client, pageId);
+      if (
+        !metadata.output.files[pageId] ||
+        metadata.output.files[pageId].updatedAt !== page.last_edited_time
+      ) {
+        await writePageToFile(client, page, workingDir);
+        syncedCount++;
+        metadata.output.files[pageId] = {
+          url: page.url,
+          filePath: getPath(workingDir, page!),
+          updatedAt: page.last_edited_time,
+        };
+      }
+      metadata.output.status = `${syncedCount}/${
+        Object.keys(metadata.output.state.notionState.pages).length
+      } number of pages have been synced`;
+      await writeFile(metadataPath, JSON.stringify(metadata, null, 2));
     }
     for (const [pageId, fileInfo] of Object.entries(metadata.output.files)) {
-      if (
-        !metadata.input?.notionConfig?.pages?.includes(pageId) ||
-        metadata.input?.exclude?.includes(pageId)
-      ) {
+      if (metadata.input?.exclude?.includes(pageId) || !pageIds.has(pageId)) {
         try {
           await fs.rmSync(path.dirname(fileInfo.filePath), {
             recursive: true,

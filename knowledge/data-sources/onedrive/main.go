@@ -48,6 +48,12 @@ type State struct {
 type OneDriveLinksConnectorState struct {
 	Folders map[string]struct{}  `json:"folders,omitempty"`
 	Files   map[string]FileState `json:"files,omitempty"`
+	Links   map[string]LinkState `json:"links,omitempty"`
+}
+
+type LinkState struct {
+	IsFolder bool   `json:"isFolder"`
+	Name     string `json:"name"`
 }
 
 type FileState struct {
@@ -135,6 +141,9 @@ func main() {
 	if metadata.Output.State.OneDriveState.Files == nil {
 		metadata.Output.State.OneDriveState.Files = make(map[string]FileState)
 	}
+	if metadata.Output.State.OneDriveState.Links == nil {
+		metadata.Output.State.OneDriveState.Links = make(map[string]LinkState)
+	}
 
 	if err := sync(ctx, metadata, client, workingDir, metadataPath); err != nil {
 		metadata.Output.Error = err.Error()
@@ -169,6 +178,10 @@ func sync(ctx context.Context, metadata Metadata, client *msgraphsdk.GraphServic
 			return err
 		}
 		root := path.Dir(getFullName(shareDriveItem))
+		metadata.Output.State.OneDriveState.Links[link] = LinkState{
+			IsFolder: shareDriveItem.GetFile() == nil,
+			Name:     *shareDriveItem.GetName(),
+		}
 
 		children, err := getChildrenFileForItem(ctx, client, shareDriveItem)
 		if err != nil {
@@ -234,15 +247,14 @@ func saveToMetadata(ctx context.Context, metadata Metadata, client *msgraphsdk.G
 		excluded[exclude] = struct{}{}
 	}
 	for _, item := range items {
-		if _, ok := excluded[*item.Item.GetId()]; ok {
-			continue
-		}
 		fullPath := getFullName(item.Item)
 		relativePath := strings.TrimPrefix(fullPath, item.Root)
 		downloadPath := path.Join(dataPath, relativePath)
 		topRootFolder := strings.Split(strings.TrimPrefix(relativePath, string(os.PathSeparator)), string(os.PathSeparator))[0]
+		created := false
 		detail, ok := metadata.Output.Files[*item.Item.GetId()]
 		if !ok {
+			created = true
 			detail.FilePath = downloadPath
 			detail.URL = *item.Item.GetWebUrl()
 			detail.UpdatedAt = (*item.Item.GetLastModifiedDateTime()).String()
@@ -253,29 +265,30 @@ func saveToMetadata(ctx context.Context, metadata Metadata, client *msgraphsdk.G
 			FileName:   path.Base(downloadPath),
 			URL:        *item.Item.GetWebUrl(),
 		}
-		if _, err := os.Stat(path.Dir(downloadPath)); err != nil {
-			err := os.MkdirAll(path.Dir(downloadPath), 0755)
+		if _, ok := excluded[*item.Item.GetId()]; !ok && (created || detail.UpdatedAt != item.Item.GetLastModifiedDateTime().String()) {
+			if _, err := os.Stat(path.Dir(downloadPath)); err != nil {
+				err := os.MkdirAll(path.Dir(downloadPath), 0755)
+				if err != nil {
+					return err
+				}
+			}
+			driveID := *item.Item.GetParentReference().GetDriveId()
+			data, err := client.Drives().ByDriveId(driveID).Items().ByDriveItemId(*item.Item.GetId()).Content().Get(ctx, nil)
 			if err != nil {
 				return err
 			}
-		}
-		if _, err := os.Stat(downloadPath); err != nil || detail.UpdatedAt != item.Item.GetLastModifiedDateTime().String() {
-			{
-				driveID := *item.Item.GetParentReference().GetDriveId()
-				data, err := client.Drives().ByDriveId(driveID).Items().ByDriveItemId(*item.Item.GetId()).Content().Get(ctx, nil)
-				if err != nil {
-					return err
-				}
 
-				err = os.WriteFile(downloadPath, data, 0644)
-				if err != nil {
-					return err
-				}
-				logrus.Info(fmt.Sprintf("Downloaded %s", downloadPath))
+			err = os.WriteFile(downloadPath, data, 0644)
+			if err != nil {
+				return err
 			}
+			logrus.Info(fmt.Sprintf("Downloaded %s", downloadPath))
+			detail.UpdatedAt = item.Item.GetLastModifiedDateTime().String()
+			metadata.Output.Files[*item.Item.GetId()] = detail
 		}
 		folders[topRootFolder] = struct{}{}
 		metadata.Output.State.OneDriveState.Folders[topRootFolder] = struct{}{}
+		metadata.Output.State.OneDriveState.Files = files
 		metadata.Output.Status = fmt.Sprintf("Synced %d files out of %d", len(metadata.Output.Files), len(items))
 		if err := writeMetadata(metadata, metadataPath); err != nil {
 			return err

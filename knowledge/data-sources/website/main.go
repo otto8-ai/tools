@@ -35,9 +35,13 @@ type State struct {
 }
 
 type WebsiteCrawlingState struct {
-	ScrapeJobIds map[string]string   `json:"scrapeJobIds"`
-	Folders      map[string]struct{} `json:"folders"`
-	Pages        map[string]struct{} `json:"pages"`
+	ScrapeJobIds map[string]string      `json:"scrapeJobIds"`
+	Folders      map[string]struct{}    `json:"folders"`
+	Pages        map[string]PageDetails `json:"pages"`
+}
+
+type PageDetails struct {
+	ParentURL string `json:"parentURL"`
 }
 
 type FileDetails struct {
@@ -88,6 +92,10 @@ func main() {
 
 	if err := os.MkdirAll(workingDir, 0755); err != nil {
 		logrus.Fatal(err)
+	}
+
+	if metadata.Output.State.WebsiteCrawlingState.Pages == nil {
+		metadata.Output.State.WebsiteCrawlingState.Pages = make(map[string]PageDetails)
 	}
 
 	if mode == "colly" {
