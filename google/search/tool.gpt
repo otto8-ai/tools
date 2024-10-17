@@ -6,7 +6,7 @@ Share Tools: Search
 
 ---
 Name: Search
-Share Context: github.com/gptscript-ai/credentials/model-provider
+Credential: github.com/gptscript-ai/credentials/model-provider
 Description: Search Google with a given query and return relevant information from the search results
 JSON Response: true
 Args: query: A question, statement, or topic to search with (required)
