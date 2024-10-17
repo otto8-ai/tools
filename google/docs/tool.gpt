@@ -1,0 +1,45 @@
+---
+Name: Google Docs 
+Metadata: bundle: true
+Description: Tools for managing Google Docs
+Share Tools: List Docs, Read Doc
+
+---
+Name: Read Doc
+Description: Returns the content of a Google Doc in markdown format
+Share Context: Google Docs Context
+Credential: ./credential
+Share Tools: List Docs
+Param: doc_ref: Google Docs ID or share link of the document to read
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/read_doc.py
+
+---
+Name: List Docs
+Description: List all Google Docs in current user's Google Drive
+Share Context: Google Docs Context
+Credential: ./credential
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/list_docs.py
+
+---
+Name: Google Docs Context
+Type: context
+
+#!sys.echo
+
+## Instructions for using Google Docs tools
+
+Do not output Google Docs IDs because they are not helpful for the user.
+Document names are not considered Doc IDs.
+Google Docs share links match the following regex: (?:https?://(?:drive|docs)\.google\.com/(?:file/d/|document/d/|open\?id=|uc\?id=))([a-zA-Z0-9_-]{33,})
+
+## End of instructions for using Google Docs tools
+
+---
+!metadata:*:category
+Google Docs
+
+---
+!metadata:*:icon
+https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/googledocs.svg
