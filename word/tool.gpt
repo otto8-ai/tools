@@ -1,0 +1,43 @@
+---
+Name: Word
+Description: Tools for interacting with Microsoft Word documents in OneDrive
+Metadata: bundle: true
+Share Tools: List Docs, Get Doc
+
+---
+Name: List Docs
+Description: List all Microsoft Word documents available to the user in OneDrive
+Share Context: Word Context
+Credential: ./credential
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listDocs
+
+---
+Name: Get Doc
+Description: Get the contents of a Microsoft Word document from OneDrive
+Share Context: Word Context
+Credential: ./credential
+Share Tools: List Docs
+Param: doc_id: ID of the Microsoft Word document to get
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool getDoc
+
+---
+Name: Word Context
+Type: context
+
+#!sys.echo
+
+## Instructions for using Microsoft Word tools
+
+Do not output Microsoft Word document IDs because they are not helpful for the user.
+
+## End of instructions for using Microsoft Word tools
+
+---
+!metadata:*:category
+Word
+
+---
+!metadata:*:icon
+https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/duotone/microsoft-word-logo-duotone.svg
