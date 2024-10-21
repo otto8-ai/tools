@@ -40,134 +40,11 @@ func (c *Colly) Crawl(metadata *Metadata, metadataPath string, workingDir string
 	}
 
 	for _, url := range metadata.Input.WebsiteCrawlingConfig.URLs {
-		c.collector.OnHTML("body", func(e *colly.HTMLElement) {
-			if _, ok := visited[e.Request.URL.String()]; ok {
-				return
-			}
-			if exclude[e.Request.URL.String()] {
-				return
-			}
-
-			visited[e.Request.URL.String()] = struct{}{}
-			markdown := converter.Convert(e.DOM)
-			hostname := e.Request.URL.Hostname()
-			urlPath := e.Request.URL.Path
-
-			var filePath string
-			if urlPath == "" {
-				filePath = path.Join(workingDir, hostname, "index.md")
-			} else {
-				trimmedPath := strings.Trim(urlPath, "/")
-				if trimmedPath == "" {
-					filePath = path.Join(workingDir, hostname, "index.md")
-				} else {
-					segments := strings.Split(trimmedPath, "/")
-					fileName := segments[len(segments)-1] + ".md"
-					filePath = path.Join(path.Join(workingDir, hostname, strings.Join(segments[:len(segments)-1], "/")), fileName)
-				}
-			}
-			dirPath := path.Dir(filePath)
-			err := os.MkdirAll(dirPath, os.ModePerm)
-			if err != nil {
-				logrus.Errorf("Failed to create directories for %s: %v", dirPath, err)
-				return
-			}
-
-			etag := e.Response.Headers.Get("ETag")
-			lastModified := e.Response.Headers.Get("Last-Modified")
-			var updatedAt string
-			if etag != "" {
-				updatedAt = etag
-			} else if lastModified != "" {
-				updatedAt = lastModified
-			} else {
-				updatedAt = time.Now().Format(time.RFC3339)
-			}
-
-			checksum, err := GetChecksum(markdown)
-			if err != nil {
-				logrus.Errorf("Failed to get checksum for %s: %v", filePath, err)
-				return
-			}
-			if checksum == metadata.Output.Files[e.Request.URL.String()].Checksum {
-				logrus.Infof("skipping %s because it has not changed", e.Request.URL.String())
-				return
-			}
-
-			if updatedAt == metadata.Output.Files[e.Request.URL.String()].UpdatedAt {
-				logrus.Infof("skipping %s because it has not changed for etag/last-modified: %s/%s", e.Request.URL.String(), etag, lastModified)
-				return
-			}
-
-			logrus.Infof("scraping %s", e.Request.URL.String())
-			err = os.WriteFile(filePath, []byte(markdown), 0644)
-			if err != nil {
-				logrus.Errorf("Failed to write markdown to %s: %v", filePath, err)
-				return
-			}
-			visited[e.Request.URL.String()] = struct{}{}
-
-			metadata.Output.Files[e.Request.URL.String()] = FileDetails{
-				FilePath:  filePath,
-				URL:       e.Request.URL.String(),
-				UpdatedAt: updatedAt,
-				Checksum:  checksum,
-			}
-
-			folders[path.Join(workingDir, hostname)] = struct{}{}
-			metadata.Output.State.WebsiteCrawlingState.Folders = folders
-
-			metadata.Output.Status = fmt.Sprintf("scraped %d pages", len(visited))
-			if err := writeMetadata(metadata, metadataPath); err != nil {
-				logrus.Fatalf("Failed to write metadata: %v", err)
-			}
-		})
-
-		c.collector.OnHTML("a[href]", func(e *colly.HTMLElement) {
-			link := e.Attr("href")
-
-			baseURL, err := url2.Parse(url)
-			if err != nil {
-				logrus.Errorf("Invalid base URL: %v", err)
-				return
-			}
-			linkURL, err := url2.Parse(link)
-			if err != nil {
-				logrus.Errorf("Invalid link URL %s: %v", link, err)
-				return
-			}
-			if _, ok := visited[linkURL.String()]; ok {
-				return
-			}
-			if strings.ToLower(path.Ext(linkURL.Path)) == ".pdf" {
-				if err := scrapePDF(workingDir, metadata, metadataPath, visited, exclude, linkURL, baseURL); err != nil {
-					logrus.Errorf("Failed to scrape PDF %s: %v", linkURL.String(), err)
-				}
-			} else if (linkURL.Host == "" || baseURL.Host == linkURL.Host) && strings.HasPrefix(linkURL.Path, baseURL.Path) {
-				if linkURL.Host == "" && !strings.HasPrefix(link, "#") {
-					fullLink := baseURL.ResolveReference(linkURL).String()
-					parsedLink, err := url2.Parse(fullLink)
-					if err != nil {
-						logrus.Errorf("Invalid link URL %s: %v", link, err)
-						return
-					}
-					// don't scrape duplicate pages for homepage, for example, https://www.acorn.io and https://www.acorn.io/
-					if parsedLink.Path == "/" {
-						parsedLink.Path = ""
-					}
-					e.Request.Visit(parsedLink.String())
-				} else if !strings.HasPrefix(link, "#") {
-					e.Request.Visit(linkURL.String())
-				}
-			}
-		})
-
-		err := c.collector.Visit(url)
-		if err != nil {
-			logrus.Errorf("Failed to visit %s: %v", url, err)
-			metadata.Output.Error = err.Error()
+		if err := scrape(c, converter, metadata, metadataPath, workingDir, visited, exclude, folders, url); err != nil {
+			logrus.Errorf("Failed to scrape %s: %v", url, err)
 		}
 	}
+
 	for url, file := range metadata.Output.Files {
 		if _, ok := visited[url]; !ok || exclude[url] {
 			logrus.Infof("removing file %s", file.FilePath)
@@ -175,6 +52,7 @@ func (c *Colly) Crawl(metadata *Metadata, metadataPath string, workingDir string
 				logrus.Errorf("Failed to remove %s: %v", file.FilePath, err)
 			}
 			delete(metadata.Output.Files, url)
+			delete(metadata.Output.State.WebsiteCrawlingState.Pages, url)
 		}
 	}
 
@@ -188,16 +66,146 @@ func (c *Colly) Crawl(metadata *Metadata, metadataPath string, workingDir string
 		}
 	}
 
-	metadata.Output.State.WebsiteCrawlingState.Pages = make(map[string]struct{})
-	for url := range metadata.Output.Files {
-		metadata.Output.State.WebsiteCrawlingState.Pages[url] = struct{}{}
-	}
-
 	metadata.Output.Status = ""
 	metadata.Output.Error = ""
 	if err := writeMetadata(metadata, metadataPath); err != nil {
 		logrus.Fatalf("Failed to write metadata: %v", err)
 	}
+}
+
+func scrape(c *Colly, converter *md.Converter, metadata *Metadata, metadataPath string, workingDir string, visited map[string]struct{}, exclude map[string]bool, folders map[string]struct{}, url string) error {
+	logrus.Infof("scraping dbug %s", url)
+	collector := colly.NewCollector()
+	collector.OnHTML("body", func(e *colly.HTMLElement) {
+		if _, ok := visited[e.Request.URL.String()]; ok {
+			return
+		}
+		if exclude[e.Request.URL.String()] {
+			return
+		}
+
+		visited[e.Request.URL.String()] = struct{}{}
+		markdown := converter.Convert(e.DOM)
+		hostname := e.Request.URL.Hostname()
+		urlPath := e.Request.URL.Path
+
+		var filePath string
+		if urlPath == "" {
+			filePath = path.Join(workingDir, hostname, "index.md")
+		} else {
+			trimmedPath := strings.Trim(urlPath, "/")
+			if trimmedPath == "" {
+				filePath = path.Join(workingDir, hostname, "index.md")
+			} else {
+				segments := strings.Split(trimmedPath, "/")
+				fileName := segments[len(segments)-1] + ".md"
+				filePath = path.Join(path.Join(workingDir, hostname, strings.Join(segments[:len(segments)-1], "/")), fileName)
+			}
+		}
+		dirPath := path.Dir(filePath)
+		err := os.MkdirAll(dirPath, os.ModePerm)
+		if err != nil {
+			logrus.Errorf("Failed to create directories for %s: %v", dirPath, err)
+			return
+		}
+
+		etag := e.Response.Headers.Get("ETag")
+		lastModified := e.Response.Headers.Get("Last-Modified")
+		var updatedAt string
+		if etag != "" {
+			updatedAt = etag
+		} else if lastModified != "" {
+			updatedAt = lastModified
+		} else {
+			updatedAt = time.Now().Format(time.RFC3339)
+		}
+
+		checksum, err := GetChecksum(markdown)
+		if err != nil {
+			logrus.Errorf("Failed to get checksum for %s: %v", filePath, err)
+			return
+		}
+		if checksum == metadata.Output.Files[e.Request.URL.String()].Checksum {
+			logrus.Infof("skipping %s because it has not changed", e.Request.URL.String())
+			return
+		}
+
+		if updatedAt == metadata.Output.Files[e.Request.URL.String()].UpdatedAt {
+			logrus.Infof("skipping %s because it has not changed for etag/last-modified: %s/%s", e.Request.URL.String(), etag, lastModified)
+			return
+		}
+
+		err = os.WriteFile(filePath, []byte(markdown), 0644)
+		if err != nil {
+			logrus.Errorf("Failed to write markdown to %s: %v", filePath, err)
+			return
+		}
+		visited[e.Request.URL.String()] = struct{}{}
+
+		metadata.Output.Files[e.Request.URL.String()] = FileDetails{
+			FilePath:  filePath,
+			URL:       e.Request.URL.String(),
+			UpdatedAt: updatedAt,
+			Checksum:  checksum,
+		}
+
+		metadata.Output.State.WebsiteCrawlingState.Pages[e.Request.URL.String()] = PageDetails{
+			ParentURL: url,
+		}
+
+		folders[path.Join(workingDir, hostname)] = struct{}{}
+		metadata.Output.State.WebsiteCrawlingState.Folders = folders
+
+		metadata.Output.Status = fmt.Sprintf("scraped %d pages", len(visited))
+		if err := writeMetadata(metadata, metadataPath); err != nil {
+			logrus.Fatalf("Failed to write metadata: %v", err)
+		}
+	})
+
+	collector.OnHTML("a[href]", func(e *colly.HTMLElement) {
+		link := e.Attr("href")
+
+		baseURL, err := url2.Parse(url)
+		if err != nil {
+			logrus.Errorf("Invalid base URL: %v", err)
+			return
+		}
+		linkURL, err := url2.Parse(link)
+		if err != nil {
+			logrus.Errorf("Invalid link URL %s: %v", link, err)
+			return
+		}
+		if _, ok := visited[linkURL.String()]; ok {
+			return
+		}
+		if strings.ToLower(path.Ext(linkURL.Path)) == ".pdf" {
+			if err := scrapePDF(workingDir, metadata, metadataPath, visited, exclude, linkURL, baseURL); err != nil {
+				logrus.Errorf("Failed to scrape PDF %s: %v", linkURL.String(), err)
+			}
+		} else if (linkURL.Host == "" || baseURL.Host == linkURL.Host) && strings.HasPrefix(linkURL.Path, baseURL.Path) {
+			if linkURL.Host == "" && !strings.HasPrefix(link, "#") {
+				fullLink := baseURL.ResolveReference(linkURL).String()
+				parsedLink, err := url2.Parse(fullLink)
+				if err != nil {
+					logrus.Errorf("Invalid link URL %s: %v", link, err)
+					return
+				}
+				// don't scrape duplicate pages for homepage, for example, https://www.acorn.io and https://www.acorn.io/
+				if parsedLink.Path == "/" {
+					parsedLink.Path = ""
+				}
+				e.Request.Visit(parsedLink.String())
+			} else if !strings.HasPrefix(link, "#") {
+				e.Request.Visit(linkURL.String())
+			}
+		}
+	})
+	err := collector.Visit(url)
+	if err != nil {
+		logrus.Errorf("Failed to visit %s: %v", url, err)
+		metadata.Output.Error = err.Error()
+	}
+	return nil
 }
 
 func scrapePDF(workingDir string, metadata *Metadata, metadataPath string, visited map[string]struct{}, exclude map[string]bool, linkURL *url2.URL, baseURL *url2.URL) error {

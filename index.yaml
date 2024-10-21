@@ -54,3 +54,5 @@ system:
     reference: github.com/gptscript-ai/knowledge/ingest.gpt@main
   knowledge-delete:
     reference: github.com/gptscript-ai/knowledge/delete.gpt@main
+  knowledge-delete-file:
+    reference: github.com/gptscript-ai/knowledge/delete-file.gpt@main
