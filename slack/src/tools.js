@@ -359,6 +359,16 @@ async function messageToString(webClient, message) {
         userName = await getUserName(webClient, message.user)
     } catch (e) {}
 
+    // Find and replace any user mentions in the message text with the user's name
+    const userMentions = message.text.match(/<@U[A-Z0-9]+>/g) ?? []
+    for (const mention of userMentions) {
+        const userId = mention.substring(2, mention.length - 1)
+        try {
+            const userName = await getUserName(webClient, userId)
+            message.text = message.text.replace(mention, `@${userName}`)
+        } catch (e) {}
+    }
+
     let str = `${time.toLocaleString()}: ${userName}: ${message.text}\n`
     str += `  message ID: ${message.ts}\n`
     if (message.blocks && message.blocks.length > 0) {
