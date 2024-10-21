@@ -1,6 +1,7 @@
 ---
 Name: Notion
 Description: Tools for interacting with Notion
+Metadata: bundle: true
 Share Tools: Get Page, Get Database, Search, Create Page, List Users, Get Database Properties, Add Database Row, Update Database Row
 
 ---
@@ -81,9 +82,6 @@ Args: rowId: the ID of the row to update
 Args: properties: a JSON string containing all of the key-value pairs to update
 
 #!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js updateDatabaseRow
-
-!metadata:Notion:bundle
-true
 
 ---
 !metadata:*:category
