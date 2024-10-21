@@ -1,6 +1,7 @@
 ---
 Name: Slack
 Description: Tools for interacting with Slack
+Metadata: bundle: true
 Share Tools: List Channels, Search Channels, Get Channel History, Get Channel History by Time, Get Thread History, Search Messages, Send Message, Send Message in Thread, List Users, Search Users, Send DM, Send DM in Thread, Get Message Link, Get DM History, Get DM Thread History
 
 ---
@@ -168,6 +169,7 @@ Param: limit: the number of messages to return
 ---
 Name: Slack Context
 Type: context
+Share Context: Current Date and Time from ../time
 
 #!sys.echo
 
@@ -179,10 +181,6 @@ Do not provide channel, thread, or message IDs in the output, as these are not h
 When you use the search_messages tool, you can use normal Slack search filters. If you filter by user, use the full username, which can be obtained from the list_users or search_users tools.
 
 ## End of instructions for using Slack tools
-
----
-!metadata:Slack:bundle
-true
 
 ---
 !metadata:*:category
