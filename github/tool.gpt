@@ -1,13 +1,14 @@
 ---
 Name: GitHub
 Description: Tools for interacting with GitHub
+Metadata: bundle: true
 Share Tools: Search Issues and PRs, Get Issue, Create Issue, Modify Issue, Close Issue, List Issue Comments, Add Comment to Issue, Get PR, Create PR, Modify PR, Close PR, List PR Comments, Add Comment to PR, List Repos, Get Star Count
 
 ---
 Name: Search Issues and PRs
 Description: Search for issues and PRs in GitHub. Results are paginated, so in order to get all results for a search, call this function with the `page` parameter incremented by 1 until no results are returned.
 Credential: ./credential
-Share Context: github.com/gptscript-ai/datasets/context
+Share Contexts: Current Date and Time from ../time, github.com/gptscript-ai/datasets/context
 Param: owner: (optional) the owner of the repository the issues or PRs belong to
 Param: repo: (optional) the name of the repository the issues or PRs belong to
 Param: query: the Github search query
@@ -31,6 +32,7 @@ Param: issueNumber: the number of the issue to retrieve
 Name: Create Issue
 Description: Create a new issue in the specified GitHub repository
 Credential: ./credential
+Share Context: Current Date and Time from ../time
 Param: owner: the owner of the repository
 Param: repo: the name of the repository
 Param: title: the title of the issue
@@ -101,6 +103,7 @@ Param: prNumber: the number of the pull request to retrieve
 Name: Create PR
 Description: Create a new pull request in the specified GitHub repository
 Credential: ./credential
+Share Context: Current Date and Time from ../time
 Param: owner: the owner of the repository
 Param: repo: the name of the repository
 Param: title: the title of the pull request
@@ -171,6 +174,7 @@ Param: owner: the owner of the repositories
 Name: Get Star Count
 Description: Return the star count for the specified repo. 
 Credential: ./credential
+Share Tool: List Repos
 Param: owner: the owner of the repository
 Param: repo: the name of the repository
 
@@ -183,7 +187,3 @@ GitHub
 ---
 !metadata:*:icon
 https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/github.svg
-
----
-!metadata:GitHub:bundle
-true
