@@ -2,8 +2,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsnd --respawn src/server.ts",
-    "tool": "node --no-warnings --loader ts-node/esm src/server.ts",
-    "postinstall": "npx playwright install chromium"
+    "tool": "node --no-warnings --loader ts-node/esm src/server.ts"
   },
   "devDependencies": {
     "@types/body-parser": "^1.19.5",
