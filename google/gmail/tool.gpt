@@ -8,7 +8,7 @@ Share Tools: List Inbox, Read Email, Search Emails, Send Email, Delete Email, Li
 Name: List Inbox
 Description: List emails in the user's Gmail inbox
 Credential: ./credential
-Share Context: github.com/gptscript-ai/datasets/context
+Share Contexts: Current Date and Time from ../../time, github.com/gptscript-ai/datasets/context
 Param: max_results: Maximum number of emails to list (Optional: Default will list all emails in the inbox)
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/listInbox.py
@@ -27,7 +27,7 @@ Param: email_subject: Email subject to read (Optional: If not provided, email_id
 Name: Search Emails
 Description: Search a user's Gmail account for emails. Will return the email_id for each message. Can also be used to list emails in a folder or with a label.
 Credential: ./credential
-Share Context: github.com/gptscript-ai/datasets/context
+Share Contexts: Current Date and Time from ../../time, github.com/gptscript-ai/datasets/context
 Param: query: Search query to find emails in the user's Gmail account. Uses Gmail search syntax (e.g., "from:someuser@example.com rfc822msgid:<somemsgid@example.com> is:unread")
 Param: max_results: Maximum number of emails to list (Optional: Default will list all emails that match the query)
 
@@ -37,6 +37,7 @@ Param: max_results: Maximum number of emails to list (Optional: Default will lis
 Name: Send Email
 Description: Send an email from the user's Gmail account. Do not attempt to forward or reply to emails using this tool.
 Credential: ./credential
+Share Context: Current Date and Time from ../../time
 Param: to_emails: A comma separated list of email addresses to send the email to
 Param: cc_emails: A comma separated list of email addresses to cc the email to (Optional)
 Param: bcc_emails: A comma separated list of email addresses to bcc the email to (Optional)
@@ -58,7 +59,7 @@ Param: email_id: The ID of the email to delete
 Name: List Drafts
 Description: List drafts in a user's Gmail account
 Credential: ./credential
-Share Context: github.com/gptscript-ai/datasets/context
+Share Contexts: Current Date and Time from ../../time, github.com/gptscript-ai/datasets/context
 Param: max_results: Maximum number of drafts to list (Optional: Default will list all drafts)
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/listDrafts.py
@@ -67,6 +68,7 @@ Param: max_results: Maximum number of drafts to list (Optional: Default will lis
 Name: Create Draft
 Description: Create a draft email in a user's Gmail account
 Credential: ./credential
+Share Context: Current Date and Time from ../../time
 Param: to_emails: A comma separated list of email addresses to send the email to
 Param: cc_emails: A comma separated list of email addresses to cc the email to (Optional)
 Param: bcc_emails: A comma separated list of email addresses to bcc the email to (Optional)
