@@ -1,4 +1,5 @@
 import base64
+import sys
 from email.mime.text import MIMEText
 
 import gptscript
@@ -76,7 +77,8 @@ async def list_messages(service, query, max_results):
                     )
                 print(f"Created dataset with ID {dataset.id} with {len(all_messages)} emails")
                 return
-            except Exception:
+            except Exception as e:
+                print("An error occurred while creating the dataset:", e, file=sys.stderr)
                 pass  # Ignore errors if we got any, and just print the results.
 
         display_list_messages(service, all_messages)
@@ -145,7 +147,8 @@ async def list_drafts(service, max_results=None):
                     )
                 print(f"Created dataset with ID {dataset.id} with {len(all_drafts)} drafts")
                 return
-            except Exception:
+            except Exception as e:
+                print("An error occurred while creating the dataset:", e, file=sys.stderr)
                 pass  # Ignore errors if we got any, and just print the results.
 
         display_list_drafts(service, all_drafts)
