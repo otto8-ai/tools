@@ -1,6 +1,7 @@
 ---
 Name: Outlook Mail
 Description: Tools for interacting with Microsoft Outlook Mail.
+Metadata: bundle: true
 Share Tools: List Mail Folders, List Messages, Get Message Details, Search Messages, Create Draft, Send Draft, Delete Message, Move Message
 
 ---
@@ -16,7 +17,6 @@ Credential: Outlook Mail OAuth Read Credential from ./credential
 Name: List Messages
 Description: Lists all messages in a folder.
 Share Context: Outlook Mail Context
-Share Context: github.com/gptscript-ai/context/current-time
 Share Context: github.com/gptscript-ai/datasets/context
 Credential: Outlook Mail OAuth Read Credential from ./credential
 Share Tools: List Mail Folders
@@ -28,7 +28,6 @@ Param: folder_id: The ID of the folder to list messages in.
 Name: Get Message Details
 Description: Get the details of a message.
 Share Context: Outlook Mail Context
-Share Context: github.com/gptscript-ai/context/current-time
 Credential: Outlook Mail OAuth Read Credential from ./credential
 Share Tools: List Messages, Search Messages
 Param: message_id: The ID of the message to get details for.
@@ -39,7 +38,6 @@ Param: message_id: The ID of the message to get details for.
 Name: Search Messages
 Description: Search for messages. At least one of subject, from_address, or from_name must be specified.
 Share Context: Outlook Mail Context
-Share Context: github.com/gptscript-ai/context/current-time
 Credential: Outlook Mail OAuth Read Credential from ./credential
 Share Tools: List Mail Folders
 Param: subject: (Optional) Search query for the subject of the message.
@@ -53,7 +51,6 @@ Param: folder_id: (Optional) The ID of the folder to search in. If unset, will s
 Name: Create Draft
 Description: Create (but do not send) a draft message.
 Share Context: Outlook Mail Context
-Share Context: github.com/gptscript-ai/context/current-time
 Credential: Outlook Mail OAuth Write Credential from ./credential
 Param: subject: The subject of the message.
 Param: content: The content of the message in HTML.
@@ -67,7 +64,6 @@ Param: bcc: (Optional) A comma-separated list of email addresses to BCC on the m
 Name: Send Draft
 Description: Send an existing draft message.
 Share Context: Outlook Mail Context
-Share Context: github.com/gptscript-ai/context/current-time
 Credential: Outlook Mail OAuth Write Credential from ./credential
 Share Tools: Create Draft
 Param: draft_id: The ID of the draft to send.
@@ -78,7 +74,6 @@ Param: draft_id: The ID of the draft to send.
 Name: Delete Message
 Description: Delete a message.
 Share Context: Outlook Mail Context
-Share Context: github.com/gptscript-ai/context/current-time
 Credential: Outlook Mail OAuth Write Credential from ./credential
 Share Tools: List Messages, Search Messages
 Param: message_id: The ID of the message to delete. This is NOT a mail folder ID.
@@ -89,7 +84,6 @@ Param: message_id: The ID of the message to delete. This is NOT a mail folder ID
 Name: Move Message
 Description: Moves a message to a folder.
 Share Context: Outlook Mail Context
-Share Context: github.com/gptscript-ai/context/current-time
 Credential: Outlook Mail OAuth Write Credential from ./credential
 Share Tools: List Mail Folders, List Messages, Search Messages
 Param: message_id: The ID of the message to move.
@@ -100,6 +94,7 @@ Param: destination_folder_id: The ID of the folder to move the message into.
 ---
 Name: Outlook Mail Context
 Type: context
+Share Context: Current Date and Time from ../../time
 
 #!sys.echo
 
@@ -112,10 +107,6 @@ When printing a list of messages for the user, include the body preview. When pr
 When printing a single message or a list of messages, use Markdown formatting.
 
 ## End of instructions for using the Microsoft Outlook Mail tools
-
----
-!metadata:Outlook Mail:bundle
-true
 
 ---
 !metadata:*:category
