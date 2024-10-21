@@ -7,6 +7,7 @@ Share Tools: Search Issues and PRs, Get Issue, Create Issue, Modify Issue, Close
 Name: Search Issues and PRs
 Description: Search for issues and PRs in GitHub. Results are paginated, so in order to get all results for a search, call this function with the `page` parameter incremented by 1 until no results are returned.
 Credential: ./credential
+Share Context: github.com/gptscript-ai/datasets/context
 Param: owner: (optional) the owner of the repository the issues or PRs belong to
 Param: repo: (optional) the name of the repository the issues or PRs belong to
 Param: query: the Github search query
@@ -65,6 +66,7 @@ Param: issueNumber: the number of the issue to close
 Name: List Issue Comments
 Description: List comments for a specific issue by its number in the specified GitHub repository
 Credential: ./credential
+Share Context: github.com/gptscript-ai/datasets/context
 Share Tools: Search Issues and PRs
 Param: owner: the owner of the repository
 Param: repo: the name of the repository
@@ -136,6 +138,7 @@ Param: prNumber: the number of the pull request to close
 Name: List PR Comments
 Description: List comments for a specific pull request by its number in the specified GitHub repository
 Credential: ./credential
+Share Context: github.com/gptscript-ai/datasets/context
 Share Tools: Search Issues and PRs
 Param: owner: the owner of the repository
 Param: repo: the name of the repository
@@ -159,6 +162,7 @@ Param: comment: the comment to add
 Name: List Repos
 Description: List all repositories for a given owner
 Credential: ./credential
+Share Context: github.com/gptscript-ai/datasets/context
 Param: owner: the owner of the repositories
 
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js listRepos

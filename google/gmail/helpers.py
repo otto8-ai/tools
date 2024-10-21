@@ -1,5 +1,8 @@
 import base64
+import sys
 from email.mime.text import MIMEText
+
+import gptscript
 
 
 def create_message(to, cc, bcc, subject, message_text):
@@ -35,7 +38,7 @@ def client(service_name: str, version: str):
         exit(1)
 
 
-def list_messages(service, query, max_results):
+async def list_messages(service, query, max_results):
     all_messages = []
     next_page_token = None
     try:
@@ -57,6 +60,27 @@ def list_messages(service, query, max_results):
             if not next_page_token:
                 break
 
+        if len(all_messages) > 10:
+            gptscript_client = gptscript.GPTScript()
+            try:
+                dataset = await gptscript_client.create_dataset(
+                    os.getenv("GPTSCRIPT_WORKSPACE_DIR"),
+                    f"gmail_{query}",
+                    f"list of emails in Gmail for query {query}")
+                for message in all_messages:
+                    msg_id, msg_str = message_to_string(service, message)
+                    await gptscript_client.add_dataset_element(
+                        os.getenv("GPTSCRIPT_WORKSPACE_DIR"),
+                        dataset.id,
+                        msg_id,
+                        msg_str
+                    )
+                print(f"Created dataset with ID {dataset.id} with {len(all_messages)} emails")
+                return
+            except Exception as e:
+                print("An error occurred while creating the dataset:", e, file=sys.stderr)
+                pass  # Ignore errors if we got any, and just print the results.
+
         display_list_messages(service, all_messages)
 
     except HttpError as err:
@@ -66,21 +90,25 @@ def list_messages(service, query, max_results):
 from datetime import datetime, timezone
 
 
+def message_to_string(service, message):
+    msg = (service.users().messages().get(userId='me',
+                                          id=message['id'],
+                                          format='metadata',
+                                          metadataHeaders=['From', 'Subject'])
+           .execute())
+    msg_id = msg['id']
+    subject, sender, to, cc, bcc, date = extract_message_headers(msg)
+    return msg_id, f"ID: {msg_id} From: {sender}, Subject: {subject}, To: {to}, CC: {cc}, Bcc: {bcc}, Received: {date}"
+
+
 def display_list_messages(service, messages: list):
     print('Messages:')
     for message in messages:
-        msg = (service.users().messages().get(userId='me',
-                                              id=message['id'],
-                                              format='metadata',
-                                              metadataHeaders=['From', 'Subject'])
-               .execute())
-
-        msg_id = msg['id']
-        subject, sender, to, cc, bcc, date = extract_message_headers(msg)
-        print(f"ID: {msg_id} From: {sender}, Subject: {subject}, To: {to}, CC: {cc}, Bcc: {bcc}, Received: {date}")
+        _, msg_str = message_to_string(service, message)
+        print(msg_str)
 
 
-def list_drafts(service, max_results=None):
+async def list_drafts(service, max_results=None):
     all_drafts = []
     next_page_token = None
     try:
@@ -89,7 +117,7 @@ def list_drafts(service, max_results=None):
                 results = service.users().drafts().list(userId='me', pageToken=next_page_token, maxResults=10).execute()
             else:
                 results = service.users().drafts().list(userId='me', maxResults=10).execute()
- 
+
             drafts = results.get('drafts', [])
             if not drafts:
                 break
@@ -102,20 +130,46 @@ def list_drafts(service, max_results=None):
             if not next_page_token:
                 break
 
+        if len(all_drafts) > 10:
+            try:
+                gptscript_client = gptscript.GPTScript()
+                dataset = await gptscript_client.create_dataset(
+                    os.getenv("GPTSCRIPT_WORKSPACE_DIR"),
+                    "gmail_drafts",
+                    "list of drafts in Gmail")
+                for draft in all_drafts:
+                    draft_id, draft_str = draft_to_string(service, draft)
+                    await gptscript_client.add_dataset_element(
+                        os.getenv("GPTSCRIPT_WORKSPACE_DIR"),
+                        dataset.id,
+                        draft_id,
+                        draft_str
+                    )
+                print(f"Created dataset with ID {dataset.id} with {len(all_drafts)} drafts")
+                return
+            except Exception as e:
+                print("An error occurred while creating the dataset:", e, file=sys.stderr)
+                pass  # Ignore errors if we got any, and just print the results.
+
         display_list_drafts(service, all_drafts)
 
     except HttpError as err:
         print(f"An error occurred: {err}")
 
 
+def draft_to_string(service, draft):
+    draft_id = draft['id']
+    draft_msg = service.users().drafts().get(userId='me', id=draft_id).execute()
+    msg = draft_msg['message']
+    subject, sender, to, cc, bcc, date = extract_message_headers(msg)
+    return draft_id, f"Draft ID: {draft_id}, From: {sender}, Subject: {subject}, To: {to}, CC: {cc}, Bcc: {bcc}, Saved: {date}"
+
+
 def display_list_drafts(service, drafts: list):
     print('Drafts:')
     for draft in drafts:
-        draft_id = draft['id']
-        draft_msg = service.users().drafts().get(userId='me', id=draft_id).execute()
-        msg = draft_msg['message']
-        subject, sender, to, cc, bcc, date = extract_message_headers(msg)
-        print(f"Draft ID: {draft_id}, From: {sender}, Subject: {subject}, To: {to}, CC: {cc}, Bcc: {bcc}, Saved: {date}")
+        _, draft_str = draft_to_string(service, draft)
+        print(draft_str)
 
 
 def extract_message_headers(message):
@@ -139,7 +193,7 @@ def extract_message_headers(message):
             if header['name'].lower() == 'bcc':
                 bcc = header['value']
             date = datetime.fromtimestamp(int(message['internalDate']) / 1000, timezone.utc).astimezone().strftime(
-            '%Y-%m-%d %H:%M:%S')
+                '%Y-%m-%d %H:%M:%S')
 
     return subject, sender, to, cc, bcc, date
 

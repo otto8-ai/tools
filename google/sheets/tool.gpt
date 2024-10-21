@@ -10,6 +10,7 @@ Description: Read data from a Google Sheet. Spreadsheet ID is required if the sp
 Share Context: Google Sheets Context
 Credential: ./credential
 Share Tools: List Spreadsheets
+Share Context: github.com/gptscript-ai/datasets/context
 Param: spreadsheet_id: The ID of the Spreadsheet (Optional, if not provided, the spreadsheet_name is required)
 Param: spreadsheet_name: The name of the Spreadsheet (Optional, if not provided, the spreadsheet_id is required)
 Param: range: The range of cells on the Spreadsheet to read (Optional, by default reads the entire Spreadsheet)
@@ -24,6 +25,7 @@ Description: Detect multiple tables and read data from a Google Sheet. Spreadshe
 Share Context: Google Sheets Context
 Credential: ./credential
 Share Tools: List Spreadsheets
+Share Context: github.com/gptscript-ai/datasets/context
 Param: spreadsheet_id: The ID of the Spreadsheet (Optional, if not provided, the spreadsheet_name is required)
 Param: spreadsheet_name: The name of the Spreadsheet (Optional, if not provided, the spreadsheet_id is required)
 Param: range: The range of cells on the Spreadsheet to read (Optional, by default reads the entire Spreadsheet)
@@ -35,6 +37,7 @@ Param: sheet_name: The name of the page to read from (Optional, by default reads
 Name: List Spreadsheets
 Description: List all Google Sheets in current user's Google Drive
 Share Context: Google Sheets Context
+Share Context: github.com/gptscript-ai/datasets/context
 Credential: ./credential
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/listSpreadsheets.py

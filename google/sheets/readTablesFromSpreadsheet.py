@@ -1,9 +1,12 @@
+import asyncio
 import os
+
+from gptscript import GPTScript
 
 from auth import gspread_client
 
 
-def main():
+async def main():
     spreadsheet_id = os.getenv('SPREADSHEET_ID')
     spreadsheet_name = os.getenv('SPREADSHEET_NAME')
     if spreadsheet_id is None and spreadsheet_name is None:
@@ -47,6 +50,25 @@ def main():
                 current_table.append(row)
         if current_table:
             tables.append(current_table)
+
+        if len(tables) > 10:
+            try:
+                gptscript_client = GPTScript()
+                dataset = await gptscript_client.create_dataset(
+                    os.getenv("GPTSCRIPT_WORKSPACE_DIR"), f"{spreadsheet.id}_tables", ""
+                )
+
+                for index, table in enumerate(tables):
+                    table_text = "\n".join([f"[{', '.join(row)}]" for row in table])
+                    await gptscript_client.add_dataset_element(
+                        os.getenv("GPTSCRIPT_WORKSPACE_DIR"), dataset.id, f"Table {index + 1}", table_text
+                    )
+
+                print(f"Created dataset with ID {dataset.id} with {len(tables)} tables")
+                return
+            except Exception:
+                pass  # Ignore errors if we got any, and just print the results.
+
         for index, table in enumerate(tables):
             print(f"Table {index + 1}:")
             for row in table:
@@ -57,4 +79,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

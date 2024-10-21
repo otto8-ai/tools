@@ -1,50 +1,96 @@
-export function printSearchResults(res) {
-    let pages = []
-    let databases = []
-    for (let r of res.results) {
-        switch (r.object) {
-            case "page":
-                pages.push(r)
-                break
-            case "database":
-                databases.push(r)
-                break
+import {min} from "./util.js";
+import {GPTScript} from "@gptscript-ai/gptscript";
+
+export async function search(client, query, max) {
+    if (max === undefined) {
+        max = 999999999 // basically unlimited
+    }
+    let nextCursor = undefined
+    let results = []
+    while (true) {
+        let response
+        if (nextCursor === undefined) {
+            response = await client.search({query: query})
+        } else {
+            response = await client.search({query: query, start_cursor: nextCursor})
         }
+        results = results.concat(response.results)
+
+        if (response.has_more === false || results.length >= max) {
+            break
+        }
+        nextCursor = response.next_cursor
     }
 
-    if (pages.length === 0 && databases.length === 0) {
+    if (min(results.length, max) > 10) {
+        try {
+            const gptscriptClient = new GPTScript()
+            const dataset = await gptscriptClient.createDataset(process.env.GPTSCRIPT_WORKSPACE_DIR, `${query}_notion_search`, `search results from Notion for query ${query}`)
+            for (let i = 0; i < min(results.length, max); i++) {
+                await gptscriptClient.addDatasetElement(
+                    process.env.GPTSCRIPT_WORKSPACE_DIR,
+                    dataset.id,
+                    results[i].name+results[i].id,
+                    `Notion page named ${results[i].name}`,
+                    `${resultToString(results[i])}`)
+            }
+            console.log(`Created dataset with ID ${dataset.id} with ${min(results.length, max)} search results`)
+            return
+        } catch (e) {} // Ignore errors if we got any. We'll just print the results below.
+    }
+
+    if (results.length === 0) {
         console.log("No results found")
         return
     }
 
-    if (pages.length > 0) {
-        printPages(pages)
-    }
-    console.log("")
-    if (databases.length > 0) {
-        printDatabases(databases)
+    for (let i = 0; i < min(max, results.length); i++) {
+        console.log(resultToString(results[i]))
     }
 }
 
-function printPages(pages) {
-    console.log("Pages:")
-    for (let page of pages) {
-        console.log(`- ID: ${page.id}`)
-        if (page.properties.title !== undefined && page.properties.title.title.length > 0) {
-            console.log(`  Title: ${page.properties.title.title[0].plain_text}`)
-        } else if (page.properties.Name !== undefined && page.properties.Name.title.length > 0) {
-            console.log(`  Name: ${page.properties.Name.title[0].plain_text}`)
-        }
-        console.log(`  URL: ${page.url}`)
-        console.log(`  Parent Type: ${page.parent.type}`)
-        if (page.parent.type === "database_id") {
-            console.log(`  Parent Database ID: ${page.parent.database_id}`)
-        } else if (page.parent.type === "page_id") {
-            console.log(`  Parent Page ID: ${page.parent.page_id}`)
-        } else if (page.parent.type === "block_id") {
-            console.log(`  Parent Block ID: ${page.parent.block_id}`)
-        }
+function resultToString(res) {
+    let str = ''
+    switch (res.object) {
+        case "page":
+            str += `- ID: ${res.id}\n`
+            if (res.properties.title !== undefined && res.properties.title.title.length > 0) {
+                str += `  Title: ${res.properties.title.title[0].plain_text}\n`
+            } else if (res.properties.Name !== undefined && res.properties.Name.title.length > 0) {
+                str += `  Name: ${res.properties.Name.title[0].plain_text}\n`
+            }
+            str += `  URL: ${res.url}\n`
+            str += `  Type: page\n`
+            str += `  Parent Type: ${res.parent.type}\n`
+            if (res.parent.type === "database_id") {
+                str += `  Parent Database ID: ${res.parent.database_id}\n`
+            } else if (res.parent.type === "page_id") {
+                str += `  Parent Page ID: ${res.parent.page_id}\n`
+            } else if (res.parent.type === "block_id") {
+                str += `  Parent Block ID: ${res.parent.block_id}\n`
+            }
+            break
+        case "database":
+            str += `- Title: ${res.title[0].plain_text}\n`
+            str += `  ID: ${res.id}\n`
+            str += `  URL: ${res.url}\n`
+            str += `  Type: database\n`
+            if (res.description.length > 0) {
+                str += `  Description: ${res.description[0].plain_text}\n`
+            }
+            if (res.parent.type !== "") {
+                str += `  Parent Type: ${res.parent.type}\n`
+            }
+            if (res.parent.type === "database_id") {
+                str += `  Parent Database ID: ${res.parent.database_id}\n`
+            } else if (res.parent.type === "page_id") {
+                str += `  Parent Page ID: ${res.parent.page_id}\n`
+            } else if (res.parent.type === "block_id") {
+                str += `  Parent Block ID: ${res.parent.block_id}\n`
+            }
+            break
     }
+    return str
 }
 
 function printDatabases(dbs) {

@@ -12,6 +12,28 @@ import (
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 )
 
+func EventToString(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, calendar graph.CalendarInfo, event models.Eventable) string {
+	var calendarName string
+	if calendar.Owner == graph.OwnerTypeUser {
+		calendarName = util.Deref(calendar.Calendar.GetName())
+	} else {
+		groupName, err := graph.GetGroupNameFromID(ctx, client, calendar.ID)
+		if err != nil {
+			calendarName = calendar.ID
+		} else {
+			calendarName = groupName
+		}
+	}
+
+	var sb strings.Builder
+	sb.WriteString("Subject: " + util.Deref(event.GetSubject()) + "\n")
+	sb.WriteString("  ID: " + util.Deref(event.GetId()) + "\n")
+	sb.WriteString("  Start: " + util.Deref(event.GetStart().GetDateTime()) + "\n")
+	sb.WriteString("  End: " + util.Deref(event.GetEnd().GetDateTime()) + "\n")
+	sb.WriteString("  In calendar: " + calendarName + " (ID " + calendar.ID + ")\n")
+	return sb.String()
+}
+
 func PrintEventsForCalendar(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, calendar graph.CalendarInfo, events []models.Eventable, detailed bool) error {
 	if calendar.Owner == graph.OwnerTypeUser {
 		fmt.Printf("Found events for calendar %s (ID %s):\n", util.Deref(calendar.Calendar.GetName()), calendar.ID)

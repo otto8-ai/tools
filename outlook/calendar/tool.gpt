@@ -16,6 +16,7 @@ Name: List Events Today
 Description: List all events for today in all calendars available to the user.
 Share Context: Outlook Calendar Context
 Share Context: github.com/gptscript-ai/context/current-time
+Share Context: github.com/gptscript-ai/datasets/context
 Credential: ./credential
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listEventsToday
@@ -25,6 +26,7 @@ Name: List Events
 Description: List all events in the given time frame in all calendars available to the user.
 Share Context: Outlook Calendar Context
 Share Context: github.com/gptscript-ai/context/current-time
+Share Context: github.com/gptscript-ai/datasets/context
 Credential: ./credential
 Param: start: The start date and time of the time frame, in RFC 3339 format.
 Param: end: The end date and time of the time frame, in RFC 3339 format.
@@ -94,6 +96,7 @@ Name: Search Events
 Description: Search for events based on a query string.
 Share Context: Outlook Calendar Context
 Share Context: github.com/gptscript-ai/context/current-time
+Share Context: github.com/gptscript-ai/datasets/context
 Credential: ./credential
 Param: query: (Required) The search query.
 Param: start: (Required) The start date and time of the time frame to search within, in RFC 3339 format.

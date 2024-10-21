@@ -25,6 +25,7 @@ Args: id: the ID of the database to get
 Name: Search
 Description: Searches a Notion workspace for pages and databases
 Credential: ./credential
+Share Context: github.com/gptscript-ai/datasets/context
 Args: query: the search query
 
 #!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js search
@@ -44,6 +45,7 @@ Args: parentPageId: ID of the page that will be the parent of the new page
 Name: List Users
 Description: Lists all users in the Notion workspace, including their IDs
 Credential: ./credential
+Share Context: github.com/gptscript-ai/datasets/context
 Args: max: the maximum number of users to list (default: unlimited)
 
 #!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js listUsers

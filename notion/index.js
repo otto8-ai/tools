@@ -1,7 +1,7 @@
 import {APIResponseError, Client} from "@notionhq/client"
 import {createPage, printPageProperties, recursivePrintChildBlocks} from "./src/pages.js"
 import {addDatabaseRow, describeProperty, printDatabaseRow, updateDatabaseRow} from "./src/database.js";
-import {printSearchResults} from "./src/search.js";
+import {search} from "./src/search.js";
 import {listUsers} from "./src/users.js";
 
 if (process.argv.length !== 3) {
@@ -21,7 +21,7 @@ async function main() {
                 await listUsers(notion, process.env.MAX)
                 break
             case "search":
-                printSearchResults(await notion.search({query: process.env.QUERY}))
+                await search(notion, process.env.QUERY, process.env.MAX)
                 break
             case "getPage":
                 await printPageProperties(notion, process.env.ID)
@@ -65,6 +65,7 @@ async function main() {
             console.log(error.message)
         } else {
             console.log("Got an error:", error.message)
+            throw error
         }
     }
 }
