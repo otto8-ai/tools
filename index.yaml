@@ -2,6 +2,9 @@ tools:
   excel:
     reference: ./excel
     all: true
+  browser:
+    reference: ./browser
+    all: true
   slack:
     reference: ./slack
     all: true

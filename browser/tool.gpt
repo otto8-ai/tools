@@ -1,0 +1,152 @@
+Name: Browser
+Description: Tools to navigate websites using a browser.
+Metadata: bundle: true
+Credentials: github.com/gptscript-ai/credentials/model-provider
+Share Tools: Browse, Get Page Contents, Get Page Images, Click, Fill, Check, Select, Enter, Scroll, Close, Screenshot, Back, Forward, Filter
+
+---
+Name: Browse
+Description: Navigates to a website, but does not return the content.
+Params: website: The URL of the website to visit. Must be an HTTPS URL.
+Params: tabID: (optional) The ID of the tab. If unspecified, a new tab will be created, and its ID will be returned.
+Tools: service
+
+#!http://service.daemon.gptscript.local/browse
+
+---
+Name: Get Page Contents
+Description: Returns the content of a website in Markdown format.
+Params: website: (optional) The HTTPS URL of the website to visit. If unspecified, the current tab will be used.
+Params: tabID: (optional) The ID of the tab. If unspecified, a new tab will be created.
+Tools: service
+
+#!http://service.daemon.gptscript.local/getPageContents
+
+---
+Name: Get Page Images
+Description: Navigates to a website and returns all the img tags in raw HTML, including their source URLs.
+Params: website: The URL of the website to visit. Must be an HTTPS URL.
+Params: tabID: (optional) The ID of the tab. If unspecified, a new tab will be created, and its ID will be returned.
+Tools: service
+
+#!http://service.daemon.gptscript.local/getPageImages
+
+---
+Name: Click
+Description: Clicks elements on the web page. Useful for clicking buttons, links, etc.
+Params: userInput: (required) Description of the element to click on. This will be used by the AI to determine which element to pick from the results. Be as detailed as possible.
+Params: keywords: (required) Comma-separated list of keywords related to the element. These will be used to search for the element on the page. ALWAYS include at least one keyword.
+Params: allElements: (optional, default false) Clicks on all matching elements, instead of only clicking on the first matched element.
+Params: matchTextOnly: (optional, default false) Matches elements based on their text content and ignores their attributes. Useful for cases where the user has provided an exact piece of text that they want to interact with on the page.
+Params: tabID: (required) The ID of the tab.
+Tools: service
+
+#!http://service.daemon.gptscript.local/click
+
+---
+Name: Filter
+Description: filter the page to get elements based on specific id, html tag, or class.
+Params: filter: (required) the class (eg. '.foo') or id (eg. '#foo') of an object.
+Params: tabID: (required) The ID of the tab to filter contents of.
+Tools: service
+
+#!http://service.daemon.gptscript.local/getFilteredContent
+
+---
+Name: Fill
+Description: Fills text into an element on the web page. Useful for filling out forms and other input fields.
+Params: userInput: (required) Description of the element to fill. This will be used by the AI to determine which element to pick from the results. Be as detailed as possible.
+Params: keywords: (required) Comma-separated list of keywords related to the element. These will be used to search for the element on the page. ALWAYS include at least one keyword.
+Params: matchTextOnly: (optional, default false) Matches elements based on their text content and ignores their attributes. Useful for cases where the user has provided an exact piece of text that they want to interact with on the page.
+Params: content: The text to fill into the element.
+Params: tabID: (required) The ID of the tab.
+Tools: service
+
+#!http://service.daemon.gptscript.local/fill
+
+---
+Name: Enter
+Description: Presses the enter key. Useful after filling out a form or other input.
+Params: tabID: (required) The ID of the tab.
+Tools: service
+
+#!http://service.daemon.gptscript.local/enter
+
+---
+Name: Scroll
+Description: Scrolls to the bottom of the page, possibly loading more content. Useful for sites like Reddit which support infinite scroll.
+Params: tabID: (required) The ID of the tab.
+Tools: service
+
+#!http://service.daemon.gptscript.local/scrollToBottom
+
+---
+Name: Check
+Description: Checks a radio button on the web page.
+Params: userInput: (required) Description of the element to check. This will be used by the AI to determine which element to pick from the results. Be as detailed as possible.
+Params: keywords: (required) Comma-separated list of keywords related to the element. These will be used to search for the element on the page. ALWAYS include at least one keyword.
+Params: matchTextOnly: (optional, default false) Matches elements based on their text content and ignores their attributes. Useful for cases where the user has provided an exact piece of text that they want to interact with on the page.
+Params: tabID: (optional) The ID of the tab. If unspecified, a new tab will be created.
+Tools: service
+
+#!http://service.daemon.gptscript.local/check
+
+---
+Name: Select
+Description: Selects an option from a select element.
+Params: userInput: (required) Description of the element to select from.
+Params: option: The option to choose in the dropdown.
+Params: tabID: (required) The ID of the tab.
+Tools: service
+
+#!http://service.daemon.gptscript.local/select
+
+---
+Name: Close
+Description: Closes a page.
+Params: tabID: (required) The ID of the tab to close.
+Tools: service
+
+#!http://service.daemon.gptscript.local/close
+
+---
+Name: Screenshot
+Description: Takes a screenshot of an element. Saves it as a PNG file in the workspace.
+Params: userInput: (required) Description of the element to screenshot. This will be used by the AI to determine which element to pick from the results. Be as detailed as possible.
+Params: keywords: (required) Comma-separated list of keywords related to the element. These will be used to search for the element on the page. ALWAYS include at least one keyword.
+Params: matchTextOnly: (optional, default false) Matches elements based on their text content and ignores their attributes. Useful for cases where the user has provided an exact piece of text that they want to interact with on the page.
+Params: tabID: (optional) The ID of the tab. If unspecified, a new tab will be created.
+Params: filename: (optional) The name of the file to create. Defaults to screenshot.png
+Tools: service
+
+#!http://service.daemon.gptscript.local/screenshot
+
+---
+Name: Back
+Description: Navigates to back to the previous site in history.
+Params: tabID: (required) The ID of the tab.
+Tools: service
+
+#!http://service.daemon.gptscript.local/back
+
+---
+Name: Forward
+Description: Navigates to forward to the next site in history.
+Params: tabID: (required) The ID of the tab.
+Tools: service
+
+#!http://service.daemon.gptscript.local/forward
+
+---
+Name: service
+Metadata: index: false
+
+#!sys.daemon /usr/bin/env npm --prefix ${GPTSCRIPT_TOOL_DIR} run server
+
+---
+!metadata:*:category
+Browser
+
+---
+!metadata:*:icon
+https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/duotone/browsers-duotone.svg

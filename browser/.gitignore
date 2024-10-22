@@ -1,0 +1,22 @@
+# Node.js dependencies
+node_modules/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Environment variables
+.env
+.env.*
+
+# Output of 'npm pack'
+*.tgz
+
+# IDE settings
+.vscode/
+.idea/
+
+# Build output
+dist/
+
+# Optional eslint cache
+.eslintcache
