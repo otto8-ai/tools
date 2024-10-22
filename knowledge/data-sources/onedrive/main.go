@@ -145,6 +145,10 @@ func main() {
 		metadata.Output.State.OneDriveState.Links = make(map[string]LinkState)
 	}
 
+	if metadata.Input.OneDriveConfig == nil {
+		metadata.Input.OneDriveConfig = &OneDriveConfig{}
+	}
+
 	if err := sync(ctx, metadata, client, workingDir, metadataPath); err != nil {
 		metadata.Output.Error = err.Error()
 		if err := writeMetadata(metadata, metadataPath); err != nil {
