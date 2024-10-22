@@ -67,6 +67,8 @@ Type: context
 You have access to a set of tools to access, create, and modify Microsoft Excel workbooks.
 Do not output workbook IDs or worksheet IDs because they are not helpful for the user.
 
+When the Workbook to use is ambiguous, ask the user to to select one before continuing.
+
 ## End of instructions for using Excel tools
 
 ---
