@@ -13,7 +13,7 @@ import { randomBytes } from 'node:crypto'
 import { screenshot } from './screenshot.ts'
 import { getSessionId, SessionManager } from './session.ts'
 
-async function main (): Promise<void> {
+async function main(): Promise<void> {
   console.log('Starting browser server')
 
   const app = express()
@@ -53,29 +53,16 @@ async function main (): Promise<void> {
         printTabID = false
       }
 
-      browserContext.on('close', () => {
-        console.log('Closing the context')
-        setTimeout(() => {
-          process.exit(0)
-        }, 3000)
-      })
-
       let page: Page
-      if (openPages[tabID] !== undefined) {
-        page = openPages[tabID]
+      if (openPages.has(tabID)) {
+        page = openPages.get(tabID)!
         if (page.isClosed()) {
           page = await browserContext.newPage()
-          if (openPages === undefined) {
-            openPages = {}
-          }
-          openPages[tabID] = page
+          openPages.set(tabID, page)
         }
       } else {
         page = await browserContext.newPage()
-        if (openPages === undefined) {
-          openPages = {}
-        }
-        openPages[tabID] = page
+        openPages.set(tabID, page)
       }
       await page.bringToFront()
 
@@ -114,8 +101,7 @@ async function main (): Promise<void> {
         await scrollToBottom(page)
       } else if (req.path === '/close') {
         await close(page)
-        // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-        delete openPages[tabID]
+        openPages.delete(tabID)
       } else if (req.path === '/back') {
         await page.goBack()
       } else if (req.path === '/forward') {

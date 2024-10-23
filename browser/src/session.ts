@@ -29,20 +29,24 @@ interface ManagedSession {
 }
 
 export class SessionManager {
-  private readonly sessions: Record<string, ManagedSession> = {}
+  private readonly sessions: Map<string, ManagedSession> = new Map()
   private readonly sessionsLock: Mutex = new Mutex()
 
-  private constructor () {
+  private constructor() {
   }
 
-  static async create (): Promise<SessionManager> {
+  static async create(): Promise<SessionManager> {
     sessionManager ??= new SessionManager()
     return sessionManager
   }
 
-  async withSession (sessionId: string, fn: (browserContext: BrowserContext, openPages: Record<string, Page>) => Promise<void>): Promise<void> {
+  async withSession(sessionId: string, fn: (browserContext: BrowserContext, openPages: Map<string, Page>) => Promise<void>): Promise<void> {
     await this.sessionsLock.runExclusive(async () => {
-      const managedSession = this.sessions[sessionId] ??= { session: await Session.create(sessionId) }
+      let managedSession = this.sessions.get(sessionId)
+      if (!managedSession) {
+        managedSession = { session: await Session.create(sessionId) }
+        this.sessions.set(sessionId, managedSession)
+      }
       if (managedSession.cleanupTimeout != null) clearTimeout(managedSession.cleanupTimeout)
 
       await managedSession.session.lock.runExclusive(async () => {
@@ -56,13 +60,15 @@ export class SessionManager {
     })
   }
 
-  private async deleteSession (sessionId: string): Promise<void> {
+  private async deleteSession(sessionId: string): Promise<void> {
     await this.sessionsLock.runExclusive(async () => {
-      const { session, cleanupTimeout } = this.sessions[sessionId] ?? {}
-      if (cleanupTimeout != null) clearTimeout(cleanupTimeout)
-      await session?.close()
-      // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-      delete this.sessions[sessionId]
+      const managedSession = this.sessions.get(sessionId)
+      if (managedSession) {
+        const { session, cleanupTimeout } = managedSession
+        if (cleanupTimeout != null) clearTimeout(cleanupTimeout)
+        await session?.close()
+        this.sessions.delete(sessionId)
+      }
     })
   }
 }
@@ -73,40 +79,40 @@ class Session {
   sessionId: string
   sessionDir: string = ''
   browserContext?: BrowserContext
-  openPages: Record<string, Page> = {}
+  openPages: Map<string, Page> = new Map()
   lock: Mutex = new Mutex()
 
-  private constructor (sessionId: string) {
+  private constructor(sessionId: string) {
     this.sessionId = sessionId
   }
 
-  static async create (sessionId: string): Promise<Session> {
+  static async create(sessionId: string): Promise<Session> {
     const session = new Session(sessionId)
     session.sessionDir = await mkSessionDir(sessionId)
     session.browserContext = await newBrowserContext(session.sessionDir)
     return session
   }
 
-  async close (): Promise<void> {
+  async close(): Promise<void> {
     await this.browserContext?.close()
     await fs.rm(this.sessionDir, { recursive: true })
   }
 }
 
-async function mkSessionDir (sessionId: string): Promise<string> {
+async function mkSessionDir(sessionId: string): Promise<string> {
   const sessionDir = path.resolve(APP_CACHE_DIR, 'browser_sessions', sessionId)
   await fs.mkdir(sessionDir, { recursive: true })
   return sessionDir
 }
 
-export function getSessionId (headers: IncomingHttpHeaders): string {
+export function getSessionId(headers: IncomingHttpHeaders): string {
   const workspaceId = getWorkspaceId(headers['x-gptscript-env'])
   if (workspaceId == null) throw new Error('No GPTScript workspace ID provided')
 
   return createHash('sha256').update(workspaceId).digest('hex').substring(0, 16)
 }
 
-function getWorkspaceId (envHeader: string | string[] | undefined): string | undefined {
+function getWorkspaceId(envHeader: string | string[] | undefined): string | undefined {
   const envArray = Array.isArray(envHeader) ? envHeader : [envHeader]
   for (const env of envArray) {
     if (env == null) {
@@ -122,3 +128,4 @@ function getWorkspaceId (envHeader: string | string[] | undefined): string | und
   }
   return process.env.GPTSCRIPT_WORKSPACE_ID
 }
+
