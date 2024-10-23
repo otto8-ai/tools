@@ -106,6 +106,8 @@ Do not output mail folder IDs or message IDs because they are not helpful for th
 When printing a list of messages for the user, include the body preview. When printing a single message and its details, print the full body. Always include the email link.
 When printing a single message or a list of messages, use Markdown formatting.
 
+Do not attempt to forward emails. Email forwarding is not supported.
+
 ## End of instructions for using the Microsoft Outlook Mail tools
 
 ---
