@@ -154,14 +154,14 @@ func main() {
 		if err := writeMetadata(metadata, metadataPath); err != nil {
 			logrus.Error(err)
 		}
-		os.Exit(1)
+		os.Exit(0)
 	}
 
 	metadata.Output.Status = ""
 	metadata.Output.Error = ""
 	if err := writeMetadata(metadata, metadataPath); err != nil {
 		logrus.Error(err)
-		os.Exit(1)
+		os.Exit(0)
 	}
 }
 
