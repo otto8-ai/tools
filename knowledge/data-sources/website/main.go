@@ -52,6 +52,8 @@ type FileDetails struct {
 }
 
 func main() {
+	logrus.SetOutput(os.Stdout)
+
 	var err error
 	workingDir := os.Getenv("GPTSCRIPT_WORKSPACE_DIR")
 	if workingDir == "" {
@@ -99,7 +101,7 @@ func main() {
 	}
 
 	if mode == "colly" {
-		NewColly().Crawl(&metadata, metadataPath, workingDir)
+		CrawlColly(&metadata, metadataPath, workingDir)
 	} else if mode == "firecrawl" {
 		NewFirecrawl().Crawl(&metadata, metadataPath, workingDir)
 	}

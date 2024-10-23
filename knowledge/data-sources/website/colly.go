@@ -18,17 +18,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type Colly struct {
-	collector *colly.Collector
-}
-
-func NewColly() *Colly {
-	return &Colly{
-		collector: colly.NewCollector(),
-	}
-}
-
-func (c *Colly) Crawl(metadata *Metadata, metadataPath string, workingDir string) {
+func CrawlColly(metadata *Metadata, metadataPath string, workingDir string) {
 	converter := md.NewConverter("", true, nil)
 
 	visited := make(map[string]struct{})
@@ -40,7 +30,7 @@ func (c *Colly) Crawl(metadata *Metadata, metadataPath string, workingDir string
 	}
 
 	for _, url := range metadata.Input.WebsiteCrawlingConfig.URLs {
-		if err := scrape(c, converter, metadata, metadataPath, workingDir, visited, exclude, folders, url); err != nil {
+		if err := scrape(converter, metadata, metadataPath, workingDir, visited, exclude, folders, url); err != nil {
 			logrus.Errorf("Failed to scrape %s: %v", url, err)
 		}
 	}
@@ -73,8 +63,7 @@ func (c *Colly) Crawl(metadata *Metadata, metadataPath string, workingDir string
 	}
 }
 
-func scrape(c *Colly, converter *md.Converter, metadata *Metadata, metadataPath string, workingDir string, visited map[string]struct{}, exclude map[string]bool, folders map[string]struct{}, url string) error {
-	logrus.Infof("scraping dbug %s", url)
+func scrape(converter *md.Converter, metadata *Metadata, metadataPath string, workingDir string, visited map[string]struct{}, exclude map[string]bool, folders map[string]struct{}, url string) error {
 	collector := colly.NewCollector()
 	collector.OnHTML("body", func(e *colly.HTMLElement) {
 		if _, ok := visited[e.Request.URL.String()]; ok {
@@ -84,6 +73,7 @@ func scrape(c *Colly, converter *md.Converter, metadata *Metadata, metadataPath 
 			return
 		}
 
+		logrus.Infof("scraping %s", e.Request.URL.String())
 		visited[e.Request.URL.String()] = struct{}{}
 		markdown := converter.Convert(e.DOM)
 		hostname := e.Request.URL.Hostname()
@@ -120,7 +110,7 @@ func scrape(c *Colly, converter *md.Converter, metadata *Metadata, metadataPath 
 			updatedAt = time.Now().Format(time.RFC3339)
 		}
 
-		checksum, err := GetChecksum(markdown)
+		checksum, err := getChecksum(markdown)
 		if err != nil {
 			logrus.Errorf("Failed to get checksum for %s: %v", filePath, err)
 			return
@@ -245,7 +235,7 @@ func scrapePDF(workingDir string, metadata *Metadata, metadataPath string, visit
 		return fmt.Errorf("failed to copy PDF to temp file: %v", err)
 	}
 	tempFile.Seek(0, 0)
-	newChecksum, err := GetChecksum(tempFile.Name())
+	newChecksum, err := getChecksum(tempFile.Name())
 	if err != nil {
 		return fmt.Errorf("failed to calculate checksum: %v", err)
 	}
@@ -287,7 +277,7 @@ func scrapePDF(workingDir string, metadata *Metadata, metadataPath string, visit
 	return nil
 }
 
-func GetChecksum(content string) (string, error) {
+func getChecksum(content string) (string, error) {
 	hash := sha256.New()
 	_, err := hash.Write([]byte(content))
 	if err != nil {
