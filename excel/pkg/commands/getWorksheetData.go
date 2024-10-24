@@ -33,31 +33,36 @@ func GetWorksheetData(ctx context.Context, workbookID, worksheetID string) error
 		return fmt.Errorf("failed to create gptscript client: %w", err)
 	}
 
-	workspace := os.Getenv("GPTSCRIPT_WORKSPACE_DIR")
-
 	dataset, err := gptscriptClient.CreateDataset(ctx,
-		workspace,
+		os.Getenv("GPTSCRIPT_WORKSPACE_ID"),
 		fmt.Sprintf("%s_%s_worksheet_data", worksheetID, workbookID),
 		fmt.Sprintf("Data from Excel worksheet %s in workbook %s", worksheetID, workbookID),
 	)
 	if err != nil {
-		// If we're unable to create the dataset, it's better to just print all the data than fail.
-		return printWorksheetData(data)
+		return err
 	}
 
+	var elements []gptscript.DatasetElement
 	for i, row := range data {
 		rowJSON, err := json.Marshal(row)
 		if err != nil {
 			return fmt.Errorf("failed to marshal row %d: %w", i, err)
 		}
 
-		if _, err := gptscriptClient.AddDatasetElement(ctx, workspace, dataset.ID, fmt.Sprintf("row_%d", i), "", string(rowJSON)); err != nil {
-			return fmt.Errorf("failed to add element: %w", err)
-		}
+		elements = append(elements, gptscript.DatasetElement{
+			DatasetElementMeta: gptscript.DatasetElementMeta{
+				Name: fmt.Sprintf("row_%d", i),
+			},
+			Contents: string(rowJSON),
+		})
 
-		if i == 5000 { // Stop writing after 5k rows. It's just too many, at least for now.
+		if i == 5000 { // Stop after 5k rows. It's just too many, at least for now.
 			break
 		}
+	}
+
+	if err := gptscriptClient.AddDatasetElements(ctx, os.Getenv("GPTSCRIPT_WORKSPACE_ID"), dataset.ID, elements); err != nil {
+		return fmt.Errorf("failed to add elements: %w", err)
 	}
 
 	fmt.Printf("Dataset created with ID: %s\n", dataset.ID)

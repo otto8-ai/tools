@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/gptscript-ai/go-gptscript"
@@ -44,35 +43,42 @@ func ListEvents(ctx context.Context, start, end time.Time) error {
 	}
 
 	if len(util.Flatten(util.MapValues(calendarEvents))) > 10 {
-		workspace := os.Getenv("GPTSCRIPT_WORKSPACE_DIR")
+		workspaceID := os.Getenv("GPTSCRIPT_WORKSPACE_ID")
 		gptscriptClient, err := gptscript.NewGPTScript()
 		if err != nil {
 			return fmt.Errorf("failed to create GPTScript client: %w", err)
 		}
 
-		dataset, err := gptscriptClient.CreateDataset(ctx, workspace, "event list", "List of Outlook Calendar events")
-		// If we got back an error, we just print the events. Otherwise, write them to the dataset.
-		if err == nil {
-			for cal, events := range calendarEvents {
-				for _, event := range events {
-					eventString := printers.EventToString(ctx, c, cal, event)
-					if _, err := gptscriptClient.AddDatasetElement(ctx, workspace, dataset.ID,
-						util.Deref(event.GetSubject())+"_"+util.Deref(cal.Calendar.GetName())+"_"+util.Deref(event.GetStart().GetDateTime()),
-						util.Deref(event.GetBodyPreview()), eventString); err != nil {
-						if strings.Contains(err.Error(), "already exists") {
-							// We can hit this error pretty easily. I think it has to do with events that span multiple days.
-							// It makes the most sense to just skip it and move on to the next event.
-							continue
-						}
-
-						return fmt.Errorf("failed to add event to dataset: %w", err)
-					}
-				}
-			}
-
-			fmt.Printf("Created dataset with ID %s with %d events\n", dataset.ID, len(util.Flatten(util.MapValues(calendarEvents))))
-			return nil
+		dataset, err := gptscriptClient.CreateDataset(ctx, workspaceID, "event list", "List of Outlook Calendar events")
+		if err != nil {
+			return fmt.Errorf("failed to create dataset: %w", err)
 		}
+
+		names := map[string]any{} // Store names to avoid duplicates
+		var elements []gptscript.DatasetElement
+		for cal, events := range calendarEvents {
+			for _, event := range events {
+				name := util.Deref(event.GetSubject()) + "_" + util.Deref(cal.Calendar.GetName()) + "_" + util.Deref(event.GetStart().GetDateTime())
+				if _, exists := names[name]; !exists {
+					elements = append(elements, gptscript.DatasetElement{
+						DatasetElementMeta: gptscript.DatasetElementMeta{
+							Name:        util.Deref(event.GetSubject()) + "_" + util.Deref(cal.Calendar.GetName()) + "_" + util.Deref(event.GetStart().GetDateTime()),
+							Description: util.Deref(event.GetBodyPreview()),
+						},
+						Contents: printers.EventToString(ctx, c, cal, event),
+					})
+					names[name] = struct{}{}
+				}
+
+			}
+		}
+
+		if err := gptscriptClient.AddDatasetElements(ctx, workspaceID, dataset.ID, elements); err != nil {
+			return fmt.Errorf("failed to add dataset elements: %w", err)
+		}
+
+		fmt.Printf("Created dataset with ID %s with %d events\n", dataset.ID, len(util.Flatten(util.MapValues(calendarEvents))))
+		return nil
 	}
 
 	for cal, events := range calendarEvents {
