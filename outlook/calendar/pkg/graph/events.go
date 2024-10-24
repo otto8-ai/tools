@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/gptscript-ai/tools/outlook/calendar/pkg/recurrence"
 	"github.com/gptscript-ai/tools/outlook/calendar/pkg/util"
 	msgraphsdkgo "github.com/microsoftgraph/msgraph-sdk-go"
 	"github.com/microsoftgraph/msgraph-sdk-go/groups"
@@ -13,11 +14,11 @@ import (
 )
 
 type CreateEventInfo struct {
-	Attendees                   []string // slice of email addresses
-	Subject, Location, Body, ID string
-	Owner                       OwnerType
-	IsOnline                    bool
-	Start, End                  time.Time
+	Attendees                               []string // slice of email addresses
+	Subject, Location, Body, ID, Recurrence string
+	Owner                                   OwnerType
+	IsOnline                                bool
+	Start, End                              time.Time
 }
 
 func GetEvent(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, eventID, calendarID string, owner OwnerType) (models.Eventable, error) {
@@ -48,6 +49,21 @@ func GetEvent(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, even
 
 func CreateEvent(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, info CreateEventInfo) (models.Eventable, error) {
 	requestBody := models.NewEvent()
+
+	if info.Recurrence != "" {
+		// Recurrence is pretty complicated in the graph API, so we use an internal tool call to generate it.
+		r, err := recurrence.Generate(ctx, info.Recurrence)
+		if err != nil {
+			return nil, fmt.Errorf("failed to generate recurrence: %w", err)
+		}
+
+		graphRecurrence, err := r.ConvertForGraphAPI()
+		if err != nil {
+			return nil, fmt.Errorf("failed to convert recurrence for Graph API: %w", err)
+		}
+
+		requestBody.SetRecurrence(graphRecurrence)
+	}
 
 	var attendees []models.Attendeeable
 	for _, a := range info.Attendees {
