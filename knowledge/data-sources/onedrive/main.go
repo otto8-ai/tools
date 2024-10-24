@@ -149,6 +149,10 @@ func main() {
 		metadata.Input.OneDriveConfig = &OneDriveConfig{}
 	}
 
+	for i := range metadata.Input.OneDriveConfig.SharedLinks {
+		metadata.Input.OneDriveConfig.SharedLinks[i] = strings.TrimSpace(metadata.Input.OneDriveConfig.SharedLinks[i])
+	}
+
 	if err := sync(ctx, metadata, client, workingDir, metadataPath); err != nil {
 		metadata.Output.Error = err.Error()
 		if err := writeMetadata(metadata, metadataPath); err != nil {
