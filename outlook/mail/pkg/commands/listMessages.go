@@ -43,23 +43,35 @@ func ListMessages(ctx context.Context, folderID string) error {
 			return fmt.Errorf("failed to create GPTScript client: %w", err)
 		}
 
-		dataset, err := gptscriptClient.CreateDataset(ctx, os.Getenv("GPTSCRIPT_WORKSPACE_DIR"), fmt.Sprintf("%s_outlook_mail", folderID), "Outlook mail messages in folder "+folderID)
-		// If we got back an error, we just print the messages. Otherwise, write them to the dataset.
-		if err == nil {
-			for _, message := range messages {
-				messageStr, err := printers.MessageToString(message, false)
-				if err != nil {
-					return fmt.Errorf("failed to convert message to string: %w", err)
-				}
+		workspaceID := os.Getenv("GPTSCRIPT_WORKSPACE_ID")
 
-				if _, err = gptscriptClient.AddDatasetElement(ctx, os.Getenv("GPTSCRIPT_WORKSPACE_DIR"), dataset.ID, util.Deref(message.GetId()), util.Deref(message.GetSubject()), messageStr); err != nil {
-					return fmt.Errorf("failed to add element: %w", err)
-				}
+		dataset, err := gptscriptClient.CreateDataset(ctx, workspaceID, fmt.Sprintf("%s_outlook_mail", folderID), "Outlook mail messages in folder "+folderID)
+		if err != nil {
+			return fmt.Errorf("failed to create dataset: %w", err)
+		}
+
+		var elements []gptscript.DatasetElement
+		for _, message := range messages {
+			messageStr, err := printers.MessageToString(message, false)
+			if err != nil {
+				return fmt.Errorf("failed to convert message to string: %w", err)
 			}
 
-			fmt.Printf("Created dataset with ID %s with %d messages\n", dataset.ID, len(messages))
-			return nil
+			elements = append(elements, gptscript.DatasetElement{
+				DatasetElementMeta: gptscript.DatasetElementMeta{
+					Name:        util.Deref(message.GetId()),
+					Description: util.Deref(message.GetSubject()),
+				},
+				Contents: messageStr,
+			})
 		}
+
+		if err := gptscriptClient.AddDatasetElements(ctx, workspaceID, dataset.ID, elements); err != nil {
+			return fmt.Errorf("failed to add dataset elements: %w", err)
+		}
+
+		fmt.Printf("Created dataset with ID %s with %d messages\n", dataset.ID, len(messages))
+		return nil
 	}
 
 	return printers.PrintMessages(messages, false)
