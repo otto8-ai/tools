@@ -6,9 +6,9 @@ from googleapiclient.errors import HttpError
 
 
 def client(service_name: str, version: str):
-    token = os.getenv('SHEETS_GOOGLE_OAUTH_TOKEN')
+    token = os.getenv('GOOGLE_OAUTH_TOKEN')
     if token is None:
-        raise ValueError("SHEETS_GOOGLE_OAUTH_TOKEN environment variable is not set")
+        raise ValueError("GOOGLE_OAUTH_TOKEN environment variable is not set")
 
     creds = Credentials(token=token)
     try:
@@ -21,9 +21,9 @@ def client(service_name: str, version: str):
 
 def gspread_client():
     import gspread
-    token = os.getenv('SHEETS_GOOGLE_OAUTH_TOKEN')
+    token = os.getenv('GOOGLE_OAUTH_TOKEN')
     if token is None:
-        raise ValueError("SHEETS_GOOGLE_OAUTH_TOKEN environment variable is not set")
+        raise ValueError("GOOGLE_OAUTH_TOKEN environment variable is not set")
 
     creds = Credentials(token=token)
     try:
