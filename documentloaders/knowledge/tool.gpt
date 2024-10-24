@@ -1,0 +1,8 @@
+Name: PDF Document Loader
+Tools: Knowledge Load from github.com/gptscript-ai/knowledge@v0.4.14-rc.23
+Params: input: Path to input PDF file
+Params: output: Path to output file where the extracted markdown content should be written to. Should end with .md
+metadata: supported-file-type: pdf
+
+Always call the Knowledge Load tool with the input and output parameters set to the input and output parameters of the PDF Document Loader tool.
+Explicitly set the Loader parameter to mupdf.
