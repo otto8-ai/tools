@@ -57,6 +57,7 @@ Param: attendees: (Required) A comma-separated list of the email addresses of pe
 Param: is_online: (Required) (boolean) Whether the event is online (true) or in person (false).
 Param: start: (Required) The start date and time of the event, in RFC 3339 format.
 Param: end: (Required) The end date and time of the event, in RFC 3339 format.
+Param: recurrence: (Optional) If the meeting should recur, describe in plain English how often it should occur (daily, weekly, monthly, yearly) and during which date range (first and last occurence) or how many total times the event should occur.
 Param: calendar_id: The unique ID of the calendar or group to add the event to. If unset, adds the event to the default calendar.
 Param: owner_type: The type of the owner of the calendar or group. Possible values are "user" or "group". Required if calendar_id is set.
 
