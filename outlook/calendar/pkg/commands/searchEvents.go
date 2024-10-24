@@ -45,21 +45,17 @@ func SearchEvents(ctx context.Context, query string, start, end time.Time) error
 			return fmt.Errorf("failed to create dataset: %w", err)
 		}
 
-		names := map[string]any{} // Store names to avoid duplicates
 		var elements []gptscript.DatasetElement
 		for cal, events := range calendarEvents {
 			for _, event := range events {
-				name := util.Deref(event.GetSubject()) + "_" + util.Deref(cal.Calendar.GetName()) + "_" + util.Deref(event.GetStart().GetDateTime())
-				if _, exists := names[name]; !exists {
-					elements = append(elements, gptscript.DatasetElement{
-						DatasetElementMeta: gptscript.DatasetElementMeta{
-							Name:        name,
-							Description: util.Deref(event.GetBodyPreview()),
-						},
-						Contents: printers.EventToString(ctx, c, cal, event),
-					})
-					names[name] = struct{}{}
-				}
+				name := util.Deref(event.GetId()) + "_" + util.Deref(event.GetSubject())
+				elements = append(elements, gptscript.DatasetElement{
+					DatasetElementMeta: gptscript.DatasetElementMeta{
+						Name:        name,
+						Description: util.Deref(event.GetBodyPreview()),
+					},
+					Contents: printers.EventToString(ctx, c, cal, event),
+				})
 			}
 		}
 
