@@ -7,10 +7,10 @@ export async function listChannels(webClient) {
     if (publicChannels.channels.length + privateChannels.channels.length > 10) {
         try {
             const gptscriptClient = new GPTScript()
-            const dataset = await gptscriptClient.createDataset(process.env.GPTSCRIPT_WORKSPACE_DIR, 'slack_channels', 'list of slack channels')
+            const dataset = await gptscriptClient.createDataset(process.env.GPTSCRIPT_WORKSPACE_ID, 'slack_channels', 'list of slack channels')
 
             for (const channel of [...publicChannels.channels, ...privateChannels.channels]) {
-                await gptscriptClient.addDatasetElement(process.env.GPTSCRIPT_WORKSPACE_DIR, dataset.id, channel.name, channel.purpose.value || '', channelToString(channel))
+                await gptscriptClient.addDatasetElement(process.env.GPTSCRIPT_WORKSPACE_ID, dataset.id, channel.name, channel.purpose.value || '', channelToString(channel))
             }
 
             console.log(`Created dataset with ID ${dataset.id} with ${publicChannels.channels.length + privateChannels.channels.length} channels`)
@@ -44,11 +44,11 @@ export async function searchChannels(webClient, query) {
     } else if (publicChannels.length + privateChannels.length > 10) {
         try {
             const gptscriptClient = new GPTScript()
-            const dataset = await gptscriptClient.createDataset(process.env.GPTSCRIPT_WORKSPACE_DIR, `${query}_slack_channels`, `list of slack channels matching search query "${query}"`)
+            const dataset = await gptscriptClient.createDataset(process.env.GPTSCRIPT_WORKSPACE_ID, `${query}_slack_channels`, `list of slack channels matching search query "${query}"`)
 
             for (const channel of [...publicChannels, ...privateChannels]) {
                 await gptscriptClient.addDatasetElement(
-                    process.env.GPTSCRIPT_WORKSPACE_DIR,
+                    process.env.GPTSCRIPT_WORKSPACE_ID,
                     dataset.id,
                     channel.name,
                     channel.purpose.value || '',
@@ -133,11 +133,11 @@ export async function search(webClient, query) {
     } else if (result.messages.matches.length > 10) {
         try {
             const gptscriptClient = new GPTScript()
-            const dataset = await gptscriptClient.createDataset(process.env.GPTSCRIPT_WORKSPACE_DIR, `slack_search_${query}`, `search results for query "${query}"`)
+            const dataset = await gptscriptClient.createDataset(process.env.GPTSCRIPT_WORKSPACE_ID, `slack_search_${query}`, `search results for query "${query}"`)
 
             for (const message of result.messages.matches) {
                 await gptscriptClient.addDatasetElement(
-                    process.env.GPTSCRIPT_WORKSPACE_DIR,
+                    process.env.GPTSCRIPT_WORKSPACE_ID,
                     dataset.id,
                     `${message.iid}_${message.ts}`,
                     "",
@@ -188,10 +188,10 @@ export async function listUsers(webClient) {
     if (users.members.length > 10) {
         try {
             const gptscriptClient = new GPTScript()
-            const dataset = await gptscriptClient.createDataset(process.env.GPTSCRIPT_WORKSPACE_DIR, 'slack_users', 'list of slack users')
+            const dataset = await gptscriptClient.createDataset(process.env.GPTSCRIPT_WORKSPACE_ID, 'slack_users', 'list of slack users')
 
             for (const user of users.members) {
-                await gptscriptClient.addDatasetElement(process.env.GPTSCRIPT_WORKSPACE_DIR, dataset.id, user.name, user.profile.real_name, userToString(user))
+                await gptscriptClient.addDatasetElement(process.env.GPTSCRIPT_WORKSPACE_ID, dataset.id, user.name, user.profile.real_name, userToString(user))
             }
 
             console.log(`Created dataset with ID ${dataset.id} with ${users.members.length} users`)
@@ -211,10 +211,10 @@ export async function searchUsers(webClient, query) {
     if (matchingUsers.length > 10) {
         try {
             const gptscriptClient = new GPTScript()
-            const dataset = await gptscriptClient.createDataset(process.env.GPTSCRIPT_WORKSPACE_DIR, `${query}_slack_users`, `list of slack users matching search query "${query}"`)
+            const dataset = await gptscriptClient.createDataset(process.env.GPTSCRIPT_WORKSPACE_ID, `${query}_slack_users`, `list of slack users matching search query "${query}"`)
 
             for (const user of matchingUsers) {
-                await gptscriptClient.addDatasetElement(process.env.GPTSCRIPT_WORKSPACE_DIR, dataset.id, user.name, user.profile.real_name, userToString(user))
+                await gptscriptClient.addDatasetElement(process.env.GPTSCRIPT_WORKSPACE_ID, dataset.id, user.name, user.profile.real_name, userToString(user))
             }
 
             console.log(`Created dataset with ID ${dataset.id} with ${matchingUsers.length} users`)
