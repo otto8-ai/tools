@@ -66,9 +66,10 @@ Param: max_results: Maximum number of drafts to list (Optional: Default will lis
 
 ---
 Name: Create Draft
-Description: Create a draft email in a user's Gmail account
+Description: Create a draft email in a user's Gmail account.
 Credential: ./credential
 Share Context: Current Date and Time from ../../time
+Share Context: Draft Context
 Param: to_emails: A comma separated list of email addresses to send the email to
 Param: cc_emails: A comma separated list of email addresses to cc the email to (Optional)
 Param: bcc_emails: A comma separated list of email addresses to bcc the email to (Optional)
@@ -118,10 +119,15 @@ Type: context
 
 #!sys.echo
 
-## Instructions for Updating, Deleting, or Sending a Draft Email
+## Instructions for Creating, Updating, Deleting, or Sending a Draft Email
 
 If more information about a draft email is required before updating, deleting, or sending it,
 retrieve the contents of the current draft using the Read Email tool.
+
+Replying to and forwarding emails are not supported operations.
+Drafts should not be used to provide indirect support for these operations.
+Do not assist the user with drafting an email to reply to or forward an email in any way.
+
 
 ## End of instructions for Updating, Deleting, or Sending a Draft Email
 
