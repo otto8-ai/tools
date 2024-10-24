@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 )
@@ -98,6 +99,14 @@ func main() {
 
 	if metadata.Output.State.WebsiteCrawlingState.Pages == nil {
 		metadata.Output.State.WebsiteCrawlingState.Pages = make(map[string]PageDetails)
+	}
+
+	for i := range metadata.Input.WebsiteCrawlingConfig.URLs {
+		metadata.Input.WebsiteCrawlingConfig.URLs[i] = strings.TrimSpace(metadata.Input.WebsiteCrawlingConfig.URLs[i])
+	}
+
+	for i := range metadata.Input.Exclude {
+		metadata.Input.Exclude[i] = strings.TrimSpace(metadata.Input.Exclude[i])
 	}
 
 	if mode == "colly" {
