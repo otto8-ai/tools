@@ -53,7 +53,7 @@ func SearchEvents(ctx context.Context, query string, start, end time.Time) error
 				if _, exists := names[name]; !exists {
 					elements = append(elements, gptscript.DatasetElement{
 						DatasetElementMeta: gptscript.DatasetElementMeta{
-							Name:        util.Deref(event.GetSubject()) + "_" + util.Deref(cal.Calendar.GetName()) + "_" + util.Deref(event.GetStart().GetDateTime()),
+							Name:        name,
 							Description: util.Deref(event.GetBodyPreview()),
 						},
 						Contents: printers.EventToString(ctx, c, cal, event),
