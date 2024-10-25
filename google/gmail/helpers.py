@@ -64,13 +64,13 @@ async def list_messages(service, query, max_results):
             gptscript_client = gptscript.GPTScript()
             try:
                 dataset = await gptscript_client.create_dataset(
-                    os.getenv("GPTSCRIPT_WORKSPACE_DIR"),
+                    os.getenv("GPTSCRIPT_WORKSPACE_ID"),
                     f"gmail_{query}",
                     f"list of emails in Gmail for query {query}")
                 for message in all_messages:
                     msg_id, msg_str = message_to_string(service, message)
                     await gptscript_client.add_dataset_element(
-                        os.getenv("GPTSCRIPT_WORKSPACE_DIR"),
+                        os.getenv("GPTSCRIPT_WORKSPACE_ID"),
                         dataset.id,
                         msg_id,
                         msg_str
@@ -134,13 +134,13 @@ async def list_drafts(service, max_results=None):
             try:
                 gptscript_client = gptscript.GPTScript()
                 dataset = await gptscript_client.create_dataset(
-                    os.getenv("GPTSCRIPT_WORKSPACE_DIR"),
+                    os.getenv("GPTSCRIPT_WORKSPACE_ID"),
                     "gmail_drafts",
                     "list of drafts in Gmail")
                 for draft in all_drafts:
                     draft_id, draft_str = draft_to_string(service, draft)
                     await gptscript_client.add_dataset_element(
-                        os.getenv("GPTSCRIPT_WORKSPACE_DIR"),
+                        os.getenv("GPTSCRIPT_WORKSPACE_ID"),
                         dataset.id,
                         draft_id,
                         draft_str
