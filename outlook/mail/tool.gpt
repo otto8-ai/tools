@@ -53,7 +53,7 @@ Description: Create (but do not send) a draft message.
 Share Context: Outlook Mail Context
 Credential: Outlook Mail OAuth Write Credential from ./credential
 Param: subject: The subject of the message.
-Param: content: The content of the message in HTML.
+Param: body: The body of the message in markdown format.
 Param: recipients: A comma-separated list of email addresses to send the message to. No spaces. Example: person1@example.com,person2@example.com
 Param: cc: (Optional) A comma-separated list of email addresses to CC on the message. No spaces. Example: person1@example.com,person2@example.com
 Param: bcc: (Optional) A comma-separated list of email addresses to BCC on the message. No spaces. Example: person1@example.com,person2@example.com
@@ -105,6 +105,7 @@ You have access to tools for the Microsoft Outlook Mail API.
 Do not output mail folder IDs or message IDs because they are not helpful for the user. The message IDs are needed for getting message details, deleting a message, or moving a message.
 When printing a list of messages for the user, include the body preview. When printing a single message and its details, print the full body. Always include the email link.
 When printing a single message or a list of messages, use Markdown formatting.
+When creating a draft message, ensure the body is valid markdown and there are no broken links. Draft bodies may include markdown-compatible inline HTML for styling purposes.
 
 Do not attempt to forward emails. Email forwarding is not supported.
 

@@ -5,9 +5,9 @@ import (
 	"strings"
 	"time"
 
+	md "github.com/JohannesKaufmann/html-to-markdown"
 	"github.com/gptscript-ai/tools/outlook/common/id"
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/util"
-	"github.com/jaytaylor/html2text"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 )
 
@@ -89,11 +89,14 @@ func MessageToString(msg models.Messageable, detailed bool) (string, error) {
 		result.WriteString(fmt.Sprintf("CC: %s\n", strings.Join(util.Map(msg.GetCcRecipients(), recipientableToString), ", ")))
 		result.WriteString(fmt.Sprintf("Has attachments: %t\n", util.Deref(msg.GetHasAttachments())))
 
-		bodyText, err := html2text.FromString(util.Deref(msg.GetBody().GetContent()))
+		converter := md.NewConverter("", true, nil)
+		bodyHTML := util.Deref(msg.GetBody().GetContent())
+		bodyMarkdown, err := converter.ConvertString(bodyHTML)
 		if err != nil {
-			return "", fmt.Errorf("failed to convert HTML to text: %w", err)
+			return "", fmt.Errorf("failed to convert email body HTML to markdown: %w", err)
 		}
-		result.WriteString(fmt.Sprintf("Body: %s", strings.ReplaceAll(bodyText, "\n", "\n  ")))
+
+		result.WriteString(fmt.Sprintf("Body: %s", strings.ReplaceAll(bodyMarkdown, "\n", "\n  ")))
 	} else {
 		result.WriteString(fmt.Sprintf("Body preview: %s\n", strings.ReplaceAll(util.Deref(msg.GetBodyPreview()), "\n", "\n  ")))
 	}

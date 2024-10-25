@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/gomarkdown/markdown"
+	"github.com/gomarkdown/markdown/html"
+	"github.com/gomarkdown/markdown/parser"
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/util"
 	msgraphsdkgo "github.com/microsoftgraph/msgraph-sdk-go"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
@@ -17,9 +20,7 @@ func ListMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, 
 			Top: util.Ptr(int32(100)),
 		},
 	})
-
 	// TODO - handle if there are more than 100
-
 	if err != nil {
 		return nil, fmt.Errorf("failed to list mail: %w", err)
 	}
@@ -81,9 +82,16 @@ func SearchMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceClient
 }
 
 type DraftInfo struct {
-	Subject, Content    string
+	Subject, Body       string
 	Recipients, CC, BCC []string // slice of email addresses
 }
+
+var (
+	mdParser   = parser.NewWithExtensions(parser.CommonExtensions | parser.AutoHeadingIDs | parser.NoEmptyLineBeforeBlock)
+	mdRenderer = html.NewRenderer(html.RendererOptions{
+		Flags: html.CompletePage,
+	})
+)
 
 func CreateDraft(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, info DraftInfo) (models.Messageable, error) {
 	requestBody := models.NewMessage()
@@ -101,7 +109,9 @@ func CreateDraft(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, i
 
 	body := models.NewItemBody()
 	body.SetContentType(util.Ptr(models.HTML_BODYTYPE))
-	body.SetContent(util.Ptr(info.Content))
+
+	bodyHTML := string(markdown.Render(mdParser.Parse([]byte(info.Body)), mdRenderer))
+	body.SetContent(util.Ptr(bodyHTML))
 
 	requestBody.SetBody(body)
 
