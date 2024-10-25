@@ -9,7 +9,7 @@ print("The current date and time is ", datetime.now(timezone.utc).isoformat())
 
 ---
 !metadata:*:category
-Time
+Utilities
 
 ---
 !metadata:*:icon

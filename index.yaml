@@ -35,6 +35,10 @@ tools:
   github:
     reference: ./github
     all: true
+  time:
+    reference: ./time
+  workspace-files:
+    reference: ./workspace-files
 
 knowledgeDataSources:
   notion-data-source:
@@ -43,9 +47,6 @@ knowledgeDataSources:
     reference: ./knowledge/data-sources/onedrive
   website-data-source:
     reference: ./knowledge/data-sources/website
-
-# Add one day... Same format as above
-stepTemplates: {}
 
 system:
   knowledge-retrieval:
