@@ -138,6 +138,16 @@ func Generate(ctx context.Context, description string) (Recurrence, error) {
 		return Recurrence{}, fmt.Errorf("failed to unmarshal recurrence: %w", err)
 	}
 
+	// The Outlook Calendar API is supposed to be able to support this, but it never seems to work,
+	// so we just ask the LLM to schedule multiple events if it is trying to do this.
+	if len(r.Recurrence.Pattern.DaysOfWeek) > 1 {
+		if r.Recurrence.Pattern.RecurrenceType == "relativeMonthly" {
+			return Recurrence{}, fmt.Errorf("error: a single monthly event cannot be scheduled on multiple days of the week - please schedule separate events instead")
+		} else if r.Recurrence.Pattern.RecurrenceType == "relativeYearly" {
+			return Recurrence{}, fmt.Errorf("error: a single yearly event cannot be scheduled on multiple days of the week - please schedule separate events instead")
+		}
+	}
+
 	return r.Recurrence, nil
 }
 

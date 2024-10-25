@@ -187,11 +187,11 @@ func TestRecurrenceGeneration(t *testing.T) {
 		},
 		{
 			name:       "Relative Monthly Numbered",
-			recurrence: "every three months on the third Tuesday and Wednesday, for 18 events, starting 3/3/27",
+			recurrence: "every three months on the third Tuesday, for 18 events, starting 3/3/27",
 			expected: Recurrence{
 				Pattern: RecurrencePattern{
 					Index:          "third",
-					DaysOfWeek:     []string{"Tuesday", "Wednesday"},
+					DaysOfWeek:     []string{"Tuesday"},
 					Interval:       3,
 					RecurrenceType: "relativeMonthly",
 				},
@@ -254,12 +254,12 @@ func TestRecurrenceGeneration(t *testing.T) {
 		},
 		{
 			name:       "Relative Yearly NoEnd",
-			recurrence: "every other year on the last Monday, Tuesday, and Wednesday of March, beginning in 2027",
+			recurrence: "every other year on the last Monday of March, beginning in 2027",
 			expected: Recurrence{
 				Pattern: RecurrencePattern{
 					Index:          "last",
 					Month:          3,
-					DaysOfWeek:     []string{"Monday", "Tuesday", "Wednesday"},
+					DaysOfWeek:     []string{"Monday"},
 					Interval:       2,
 					RecurrenceType: "relativeYearly",
 				},
