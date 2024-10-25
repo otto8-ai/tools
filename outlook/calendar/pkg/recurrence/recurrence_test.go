@@ -7,7 +7,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TODO - test these for real with Outlook
 func TestRecurrenceGeneration(t *testing.T) {
 	tests := []struct {
 		name       string
