@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// TODO - test these for real with Outlook
 func TestRecurrenceGeneration(t *testing.T) {
 	tests := []struct {
 		name       string
@@ -151,7 +152,159 @@ func TestRecurrenceGeneration(t *testing.T) {
 				},
 			},
 		},
-		// TODO - add more tests
+		{
+			name:       "Relative Monthly NoEnd",
+			recurrence: "every month on the first Thursday, beginning 2/2/27",
+			expected: Recurrence{
+				Pattern: RecurrencePattern{
+					Index:          "first",
+					DaysOfWeek:     []string{"Thursday"},
+					Interval:       1,
+					RecurrenceType: "relativeMonthly",
+				},
+				Range: RecurrenceRange{
+					StartDate:      "2027-02-02",
+					RecurrenceType: "noEnd",
+				},
+			},
+		},
+		{
+			name:       "Relative Monthly EndDate",
+			recurrence: "every two months on the last Friday, from 2/2/27 to 7/7/27",
+			expected: Recurrence{
+				Pattern: RecurrencePattern{
+					Index:          "last",
+					DaysOfWeek:     []string{"Friday"},
+					Interval:       2,
+					RecurrenceType: "relativeMonthly",
+				},
+				Range: RecurrenceRange{
+					StartDate:      "2027-02-02",
+					EndDate:        "2027-07-07",
+					RecurrenceType: "endDate",
+				},
+			},
+		},
+		{
+			name:       "Relative Monthly Numbered",
+			recurrence: "every three months on the third Tuesday and Wednesday, for 18 events, starting 3/3/27",
+			expected: Recurrence{
+				Pattern: RecurrencePattern{
+					Index:          "third",
+					DaysOfWeek:     []string{"Tuesday", "Wednesday"},
+					Interval:       3,
+					RecurrenceType: "relativeMonthly",
+				},
+				Range: RecurrenceRange{
+					StartDate:           "2027-03-03",
+					NumberOfOccurrences: 18,
+					RecurrenceType:      "numbered",
+				},
+			},
+		},
+		{
+			name:       "Absolute Yearly NoEnd",
+			recurrence: "every other year on April 1st, beginning in 2027",
+			expected: Recurrence{
+				Pattern: RecurrencePattern{
+					Month:          4,
+					DayOfMonth:     1,
+					Interval:       2,
+					RecurrenceType: "absoluteYearly",
+				},
+				Range: RecurrenceRange{
+					StartDate:      "2027-04-01",
+					RecurrenceType: "noEnd",
+				},
+			},
+		},
+		{
+			name:       "Absolute Yearly EndDate",
+			recurrence: "every year on April 1st, from 2027 to 2030",
+			expected: Recurrence{
+				Pattern: RecurrencePattern{
+					Month:          4,
+					DayOfMonth:     1,
+					Interval:       1,
+					RecurrenceType: "absoluteYearly",
+				},
+				Range: RecurrenceRange{
+					StartDate:      "2027-04-01",
+					EndDate:        "2030-04-01",
+					RecurrenceType: "endDate",
+				},
+			},
+		},
+		{
+			name:       "Absolute Yearly Numbered",
+			recurrence: "every five years on May 4th, 9 times, starting in 2027",
+			expected: Recurrence{
+				Pattern: RecurrencePattern{
+					Month:          5,
+					DayOfMonth:     4,
+					Interval:       5,
+					RecurrenceType: "absoluteYearly",
+				},
+				Range: RecurrenceRange{
+					StartDate:           "2027-05-04",
+					NumberOfOccurrences: 9,
+					RecurrenceType:      "numbered",
+				},
+			},
+		},
+		{
+			name:       "Relative Yearly NoEnd",
+			recurrence: "every other year on the last Monday, Tuesday, and Wednesday of March, beginning in 2027",
+			expected: Recurrence{
+				Pattern: RecurrencePattern{
+					Index:          "last",
+					Month:          3,
+					DaysOfWeek:     []string{"Monday", "Tuesday", "Wednesday"},
+					Interval:       2,
+					RecurrenceType: "relativeYearly",
+				},
+				Range: RecurrenceRange{
+					StartDate:      "2027-03-29",
+					RecurrenceType: "noEnd",
+				},
+			},
+		},
+		{
+			name:       "Relative Yearly EndDate",
+			recurrence: "every year on the first Friday of March, from 2027 to 2039",
+			expected: Recurrence{
+				Pattern: RecurrencePattern{
+					Index:          "first",
+					Month:          3,
+					DaysOfWeek:     []string{"Friday"},
+					Interval:       1,
+					RecurrenceType: "relativeYearly",
+				},
+				Range: RecurrenceRange{
+					StartDate:      "2027-03-01",
+					EndDate:        "2039-12-31",
+					RecurrenceType: "endDate",
+				},
+			},
+		},
+		{
+			name:       "Relative Yearly Numbered",
+			recurrence: "every third year on the fourth Thursday of May, for 10 occurrences, starting in 2027",
+			expected: Recurrence{
+				Pattern: RecurrencePattern{
+					Index:          "fourth",
+					Month:          5,
+					DaysOfWeek:     []string{"Thursday"},
+					Interval:       3,
+					RecurrenceType: "relativeYearly",
+				},
+				Range: RecurrenceRange{
+					StartDate:           "2027-05-27",
+					NumberOfOccurrences: 10,
+					RecurrenceType:      "numbered",
+				},
+			},
+		},
 	}
 
 	for _, tt := range tests {
