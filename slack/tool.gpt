@@ -36,7 +36,7 @@ Param: limit: the number of messages to return - recommend starting with 10 and 
 
 ---
 Name: Get Channel History by Time
-Description: Get the chat history for a channel in the Slack workspace within a specific time range
+Description: Get the chat history for a channel in the Slack workspace within a specific time range. Use this tool to get the latest messages from a channel.
 Share Context: Slack Context
 Credential: ./credential
 Share Tools: List Channels, Search Channels
