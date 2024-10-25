@@ -5,7 +5,6 @@ import (
 	_ "embed"
 	"encoding/json"
 	"fmt"
-	"os"
 	"strings"
 	"time"
 
@@ -15,6 +14,8 @@ import (
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 )
 
+// the source for doc.md: https://learn.microsoft.com/en-us/graph/outlook-schedule-recurring-events
+//
 //go:embed doc.md
 var doc string
 
@@ -123,12 +124,6 @@ func Generate(ctx context.Context, description string) (Recurrence, error) {
 	result, err := run.Text()
 	if err != nil {
 		return Recurrence{}, err
-	}
-
-	file, err := os.OpenFile("/Users/grant/recurrence.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err == nil {
-		file.WriteString(result + "\n")
-		file.Close()
 	}
 
 	var r struct {
