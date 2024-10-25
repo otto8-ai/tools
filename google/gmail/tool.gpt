@@ -8,7 +8,7 @@ Share Tools: List Inbox, Read Email, Search Emails, Send Email, Delete Email, Li
 Name: List Inbox
 Description: List emails in the user's Gmail inbox
 Credential: ../credential
-Share Contexts: Current Date and Time from ../../time, github.com/gptscript-ai/datasets/context
+Share Contexts: Current Date and Time from ../../time, github.com/gptscript-ai/datasets/context, Email List Context
 Param: max_results: Maximum number of emails to list (Optional: Default will list all emails in the inbox)
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/listInbox.py
@@ -59,7 +59,7 @@ Param: email_id: The ID of the email to delete
 Name: List Drafts
 Description: List drafts in a user's Gmail account
 Credential: ../credential
-Share Contexts: Current Date and Time from ../../time, github.com/gptscript-ai/datasets/context
+Share Contexts: Current Date and Time from ../../time, github.com/gptscript-ai/datasets/context, Email List Context
 Param: max_results: Maximum number of drafts to list (Optional: Default will list all drafts)
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/listDrafts.py
@@ -130,6 +130,19 @@ Do not assist the user with drafting an email to reply to or forward an email in
 
 
 ## End of instructions for Updating, Deleting, or Sending a Draft Email
+
+---
+Name: Email List Context
+
+#!sys.echo
+
+## Instructions for getting emails from a dataset
+
+When you list the element in a dataset that contains emails, the element names will be the email IDs.
+These email IDs are not useful to the user, so don't show them to the user.
+Instead, get the contents of the elements and display that to the user.
+
+## End of instructions for getting emails from a dataset
 
 ---
 !metadata:*:category

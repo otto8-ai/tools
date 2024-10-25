@@ -1,4 +1,4 @@
 google-api-python-client
 google-auth-httplib2
 google-auth-oauthlib
-git+https://github.com/gptscript-ai/py-gptscript.git@ed2e33b1565db8d9cfab7d18355713f7435c588b#egg=gptscript
+git+https://github.com/gptscript-ai/py-gptscript.git@e64740b0a4f63abdba82bb876790ee6f2ade5bf8#egg=gptscript
