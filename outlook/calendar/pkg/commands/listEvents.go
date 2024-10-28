@@ -49,7 +49,7 @@ func ListEvents(ctx context.Context, start, end time.Time) error {
 			return fmt.Errorf("failed to create GPTScript client: %w", err)
 		}
 
-		dataset, err := gptscriptClient.CreateDataset(ctx, workspaceID, "event list", "List of Outlook Calendar events")
+		dataset, err := gptscriptClient.CreateDataset(ctx, workspaceID, "event_list", "List of Outlook Calendar events")
 		if err != nil {
 			return fmt.Errorf("failed to create dataset: %w", err)
 		}
