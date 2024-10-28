@@ -47,7 +47,7 @@ Param: owner_type: The type of the owner of the calendar or group. Possible valu
 ---
 Name: Create Event
 Description: Create a new event.
-Share Context: Outlook Calendar Context
+Share Context: Outlook Calendar Context, Recurrence Context
 Credential: ./credential
 Share Tools: List Calendars
 Param: subject: (Required) The title of the event.
@@ -55,8 +55,9 @@ Param: location: (Required) The location of the event.
 Param: body: (Required) The details of the event.
 Param: attendees: (Required) A comma-separated list of the email addresses of people to invite to the event.
 Param: is_online: (Required) (boolean) Whether the event is online (true) or in person (false).
-Param: start: (Required) The start date and time of the event, in RFC 3339 format.
-Param: end: (Required) The end date and time of the event, in RFC 3339 format.
+Param: start: (Required) The start time of the event, in RFC 3339 format.
+Param: end: (Required) The end time of the event, in RFC 3339 format. When scheduling a recurring event, this should be the end time of the first event in the series.
+Param: recurrence: (Optional) If the meeting should recur, describe in plain English how often it should occur (daily, weekly, monthly, yearly) and during which date range (first and last occurrence) or how many total times the event should occur. ALWAYS include the date of the first occurrence, and optionally the date of the last occurrence.
 Param: calendar_id: The unique ID of the calendar or group to add the event to. If unset, adds the event to the default calendar.
 Param: owner_type: The type of the owner of the calendar or group. Possible values are "user" or "group". Required if calendar_id is set.
 
@@ -139,6 +140,49 @@ If creating a date/time in the UTC timezone, it must end with 'Z' to properly de
 If the user asks you to create or modify events, use their default timezone unless otherwise stated. If the user's default timezone isn't defined, ask them for clarification.
 
 ## End of instructions for using the Microsoft Outlook Calendar tools
+
+---
+Name: Recurrence Context
+Type: context
+
+#!sys.echo
+
+## Instructions for scheduling recurring meetings in Outlook Calendar
+
+When scheduling a recurring meeting in Outlook Calendar, include as much information as you can about when it should occur.
+Always include the date of the first occurrence of the event. Here are some examples of how to describe recurrence well:
+
+Daily:
+- "every 3 days, beginning 2/2/27"
+- "every 4 days, from 2/2/27 to 4/4/27"
+- "every 5 days, for 10 occurrences, starting 2/2/27"
+
+Weekly:
+- "every other week on Monday, beginning 2/2/27"
+- "every week on Tuesday, from 2/2/27 to 4/4/27"
+- "every three weeks on Wednesday, Thursday, and Friday, 5 times, starting 2/2/27"
+
+Monthly:
+- "every month on the 15th, beginning 2/15/27"
+- "every other month on the 15th, from 2/15/27 to 6/16/27"
+- "every three months on the 16th, 9 times, starting 2/16/27"
+- "every month on the first Thursday, beginning 2/2/27"
+- "every two months on the last Friday, from 2/2/27 to 7/7/28"
+- "every three months on the third Tuesday, for 18 events, starting 3/3/27"
+
+Yearly:
+- "every other year on April 1st, beginning in 2027"
+- "every year on April 1st, from 2027 to 2030"
+- "every five years on May 4th, 9 times, starting in 2027"
+- "every other year on the last Monday of March, beginning in 2027"
+- "every year on the first Friday of March, from 2027 to 2039"
+- "every third year on the fourth Thursday of May, for 10 occurrences, starting in 2027"
+
+When setting the `end` parameter, it should be the date and time of the end of the very first event in the series.
+In most circumstances, this event will not span multiple days. Ask for confirmation from the user before creating a single
+event that spans multiple days.
+
+## End of instructions for scheduling recurring meetings in Outlook Calendar
 
 ---
 !metadata:*:category
