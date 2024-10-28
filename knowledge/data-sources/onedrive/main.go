@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path"
@@ -12,6 +13,8 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
+	"github.com/gptscript-ai/go-gptscript"
+	"github.com/gptscript-ai/gptscript/pkg/sdkserver"
 	msgraphsdk "github.com/microsoftgraph/msgraph-sdk-go"
 	drives2 "github.com/microsoftgraph/msgraph-sdk-go/drives"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
@@ -19,15 +22,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type Metadata struct {
-	Input     MetadataInput  `json:"input"`
-	Output    MetadataOutput `json:"output"`
-	OutputDir string         `json:"outputDir"`
-}
-
 type MetadataInput struct {
 	OneDriveConfig *OneDriveConfig `json:"onedriveConfig,omitempty"`
-	Exclude        []string        `json:"exclude,omitempty"`
 }
 
 type OneDriveConfig struct {
@@ -36,7 +32,6 @@ type OneDriveConfig struct {
 
 type MetadataOutput struct {
 	Status string                 `json:"status"`
-	Error  string                 `json:"error"`
 	Files  map[string]FileDetails `json:"files"`
 	State  State                  `json:"state"`
 }
@@ -46,9 +41,8 @@ type State struct {
 }
 
 type OneDriveLinksConnectorState struct {
-	Folders map[string]struct{}  `json:"folders,omitempty"`
-	Files   map[string]FileState `json:"files,omitempty"`
-	Links   map[string]LinkState `json:"links,omitempty"`
+	Files map[string]FileState `json:"files,omitempty"`
+	Links map[string]LinkState `json:"links,omitempty"`
 }
 
 type LinkState struct {
@@ -84,97 +78,112 @@ type FileDetails struct {
 	UpdatedAt string `json:"updatedAt"`
 }
 
+func newGPTScript(ctx context.Context) (*gptscript.GPTScript, error) {
+	workspaceTool := os.Getenv("WORKSPACE_TOOL")
+	if workspaceTool == "" {
+		workspaceTool = "github.com/gptscript-ai/workspace-provider"
+	}
+	if os.Getenv("GPTSCRIPT_URL") != "" {
+		return gptscript.NewGPTScript(gptscript.GlobalOptions{
+			URL:           os.Getenv("GPTSCRIPT_URL"),
+			WorkspaceTool: workspaceTool,
+		})
+	}
+
+	url, err := sdkserver.EmbeddedStart(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := os.Setenv("GPTSCRIPT_URL", url); err != nil {
+		return nil, err
+	}
+
+	return gptscript.NewGPTScript(gptscript.GlobalOptions{
+		URL:           url,
+		WorkspaceTool: workspaceTool,
+	})
+}
+
 func main() {
-	logrus.SetOutput(os.Stdout)
+	logOut := logrus.New()
+	logOut.SetOutput(os.Stdout)
+	logOut.SetFormatter(&logrus.JSONFormatter{})
+	logErr := logrus.New()
+	logErr.SetOutput(os.Stderr)
+	logErr.SetFormatter(&logrus.JSONFormatter{})
 
 	cred := NewStaticTokenCredential(os.Getenv("GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN"))
 	client, err := msgraphsdk.NewGraphServiceClientWithCredentials(cred, []string{})
 	if err != nil {
-		logrus.Error(err)
-		os.Exit(1)
+		logErr.WithError(err).Fatal("Failed to create ms graph client")
 	}
+
 	ctx := context.Background()
-	workingDir := os.Getenv("GPTSCRIPT_WORKSPACE_DIR")
-	if workingDir == "" {
-		workingDir, err = os.Getwd()
-		if err != nil {
-			logrus.Error(err)
-			os.Exit(1)
-		}
-	}
-
-	metadata := Metadata{}
-	metadataPath := path.Join(workingDir, ".metadata.json")
-	if _, err := os.Stat(metadataPath); os.IsNotExist(err) {
-		logrus.Error("metadata.json not found")
-		os.Exit(1)
-	}
-	data, err := os.ReadFile(metadataPath)
+	gptscriptClient, err := newGPTScript(ctx)
 	if err != nil {
-		logrus.Error(err)
-		os.Exit(1)
+		logErr.WithError(err).Fatal("Failed to create gptscript client")
 	}
 
-	err = json.Unmarshal(data, &metadata)
-	if err != nil {
-		logrus.Error(err)
-		os.Exit(1)
+	inputData := os.Getenv("GPTSCRIPT_INPUT")
+	input := MetadataInput{}
+
+	if err := json.Unmarshal([]byte(inputData), &input); err != nil {
+		logErr.WithError(err).Fatal("Failed to unmarshal input data")
+	}
+	if input.OneDriveConfig == nil {
+		input.OneDriveConfig = &OneDriveConfig{}
 	}
 
-	if metadata.Output.Files == nil {
-		metadata.Output.Files = make(map[string]FileDetails)
-	}
+	output := MetadataOutput{}
 
-	if metadata.OutputDir != "" {
-		workingDir = metadata.OutputDir
-	}
-
-	if metadata.Output.State.OneDriveState == nil {
-		metadata.Output.State.OneDriveState = &OneDriveLinksConnectorState{
-			Folders: make(map[string]struct{}),
-			Files:   make(map[string]FileState),
+	var notfoundErr gptscript.NotFoundInWorkspaceError
+	outputData, err := gptscriptClient.ReadFileInWorkspace(ctx, ".metadata.json")
+	if err != nil && !errors.As(err, &notfoundErr) {
+		logrus.WithError(err).Fatal("Failed to read .metadata.json in workspace")
+	} else if err == nil {
+		if err := json.Unmarshal(outputData, &output); err != nil {
+			logrus.WithError(err).Fatal("Failed to unmarshal output data")
 		}
 	}
-	if metadata.Output.State.OneDriveState.Folders == nil {
-		metadata.Output.State.OneDriveState.Folders = make(map[string]struct{})
-	}
-	if metadata.Output.State.OneDriveState.Files == nil {
-		metadata.Output.State.OneDriveState.Files = make(map[string]FileState)
-	}
-	if metadata.Output.State.OneDriveState.Links == nil {
-		metadata.Output.State.OneDriveState.Links = make(map[string]LinkState)
+
+	if output.Files == nil {
+		output.Files = make(map[string]FileDetails)
 	}
 
-	if metadata.Input.OneDriveConfig == nil {
-		metadata.Input.OneDriveConfig = &OneDriveConfig{}
-	}
-
-	for i := range metadata.Input.OneDriveConfig.SharedLinks {
-		metadata.Input.OneDriveConfig.SharedLinks[i] = strings.TrimSpace(metadata.Input.OneDriveConfig.SharedLinks[i])
-	}
-
-	if err := sync(ctx, metadata, client, workingDir, metadataPath); err != nil {
-		metadata.Output.Error = err.Error()
-		if err := writeMetadata(metadata, metadataPath); err != nil {
-			logrus.Error(err)
+	if output.State.OneDriveState == nil {
+		output.State.OneDriveState = &OneDriveLinksConnectorState{
+			Files: make(map[string]FileState),
 		}
-		os.Exit(0)
+	}
+	if output.State.OneDriveState.Files == nil {
+		output.State.OneDriveState.Files = make(map[string]FileState)
+	}
+	if output.State.OneDriveState.Links == nil {
+		output.State.OneDriveState.Links = make(map[string]LinkState)
 	}
 
-	metadata.Output.Status = ""
-	metadata.Output.Error = ""
-	if err := writeMetadata(metadata, metadataPath); err != nil {
+	for i := range input.OneDriveConfig.SharedLinks {
+		input.OneDriveConfig.SharedLinks[i] = strings.TrimSpace(input.OneDriveConfig.SharedLinks[i])
+	}
+
+	if err := sync(ctx, logErr, input, &output, client, gptscriptClient); err != nil {
+		logrus.WithError(err).Fatal("Failed to sync onedrive links")
+	}
+
+	output.Status = ""
+	if err := writeMetadata(ctx, &output, gptscriptClient); err != nil {
 		logrus.Error(err)
 		os.Exit(0)
 	}
 }
 
-func sync(ctx context.Context, metadata Metadata, client *msgraphsdk.GraphServiceClient, workingDir string, metadataPath string) error {
+func sync(ctx context.Context, logErr *logrus.Logger, input MetadataInput, output *MetadataOutput, client *msgraphsdk.GraphServiceClient, gptscript *gptscript.GPTScript) error {
 	items := make(map[string]struct {
 		Item models.DriveItemable
 		Root string
 	})
-	for _, link := range metadata.Input.OneDriveConfig.SharedLinks {
+	for _, link := range input.OneDriveConfig.SharedLinks {
 		requestParameters := &shares.ItemDriveItemRequestBuilderGetQueryParameters{
 			Expand: []string{"children"},
 		}
@@ -186,7 +195,7 @@ func sync(ctx context.Context, metadata Metadata, client *msgraphsdk.GraphServic
 			return err
 		}
 		root := path.Dir(getFullName(shareDriveItem))
-		metadata.Output.State.OneDriveState.Links[link] = LinkState{
+		output.State.OneDriveState.Links[link] = LinkState{
 			IsFolder: shareDriveItem.GetFile() == nil,
 			Name:     *shareDriveItem.GetName(),
 		}
@@ -205,19 +214,19 @@ func sync(ctx context.Context, metadata Metadata, client *msgraphsdk.GraphServic
 			}
 		}
 	}
-	if err := saveToMetadata(ctx, metadata, client, workingDir, metadataPath, items); err != nil {
+	if err := saveToMetadata(ctx, logErr, output, client, gptscript, items); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func writeMetadata(metadata Metadata, path string) error {
-	data, err := json.MarshalIndent(metadata, "", "  ")
+func writeMetadata(ctx context.Context, output *MetadataOutput, gptscript *gptscript.GPTScript) error {
+	data, err := json.MarshalIndent(output, "", "  ")
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(path, data, 0644)
+	return gptscript.WriteFileInWorkspace(ctx, ".metadata.json", data)
 }
 
 func getChildrenFileForItem(ctx context.Context, client *msgraphsdk.GraphServiceClient, item models.DriveItemable) ([]models.DriveItemable, error) {
@@ -244,92 +253,70 @@ func getChildrenFileForItem(ctx context.Context, client *msgraphsdk.GraphService
 	return result, nil
 }
 
-func saveToMetadata(ctx context.Context, metadata Metadata, client *msgraphsdk.GraphServiceClient, dataPath string, metadataPath string, items map[string]struct {
+func saveToMetadata(ctx context.Context, logErr *logrus.Logger, output *MetadataOutput, client *msgraphsdk.GraphServiceClient, gptscriptClient *gptscript.GPTScript, items map[string]struct {
 	Item models.DriveItemable
 	Root string
 }) error {
 	folders := make(map[string]struct{})
-	excluded := make(map[string]struct{})
 	files := make(map[string]FileState)
-	for _, exclude := range metadata.Input.Exclude {
-		excluded[exclude] = struct{}{}
-	}
 	for _, item := range items {
 		fullPath := getFullName(item.Item)
 		relativePath := strings.TrimPrefix(fullPath, item.Root)
-		downloadPath := path.Join(dataPath, relativePath)
 		topRootFolder := strings.Split(strings.TrimPrefix(relativePath, string(os.PathSeparator)), string(os.PathSeparator))[0]
 		created := false
-		detail, ok := metadata.Output.Files[*item.Item.GetId()]
+		detail, ok := output.Files[*item.Item.GetId()]
 		if !ok {
 			created = true
-			detail.FilePath = downloadPath
+			detail.FilePath = relativePath
 			detail.URL = *item.Item.GetWebUrl()
 			detail.UpdatedAt = (*item.Item.GetLastModifiedDateTime()).String()
-			metadata.Output.Files[*item.Item.GetId()] = detail
+			output.Files[*item.Item.GetId()] = detail
 		}
 		files[*item.Item.GetId()] = FileState{
 			FolderPath: strings.TrimPrefix(filepath.Dir(relativePath), string(os.PathSeparator)),
-			FileName:   path.Base(downloadPath),
+			FileName:   path.Base(relativePath),
 			URL:        *item.Item.GetWebUrl(),
 		}
-		if _, ok := excluded[*item.Item.GetId()]; !ok && (created || detail.UpdatedAt != item.Item.GetLastModifiedDateTime().String()) {
-			if _, err := os.Stat(path.Dir(downloadPath)); err != nil {
-				err := os.MkdirAll(path.Dir(downloadPath), 0755)
-				if err != nil {
-					return err
-				}
-			}
+		if created || detail.UpdatedAt != item.Item.GetLastModifiedDateTime().String() {
 			driveID := *item.Item.GetParentReference().GetDriveId()
 			data, err := client.Drives().ByDriveId(driveID).Items().ByDriveItemId(*item.Item.GetId()).Content().Get(ctx, nil)
 			if err != nil {
 				return err
 			}
 
-			err = os.WriteFile(downloadPath, data, 0644)
-			if err != nil {
+			if err := gptscriptClient.WriteFileInWorkspace(ctx, relativePath, data); err != nil {
 				return err
 			}
-			logrus.Info(fmt.Sprintf("Downloaded %s", downloadPath))
+			logErr.Infof("Downloaded %s", relativePath)
 			detail.UpdatedAt = item.Item.GetLastModifiedDateTime().String()
-			metadata.Output.Files[*item.Item.GetId()] = detail
+			output.Files[*item.Item.GetId()] = detail
+		} else {
+			logErr.Infof("Skipping %s because it is not changed", relativePath)
 		}
 		folders[topRootFolder] = struct{}{}
-		metadata.Output.State.OneDriveState.Folders[topRootFolder] = struct{}{}
-		metadata.Output.State.OneDriveState.Files = files
-		metadata.Output.Status = fmt.Sprintf("Synced %d files out of %d", len(metadata.Output.Files), len(items))
-		if err := writeMetadata(metadata, metadataPath); err != nil {
+		output.State.OneDriveState.Files = files
+		output.Status = fmt.Sprintf("Synced %d files out of %d", len(output.Files), len(items))
+		if err := writeMetadata(ctx, output, gptscriptClient); err != nil {
 			return err
 		}
 	}
-	for id := range metadata.Output.Files {
+	for id := range output.Files {
 		found := false
 		if _, ok := items[id]; ok {
 			found = true
 		}
-		if _, ok := excluded[id]; ok || !found {
-			if metadata.Output.Files[id].FilePath != "" {
-				logrus.Infof("Deleting %s", metadata.Output.Files[id].FilePath)
-				downloadPath := metadata.Output.Files[id].FilePath
-				if err := os.RemoveAll(downloadPath); err != nil {
+		if !found {
+			if output.Files[id].FilePath != "" {
+				logErr.Infof("Deleting %s", output.Files[id].FilePath)
+				if err := gptscriptClient.DeleteFileInWorkspace(ctx, output.Files[id].FilePath); err != nil {
 					return err
 				}
 			}
-			delete(metadata.Output.Files, id)
+			delete(output.Files, id)
 		}
 	}
 
-	for folder := range metadata.Output.State.OneDriveState.Folders {
-		if _, ok := folders[folder]; !ok {
-			logrus.Infof("Deleting folder %s", folder)
-			if err := os.RemoveAll(strings.TrimRight(folder, "/")); err != nil {
-				return err
-			}
-			delete(metadata.Output.State.OneDriveState.Folders, folder)
-		}
-	}
-
-	metadata.Output.State.OneDriveState.Files = files
+	output.State.OneDriveState.Files = files
 
 	return nil
 }

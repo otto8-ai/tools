@@ -1,23 +1,19 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"os"
-	"path"
 	"strings"
 
+	"github.com/gptscript-ai/go-gptscript"
+	"github.com/gptscript-ai/gptscript/pkg/sdkserver"
 	"github.com/sirupsen/logrus"
 )
 
-type Metadata struct {
-	Input     MetadataInput  `json:"input"`
-	Output    MetadataOutput `json:"output"`
-	OutputDir string         `json:"outputDir"`
-}
-
 type MetadataInput struct {
 	WebsiteCrawlingConfig WebsiteCrawlingConfig `json:"websiteCrawlingConfig"`
-	Exclude               []string              `json:"exclude"`
 }
 
 type WebsiteCrawlingConfig struct {
@@ -26,7 +22,6 @@ type WebsiteCrawlingConfig struct {
 
 type MetadataOutput struct {
 	Status string                 `json:"status"`
-	Error  string                 `json:"error"`
 	State  State                  `json:"state"`
 	Files  map[string]FileDetails `json:"files"`
 }
@@ -36,9 +31,8 @@ type State struct {
 }
 
 type WebsiteCrawlingState struct {
-	ScrapeJobIds map[string]string      `json:"scrapeJobIds"`
-	Folders      map[string]struct{}    `json:"folders"`
-	Pages        map[string]PageDetails `json:"pages"`
+	Folders map[string]struct{}    `json:"folders"`
+	Pages   map[string]PageDetails `json:"pages"`
 }
 
 type PageDetails struct {
@@ -52,17 +46,75 @@ type FileDetails struct {
 	Checksum  string `json:"checksum,omitempty"`
 }
 
-func main() {
-	logrus.SetOutput(os.Stdout)
+func newGPTScript(ctx context.Context) (*gptscript.GPTScript, error) {
+	workspaceTool := os.Getenv("WORKSPACE_TOOL")
+	if workspaceTool == "" {
+		workspaceTool = "github.com/gptscript-ai/workspace-provider"
+	}
+	if os.Getenv("GPTSCRIPT_URL") != "" {
+		return gptscript.NewGPTScript(gptscript.GlobalOptions{
+			URL:           os.Getenv("GPTSCRIPT_URL"),
+			WorkspaceTool: workspaceTool,
+		})
+	}
 
-	var err error
-	workingDir := os.Getenv("GPTSCRIPT_WORKSPACE_DIR")
-	if workingDir == "" {
-		workingDir, err = os.Getwd()
-		if err != nil {
-			logrus.Error(err)
-			os.Exit(1)
+	url, err := sdkserver.EmbeddedStart(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := os.Setenv("GPTSCRIPT_URL", url); err != nil {
+		return nil, err
+	}
+
+	return gptscript.NewGPTScript(gptscript.GlobalOptions{
+		URL:           url,
+		WorkspaceTool: workspaceTool,
+	})
+}
+
+func main() {
+	logOut := logrus.New()
+	logOut.SetOutput(os.Stdout)
+	logOut.SetFormatter(&logrus.JSONFormatter{})
+	logErr := logrus.New()
+	logErr.SetOutput(os.Stderr)
+	logErr.SetFormatter(&logrus.JSONFormatter{})
+
+	ctx := context.Background()
+	gptscriptClient, err := newGPTScript(ctx)
+	if err != nil {
+		logErr.WithError(err).Fatal("Failed to create gptscript client")
+	}
+
+	inputData := os.Getenv("GPTSCRIPT_INPUT")
+	input := MetadataInput{}
+	for i := range input.WebsiteCrawlingConfig.URLs {
+		input.WebsiteCrawlingConfig.URLs[i] = strings.TrimSpace(input.WebsiteCrawlingConfig.URLs[i])
+	}
+
+	if err := json.Unmarshal([]byte(inputData), &input); err != nil {
+		logErr.WithError(err).Fatal("Failed to unmarshal input data")
+	}
+
+	output := MetadataOutput{}
+
+	var notfoundErr *gptscript.NotFoundInWorkspaceError
+	outputData, err := gptscriptClient.ReadFileInWorkspace(ctx, ".metadata.json")
+	if err != nil && !errors.As(err, &notfoundErr) {
+		logrus.WithError(err).Fatal("Failed to read .metadata.json in workspace")
+	} else if err == nil {
+		if err := json.Unmarshal(outputData, &output); err != nil {
+			logrus.WithError(err).Fatal("Failed to unmarshal output data")
 		}
+	}
+
+	if output.Files == nil {
+		output.Files = make(map[string]FileDetails)
+	}
+
+	if output.State.WebsiteCrawlingState.Pages == nil {
+		output.State.WebsiteCrawlingState.Pages = make(map[string]PageDetails)
 	}
 
 	mode := os.Getenv("MODE")
@@ -70,56 +122,13 @@ func main() {
 		mode = "colly"
 	}
 
-	metadata := Metadata{}
-	metadataPath := path.Join(workingDir, ".metadata.json")
-	if _, err := os.Stat(metadataPath); os.IsNotExist(err) {
-		logrus.Fatal("metadata.json not found")
-	}
-	data, err := os.ReadFile(metadataPath)
-	if err != nil {
-		logrus.Fatal(err)
-	}
-
-	err = json.Unmarshal(data, &metadata)
-	if err != nil {
-		logrus.Fatal(err)
-	}
-
-	if metadata.Output.Files == nil {
-		metadata.Output.Files = make(map[string]FileDetails)
-	}
-
-	if metadata.OutputDir != "" {
-		workingDir = metadata.OutputDir
-	}
-
-	if err := os.MkdirAll(workingDir, 0755); err != nil {
-		logrus.Fatal(err)
-	}
-
-	if metadata.Output.State.WebsiteCrawlingState.Pages == nil {
-		metadata.Output.State.WebsiteCrawlingState.Pages = make(map[string]PageDetails)
-	}
-
-	for i := range metadata.Input.WebsiteCrawlingConfig.URLs {
-		metadata.Input.WebsiteCrawlingConfig.URLs[i] = strings.TrimSpace(metadata.Input.WebsiteCrawlingConfig.URLs[i])
-	}
-
-	for i := range metadata.Input.Exclude {
-		metadata.Input.Exclude[i] = strings.TrimSpace(metadata.Input.Exclude[i])
-	}
-
-	if mode == "colly" {
-		CrawlColly(&metadata, metadataPath, workingDir)
-	} else if mode == "firecrawl" {
-		NewFirecrawl().Crawl(&metadata, metadataPath, workingDir)
-	}
+	CrawlColly(ctx, &input, &output, logErr, gptscriptClient)
 }
 
-func writeMetadata(metadata *Metadata, path string) error {
-	data, err := json.MarshalIndent(metadata, "", "  ")
+func writeMetadata(ctx context.Context, output *MetadataOutput, gptscript *gptscript.GPTScript) error {
+	data, err := json.MarshalIndent(output, "", "  ")
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(path, data, 0644)
+	return gptscript.WriteFileInWorkspace(ctx, ".metadata.json", data)
 }
