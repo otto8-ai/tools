@@ -138,39 +138,3 @@ func ListCalendarView(ctx context.Context, client *msgraphsdkgo.GraphServiceClie
 
 	return resp.GetValue(), nil
 }
-
-func listCalendarViewWithTimeZoneable(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, id string, owner OwnerType, start, end models.DateTimeTimeZoneable) ([]models.Eventable, error) {
-	if owner == OwnerTypeUser {
-		resp, err := client.Me().Calendars().ByCalendarId(id).CalendarView().Get(ctx, &users.ItemCalendarsItemCalendarViewRequestBuilderGetRequestConfiguration{
-			QueryParameters: &users.ItemCalendarsItemCalendarViewRequestBuilderGetQueryParameters{
-				EndDateTime:   end.GetDateTime(),
-				StartDateTime: start.GetDateTime(),
-				Top:           util.Ptr(int32(100)),
-			},
-		})
-
-		// TODO - handle if there are more than 100
-
-		if err != nil {
-			return nil, fmt.Errorf("failed to list calendar view: %w", err)
-		}
-
-		return resp.GetValue(), nil
-	}
-
-	resp, err := client.Groups().ByGroupId(id).CalendarView().Get(ctx, &groups.ItemCalendarViewRequestBuilderGetRequestConfiguration{
-		QueryParameters: &groups.ItemCalendarViewRequestBuilderGetQueryParameters{
-			EndDateTime:   end.GetDateTime(),
-			StartDateTime: start.GetDateTime(),
-			Top:           util.Ptr(int32(100)),
-		},
-	})
-
-	// TODO - handle if there are more than 100
-
-	if err != nil {
-		return nil, fmt.Errorf("failed to list calendar view: %w", err)
-	}
-
-	return resp.GetValue(), nil
-}
