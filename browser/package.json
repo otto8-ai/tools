@@ -17,7 +17,7 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "@gptscript-ai/gptscript": "^0.9.5",
+    "@gptscript-ai/gptscript": "https://github.com/gptscript-ai/node-gptscript#306861b8b5aea2ea0481c180067a1687d2726530",
     "@types/turndown": "^5.0.4",
     "async-mutex": "^0.5.0",
     "body-parser": "^1.20.2",

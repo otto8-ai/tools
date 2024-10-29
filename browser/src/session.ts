@@ -124,7 +124,7 @@ export function getSessionId (headers: IncomingHttpHeaders): string {
   return createHash('sha256').update(workspaceId).digest('hex').substring(0, 16)
 }
 
-function getWorkspaceId (envHeader: string | string[] | undefined): string | undefined {
+export function getWorkspaceId (envHeader: string | string[] | undefined): string | undefined {
   const envArray = Array.isArray(envHeader) ? envHeader : [envHeader]
   for (const env of envArray) {
     if (env == null) {
