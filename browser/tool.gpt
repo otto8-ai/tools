@@ -2,7 +2,7 @@ Name: Browser
 Description: Tools to navigate websites using a browser.
 Metadata: bundle: true
 Credentials: github.com/gptscript-ai/credentials/model-provider
-Share Tools: Browse, Get Page Contents, Filter, Fill, Enter, Scroll, Back, Forward
+Share Tools: Browse, Get Page Contents, Filter, Fill, Enter, Scroll, Back, Forward, Screenshot
 
 ---
 Name: Get Page Contents
@@ -74,6 +74,16 @@ Params: tabID: (required) The ID of the tab.
 Tools: service
 
 #!http://service.daemon.gptscript.local/scrollToBottom
+
+---
+Name: Screenshot
+Metadata: index: false
+Share Context: Browser Context
+Tools: service
+Description: Take a screenshot of the given tabID
+Params: tabID: (required) The ID of the tab.
+
+#!http://service.daemon.gptscript.local/screenshot
 
 ---
 Name: Back

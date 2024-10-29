@@ -7,6 +7,7 @@ import { enter } from './enter.ts'
 import { scrollToBottom } from './scrollToBottom.ts'
 import { randomBytes } from 'node:crypto'
 import { getSessionId, SessionManager } from './session.ts'
+import { screenshot } from './screenshot.ts'
 
 async function main (): Promise<void> {
   console.log('Starting browser server')
@@ -94,6 +95,10 @@ async function main (): Promise<void> {
 
           case '/scrollToBottom':
             await scrollToBottom(page)
+            break
+
+          case '/screenshot':
+            res.send(await screenshot(page))
             break
 
           case '/back':
