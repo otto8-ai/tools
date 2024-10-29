@@ -1,0 +1,56 @@
+flows:
+  foo:
+    default: false
+    ingestion:
+      - filetypes: [".txt", ".md"]
+        documentloader:
+          name: plaintext
+        textsplitter:
+          name: markdown
+        transformers:
+          - name: filter_markdown_docs_no_content
+          - name: extra_metadata
+            options:
+              metadata:
+                "foo": "bar"
+      - filetypes: [".pdf"]
+        documentloader:
+          name: pdf
+          options:
+            maxPages: 5
+            interpreterConfig:
+              ignoreDefOfNonNameVals:
+                - "CMapName"
+    retrieval:
+      retriever:
+        name: basic
+        options:
+          topK: 15
+      postprocessors:
+        - name: extra_metadata
+          options:
+            metadata:
+              "spam": "eggs"
+  bar:
+    default: false
+    ingestion:
+      - filetypes: [ ".txt", ".md" ]
+        documentloader:
+          name: plaintext
+        textsplitter:
+          name: text
+  baz:
+    default: false
+    ingestion:
+      - filetypes: [ ".txt", ".md" ]
+        documentloader:
+          name: plaintext
+        textsplitter:
+          name: text
+          options:
+            chunkSize: 4096
+
+datasets:
+  foo: foo
+  bar: bar
+  baz: baz

@@ -1,0 +1,14 @@
+flows:
+  foo:
+    default: true
+    retrieval:
+      retriever:
+        name: routing
+        options:
+          model:
+            openai:
+              apiKey: "${OPENAI_API_KEY}"
+              model: gpt-4o
+              apiType: OPEN_AI
+              apiBase: https://api.openai.com/v1
+          topK: 6

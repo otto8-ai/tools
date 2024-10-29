@@ -1,0 +1,22 @@
+flows:
+  hybrid:
+    default: true
+    retrieval:
+      retriever:
+        name: merge
+        options:
+          topK: 10
+          retrievers:
+            - name: basic
+              weight: 0.5
+              options:
+                topK: 10
+            - name: bm25
+              weight: 0.5
+              options:
+                topN: 10
+                k1: 1.2
+                b: 0.75
+                cleanStopWords:
+                  - en
+                  - de

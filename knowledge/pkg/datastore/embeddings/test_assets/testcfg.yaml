@@ -1,0 +1,8 @@
+embeddings:
+  provider: "openai"
+  providers:
+    - name: openai
+      type: openai
+      config:
+        apiKey: "sk-1234567890abcdef"
+        embeddingEndpoint: "/foobar"

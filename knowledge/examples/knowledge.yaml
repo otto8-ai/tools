@@ -1,0 +1,42 @@
+flows:
+  knowledge:
+    default: true
+    globals:
+      ingestion:
+        textsplitter:
+          chunkSize: 800
+          chunkOverlap: 400
+    ingestion:
+      - filetypes: ["*"]
+    retrieval:
+      querymodifiers:
+        # Enhance
+        - name: enhance
+          options:
+            model:
+              openai:
+                apiKey: "${OPENAI_API_KEY}"
+                model: gpt-4o
+                apiType: OPEN_AI
+                baseURL: https://api.openai.com/v1
+      retriever:
+        name: subquery
+        options:
+          limit: 3 # max. 3 subqueries
+          topK: 10 # topK per search
+          model:
+            openai:
+              apiKey: "${OPENAI_API_KEY}"
+              model: gpt-4o
+              apiType: OPEN_AI
+              baseURL: https://api.openai.com/v1
+      postprocessors:
+        - name: similarity
+          options:
+            threshold: 0.6
+        - name: reduce
+          options:
+            topK: 10
+
+
+

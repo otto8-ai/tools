@@ -1,0 +1,7 @@
+Name: Knowledge Loading
+Description: Load a document, convert it to Knowledge JSON Format and store it to a file.
+Params: Input: Input File
+Params: Output: Output File
+Params: know_load_metadata: Comma-delimited key=value pairs to be added to the metadata of the loaded document.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool load "ws://${INPUT}" "ws://${OUTPUT}"

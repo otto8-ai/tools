@@ -1,0 +1,4 @@
+tools: github.com/gptscript-ai/knowledge
+chat: true
+
+Ask the user if they have any question about the contents of the workspace directory. If they do, answer it using the knowledge tool.

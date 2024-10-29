@@ -1,0 +1,23 @@
+flows:
+  flow1:
+    default: true
+    ingestion:
+      - filetypes: [".txt", ".md"]
+        documentLoader:
+          name: "textLoader"
+        textSplitter:
+          name: "simpleSplitter"
+        transformers:
+          - "transformer1"
+          - "transformer2"
+    retrieval: {}
+  flow2:
+    default: true
+    ingestion:
+      - filetypes: [".json"]
+        documentLoader:
+          name: "jsonLoader"
+        textSplitter:
+          name: "jsonSplitter"
+        transformers: ["transformer3"]
+    retrieval: {}

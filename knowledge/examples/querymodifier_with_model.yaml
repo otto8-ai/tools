@@ -1,0 +1,27 @@
+flows:
+  enhancefoo:
+    retrieval:
+      querymodifiers:
+        - name: enhance
+          options:
+            model:
+              openai:
+                apiKey: "${OPENAI_API_KEY}"
+                model: gpt-4o
+                apiType: OPEN_AI
+                apiBase: https://api.openai.com/v1
+  genericfoo:
+    retrieval:
+      querymodifiers:
+        - name: generic
+          options:
+            model:
+              openai:
+                apiKey: "${OPENAI_API_KEY}"
+                model: gpt-4o
+                apiType: OPEN_AI
+                apiBase: https://api.openai.com/v1
+            prompt: |
+              Enhance the query with related concepts that are not yet present in the original query.
+              Feel free to create multiple queries if you think it will yield better results in Vector search.
+              Limit the number of generated queries to a maximum of 3.

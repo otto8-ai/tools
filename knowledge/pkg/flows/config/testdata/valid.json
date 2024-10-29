@@ -1,0 +1,41 @@
+{
+  "flows": {
+    "flow1": {
+      "ingestion": [
+        {
+          "filetypes": [".txt", ".md"],
+          "documentLoader": {
+            "name": "textLoader"
+          },
+          "textSplitter": {
+            "name": "simpleSplitter"
+          },
+          "transformers": [
+            {"name": "transformer1"},
+            {
+              "name": "transformer2"
+            }]
+        }
+      ],
+      "retrieval": {}
+    },
+    "flow2": {
+      "ingestion": [
+        {
+          "filetypes": [".json"],
+          "documentLoader": {
+            "name": "jsonLoader"
+          },
+          "textSplitter": {
+            "name": "jsonSplitter"
+          },
+          "transformers": [
+            {
+              "name": "transformer3"
+            }]
+        }
+      ],
+      "retrieval": {}
+    }
+  }
+}

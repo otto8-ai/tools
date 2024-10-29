@@ -1,0 +1,22 @@
+flows:
+  foo:
+    default: false
+    ingestion:
+      - filetypes: [".md"]
+        documentloader:
+          name: plaintext
+        textsplitter:
+          name: markdown
+        transformers:
+          - name: filter_markdown_docs_no_content
+    retrieval:
+      retriever:
+        name: basic
+        options:
+          topK: 25
+      postprocessors:
+        - name: cohere_rerank
+          options:
+            apiKey: ${COHERE_API_KEY}
+            topN: 3
+            model: rerank-multilingual-v3.0
