@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"strings"
 
@@ -51,12 +52,12 @@ func main() {
 	logOut.SetFormatter(&logrus.JSONFormatter{})
 	logErr := logrus.New()
 	logErr.SetOutput(os.Stderr)
-	logErr.SetFormatter(&logrus.JSONFormatter{})
 
 	ctx := context.Background()
 	gptscriptClient, err := gptscript.NewGPTScript()
 	if err != nil {
-		logErr.WithError(err).Fatal("Failed to create gptscript client")
+		logOut.WithError(fmt.Errorf("failed to create gptscript client, error: %v", err)).Error()
+		os.Exit(0)
 	}
 
 	inputData := os.Getenv("GPTSCRIPT_INPUT")
@@ -66,7 +67,8 @@ func main() {
 	}
 
 	if err := json.Unmarshal([]byte(inputData), &input); err != nil {
-		logErr.WithError(err).Fatal("Failed to unmarshal input data")
+		logOut.WithError(fmt.Errorf("failed to unmarshal input data, error: %v", err)).Error()
+		os.Exit(0)
 	}
 
 	output := MetadataOutput{}
@@ -74,10 +76,12 @@ func main() {
 	var notfoundErr *gptscript.NotFoundInWorkspaceError
 	outputData, err := gptscriptClient.ReadFileInWorkspace(ctx, ".metadata.json")
 	if err != nil && !errors.As(err, &notfoundErr) {
-		logrus.WithError(err).Fatal("Failed to read .metadata.json in workspace")
+		logOut.WithError(fmt.Errorf("failed to read .metadata.json in workspace, error: %w", err)).Error()
+		os.Exit(0)
 	} else if err == nil {
 		if err := json.Unmarshal(outputData, &output); err != nil {
-			logrus.WithError(err).Fatal("Failed to unmarshal output data")
+			logOut.WithError(fmt.Errorf("failed to unmarshal output data, error: %w", err)).Error()
+			os.Exit(0)
 		}
 	}
 
@@ -94,7 +98,10 @@ func main() {
 		mode = "colly"
 	}
 
-	CrawlColly(ctx, &input, &output, logErr, gptscriptClient)
+	if err := crawlColly(ctx, &input, &output, logErr, gptscriptClient); err != nil {
+		logOut.WithError(fmt.Errorf("failed to crawl website: error: %w", err)).Error()
+		os.Exit(0)
+	}
 }
 
 func writeMetadata(ctx context.Context, output *MetadataOutput, gptscript *gptscript.GPTScript) error {
