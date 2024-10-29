@@ -35,3 +35,24 @@ func MapValues[T comparable, U any](m map[T]U) []U {
 	}
 	return out
 }
+
+func Merge[T comparable, U any](one map[T][]U, two map[T][]U) map[T][]U {
+	out := make(map[T][]U)
+	checked := make(map[T]any)
+
+	for k, v := range one {
+		checked[k] = struct{}{}
+		out[k] = v
+		if _, ok := two[k]; ok {
+			out[k] = append(out[k], two[k]...)
+		}
+	}
+
+	for k, v := range two {
+		if _, ok := checked[k]; !ok {
+			out[k] = v
+		}
+	}
+
+	return out
+}

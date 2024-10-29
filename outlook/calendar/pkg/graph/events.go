@@ -111,6 +111,8 @@ func CreateEvent(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, i
 				return nil, fmt.Errorf("failed to create event: %w", err)
 			}
 			return event, nil
+		default:
+			return nil, fmt.Errorf("invalid owner type: %s (possible values are \"user\" and \"group\")", info.Owner)
 		}
 	}
 
@@ -174,56 +176,6 @@ func DeleteEvent(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, e
 	}
 
 	return nil
-}
-
-func SearchEvents(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, query string, start, end time.Time) (map[CalendarInfo][]models.Eventable, error) {
-	calendars, err := ListCalendars(ctx, client)
-	if err != nil {
-		return nil, fmt.Errorf("failed to list calendars: %w", err)
-	}
-
-	params := &users.ItemCalendarsItemCalendarViewRequestBuilderGetQueryParameters{
-		StartDateTime: util.Ptr(start.Format(time.RFC3339)),
-		EndDateTime:   util.Ptr(end.Format(time.RFC3339)),
-		Search:        &query,
-		Top:           util.Ptr(int32(100)),
-	}
-
-	groupParams := &groups.ItemCalendarViewRequestBuilderGetQueryParameters{
-		StartDateTime: util.Ptr(start.Format(time.RFC3339)),
-		EndDateTime:   util.Ptr(end.Format(time.RFC3339)),
-		Search:        &query,
-		Top:           util.Ptr(int32(100)),
-	}
-
-	eventsByCalendar := make(map[CalendarInfo][]models.Eventable)
-	for _, cal := range calendars {
-		if util.Deref(cal.Calendar.GetName()) == "United States holidays" {
-			// The holidays calendar almost always shows everything in the search results for some dumb reason. It's not useful, so we skip it.
-			continue
-		}
-
-		switch cal.Owner {
-		case OwnerTypeUser:
-			resp, err := client.Me().Calendars().ByCalendarId(cal.ID).CalendarView().Get(ctx, &users.ItemCalendarsItemCalendarViewRequestBuilderGetRequestConfiguration{
-				QueryParameters: params,
-			})
-			if err != nil {
-				return nil, fmt.Errorf("failed to search events: %w", err)
-			}
-			eventsByCalendar[cal] = resp.GetValue()
-		case OwnerTypeGroup:
-			resp, err := client.Groups().ByGroupId(cal.ID).CalendarView().Get(ctx, &groups.ItemCalendarViewRequestBuilderGetRequestConfiguration{
-				QueryParameters: groupParams,
-			})
-			if err != nil {
-				return nil, fmt.Errorf("failed to search events: %w", err)
-			}
-			eventsByCalendar[cal] = resp.GetValue()
-		}
-	}
-
-	return eventsByCalendar, nil
 }
 
 func AcceptEvent(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, eventID, calendarID string, owner OwnerType) error {
