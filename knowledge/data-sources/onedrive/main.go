@@ -137,7 +137,7 @@ func main() {
 
 	output := MetadataOutput{}
 
-	var notfoundErr gptscript.NotFoundInWorkspaceError
+	var notfoundErr *gptscript.NotFoundInWorkspaceError
 	outputData, err := gptscriptClient.ReadFileInWorkspace(ctx, ".metadata.json")
 	if err != nil && !errors.As(err, &notfoundErr) {
 		logrus.WithError(err).Fatal("Failed to read .metadata.json in workspace")

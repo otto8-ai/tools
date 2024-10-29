@@ -2,3 +2,5 @@
 .idea
 **/*.swp
 **/venv
+**/bin
+**/node_modules
