@@ -6,7 +6,7 @@
   "private": true,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "ts-node src/index.ts",
+    "start": "NODE_NO_WARNINGS=1 ts-node src/index.ts",
     "typecheck": "tsc --noEmit",
     "build": "tsc",
     "format": "prettier --write src/**/*.ts"
@@ -14,6 +14,7 @@
   "keywords": [],
   "author": "",
   "dependencies": {
+    "@gptscript-ai/gptscript": "https://github.com/gptscript-ai/node-gptscript#306861b8b5aea2ea0481c180067a1687d2726530",
     "@notionhq/client": "^2.2.2",
     "dotenv": "^16.0.1",
     "punycode": "^2.3.1",

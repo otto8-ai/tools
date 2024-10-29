@@ -14,7 +14,6 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/gptscript-ai/go-gptscript"
-	"github.com/gptscript-ai/gptscript/pkg/sdkserver"
 	msgraphsdk "github.com/microsoftgraph/msgraph-sdk-go"
 	drives2 "github.com/microsoftgraph/msgraph-sdk-go/drives"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
@@ -78,58 +77,33 @@ type FileDetails struct {
 	UpdatedAt string `json:"updatedAt"`
 }
 
-func newGPTScript(ctx context.Context) (*gptscript.GPTScript, error) {
-	workspaceTool := os.Getenv("WORKSPACE_TOOL")
-	if workspaceTool == "" {
-		workspaceTool = "github.com/gptscript-ai/workspace-provider"
-	}
-	if os.Getenv("GPTSCRIPT_URL") != "" {
-		return gptscript.NewGPTScript(gptscript.GlobalOptions{
-			URL:           os.Getenv("GPTSCRIPT_URL"),
-			WorkspaceTool: workspaceTool,
-		})
-	}
-
-	url, err := sdkserver.EmbeddedStart(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := os.Setenv("GPTSCRIPT_URL", url); err != nil {
-		return nil, err
-	}
-
-	return gptscript.NewGPTScript(gptscript.GlobalOptions{
-		URL:           url,
-		WorkspaceTool: workspaceTool,
-	})
-}
-
 func main() {
 	logOut := logrus.New()
 	logOut.SetOutput(os.Stdout)
 	logOut.SetFormatter(&logrus.JSONFormatter{})
 	logErr := logrus.New()
 	logErr.SetOutput(os.Stderr)
-	logErr.SetFormatter(&logrus.JSONFormatter{})
 
 	cred := NewStaticTokenCredential(os.Getenv("GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN"))
 	client, err := msgraphsdk.NewGraphServiceClientWithCredentials(cred, []string{})
 	if err != nil {
-		logErr.WithError(err).Fatal("Failed to create ms graph client")
+		logOut.WithError(fmt.Errorf("failed to create ms graph client, error: %w", err)).Error()
+		os.Exit(0)
 	}
 
 	ctx := context.Background()
-	gptscriptClient, err := newGPTScript(ctx)
+	gptscriptClient, err := gptscript.NewGPTScript()
 	if err != nil {
-		logErr.WithError(err).Fatal("Failed to create gptscript client")
+		logOut.WithError(fmt.Errorf("failed to create gptscript client, error: %w", err)).Error()
+		os.Exit(0)
 	}
 
 	inputData := os.Getenv("GPTSCRIPT_INPUT")
 	input := MetadataInput{}
 
 	if err := json.Unmarshal([]byte(inputData), &input); err != nil {
-		logErr.WithError(err).Fatal("Failed to unmarshal input data")
+		logOut.WithError(fmt.Errorf("failed to unmarshal input data, error: %w", err)).Error()
+		os.Exit(0)
 	}
 	if input.OneDriveConfig == nil {
 		input.OneDriveConfig = &OneDriveConfig{}
@@ -137,10 +111,11 @@ func main() {
 
 	output := MetadataOutput{}
 
-	var notfoundErr gptscript.NotFoundInWorkspaceError
+	var notfoundErr *gptscript.NotFoundInWorkspaceError
 	outputData, err := gptscriptClient.ReadFileInWorkspace(ctx, ".metadata.json")
 	if err != nil && !errors.As(err, &notfoundErr) {
-		logrus.WithError(err).Fatal("Failed to read .metadata.json in workspace")
+		logOut.WithError(fmt.Errorf("failed to read .metadata.json in workspace, error: %w", err)).Error()
+		os.Exit(0)
 	} else if err == nil {
 		if err := json.Unmarshal(outputData, &output); err != nil {
 			logrus.WithError(err).Fatal("Failed to unmarshal output data")
@@ -168,12 +143,12 @@ func main() {
 	}
 
 	if err := sync(ctx, logErr, input, &output, client, gptscriptClient); err != nil {
-		logrus.WithError(err).Fatal("Failed to sync onedrive links")
+		logOut.WithError(fmt.Errorf("failed to sync onedrive links, error: %w", err)).Error()
+		os.Exit(0)
 	}
 
-	output.Status = ""
 	if err := writeMetadata(ctx, &output, gptscriptClient); err != nil {
-		logrus.Error(err)
+		logOut.WithError(fmt.Errorf("failed to write metadata, error: %w", err)).Error()
 		os.Exit(0)
 	}
 }
