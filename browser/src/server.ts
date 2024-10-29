@@ -98,7 +98,7 @@ async function main (): Promise<void> {
             break
 
           case '/screenshot':
-            res.send(await screenshot(page))
+            res.send(await screenshot(page, req.headers))
             break
 
           case '/back':
