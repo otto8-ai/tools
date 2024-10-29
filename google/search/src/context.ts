@@ -1,15 +1,7 @@
-import { type BrowserContext, chromium, firefox } from '@playwright/test'
-import { randomInt } from 'node:crypto'
+import { type BrowserContext, chromium, firefox } from 'playwright'
 
-export interface ContextAndSessionDir {
-  context: BrowserContext
-  sessionDir: string
-}
-
-export async function getNewContext(workspaceDir: string, javaScriptEnabled: boolean): Promise<ContextAndSessionDir> {
-  const sessionDir = workspaceDir + '/afti_browser_session_' + randomInt(1, 1000000).toString()
+export async function newBrowserContext (sessionDir: string, javaScriptEnabled: boolean = true): Promise<BrowserContext> {
   let context: BrowserContext
-
   const browser = await getSystemBrowser()
   switch (browser) {
     case 'chromium':
@@ -20,8 +12,8 @@ export async function getNewContext(workspaceDir: string, javaScriptEnabled: boo
           headless: true,
           viewport: null,
           args: ['--start-maximized', '--disable-blink-features=AutomationControlled'],
-          ignoreDefaultArgs: ['--enable-automation', '--use-mock-keychain'],
-          javaScriptEnabled
+          ignoreDefaultArgs: ['--enable-automation'],
+          javaScriptEnabled: javaScriptEnabled
         })
       break
     case 'chrome':
@@ -33,8 +25,8 @@ export async function getNewContext(workspaceDir: string, javaScriptEnabled: boo
           viewport: null,
           channel: 'chrome',
           args: ['--start-maximized', '--disable-blink-features=AutomationControlled'],
-          ignoreDefaultArgs: ['--enable-automation', '--use-mock-keychain'],
-          javaScriptEnabled
+          ignoreDefaultArgs: ['--enable-automation'],
+          javaScriptEnabled: javaScriptEnabled
         })
       break
     case 'firefox':
@@ -44,7 +36,7 @@ export async function getNewContext(workspaceDir: string, javaScriptEnabled: boo
           userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Firefox/89.0 Safari/537.36',
           headless: true,
           viewport: null,
-          javaScriptEnabled
+          javaScriptEnabled: javaScriptEnabled
         })
       break
     case 'edge':
@@ -56,29 +48,29 @@ export async function getNewContext(workspaceDir: string, javaScriptEnabled: boo
           viewport: null,
           channel: 'msedge',
           args: ['--start-maximized', '--disable-blink-features=AutomationControlled'],
-          ignoreDefaultArgs: ['--enable-automation', '--use-mock-keychain'],
-          javaScriptEnabled
+          ignoreDefaultArgs: ['--enable-automation'],
+          javaScriptEnabled: javaScriptEnabled
         })
       break
     default:
       throw new Error(`Unknown browser: ${browser}`)
   }
 
-  return { context, sessionDir }
+  return context
 }
 
-let systemBrowser: string | undefined;
+let systemBrowser: string | undefined
 
-async function getSystemBrowser(): Promise<string> {
+async function getSystemBrowser (): Promise<string> {
   if (systemBrowser) {
     return systemBrowser
   }
 
   const browsers = [
-    { name: 'Chrome', launchFunction: async () => await chromium.launch({ channel: 'chrome' }) },
-    { name: 'Edge', launchFunction: async () => await chromium.launch({ channel: 'msedge' }) },
-    { name: 'Firefox', launchFunction: async () => await firefox.launch() },
-    { name: 'Chromium', launchFunction: async () => await chromium.launch() }
+    { name: 'Chrome', launchFunction: async () => await chromium.launch({ channel: 'chrome', headless: true }) },
+    { name: 'Edge', launchFunction: async () => await chromium.launch({ channel: 'msedge', headless: true }) },
+    { name: 'Firefox', launchFunction: async () => await firefox.launch({ headless: true }) },
+    { name: 'Chromium', launchFunction: async () => await chromium.launch({ headless: true }) }
   ]
 
   const errors = []
