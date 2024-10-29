@@ -9,17 +9,26 @@ export type SearchResult = {
 
 export async function search(
   context: BrowserContext,
-  noJSContext: BrowserContext,
   query: string,
   maxResults: number = 3 // Default to 3 results if not specified
 ): Promise<SearchResult[]> {
-  const foundURLs = new Set<string>();
-  const contentsPromises: Array<Promise<SearchResult | null>> = [];
+  const foundURLs = new Set<string>()
+  const contentsPromises: Array<Promise<SearchResult | null>> = []
 
   const page = await context.newPage();
   const noJSPages = await Promise.all(
-    Array.from({ length: maxResults }, () => noJSContext.newPage()) 
-  );
+    Array.from({ length: maxResults }, async () => {
+      const page = await context.newPage()
+      await page.addInitScript(() => {
+        // Disable JavaScript for the page
+        Object.defineProperty(navigator, 'javaScriptEnabled', { value: false });
+        Object.defineProperty(window, 'Function', { value: () => {} });
+        Object.defineProperty(window, 'eval', { value: () => {} });
+      })
+
+      return page
+    })
+  )
 
   try {
     await page.goto(`https://www.google.com/search?q=${query}&udm=14`);
