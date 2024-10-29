@@ -40,7 +40,7 @@ func SearchEvents(ctx context.Context, query string, start, end time.Time) error
 			return fmt.Errorf("failed to create GPTScript client: %w", err)
 		}
 
-		dataset, err := gptscriptClient.CreateDataset(ctx, workspaceID, "event search "+query, "Search results for Outlook Calendar events")
+		dataset, err := gptscriptClient.CreateDataset(ctx, workspaceID, "event_search "+query, "Search results for Outlook Calendar events")
 		if err != nil {
 			return fmt.Errorf("failed to create dataset: %w", err)
 		}
