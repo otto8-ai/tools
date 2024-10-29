@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/gptscript-ai/go-gptscript"
-	"github.com/gptscript-ai/gptscript/pkg/sdkserver"
 	"github.com/sirupsen/logrus"
 )
 
@@ -46,33 +45,6 @@ type FileDetails struct {
 	Checksum  string `json:"checksum,omitempty"`
 }
 
-func newGPTScript(ctx context.Context) (*gptscript.GPTScript, error) {
-	workspaceTool := os.Getenv("WORKSPACE_TOOL")
-	if workspaceTool == "" {
-		workspaceTool = "github.com/gptscript-ai/workspace-provider"
-	}
-	if os.Getenv("GPTSCRIPT_URL") != "" {
-		return gptscript.NewGPTScript(gptscript.GlobalOptions{
-			URL:           os.Getenv("GPTSCRIPT_URL"),
-			WorkspaceTool: workspaceTool,
-		})
-	}
-
-	url, err := sdkserver.EmbeddedStart(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := os.Setenv("GPTSCRIPT_URL", url); err != nil {
-		return nil, err
-	}
-
-	return gptscript.NewGPTScript(gptscript.GlobalOptions{
-		URL:           url,
-		WorkspaceTool: workspaceTool,
-	})
-}
-
 func main() {
 	logOut := logrus.New()
 	logOut.SetOutput(os.Stdout)
@@ -82,7 +54,7 @@ func main() {
 	logErr.SetFormatter(&logrus.JSONFormatter{})
 
 	ctx := context.Background()
-	gptscriptClient, err := newGPTScript(ctx)
+	gptscriptClient, err := gptscript.NewGPTScript()
 	if err != nil {
 		logErr.WithError(err).Fatal("Failed to create gptscript client")
 	}

@@ -14,7 +14,6 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/gptscript-ai/go-gptscript"
-	"github.com/gptscript-ai/gptscript/pkg/sdkserver"
 	msgraphsdk "github.com/microsoftgraph/msgraph-sdk-go"
 	drives2 "github.com/microsoftgraph/msgraph-sdk-go/drives"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
@@ -78,33 +77,6 @@ type FileDetails struct {
 	UpdatedAt string `json:"updatedAt"`
 }
 
-func newGPTScript(ctx context.Context) (*gptscript.GPTScript, error) {
-	workspaceTool := os.Getenv("WORKSPACE_TOOL")
-	if workspaceTool == "" {
-		workspaceTool = "github.com/gptscript-ai/workspace-provider"
-	}
-	if os.Getenv("GPTSCRIPT_URL") != "" {
-		return gptscript.NewGPTScript(gptscript.GlobalOptions{
-			URL:           os.Getenv("GPTSCRIPT_URL"),
-			WorkspaceTool: workspaceTool,
-		})
-	}
-
-	url, err := sdkserver.EmbeddedStart(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := os.Setenv("GPTSCRIPT_URL", url); err != nil {
-		return nil, err
-	}
-
-	return gptscript.NewGPTScript(gptscript.GlobalOptions{
-		URL:           url,
-		WorkspaceTool: workspaceTool,
-	})
-}
-
 func main() {
 	logOut := logrus.New()
 	logOut.SetOutput(os.Stdout)
@@ -120,7 +92,7 @@ func main() {
 	}
 
 	ctx := context.Background()
-	gptscriptClient, err := newGPTScript(ctx)
+	gptscriptClient, err := gptscript.NewGPTScript()
 	if err != nil {
 		logErr.WithError(err).Fatal("Failed to create gptscript client")
 	}
