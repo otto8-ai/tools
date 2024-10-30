@@ -1,4 +1,5 @@
-import {GPTScript} from "@gptscript-ai/gptscript";
+import { GPTScript } from "@gptscript-ai/gptscript"
+import { Mutex } from "async-mutex"
 
 export async function listChannels(webClient) {
     const publicChannels = await webClient.conversations.list({limit: 100, types: 'public_channel'})
@@ -331,13 +332,29 @@ function threadID(message) {
     return message.ts
 }
 
+const userNameCache = new Map()
+const userNameLock = new Mutex()
+
 async function getUserName(webClient, user) {
-    const res = await webClient.users.info({user: user})
-    if (!res.ok) {
-        // If the request didn't work for some reason, just return the user ID again.
-        return user
+    // Check if the username is already cached
+    if (userNameCache.has(user)) {
+        return userNameCache.get(user);
     }
-    return res.user.name
+
+    return await userNameLock.runExclusive(async () => {
+        // Double-check the cache inside the lock
+        if (userNameCache.has(user)) {
+            return userNameCache.get(user);
+        }
+
+        const res = await webClient.users.info({user});
+        const userName = res.ok ? res.user.name : user;
+
+        // Cache the result for future calls
+        userNameCache.set(user, userName);
+
+        return userName;
+    });
 }
 
 // Printer functions below
