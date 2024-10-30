@@ -27,8 +27,8 @@ func SearchEvents(ctx context.Context, query string, start, end time.Time) error
 		return fmt.Errorf("failed to list calendars: %w", err)
 	}
 
-	calendarEventsInSubject := map[graph.CalendarInfo][]models.Eventable{}
-	calendarEventsInPreview := map[graph.CalendarInfo][]models.Eventable{}
+	calendarEventsInSubject := make(map[graph.CalendarInfo][]models.Eventable, len(calendars))
+	calendarEventsInPreview := make(map[graph.CalendarInfo][]models.Eventable, len(calendars))
 	for _, cal := range calendars {
 		result, err := graph.ListCalendarView(ctx, c, cal.ID, cal.Owner, &start, &end)
 		if err != nil {
