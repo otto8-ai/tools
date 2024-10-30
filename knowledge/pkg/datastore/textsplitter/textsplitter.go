@@ -15,7 +15,7 @@ import (
 type SplitterFunc func([]vs.Document) ([]vs.Document, error)
 
 type TextSplitterOpts struct {
-	ChunkSize    int    `json:"chunkSize" mapstructure:"chunkSize" usage:"Textsplitter Chunk Size" default:"1024" env:"KNOW_TEXTSPLITTER_CHUNK_SIZE" name:"textsplitter-chunk-size"`
+	ChunkSize    int    `json:"chunkSize" mapstructure:"chunkSize" usage:"Textsplitter Chunk Size" default:"2048" env:"KNOW_TEXTSPLITTER_CHUNK_SIZE" name:"textsplitter-chunk-size"`
 	ChunkOverlap int    `json:"chunkOverlap" mapstructure:"chunkOverlap" usage:"Textsplitter Chunk Overlap" default:"256" env:"KNOW_TEXTSPLITTER_CHUNK_OVERLAP" name:"textsplitter-chunk-overlap"`
 	ModelName    string `json:"modelName" mapstructure:"modelName" usage:"Textsplitter Model Name" default:"gpt-4o" env:"KNOW_TEXTSPLITTER_MODEL_NAME" name:"textsplitter-model-name"`
 	EncodingName string `json:"encodingName" mapstructure:"encodingName" usage:"Textsplitter Encoding Name" default:"cl100k_base" env:"KNOW_TEXTSPLITTER_ENCODING_NAME" name:"textsplitter-encoding-name"`

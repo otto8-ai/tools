@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"maps"
 	"os"
 	"slices"
 	"strings"
@@ -13,7 +14,6 @@ import (
 	"github.com/gptscript-ai/knowledge/pkg/datastore/documentloader"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/documentloader/structured"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/filetypes"
-	"github.com/knadh/koanf/maps"
 	"github.com/spf13/cobra"
 )
 
@@ -21,6 +21,7 @@ type ClientLoad struct {
 	Loader       string            `usage:"Choose a document loader to use"`
 	OutputFormat string            `name:"format" usage:"Choose an output format" default:"structured"`
 	Metadata     map[string]string `usage:"Metadata to attach to the loaded files" env:"METADATA"`
+	MetadataJSON string            `usage:"Metadata to attach to the loaded files in JSON format" env:"METADATA_JSON"`
 }
 
 func (s *ClientLoad) Customize(cmd *cobra.Command) {
@@ -44,6 +45,14 @@ func (s *ClientLoad) run(ctx context.Context, input, output string) error {
 	if !slices.Contains([]string{"structured", "markdown"}, s.OutputFormat) {
 		return fmt.Errorf("unsupported output format %q", s.OutputFormat)
 	}
+
+	var metadata map[string]string
+	if s.MetadataJSON != "" {
+		if err := json.Unmarshal([]byte(s.MetadataJSON), &metadata); err != nil {
+			return fmt.Errorf("failed to unmarshal metadata JSON: %w", err)
+		}
+	}
+	maps.Copy(metadata, s.Metadata)
 
 	c, err := client.NewStandaloneClient(ctx, nil)
 	if err != nil {
@@ -96,7 +105,7 @@ func (s *ClientLoad) run(ctx context.Context, input, output string) error {
 				continue
 			}
 
-			for k, v := range s.Metadata {
+			for k, v := range metadata {
 				doc.Metadata[k] = v
 			}
 
@@ -117,7 +126,7 @@ func (s *ClientLoad) run(ctx context.Context, input, output string) error {
 		structuredInput.Metadata = map[string]any{}
 		structuredInput.Documents = make([]structured.StructuredInputDocument, 0, len(docs))
 
-		commonMetadata := maps.Copy(docs[0].Metadata)
+		commonMetadata := maps.Clone(docs[0].Metadata)
 		for _, doc := range docs {
 			commonMetadata = extractCommon(commonMetadata, doc.Metadata)
 			structuredInput.Documents = append(structuredInput.Documents, structured.StructuredInputDocument{
@@ -128,7 +137,7 @@ func (s *ClientLoad) run(ctx context.Context, input, output string) error {
 
 		commonMetadata["source"] = input
 
-		for k, v := range s.Metadata {
+		for k, v := range metadata {
 			commonMetadata[k] = v
 		}
 		structuredInput.Metadata = commonMetadata

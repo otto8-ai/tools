@@ -14,7 +14,7 @@ flows:
       retriever:
         name: basic
         options:
-          topK: 20
+          topK: 10
 
 
 
