@@ -62,3 +62,5 @@ system:
     reference: github.com/gptscript-ai/knowledge/delete.gpt@main
   knowledge-delete-file:
     reference: github.com/gptscript-ai/knowledge/delete-file.gpt@main
+  website-cleaner:
+    reference: ./website-cleaner

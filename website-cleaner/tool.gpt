@@ -1,0 +1,5 @@
+Name: Website Markdown Content Cleaner
+Description: Removes extra header, footer, and navigation content from the markdown version of webpages
+Model: gpt-4o-mini
+
+The following content is a scraped webpage converted to markdown. Please remove any content that came from the website header, footer, or navigation. The output should focus on just the main content body of the page. Maintain the markdown format, including any links or images.
