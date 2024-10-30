@@ -95,6 +95,10 @@ func (s *ClientLoad) run(ctx context.Context, input, output string) error {
 		return fmt.Errorf("failed to load documents from file %q using loader %q: %w", input, s.Loader, err)
 	}
 
+	if len(docs) == 0 {
+		return fmt.Errorf("no data parsed from file %q", input)
+	}
+
 	var text string
 
 	switch s.OutputFormat {
