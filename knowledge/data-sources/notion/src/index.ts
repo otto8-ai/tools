@@ -145,7 +145,7 @@ async function main() {
         break;
       }
     }
-    output.state.notionState.pages[pageId] = {
+    output.state.notionState.pages[pageUrl] = {
       url: pageUrl,
       title: pageTitle,
       folderPath: folderPath,
