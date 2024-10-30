@@ -2,8 +2,10 @@ package cmd
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log/slog"
+	"maps"
 	"os"
 	"path"
 	"strings"
@@ -38,6 +40,7 @@ type ClientIngestOpts struct {
 	ErrOnUnsupportedFile  bool              `usage:"Error on unsupported file types" default:"false" env:"KNOW_INGEST_ERR_ON_UNSUPPORTED_FILE"`
 	ExitOnFailedFile      bool              `usage:"Exit directly on failed file" default:"false" env:"KNOW_INGEST_EXIT_ON_FAILED_FILE"`
 	Metadata              map[string]string `usage:"Metadata to attach to the ingested files" env:"KNOW_INGEST_METADATA"`
+	MetadataJSON          string            `usage:"Metadata to attach to the loaded files in JSON format" env:"METADATA_JSON"`
 }
 
 func (s *ClientIngest) Customize(cmd *cobra.Command) {
@@ -85,11 +88,19 @@ func (s *ClientIngest) run(ctx context.Context, filePath string) error {
 		s.ErrOnUnsupportedFile = true
 	}
 
+	metadata := map[string]string{}
+	if s.MetadataJSON != "" {
+		if err := json.Unmarshal([]byte(s.MetadataJSON), &metadata); err != nil {
+			return fmt.Errorf("failed to unmarshal metadata JSON: %w", err)
+		}
+	}
+	maps.Copy(metadata, s.Metadata)
+
 	ingestOpts := &client.IngestPathsOpts{
 		SharedIngestionOpts: client.SharedIngestionOpts{
 			TextSplitterOpts:    &s.TextSplitterOpts,
 			IsDuplicateFuncName: s.DeduplicationFuncName,
-			Metadata:            s.Metadata,
+			Metadata:            metadata,
 		},
 		IgnoreExtensions:     strings.Split(s.IgnoreExtensions, ","),
 		Concurrency:          s.Concurrency,

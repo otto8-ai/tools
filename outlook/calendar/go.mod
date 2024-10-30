@@ -2,6 +2,8 @@ module github.com/gptscript-ai/tools/outlook/calendar
 
 go 1.23.0
 
+replace github.com/gptscript-ai/tools/outlook/common => ../common
+
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.14.0
 	github.com/gptscript-ai/go-gptscript v0.9.6-0.20241023195750-c09e0f56b39b

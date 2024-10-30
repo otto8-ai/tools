@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 	"sync"
 
 	"github.com/gptscript-ai/go-gptscript"
@@ -21,14 +22,18 @@ type subqueryResults struct {
 }
 
 type document struct {
-	ID       string            `json:"id"`
-	Content  string            `json:"content,omitempty"`
-	Metadata map[string]string `json:"metadata,omitempty"`
+	ID       string         `json:"id"`
+	Content  string         `json:"content,omitempty"`
+	Metadata map[string]any `json:"metadata,omitempty"`
 }
 
 type hit struct {
 	URL     string `json:"url,omitempty"`
 	Content string `json:"content,omitempty"`
+}
+
+type inputContent struct {
+	Documents []document `json:"documents"`
 }
 
 func main() {
@@ -46,13 +51,16 @@ func main() {
 	}
 
 	if err := json.Unmarshal([]byte(out), &output); err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "failed to unmarshal output: %v\n", err)
 		fmt.Print(out)
 		return
 	}
 
 	var (
-		outDocs []hit
-		wg      sync.WaitGroup
+		outDocs      []hit
+		wg           sync.WaitGroup
+		fullyFetched = map[string]struct{}{}
+		budget       = 120_000
 	)
 
 	for _, result := range output.Results {
@@ -60,18 +68,29 @@ func main() {
 			break
 		}
 		for _, doc := range result.ResultDocuments {
+			filename, _ := doc.Metadata["workspaceFileName"].(string)
+			if _, ok := fullyFetched[filename]; ok {
+				continue
+			}
+
+			url, _ := doc.Metadata["url"].(string)
 			outDocs = append(outDocs, hit{
-				URL:     doc.Metadata["url"],
+				URL:     url,
 				Content: doc.Content,
 			})
+
 			index := len(outDocs) - 1
+
 			if index < 3 && clientErr == nil {
-				size, _ := strconv.Atoi(doc.Metadata["fileSize"])
-				workspaceID := doc.Metadata["workspaceID"]
-				filename := doc.Metadata["workspaceFileName"]
-				if size > 5_000 && size < 100_000 {
+				fileSize, _ := doc.Metadata["fileSize"].(string)
+				size, _ := strconv.Atoi(fileSize)
+				workspaceID, _ := doc.Metadata["workspaceID"].(string)
+				if size > 5_000 && size < budget && workspaceID != "" {
 					_, _ = fmt.Fprintf(os.Stderr, "reading file in workspace: %s\n", filename)
+					fullyFetched[filename] = struct{}{}
+					budget -= size
 					wg.Add(1)
+
 					go func() {
 						defer wg.Done()
 
@@ -80,12 +99,26 @@ func main() {
 						})
 						if err != nil {
 							_, _ = fmt.Fprintf(os.Stderr, "failed to read file in workspace: %v\n", err)
+							return
 						}
 
-						outDocs[index].Content = string(content)
+						var sourceContent inputContent
+						if err := json.Unmarshal(content, &sourceContent); err != nil {
+							_, _ = fmt.Fprintf(os.Stderr, "failed to unmarshal content: %v\n", err)
+							return
+						}
+
+						var buffer strings.Builder
+						for _, sourceContentDocument := range sourceContent.Documents {
+							buffer.WriteString(sourceContentDocument.Content)
+						}
+
+						if buffer.Len() > 0 {
+							outDocs[index].Content = buffer.String()
+						}
 					}()
 				} else {
-					_, _ = fmt.Fprintf(os.Stderr, "file size is not within the range: %s %s %d\n", workspaceID, filename, size)
+					_, _ = fmt.Fprintf(os.Stderr, "file size is not within the range: %s %s %d %d\n", workspaceID, filename, size, budget)
 				}
 			}
 		}

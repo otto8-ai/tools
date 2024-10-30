@@ -2,6 +2,8 @@ module github.com/gptscript-ai/tools/outlook/mail
 
 go 1.23.0
 
+replace github.com/gptscript-ai/tools/outlook/common => ../common
+
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.14.0
 	github.com/JohannesKaufmann/html-to-markdown v1.6.0
