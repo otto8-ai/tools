@@ -8,7 +8,8 @@ import (
 	"strings"
 	"sync"
 
-	md "github.com/JohannesKaufmann/html-to-markdown"
+	mdconv "github.com/JohannesKaufmann/html-to-markdown/v2/converter"
+	"github.com/JohannesKaufmann/html-to-markdown/v2/plugin/commonmark"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gen2brain/go-fitz"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/types"
@@ -49,7 +50,7 @@ func WithConfig(config PDFOptions) func(o *PDFOptions) {
 type PDF struct {
 	opts      PDFOptions
 	document  *fitz.Document
-	converter *md.Converter
+	converter *mdconv.Converter
 	lock      *sync.Mutex
 }
 
@@ -71,7 +72,7 @@ func NewPDF(r io.Reader, optFns ...func(o *PDFOptions)) (*PDF, error) {
 		opts.StartPage = 1
 	}
 
-	converter := md.NewConverter("", true, nil)
+	converter := mdconv.NewConverter(mdconv.WithPlugins(commonmark.NewCommonmarkPlugin()))
 
 	if opts.NumThread == 0 {
 		opts.NumThread = 100
