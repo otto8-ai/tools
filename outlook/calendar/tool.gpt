@@ -59,7 +59,7 @@ Param: start: (Required) The start time of the event, in RFC 3339 format.
 Param: end: (Required) The end time of the event, in RFC 3339 format. When scheduling a recurring event, this should be the end time of the first event in the series.
 Param: recurrence: (Optional) If the meeting should recur, describe in plain English how often it should occur (daily, weekly, monthly, yearly) and during which date range (first and last occurrence) or how many total times the event should occur. ALWAYS include the date of the first occurrence, and optionally the date of the last occurrence.
 Param: calendar_id: The unique ID of the calendar or group to add the event to. If unset, adds the event to the default calendar.
-Param: owner_type: The type of the owner of the calendar or group. Possible values are "user" or "group". Required if calendar_id is set.
+Param: owner_type: (Required if calendar_id is set) The type of the owner of the calendar or group. Possible values are "user" or "group".
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool createEvent
 

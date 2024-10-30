@@ -7,6 +7,7 @@ import (
 
 	"github.com/gptscript-ai/tools/outlook/calendar/pkg/graph"
 	"github.com/gptscript-ai/tools/outlook/calendar/pkg/util"
+	"github.com/gptscript-ai/tools/outlook/common/id"
 	"github.com/jaytaylor/html2text"
 	msgraphsdkgo "github.com/microsoftgraph/msgraph-sdk-go"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
@@ -40,7 +41,16 @@ func PrintEventsForCalendar(ctx context.Context, client *msgraphsdkgo.GraphServi
 	} else {
 		groupName, err := graph.GetGroupNameFromID(ctx, client, calendar.ID)
 		if err != nil {
-			return fmt.Errorf("failed to get group name: %w", err)
+			// Try translating the ID in case this was a friendly ID instead of an Outlook ID.
+			trueCalendarID, idErr := id.GetOutlookID(calendar.ID)
+			if idErr != nil {
+				return fmt.Errorf("failed to get group name: %w", err)
+			}
+
+			groupName, err = graph.GetGroupNameFromID(ctx, client, trueCalendarID)
+			if err != nil {
+				return fmt.Errorf("failed to get group name: %w", err)
+			}
 		}
 		fmt.Printf("Found events for calendar %s (ID %s):\n", groupName, calendar.ID)
 	}

@@ -70,6 +70,11 @@ func main() {
 		if id := os.Getenv("CALENDAR_ID"); id != "" {
 			info.ID = id
 			info.Owner = graph.OwnerType(os.Getenv("OWNER_TYPE"))
+
+			if info.Owner == "" {
+				fmt.Println("Owner type is required")
+				os.Exit(1)
+			}
 		}
 
 		start, end, err := parseStartEnd(os.Getenv("START"), os.Getenv("END"), false)

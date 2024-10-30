@@ -12,6 +12,7 @@ import (
 	"github.com/gptscript-ai/tools/outlook/calendar/pkg/graph"
 	"github.com/gptscript-ai/tools/outlook/calendar/pkg/printers"
 	"github.com/gptscript-ai/tools/outlook/calendar/pkg/util"
+	"github.com/gptscript-ai/tools/outlook/common/id"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 )
 
@@ -35,6 +36,21 @@ func ListEvents(ctx context.Context, start, end time.Time) error {
 		events, err := graph.ListCalendarView(ctx, c, cal.ID, cal.Owner, &start, &end)
 		if err != nil {
 			return fmt.Errorf("failed to list events for calendar %s: %w", util.Deref(cal.Calendar.GetName()), err)
+		}
+
+		// Translate Outlook IDs to friendly numerical IDs
+		calendarID, err := id.SetOutlookID(cal.ID)
+		if err != nil {
+			return fmt.Errorf("failed to set calendar ID: %w", err)
+		}
+		cal.ID = calendarID
+
+		for i := range events {
+			eventID, err := id.SetOutlookID(util.Deref(events[i].GetId()))
+			if err != nil {
+				return fmt.Errorf("failed to set event ID: %w", err)
+			}
+			events[i].SetId(&eventID)
 		}
 
 		if len(events) > 0 {
