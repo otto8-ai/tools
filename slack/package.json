@@ -12,6 +12,7 @@
   "type": "module",
   "dependencies": {
     "@gptscript-ai/gptscript": "github:gptscript-ai/node-gptscript#b42172c6b4f89b6bda6e7d422c2e486dcee1e99a",
-    "@slack/web-api": "^7.3.2"
+    "@slack/web-api": "^7.3.2",
+    "async-mutex": "^0.5.0"
   }
 }
