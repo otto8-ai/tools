@@ -28,16 +28,18 @@ func init() {
 	}
 
 	MuPDFGetter = func(config any) (LoaderFunc, error) {
-		var pdfConfig mupdf.PDFOptions
+		var opts []func(*mupdf.PDFOptions)
 		if config != nil {
+			var pdfConfig mupdf.PDFOptions
 			slog.Debug("PDF custom config", "config", config)
 			if err := mapstructure.Decode(config, &pdfConfig); err != nil {
 				return nil, fmt.Errorf("failed to decode PDF document loader configuration: %w", err)
 			}
 			slog.Debug("PDF custom config (decoded)", "pdfConfig", pdfConfig)
+			opts = append(opts, mupdf.WithConfig(pdfConfig))
 		}
 		return func(ctx context.Context, reader io.Reader) ([]vs.Document, error) {
-			r, err := mupdf.NewPDF(reader, mupdf.WithConfig(pdfConfig))
+			r, err := mupdf.NewPDF(reader, opts...)
 			if err != nil {
 				slog.Error("Failed to create PDF loader", "error", err)
 				return nil, err
