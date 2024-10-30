@@ -11,7 +11,7 @@
   "license": "Apache-2.0",
   "type": "module",
   "dependencies": {
-    "@gptscript-ai/gptscript": "github:gptscript-ai/node-gptscript#b42172c6b4f89b6bda6e7d422c2e486dcee1e99a",
+    "@gptscript-ai/gptscript": "github:gptscript-ai/node-gptscript#ea42fed5208e0c8371d652204790965fa3c0a9ea",
     "@slack/web-api": "^7.3.2",
     "async-mutex": "^0.5.0"
   }
