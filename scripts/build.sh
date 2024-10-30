@@ -10,7 +10,7 @@ for gomod in $(find . -name go.mod); do
     (
         cd $(dirname $gomod)
         echo Building $PWD
-        CGO_ENABLED=0 go build -ldflags="-s -w" -o bin/gptscript-go-tool .
+        go build -ldflags="-s -w" -o bin/gptscript-go-tool .
     )
 done
 
