@@ -185,7 +185,12 @@ func (l *PDF) Load(ctx context.Context) ([]vs.Document, error) {
 		})
 	}
 
-	return l.mergePages(docs, docTokenCounts, numPages), g.Wait()
+	err := g.Wait()
+	if err != nil {
+		return nil, err
+	}
+
+	return l.mergePages(docs, docTokenCounts, numPages), nil
 }
 
 func (l *PDF) mergePages(docs []vs.Document, docTokenCounts []int, totalPages int) []vs.Document {
