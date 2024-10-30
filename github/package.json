@@ -8,7 +8,7 @@
     "start": "node index.js"
   },
   "dependencies": {
-    "@gptscript-ai/gptscript": "github:gptscript-ai/node-gptscript#96d37241a06f844789ce54b279973348e25364c1",
+    "@gptscript-ai/gptscript": "github:gptscript-ai/node-gptscript#306861b8b5aea2ea0481c180067a1687d2726530",
     "@octokit/rest": "^21.0.2"
   }
 }

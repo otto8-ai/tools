@@ -26,10 +26,10 @@ export async function searchIssuesAndPRs(octokit, owner, repo, query, perPage = 
     if (items.length > 10) {
         try {
             const gptscriptClient = new GPTScript();
-            const dataset = await gptscriptClient.createDataset(process.env.GPTSCRIPT_WORKSPACE_DIR, `${query}_github_issues_prs`, `Search results for ${query} on GitHub`);
+            const dataset = await gptscriptClient.createDataset(process.env.GPTSCRIPT_WORKSPACE_ID, `${query}_github_issues_prs`, `Search results for ${query} on GitHub`);
             for (const issue of items) {
                 await gptscriptClient.addDatasetElement(
-                    process.env.GPTSCRIPT_WORKSPACE_DIR,
+                    process.env.GPTSCRIPT_WORKSPACE_ID,
                     dataset.id,
                     `${issue.id}`,
                     '',
@@ -100,13 +100,13 @@ export async function listIssueComments(octokit, owner, repo, issueNumber) {
         try {
             const gptscriptClient = new GPTScript();
             const dataset = await gptscriptClient.createDataset(
-                process.env.GPTSCRIPT_WORKSPACE_DIR,
+                process.env.GPTSCRIPT_WORKSPACE_ID,
                 `${owner}_${repo}_issue_${issueNumber}_comments`,
                 `Comments for issue #${issueNumber} in ${owner}/${repo}`
             );
             for (const comment of data) {
                 await gptscriptClient.addDatasetElement(
-                    process.env.GPTSCRIPT_WORKSPACE_DIR,
+                    process.env.GPTSCRIPT_WORKSPACE_ID,
                     dataset.id,
                     `${comment.id}`,
                     '',
@@ -191,13 +191,13 @@ export async function listPRComments(octokit, owner, repo, prNumber) {
         try {
             const gptscriptClient = new GPTScript();
             const dataset = await gptscriptClient.createDataset(
-                process.env.GPTSCRIPT_WORKSPACE_DIR,
+                process.env.GPTSCRIPT_WORKSPACE_ID,
                 `${owner}_${repo}_pr_${prNumber}_comments`,
                 `Comments for PR #${prNumber} in ${owner}/${repo}`
             );
             for (const comment of data) {
                 await gptscriptClient.addDatasetElement(
-                    process.env.GPTSCRIPT_WORKSPACE_DIR,
+                    process.env.GPTSCRIPT_WORKSPACE_ID,
                     dataset.id,
                     `${comment.id}`,
                     '',
@@ -236,13 +236,13 @@ export async function listRepos(octokit, owner) {
         try {
             const gptscriptClient = new GPTScript();
             const dataset = await gptscriptClient.createDataset(
-                process.env.GPTSCRIPT_WORKSPACE_DIR,
+                process.env.GPTSCRIPT_WORKSPACE_ID,
                 `${owner}_github_repos`,
                 `GitHub repos for ${owner}`
             );
             for (const repo of repos.data) {
                 await gptscriptClient.addDatasetElement(
-                    process.env.GPTSCRIPT_WORKSPACE_DIR,
+                    process.env.GPTSCRIPT_WORKSPACE_ID,
                     dataset.id,
                     `${repo.id}`,
                     '',
