@@ -1,0 +1,31 @@
+flows:
+  context:
+    default: true
+    retrieval:
+      retriever:
+        name: merge
+        options:
+          topK: 20
+          retrievers:
+            - name: basic
+              weight: 0.7
+              options:
+                topK: 20
+            - name: bm25
+              weight: 0.3
+              options:
+                topN: 10
+                k1: 1.2
+                b: 0.75
+                cleanStopWords:
+                  - auto
+      postprocessors:
+        - name: similarity
+          options:
+            threshold: 0.4
+        - name: reduce
+          options:
+            topK: 20
+
+
+

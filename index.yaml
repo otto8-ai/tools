@@ -53,15 +53,15 @@ knowledgeDataSources:
 
 system:
   knowledge-retrieval:
-    reference: github.com/gptscript-ai/knowledge@main
+    reference: ./knowledge
   knowledge-ingest:
-    reference: github.com/gptscript-ai/knowledge/ingest.gpt@main
+    reference: ./knowledge/ingest.gpt
   knowledge-load:
-    reference: github.com/gptscript-ai/knowledge/load.gpt@main
+    reference: ./knowledge/load.gpt
   knowledge-delete:
-    reference: github.com/gptscript-ai/knowledge/delete.gpt@main
+    reference: ./knowledge/delete.gpt
   knowledge-delete-file:
-    reference: github.com/gptscript-ai/knowledge/delete-file.gpt@main
+    reference: ./knowledge/delete-file.gpt
   website-cleaner:
     reference: ./website-cleaner
   result-formatter:

@@ -1,0 +1,17 @@
+flows:
+  bm25:
+    default: true
+    retrieval:
+      retriever:
+        name: basic
+        options:
+          topK: 1
+      postprocessors:
+        - name: metadata
+          options:
+            manipulations:
+              - operator: add
+                key: foobar
+                value: 42
+              - operator: remove
+                key: absPath

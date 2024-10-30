@@ -1,0 +1,23 @@
+embeddings:
+  providers:
+  - name: my-cohere
+    type: cohere
+    config:
+      apiKey: "${COHERE_API_KEY}" # environment variables are expanded when reading the config file
+      model: "embed-english-v2.0"
+  - name: myopenai
+    type: openai
+    config:
+      apiKey: "${OPENAI_API_KEY}"
+      embeddingEndpoint: "/some-custom-endpoint" # anything that's not the default /embeddings
+  - name: foobar
+    type: vertex
+    config:
+      apiKey: "${GOOGLE_API_KEY}"
+      project: "acorn-io"
+      # apiEndpoint: https://us-central1-aiplatform.googleapis.com
+      model: "text-embedding-004"
+  - name: local
+    type: ollama
+    config:
+      model: mxbai-embed-large

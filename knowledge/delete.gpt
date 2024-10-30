@@ -1,0 +1,4 @@
+Name: Knowledge Deletion
+Description: Delete a dataset.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool delete-dataset "${GPTSCRIPT_INPUT}"

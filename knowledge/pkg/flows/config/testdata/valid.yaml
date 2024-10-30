@@ -1,0 +1,24 @@
+flows:
+  flow1:
+    default: true
+    ingestion:
+      - filetypes: [".txt", ".md"]
+        documentLoader:
+          name: "textLoader"
+        textSplitter:
+          name: "simpleSplitter"
+        transformers:
+          - name: "transformer1"
+          - name: "transformer2"
+    retrieval: {}
+  flow2:
+    ingestion:
+      - filetypes: [".json"]
+        documentLoader:
+          name: "jsonLoader"
+        textSplitter:
+          name: "jsonSplitter"
+          options:
+            chunkSize: 4096
+        transformers: [ {name: "transformer3" }]
+    retrieval: {}

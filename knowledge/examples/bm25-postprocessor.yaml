@@ -1,0 +1,16 @@
+flows:
+  bm25:
+    default: true
+    retrieval:
+      retriever:
+        name: basic
+        options:
+          topK: 100
+      postprocessors:
+        - name: bm25
+          options:
+            topN: 10
+            sparseWeight: 0.5
+            cleanStopWords:
+              - en
+              - de

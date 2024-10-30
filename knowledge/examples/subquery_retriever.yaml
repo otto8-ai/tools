@@ -1,0 +1,15 @@
+flows:
+  foo:
+    default: false
+    retrieval:
+      retriever:
+        name: subquery
+        options:
+          limit: 3
+          topK: 5
+          model:
+            openai:
+              apiKey: "${OPENAI_API_KEY}"
+              model: gpt-4o
+              apiType: OPEN_AI
+              apiBase: https://api.openai.com/v1

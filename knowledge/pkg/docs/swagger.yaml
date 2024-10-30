@@ -1,0 +1,209 @@
+definitions:
+  gin.H:
+    additionalProperties: {}
+    type: object
+  types.Dataset:
+    properties:
+      id:
+        description: Dataset ID - must be a valid RFC 1123 hostname
+        example: asst-12345
+        format: hostname_rfc1123
+        type: string
+    required:
+    - id
+    type: object
+  types.IngestResponse:
+    properties:
+      documents:
+        items:
+          type: string
+        type: array
+    type: object
+  vectorstore.Document:
+    properties:
+      content:
+        type: string
+      metadata:
+        additionalProperties: {}
+        type: object
+      similarity_score:
+        type: number
+    type: object
+info:
+  contact:
+    name: Acorn Labs Inc.
+  description: This is the Knowledge API server for GPTStudio.
+  title: Knowledge API
+  version: "1"
+paths:
+  /datasets:
+    get:
+      description: List all datasets
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/types.Dataset'
+            type: array
+      summary: List all datasets
+      tags:
+      - datasets
+  /datasets/{id}:
+    delete:
+      description: Delete a dataset by ID
+      parameters:
+      - description: Dataset ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Delete a dataset
+      tags:
+      - datasets
+    get:
+      description: Get a dataset by ID
+      parameters:
+      - description: Dataset ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.Dataset'
+      summary: Get a dataset
+      tags:
+      - datasets
+  /datasets/{id}/documents/{doc_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a document from a dataset by ID
+      parameters:
+      - description: Dataset ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Document ID
+        in: path
+        name: doc_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Remove a document from a dataset
+      tags:
+      - datasets
+  /datasets/{id}/files/{file_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a file from a dataset by ID
+      parameters:
+      - description: Dataset ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: File ID
+        in: path
+        name: file_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Remove a file from a dataset
+      tags:
+      - datasets
+  /datasets/{id}/ingest:
+    post:
+      consumes:
+      - application/json
+      description: Ingest content into a dataset by ID
+      parameters:
+      - description: Dataset ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.IngestResponse'
+      summary: Ingest content into a dataset
+      tags:
+      - datasets
+  /datasets/{id}/retrieve:
+    post:
+      consumes:
+      - application/json
+      description: Retrieve content from a dataset by ID
+      parameters:
+      - description: Dataset ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/vectorstore.Document'
+            type: array
+      summary: Retrieve content from a dataset
+      tags:
+      - datasets
+  /datasets/create:
+    post:
+      consumes:
+      - application/json
+      description: Create a new dataset
+      parameters:
+      - description: Dataset object
+        in: body
+        name: dataset
+        required: true
+        schema:
+          $ref: '#/definitions/types.Dataset'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.Dataset'
+      summary: Create a new dataset
+      tags:
+      - datasets
+swagger: "2.0"

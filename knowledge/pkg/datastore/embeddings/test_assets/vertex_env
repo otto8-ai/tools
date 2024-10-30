@@ -1,0 +1,2 @@
+export VERTEX_PROJECT=foo-project
+export VERTEX_MODEL=foo-embedding-001

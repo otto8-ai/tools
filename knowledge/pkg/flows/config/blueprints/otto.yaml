@@ -1,0 +1,20 @@
+flows:
+  otto:
+    default: true
+    globals:
+      ingestion:
+        textsplitter:
+          chunkSize: 2048
+          chunkOverlap: 256
+    ingestion:
+      - filetypes: [".json"]
+        documentloader:
+          name: structured
+    retrieval:
+      retriever:
+        name: basic
+        options:
+          topK: 20
+
+
+

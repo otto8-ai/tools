@@ -1,0 +1,6 @@
+Name: Knowledge File Deletion
+Description: Delete a file.
+Params: File: The file to delete
+Params: Dataset: The dataset to delete the file from
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool delete-file --dataset "${DATASET}" "ws://${GPTSCRIPT_WORKSPACE_ID}/${FILE}"

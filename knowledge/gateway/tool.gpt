@@ -1,0 +1,180 @@
+Name: Knowledge
+Description: Retrieve information from files uploaded by the user.
+Type: context
+Share Tools: Knowledge Retrieval
+Share Context: Knowledge Retrieval Context with *
+
+#!sys.echo
+
+You have access to a RAG tool named "Knowledge Retrieval".
+It will work with files previously uploaded by the user.
+Use it to answer questions from the user.
+Only consider this tool if the knowledge from your context doesn't already hold the answer to the user query.
+Give citations or source references only if asked for it and that doesn't conflict with any other instructions you've received in your system prompt.
+If the answers that the knowledge tool returns seem irrelevant, you may use another tool.
+
+---
+Name: Knowledge Retrieval
+Description: Retrieve information from files uploaded by the user.
+Credential: github.com/gptscript-ai/gateway-creds as github.com/gptscript-ai/gateway
+Param: query: The query to search for in the knowledge base. It will be used for semantic similarity search, so enhance it accordingly to yield good results.
+Param: debug: (OPTIONAL) Set to "true" to enable debug mode - only use if you are explicitly asked to do so.
+
+#!${KNOWLEDGE_BIN} retrieve --dataset ${GPTSCRIPT_THREAD_ID} --dataset ${GPTSCRIPT_SCRIPT_ID} "${GPTSCRIPT_INPUT}"
+
+---
+Name: Knowledge Retrieval Context
+Description: Add knowledge retrieved from uploaded files to the context.
+Credential: github.com/gptscript-ai/gateway-creds as github.com/gptscript-ai/gateway
+Type: context
+Input Filter: QueryRelevancy
+Output Filter: KnowledgeInstructions
+
+#!${KNOWLEDGE_BIN} retrieve --debug --flows-file=blueprint:context --dataset ${GPTSCRIPT_THREAD_ID} --dataset ${GPTSCRIPT_SCRIPT_ID} "${GPTSCRIPT_INPUT}"
+
+---
+Name: QueryRelevancy
+Param: input: the message
+Context: LastUserInputOverview
+
+The user has put in the following message: "${INPUT}".
+Your task is to ensure that the input is good enough to be used as a query for the knowledge tool, i.e. good for a semantic similarity search.
+Use the following criteria to determine if the input is good enough:
+1. It's good if it contains keywords, names, entities, etc.
+2. It's good if it's written as a natural language question with proper semantic meaning.
+3. It's not good if it's too generic or vague or if it only contains stopwords and no real content.
+
+If you decide based on the above criteria that the input is good enough, return it as is without further considerations.
+If you decide that it's not good enough, check if it may be a follow-up question or in any way referring to an earlier message.
+Consider the chat history enclosed in the following <HISTORY></HISTORY> tags.
+<HISTORY>
+${GPTSCRIPT_CONTEXT}
+</HISTORY>
+If you think the input is connected to parts of the history, enrich it with details from there.
+If the chat history is irrelevant (i.e. there is no connection the current input) and you're certain that the input won't make for a good query, return a single - with no quotes or highlighting or anything else.
+Only reply with the final query and nothing else. Do not use any syntax highlighting.
+Here's are some examples:
+
+## Example 1
+Input: "Who's the employer?"
+History: "<USER_MESSAGES>[User Message #1] How much does John Doe earn?</USER_MESSAGES>"
+Output: "Who's the employer of John Doe?"
+Reasoning: The input looks like a follow-up question related to a previous query. The previous query is about the entity John Doe, so the current query is likely asking about the same entity.
+
+## Example 2
+Input: "What are its attributes?"
+History: "<USER_MESSAGES>[User Message #1] What's Oystersteel?</USER_MESSAGES>"
+Output: "What are the attributes of Oystersteel?"
+Reasoning: The input is a follow-up question related to a previous query. The previous query is about the entity Oystersteel, so the current query is likely asking about the attributes of the same entity.
+
+## Example 3
+Input: "What's the weather like?"
+History: "<USER_MESSAGES></USER_MESSAGES>"
+Output: -
+Reasoning: The input is too generic and doesn't contain any specific keywords or entities. There is no relevant history to enrich the input with, so it's not good enough to be used as a query.
+
+## Example 4
+Input: "What's my Day 6 Travel Plan?"
+History: "<USER_MESSAGES></USER_MESSAGES>"
+Output: "What's my Day 6 Travel Plan?"
+Reasoning: The query is about something that belongs to the user so it's unlikely to be present in the training data. It must be in some uploaded file. The query is also good enough, since it contains keywords and a specific day.
+
+---
+Name: KnowledgeInstructions
+Params: output: the message
+Params: continuation: if the the conversation is still in progress
+Params: chat: if this is a chat conversation
+
+#!/usr/bin/env python3
+
+import os
+import json
+import asyncio
+
+async def main():
+    output = os.getenv('OUTPUT', '')
+    continuation = os.getenv('CONTINUATION', '') == 'true'
+    is_chat = os.getenv('CHAT', '') == 'true'
+
+    # We're looping here instead of just search + split, since there are some edge cases, where
+    # the actual result output was followed by more logs that shouldn't be in the output.
+    result = ""
+    for part in output.split("\n"):
+        if part.startswith('{"originalQuery"'):
+           result = part
+           break
+
+    if result != "":
+        msg = f"""
+Use the content within the following <KNOWLEDGE></KNOWLEDGE> tags as your learned knowledge.
+<KNOWLEDGE>
+{result}
+</KNOWLEDGE>
+If this knowledge seems irrelevant to the user query, ignore it.
+Avoid mentioning that you retrieved the information from the context or the knowledge tool.
+Only provide citations if explicitly asked for it and if the source references are available in the knowledge.
+Answer in the language that the user asked the question in.
+"""
+    else:
+        msg = "No data retrieved from knowledge base."
+
+    print(msg)
+
+asyncio.run(main())
+
+---
+Name: LastUserInputOverview
+Description: Get an overview over the last user inputs in the current chat
+Context: sys.chat.current
+Param: Limit: How many entries should be returned
+
+#!/usr/bin/env python3
+
+import json
+import asyncio
+import os
+
+
+async def main():
+    histories_str = os.getenv("GPTSCRIPT_CONTEXT", "")
+
+    if not histories_str:
+        print("<USER_MESSAGES></USER_MESSAGES>")
+        return
+
+    histories = json.loads(histories_str)
+
+    limit = int(os.getenv("LIMIT", "50"))
+
+    chat = ["<USER_MESSAGES>"]
+    msgs = []
+
+    completion = histories.get("completion", {})
+
+    i = 1
+
+    for message in completion.get("messages", []):
+        role = message.get("role", "")
+        text = " ".join(
+            [part["text"] for part in message.get("content", []) if "text" in part]
+        )
+        if role == "user" and len(text) > 0 and not text.startswith("Call "):
+            msgs.append(f"[User Message #{i}] {text}")
+            i += 1
+
+    if limit > len(msgs):
+        limit = len(msgs)
+
+    if limit == 0:
+        for msg in msgs:
+            chat.append(msg)
+    else:
+        for msg in msgs[-limit:]:
+            chat.append(msg)
+
+    chat.append("</USER_MESSAGES>")
+    print("\n".join(chat))
+
+
+asyncio.run(main())
+
