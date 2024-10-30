@@ -39,8 +39,8 @@ func MapValues[T comparable, U any](m map[T]U) []U {
 // Merge merges two maps where the values are arrays of the same type.
 // The resulting map will contain all keys from both maps, with each value containing the concatenated arrays from both maps.
 func Merge[T comparable, U any](one map[T][]U, two map[T][]U) map[T][]U {
-	out := make(map[T][]U)
-	checked := make(map[T]any)
+	out := make(map[T][]U, len(one) + len(two))
+	checked := make(map[T]struct{})
 
 	for k, v := range one {
 		checked[k] = struct{}{}
