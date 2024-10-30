@@ -111,6 +111,20 @@ export async function getThreadHistory(webClient, channelId, threadId, limit) {
         return
     }
 
+    if (replies.messages.length > 10) {
+        try {
+            const gptscriptClient = new GPTScript()
+            const dataset = await gptscriptClient.createDataset(process.env.GPTSCRIPT_WORKSPACE_ID, `slack_thread_${threadId}`, `thread history for thread "${threadId}"`)
+
+            for (const reply of replies.messages) {
+                await gptscriptClient.addDatasetElement(process.env.GPTSCRIPT_WORKSPACE_ID, dataset.id, reply.ts, "", await messageToString(webClient, reply))
+            }
+
+            console.log(`Created dataset with ID ${dataset.id} with ${replies.messages.length} thread replies`)
+            return
+        } catch (e) {} // Ignore errors if we got any. We'll just print the results below.
+    }
+
     for (const reply of replies.messages) {
         console.log(await messageToString(webClient, reply))
     }
@@ -288,6 +302,18 @@ export async function getDMHistory(webClient, userIds, limit) {
     if (history.messages.length === 0) {
         console.log('No messages found')
         return
+    } else if (history.messages.length > 10) {
+        try {
+            const gptscriptClient = new GPTScript()
+            const dataset = await gptscriptClient.createDataset(process.env.GPTSCRIPT_WORKSPACE_ID, `slack_dm_history_${userIds}`, `chat history for DM with users "${userIds}"`)
+
+            for (const message of history.messages) {
+                await gptscriptClient.addDatasetElement(process.env.GPTSCRIPT_WORKSPACE_ID, dataset.id, message.ts, "", await messageToString(webClient, message))
+            }
+
+            console.log(`Created dataset with ID ${dataset.id} with ${history.messages.length} messages`)
+            return
+        } catch (e) {} // Ignore errors if we got any. We'll just print the results below.
     }
 
     for (const message of history.messages) {
@@ -314,6 +340,18 @@ export async function getDMThreadHistory(webClient, userIds, threadId, limit) {
     if (replies.messages.length === 0) {
         console.log('No messages found')
         return
+    } else if (replies.messages.length > 10) {
+        try {
+            const gptscriptClient = new GPTScript()
+            const dataset = await gptscriptClient.createDataset(process.env.GPTSCRIPT_WORKSPACE_ID, `slack_dm_thread_${threadId}`, `thread history for DM with users "${userIds}"`)
+
+            for (const reply of replies.messages) {
+                await gptscriptClient.addDatasetElement(process.env.GPTSCRIPT_WORKSPACE_ID, dataset.id, reply.ts, "", await messageToString(webClient, reply))
+            }
+
+            console.log(`Created dataset with ID ${dataset.id} with ${replies.messages.length} thread replies`)
+            return
+        } catch (e) {} // Ignore errors if we got any. We'll just print the results below.
     }
 
     for (const reply of replies.messages) {
@@ -389,21 +427,43 @@ function channelToString(channel) {
 }
 
 async function printHistory(webClient, channelId, history) {
+    const data = new Map()
+
     for (const message of history.messages) {
-        console.log(await messageToString(webClient, message))
+        let messageStr = await messageToString(webClient, message)
         if (message.reply_count > 0) {
-            console.log(`  thread ID ${threadID(message)} - ${message.reply_count} ${replyString(message.reply_count)}:`)
+            messageStr += `\n  thread ID ${threadID(message)} - ${message.reply_count} ${replyString(message.reply_count)}:`
             const replies = await webClient.conversations.replies({channel: channelId, ts: message.ts, limit: 3})
             for (const reply of replies.messages) {
                 if (reply.ts === message.ts) {
                     continue
                 }
 
-                console.log(await messageToString(webClient, reply))
+                messageStr += "\n" + await messageToString(webClient, reply)
             }
             if (replies.has_more) {
-                console.log('  More replies exist')
+                messageStr += '\n  More replies exist'
             }
         }
+
+        data.set(message.ts, messageStr)
+    }
+
+    if (data.size > 10) {
+        try {
+            const gptscriptClient = new GPTScript()
+            const dataset = await gptscriptClient.createDataset(process.env.GPTSCRIPT_WORKSPACE_ID, `slack_history_${channelId}`, `chat history for channel "${channelId}"`)
+
+            for (const [key, value] of data.entries()) {
+                await gptscriptClient.addDatasetElement(process.env.GPTSCRIPT_WORKSPACE_ID, dataset.id, key, "", value)
+            }
+
+            console.log(`Created dataset with ID ${dataset.id} with ${data.size} messages`)
+            return
+        } catch (e) {} // Ignore errors if we got any. We'll just print the results below.
+    }
+
+    for (const [key, value] of data.entries()) {
+        console.log(value)
     }
 }
