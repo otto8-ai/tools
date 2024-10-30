@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -44,7 +45,7 @@ func crawlColly(ctx context.Context, input *MetadataInput, output *MetadataOutpu
 	return writeMetadata(ctx, output, gptscript)
 }
 
-func scrape(ctx context.Context, converter *md.Converter, logOut *logrus.Logger, output *MetadataOutput, gptscript *gptscript.GPTScript, visited map[string]struct{}, folders map[string]struct{}, url string) error {
+func scrape(ctx context.Context, converter *md.Converter, logOut *logrus.Logger, output *MetadataOutput, gptscriptClient *gptscript.GPTScript, visited map[string]struct{}, folders map[string]struct{}, url string) error {
 	collector := colly.NewCollector()
 	collector.OnHTML("body", func(e *colly.HTMLElement) {
 		if _, ok := visited[e.Request.URL.String()]; ok {
@@ -70,6 +71,13 @@ func scrape(ctx context.Context, converter *md.Converter, logOut *logrus.Logger,
 				filePath = path.Join(hostname, strings.Join(segments[:len(segments)-1], "/"), fileName)
 			}
 		}
+
+		fileNotExists := false
+		var notFoundError *gptscript.NotFoundInWorkspaceError
+		if _, err := gptscriptClient.ReadFileInWorkspace(ctx, filePath); errors.As(err, &notFoundError) {
+			fileNotExists = true
+		}
+
 		etag := e.Response.Headers.Get("ETag")
 		lastModified := e.Response.Headers.Get("Last-Modified")
 		var updatedAt string
@@ -81,7 +89,7 @@ func scrape(ctx context.Context, converter *md.Converter, logOut *logrus.Logger,
 			updatedAt = time.Now().Format(time.RFC3339)
 		}
 
-		if updatedAt == output.Files[e.Request.URL.String()].UpdatedAt {
+		if updatedAt == output.Files[e.Request.URL.String()].UpdatedAt && !fileNotExists {
 			logOut.Infof("skipping %s because it has not changed for etag/last-modified: %s/%s", e.Request.URL.String(), etag, lastModified)
 			return
 		}
@@ -91,12 +99,12 @@ func scrape(ctx context.Context, converter *md.Converter, logOut *logrus.Logger,
 			logOut.Errorf("Failed to get checksum for %s: %v", e.Request.URL.String(), err)
 			return
 		}
-		if checksum == output.Files[e.Request.URL.String()].Checksum {
+		if checksum == output.Files[e.Request.URL.String()].Checksum && !fileNotExists {
 			logOut.Infof("skipping %s because it has not changed", e.Request.URL.String())
 			return
 		}
 
-		if err := gptscript.WriteFileInWorkspace(ctx, filePath, []byte(markdown)); err != nil {
+		if err := gptscriptClient.WriteFileInWorkspace(ctx, filePath, []byte(markdown)); err != nil {
 			logOut.Errorf("Failed to write file %s: %v", filePath, err)
 			return
 		}
@@ -118,7 +126,7 @@ func scrape(ctx context.Context, converter *md.Converter, logOut *logrus.Logger,
 		output.State.WebsiteCrawlingState.Folders = folders
 
 		output.Status = fmt.Sprintf("scraped %d pages", len(visited))
-		if err := writeMetadata(ctx, output, gptscript); err != nil {
+		if err := writeMetadata(ctx, output, gptscriptClient); err != nil {
 			logOut.Infof("Failed to write metadata: %v", err)
 		}
 	})
@@ -140,7 +148,7 @@ func scrape(ctx context.Context, converter *md.Converter, logOut *logrus.Logger,
 			return
 		}
 		if strings.ToLower(path.Ext(linkURL.Path)) == ".pdf" {
-			if err := scrapePDF(ctx, logOut, output, visited, linkURL, baseURL, gptscript); err != nil {
+			if err := scrapePDF(ctx, logOut, output, visited, linkURL, baseURL, gptscriptClient); err != nil {
 				logOut.Infof("Failed to scrape PDF %s: %v", linkURL.String(), err)
 			}
 		} else if (linkURL.Host == "" || baseURL.Host == linkURL.Host) && strings.HasPrefix(linkURL.Path, baseURL.Path) {
