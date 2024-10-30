@@ -64,3 +64,5 @@ system:
     reference: github.com/gptscript-ai/knowledge/delete-file.gpt@main
   website-cleaner:
     reference: ./website-cleaner
+  result-formatter:
+    reference: ./result-formatter
