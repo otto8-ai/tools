@@ -70,11 +70,12 @@ func WithDisablePageMerge() func(o *PDFOptions) {
 
 // PDF represents a PDF document loader that implements the DocumentLoader interface.
 type PDF struct {
-	opts      PDFOptions
-	document  *fitz.Document
-	converter *mdconv.Converter
-	lock      *sync.Mutex
-	tokenizer *tiktoken.Tiktoken
+	opts                PDFOptions
+	document            *fitz.Document
+	converter           *mdconv.Converter
+	lock                *sync.Mutex
+	tokenizer           *tiktoken.Tiktoken
+	contentTransformers []func(string) string
 }
 
 // NewPDF creates a new PDF loader with the given options.
@@ -113,12 +114,19 @@ func NewPDF(r io.Reader, optFns ...func(o *PDFOptions)) (*PDF, error) {
 		opts.NumThread = 100
 	}
 
+	contentTransformers := []func(string) string{
+		func(s string) string {
+			return strings.TrimSpace(strings.ReplaceAll(s, "\n\n", "\n"))
+		},
+	}
+
 	return &PDF{
-		opts:      opts,
-		document:  doc,
-		converter: converter,
-		tokenizer: tk,
-		lock:      &sync.Mutex{},
+		opts:                opts,
+		document:            doc,
+		converter:           converter,
+		tokenizer:           tk,
+		lock:                &sync.Mutex{},
+		contentTransformers: contentTransformers,
 	}, nil
 }
 
@@ -165,6 +173,10 @@ func (l *PDF) Load(ctx context.Context) ([]vs.Document, error) {
 				}
 
 				content := strings.TrimSpace(markdown)
+
+				for _, transformer := range l.contentTransformers {
+					content = transformer(content)
+				}
 
 				doc := vs.Document{
 					Content: content,
