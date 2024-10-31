@@ -87,7 +87,7 @@ func NewPDF(r io.Reader, optFns ...func(o *PDFOptions)) (*PDF, error) {
 	opts := PDFOptions{
 		StartPage:           1,
 		EnablePageMerge:     true,
-		PageMergeTokenLimit: defaults.TextSplitterChunkSize,
+		PageMergeTokenLimit: defaults.ChunkSizeTokens,
 	}
 
 	for _, fn := range optFns {
@@ -100,7 +100,7 @@ func NewPDF(r io.Reader, optFns ...func(o *PDFOptions)) (*PDF, error) {
 	} else if opts.TokenModel != "" {
 		tk, err = tiktoken.EncodingForModel(opts.TokenModel)
 	} else {
-		tk, err = tiktoken.GetEncoding(defaults.TextSplitterTokenEncoding)
+		tk, err = tiktoken.GetEncoding(defaults.TokenEncoding)
 	}
 
 	if opts.StartPage == 0 {
