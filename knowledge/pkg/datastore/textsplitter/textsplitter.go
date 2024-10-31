@@ -24,10 +24,10 @@ type TextSplitterOpts struct {
 // NewTextSplitterOpts returns the default options for a text splitter.
 func NewTextSplitterOpts() TextSplitterOpts {
 	return TextSplitterOpts{
-		ChunkSize:    defaults.TextSplitterChunkSize,
-		ChunkOverlap: defaults.TextSplitterChunkOverlap,
-		ModelName:    defaults.TextSplitterTokenModel,
-		EncodingName: defaults.TextSplitterTokenEncoding,
+		ChunkSize:    defaults.ChunkSizeTokens,
+		ChunkOverlap: defaults.ChunkOverlapTokens,
+		ModelName:    defaults.TokenModel,
+		EncodingName: defaults.TokenEncoding,
 	}
 }
 

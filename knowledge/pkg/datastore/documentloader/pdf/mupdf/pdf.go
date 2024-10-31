@@ -87,7 +87,7 @@ func NewPDF(r io.Reader, optFns ...func(o *PDFOptions)) (*PDF, error) {
 	opts := PDFOptions{
 		StartPage:           1,
 		EnablePageMerge:     true,
-		PageMergeTokenLimit: defaults.TextSplitterChunkSize,
+		PageMergeTokenLimit: defaults.ChunkSizeTokens,
 	}
 
 	for _, fn := range optFns {
@@ -100,7 +100,7 @@ func NewPDF(r io.Reader, optFns ...func(o *PDFOptions)) (*PDF, error) {
 	} else if opts.TokenModel != "" {
 		tk, err = tiktoken.EncodingForModel(opts.TokenModel)
 	} else {
-		tk, err = tiktoken.GetEncoding(defaults.TextSplitterTokenEncoding)
+		tk, err = tiktoken.GetEncoding(defaults.TokenEncoding)
 	}
 
 	if opts.StartPage == 0 {
@@ -205,6 +205,7 @@ func (l *PDF) mergePages(docs []vs.Document, docTokenCounts []int, totalPages in
 		content   string
 		tokens    int
 	}
+
 	var currentDoc pDoc
 	for i, doc := range docs {
 		// If the current document is empty, set it to the current document and continue
@@ -222,6 +223,7 @@ func (l *PDF) mergePages(docs []vs.Document, docTokenCounts []int, totalPages in
 		// Check if adding the next page will exceed the token limit
 		// If it does, append the current document to the list and start over
 		if currentDoc.tokens+docTokenCounts[i] > l.opts.PageMergeTokenLimit {
+			// Append currentDoc to mergedDocs, as we reached the token limit
 			mergedDocs = append(mergedDocs, vs.Document{
 				Content: currentDoc.content,
 				Metadata: map[string]any{
@@ -230,6 +232,7 @@ func (l *PDF) mergePages(docs []vs.Document, docTokenCounts []int, totalPages in
 					"tokenCount": currentDoc.tokens,
 				},
 			})
+			// Start a new document for the next pages
 			currentDoc = pDoc{
 				pageStart: i + 1,
 				pageEnd:   i + 1,
@@ -243,18 +246,18 @@ func (l *PDF) mergePages(docs []vs.Document, docTokenCounts []int, totalPages in
 		currentDoc.content += "\n" + doc.Content
 		currentDoc.tokens += docTokenCounts[i]
 		currentDoc.pageEnd = i + 1
+	}
 
-		// If this is the last page, append the current document to the list
-		if i == len(docs)-1 {
-			mergedDocs = append(mergedDocs, vs.Document{
-				Content: currentDoc.content,
-				Metadata: map[string]any{
-					"pages":      fmt.Sprintf("%d-%d", currentDoc.pageStart, currentDoc.pageEnd),
-					"totalPages": totalPages,
-					"tokenCount": currentDoc.tokens,
-				},
-			})
-		}
+	// Add any remaining content as a new document
+	if currentDoc.content != "" {
+		mergedDocs = append(mergedDocs, vs.Document{
+			Content: currentDoc.content,
+			Metadata: map[string]any{
+				"pages":      fmt.Sprintf("%d-%d", currentDoc.pageStart, currentDoc.pageEnd),
+				"totalPages": totalPages,
+				"tokenCount": currentDoc.tokens,
+			},
+		})
 	}
 
 	slog.Debug("Merged PDF pages", "totalPages", totalPages, "mergedPages", len(mergedDocs))

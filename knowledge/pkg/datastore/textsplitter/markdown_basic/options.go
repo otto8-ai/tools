@@ -22,11 +22,11 @@ type Options struct {
 // DefaultOptions returns the default options for all text splitter.
 func DefaultOptions() Options {
 	return Options{
-		ChunkSize:    defaults.TextSplitterChunkSize,
-		ChunkOverlap: defaults.TextSplitterChunkOverlap,
+		ChunkSize:    defaults.ChunkSizeTokens,
+		ChunkOverlap: defaults.ChunkOverlapTokens,
 
-		ModelName:    defaults.TextSplitterTokenModel,
-		EncodingName: defaults.TextSplitterTokenEncoding,
+		ModelName:    defaults.TokenModel,
+		EncodingName: defaults.TokenEncoding,
 
 		MaxHeadingLevel:   6,
 		IgnoreHeadingOnly: false,
