@@ -147,6 +147,7 @@ func main() {
 		os.Exit(0)
 	}
 
+	output.Status = ""
 	if err := writeMetadata(ctx, &output, gptscriptClient); err != nil {
 		logOut.WithError(fmt.Errorf("failed to write metadata, error: %w", err)).Error()
 		os.Exit(0)
@@ -292,7 +293,6 @@ func saveToMetadata(ctx context.Context, logErr *logrus.Logger, output *Metadata
 	}
 
 	output.State.OneDriveState.Files = files
-
 	return nil
 }
 

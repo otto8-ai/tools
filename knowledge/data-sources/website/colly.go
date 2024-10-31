@@ -42,6 +42,7 @@ func crawlColly(ctx context.Context, input *MetadataInput, output *MetadataOutpu
 		}
 	}
 
+	output.Status = ""
 	return writeMetadata(ctx, output, gptscript)
 }
 
@@ -89,7 +90,14 @@ func scrape(ctx context.Context, converter *md.Converter, logOut *logrus.Logger,
 			updatedAt = time.Now().Format(time.RFC3339)
 		}
 
+		defer func() {
+			if err := writeMetadata(ctx, output, gptscriptClient); err != nil {
+				logOut.Infof("Failed to write metadata: %v", err)
+			}
+		}()
+
 		if updatedAt == output.Files[e.Request.URL.String()].UpdatedAt && !fileNotExists {
+			output.Status = fmt.Sprintf("Skipping %s because it has not changed", e.Request.URL.String())
 			logOut.Infof("skipping %s because it has not changed for etag/last-modified: %s/%s", e.Request.URL.String(), etag, lastModified)
 			return
 		}
@@ -100,6 +108,7 @@ func scrape(ctx context.Context, converter *md.Converter, logOut *logrus.Logger,
 			return
 		}
 		if checksum == output.Files[e.Request.URL.String()].Checksum && !fileNotExists {
+			output.Status = fmt.Sprintf("Skipping %s because it has not changed", e.Request.URL.String())
 			logOut.Infof("skipping %s because it has not changed", e.Request.URL.String())
 			return
 		}
@@ -124,11 +133,7 @@ func scrape(ctx context.Context, converter *md.Converter, logOut *logrus.Logger,
 
 		folders[hostname] = struct{}{}
 		output.State.WebsiteCrawlingState.Folders = folders
-
-		output.Status = fmt.Sprintf("scraped %d pages", len(visited))
-		if err := writeMetadata(ctx, output, gptscriptClient); err != nil {
-			logOut.Infof("Failed to write metadata: %v", err)
-		}
+		output.Status = fmt.Sprintf("Scraped %v", e.Request.URL.String())
 	})
 
 	collector.OnHTML("a[href]", func(e *colly.HTMLElement) {
@@ -218,7 +223,7 @@ func scrapePDF(ctx context.Context, logOut *logrus.Logger, output *MetadataOutpu
 
 	visited[linkURL.String()] = struct{}{}
 
-	output.Status = fmt.Sprintf("scraped %d pages", len(visited))
+	output.Status = fmt.Sprintf("Scraped %v", linkURL.String())
 	output.Files[linkURL.String()] = FileDetails{
 		FilePath:  filePath,
 		URL:       linkURL.String(),

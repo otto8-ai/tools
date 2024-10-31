@@ -8,7 +8,7 @@ dotenv.config();
 
 interface OutputMetadata {
   files: {
-    [pageId: string]: {
+    [pageUrl: string]: {
       updatedAt: string;
       filePath: string;
       url: string;
@@ -20,9 +20,9 @@ interface OutputMetadata {
       pages: Record<
         string,
         {
-          url: string;
           title: string;
           folderPath: string;
+          id: string;
         }
       >;
     };
@@ -102,7 +102,7 @@ async function main() {
       notionState: {
         pages: Record<
           string,
-          { url: string; title: string; folderPath: string }
+          { id: string; title: string; folderPath: string }
         >;
       };
     };
@@ -110,7 +110,7 @@ async function main() {
 
   if (!output.state.notionState) {
     output.state.notionState = {} as {
-      pages: Record<string, { url: string; title: string; folderPath: string }>;
+      pages: Record<string, { id: string; title: string; folderPath: string }>;
     };
   }
 
@@ -123,7 +123,7 @@ async function main() {
     filter: { property: "object", value: "page" },
   });
 
-  const pageIds = new Set();
+  const pageUrls = new Set();
   for (const page of allPages.results) {
     let p = page as PageObjectResponse;
     if (p.archived) {
@@ -132,7 +132,7 @@ async function main() {
     const pageId = p.id;
     const pageUrl = p.url;
     const pageTitle = getTitle(p);
-    pageIds.add(pageId);
+    pageUrls.add(pageUrl);
     let folderPath = "";
     while (p.parent && p.parent.type === "page_id") {
       try {
@@ -146,7 +146,7 @@ async function main() {
       }
     }
     output.state.notionState.pages[pageUrl] = {
-      url: pageUrl,
+      id: pageId,
       title: pageTitle,
       folderPath: folderPath,
     };
@@ -157,25 +157,27 @@ async function main() {
     Buffer.from(JSON.stringify(output, null, 2))
   );
 
-  for (const pageId of Object.keys(output.state.notionState.pages)) {
+  for (const pageUrl of Object.keys(output.state.notionState.pages)) {
     if (
       !allPages.results
         .filter((p) => !(p as PageObjectResponse).archived)
-        .some((page) => (page as PageObjectResponse).id === pageId)
+        .some((page) => (page as PageObjectResponse).url === pageUrl)
     ) {
-      delete output.state.notionState.pages[pageId];
+      delete output.state.notionState.pages[pageUrl];
     }
   }
 
-  for (const pageId of Object.keys(output.state.notionState.pages)) {
-    const page = await getPage(client, pageId);
+  for (const [pageUrl, pageDetails] of Object.entries(
+    output.state.notionState.pages
+  )) {
+    const page = await getPage(client, pageDetails.id);
     if (
-      !output.files[pageId] ||
-      output.files[pageId].updatedAt !== page.last_edited_time
+      !output.files[pageUrl] ||
+      output.files[page.url].updatedAt !== page.last_edited_time
     ) {
       console.error(`Writing page url: ${page.url}`);
       await writePageToFile(client, page, gptscriptClient);
-      output.files[pageId] = {
+      output.files[page.url] = {
         url: page.url,
         filePath: getPath(page!),
         updatedAt: page.last_edited_time,
@@ -192,17 +194,19 @@ async function main() {
       Buffer.from(JSON.stringify(output, null, 2))
     );
   }
-  for (const [pageId, fileInfo] of Object.entries(output.files)) {
-    if (!pageIds.has(pageId)) {
+  for (const [pageUrl, fileInfo] of Object.entries(output.files)) {
+    if (!pageUrls.has(pageUrl)) {
       try {
         await gptscriptClient.deleteFileInWorkspace(fileInfo.filePath);
-        delete output.files[pageId];
-        console.error(`Deleted file and entry for page ID: ${pageId}`);
+        delete output.files[pageUrl];
+        console.error(`Deleted file and entry for page URL: ${pageUrl}`);
       } catch (error) {
         console.error(`Failed to delete file ${fileInfo.filePath}:`, error);
       }
     }
   }
+
+  output.status = "";
   await gptscriptClient.writeFileInWorkspace(
     ".metadata.json",
     Buffer.from(JSON.stringify(output, null, 2))
