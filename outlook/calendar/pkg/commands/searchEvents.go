@@ -75,6 +75,6 @@ func SearchEvents(ctx context.Context, query string, start, end time.Time) error
 		return fmt.Errorf("failed to add dataset elements: %w", err)
 	}
 
-	fmt.Printf("Created dataset with ID %s with %d events\n", dataset.ID, len(util.Flatten(util.MapValues(allCalendarEvents))))
+	fmt.Printf("Created dataset with ID %s with %d events\n", dataset.ID, len(elements))
 	return nil
 }
