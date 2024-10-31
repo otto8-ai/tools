@@ -1,8 +1,9 @@
 package index
 
 import (
-	"github.com/gptscript-ai/knowledge/pkg/config"
 	"time"
+
+	"github.com/gptscript-ai/knowledge/pkg/config"
 )
 
 // Dataset refers to a VectorDB data space.
@@ -33,4 +34,5 @@ type Document struct {
 	ID      string `gorm:"primaryKey" json:"id"`
 	Dataset string `gorm:"primaryKey" json:"dataset"` // Foreign key to Dataset, part of composite primary key with FileID
 	FileID  string `gorm:"primaryKey" json:"file_id"` // Foreign key to File, part of composite primary key with Dataset
+	Index   int    `gorm:"index" json:"index"`        // Index of the document in the file (~ location within file, 0-based)
 }

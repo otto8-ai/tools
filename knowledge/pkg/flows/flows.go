@@ -123,9 +123,8 @@ func (f *IngestionFlow) Run(ctx context.Context, reader io.Reader) ([]vs.Documen
 	/*
 	 * Split documents - Chunking
 	 */
-	splitterLog := phaseLog.With("stage", "textsplitter").With(slog.Int("num_documents", len(docs)))
+	splitterLog := phaseLog.With("stage", "textsplitter").With(slog.Int("num_documents", len(docs))).With("splitter", f.Splitter.Name())
 	splitterLog.With("status", "starting").Info("Starting text splitter")
-
 	docs, err = f.Splitter.SplitDocuments(docs)
 	if err != nil {
 		splitterLog.With("status", "failed").Error("Failed to split documents", "error", err)

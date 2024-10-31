@@ -10,6 +10,7 @@ import (
 	"github.com/gptscript-ai/knowledge/pkg/datastore/documentloader"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings"
 	"github.com/gptscript-ai/knowledge/pkg/log"
+	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
 
 	"github.com/google/uuid"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/filetypes"
@@ -171,6 +172,9 @@ func (s *Datastore) Ingest(ctx context.Context, datasetID string, name string, c
 		return nil, nil
 	}
 
+	// Sort documents
+	vs.SortAndEnsureDocIndex(docs)
+
 	// Before adding doc, we need to remove the existing documents for duplicates or old contents
 	statusLog.With("component", "vectorstore").With("action", "remove").Debug("Removing existing documents")
 	where := map[string]string{
@@ -203,6 +207,7 @@ func (s *Datastore) Ingest(ctx context.Context, datasetID string, name string, c
 			ID:      docID,
 			FileID:  fileID,
 			Dataset: datasetID,
+			Index:   idx,
 		}
 	}
 

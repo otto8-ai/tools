@@ -122,8 +122,9 @@ If you identify a specific page type, like book cover, table of contents, etc., 
 
 			docs = append(docs, vs.Document{
 				Metadata: map[string]interface{}{
-					"page":       pageNo,
-					"totalPages": len(images),
+					"page":                    pageNo,
+					"totalPages":              len(images),
+					vs.DocMetadataKeyDocIndex: i,
 				},
 				Content: fmt.Sprintf("%v", result),
 			})
