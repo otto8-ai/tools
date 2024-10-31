@@ -15,6 +15,11 @@ flows:
         name: basic
         options:
           topK: 10
+  ottoload:
+    ingestion:
+      - filetypes: [".pdf"]
+        documentloader:
+          name: smartpdf
 
 
 

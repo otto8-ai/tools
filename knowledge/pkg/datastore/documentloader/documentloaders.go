@@ -39,6 +39,11 @@ func GetDocumentLoaderConfig(name string) (any, error) {
 			return nil, fmt.Errorf("MuPDF is not available")
 		}
 		return MuPDFConfig, nil
+	case "smartpdf":
+		if SmartPDFConfig == nil {
+			return nil, fmt.Errorf("SmartPDF is not available")
+		}
+		return SmartPDFConfig, nil
 	case "csv":
 		return golcdocloaders.CSVOptions{}, nil
 	case "notebook":
@@ -57,6 +62,9 @@ var MuPDFConfig any
 
 var OpenAIOCRGetter func(config any) (LoaderFunc, error) = nil
 var OpenAIOCRConfig any
+
+var SmartPDFGetter func(config any) (LoaderFunc, error) = nil
+var SmartPDFConfig any
 
 func GetDocumentLoaderFunc(name string, config any) (LoaderFunc, error) {
 	switch name {
@@ -84,6 +92,11 @@ func GetDocumentLoaderFunc(name string, config any) (LoaderFunc, error) {
 			return nil, fmt.Errorf("MuPDF is not available")
 		}
 		return MuPDFGetter(config)
+	case "smartpdf":
+		if SmartPDFGetter == nil {
+			return nil, fmt.Errorf("SmartPDF is not available")
+		}
+		return SmartPDFGetter(config)
 	case "pdf", "gopdf":
 		var pdfConfig gopdf.PDFOptions
 		if config != nil {

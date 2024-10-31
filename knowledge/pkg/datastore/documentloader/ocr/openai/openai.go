@@ -12,10 +12,15 @@ import (
 	"image/png"
 	"io"
 	"log/slog"
+	"math/rand"
 	"net/http"
+	"strings"
+	"time"
 
 	"github.com/acorn-io/z"
 	"github.com/gen2brain/go-fitz"
+	"github.com/gptscript-ai/knowledge/pkg/datastore/defaults"
+	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/load"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/openai"
 	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
 	"golang.org/x/sync/errgroup"
@@ -63,6 +68,43 @@ type Response struct {
 	Choices []Choice `json:"choices"`
 }
 
+func (o *OpenAIOCR) Configure() error {
+	if err := load.FillConfigEnv("OPENAI_", &o.OpenAIConfig); err != nil {
+		return fmt.Errorf("error filling OpenAI config: %w", err)
+	}
+
+	if o.BaseURL == "" {
+		o.BaseURL = "https://api.openai.com/v1"
+	}
+
+	if o.APIKey == "" {
+		return fmt.Errorf("OpenAI API key is required for OpenAI OCR")
+	}
+
+	if o.Concurrency == 0 {
+		o.Concurrency = 3
+	}
+
+	if o.MaxTokens == nil {
+		o.MaxTokens = z.Pointer(defaults.ChunkSizeTokens - defaults.ChunkOverlapTokens)
+	}
+
+	if o.Model == "" {
+		o.Model = "gpt-4o"
+	}
+
+	if o.Prompt == "" {
+		o.Prompt = `What is in this image? If it's a pure text page, try to return it verbatim.
+Don't add any additional text as the output will be used for a retrieval pipeline later on.
+Leave out introductory sentences like "The image seems to contain...", etc.
+For images and tabular data, try to describe the content in a way that it's useful for retrieval later on.
+If you identify a specific page type, like book cover, table of contents, etc., please add that information to the beginning of the text.
+`
+	}
+
+	return nil
+}
+
 func (o *OpenAIOCR) Load(ctx context.Context, reader io.Reader) ([]vs.Document, error) {
 	if o.Prompt == "" {
 		o.Prompt = `What is in this image? If it's a pure text page, try to return it verbatim.
@@ -73,16 +115,8 @@ If you identify a specific page type, like book cover, table of contents, etc., 
 `
 	}
 
-	if o.BaseURL == "" {
-		o.BaseURL = "https://api.openai.com/v1"
-	}
-
-	if o.APIKey == "" {
-		return nil, fmt.Errorf("OpenAI API key is required for OpenAI OCR")
-	}
-
-	if o.Concurrency == 0 {
-		o.Concurrency = 3
+	if err := load.FillConfigEnv("OPENAI_", &o.OpenAIConfig); err != nil {
+		return nil, fmt.Errorf("error filling OpenAI config: %w", err)
 	}
 
 	// We don't pull this into the concurrent loop because we first want to make sure that the PDF can be converted to images completely
@@ -108,17 +142,15 @@ If you identify a specific page type, like book cover, table of contents, etc., 
 			defer sem.Release(1)
 
 			slog.Debug("Processing PDF image", "page", pageNo, "totalPages", len(images))
-			base64Image, err := encodeImageToBase64(img)
+			base64Image, err := EncodeImageToBase64(img)
 			if err != nil {
 				return fmt.Errorf("error encoding image to base64: %w", err)
 			}
 
-			result, err := o.sendImageToOpenAI(base64Image)
+			result, err := o.SendImageToOpenAI(ctx, base64Image)
 			if err != nil {
 				return fmt.Errorf("error sending image to OpenAI: %w", err)
 			}
-
-			slog.Debug("OpenAI OCR result", "page", pageNo, "result", result)
 
 			docs = append(docs, vs.Document{
 				Metadata: map[string]interface{}{
@@ -152,7 +184,7 @@ func convertPdfToImages(reader io.Reader) ([]image.Image, error) {
 	return images, nil
 }
 
-func encodeImageToBase64(img image.Image) (string, error) {
+func EncodeImageToBase64(img image.Image) (string, error) {
 	var buffer bytes.Buffer
 	err := png.Encode(&buffer, img)
 	if err != nil {
@@ -161,20 +193,12 @@ func encodeImageToBase64(img image.Image) (string, error) {
 	return base64.StdEncoding.EncodeToString(buffer.Bytes()), nil
 }
 
-func (o *OpenAIOCR) sendImageToOpenAI(base64Image string) (string, error) {
+func (o *OpenAIOCR) SendImageToOpenAI(ctx context.Context, base64Image string) (string, error) {
 	url := fmt.Sprintf("%s/chat/completions", o.BaseURL)
 
 	headers := map[string]string{
 		"Content-Type":  "application/json",
 		"Authorization": "Bearer " + o.APIKey,
-	}
-
-	if o.MaxTokens == nil {
-		o.MaxTokens = z.Pointer(300)
-	}
-
-	if o.Model == "" {
-		o.Model = "gpt-4o"
 	}
 
 	payload := Payload{
@@ -196,7 +220,7 @@ func (o *OpenAIOCR) sendImageToOpenAI(base64Image string) (string, error) {
 		return "", err
 	}
 
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(payloadBytes))
+	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(payloadBytes))
 	if err != nil {
 		return "", err
 	}
@@ -206,15 +230,10 @@ func (o *OpenAIOCR) sendImageToOpenAI(base64Image string) (string, error) {
 	}
 
 	client := &http.Client{}
-	resp, err := client.Do(req)
+	// Send the request and get the body.
+	body, err := requestWithExponentialBackoff(ctx, client, req, 5, true)
 	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", err
+		return "", fmt.Errorf("OpenAI OCR error sending request(s): %w", err)
 	}
 
 	var result Response
@@ -223,4 +242,70 @@ func (o *OpenAIOCR) sendImageToOpenAI(base64Image string) (string, error) {
 	}
 
 	return result.Choices[0].Message.Content, nil
+}
+
+func requestWithExponentialBackoff(ctx context.Context, client *http.Client, req *http.Request, maxRetries int, handleRateLimit bool) ([]byte, error) {
+	const baseDelay = time.Millisecond * 200
+	var resp *http.Response
+	var err error
+
+	var failures []string
+
+	// Save the original request body
+	var bodyBytes []byte
+	if req.Body != nil {
+		bodyBytes, err = io.ReadAll(req.Body)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read request body: %v", err)
+		}
+	}
+
+	for i := 0; i < maxRetries; i++ {
+		// Reset body to the original request body
+		if bodyBytes != nil {
+			req.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+		}
+
+		resp, err = client.Do(req)
+		if err == nil && resp.StatusCode == http.StatusOK {
+			defer resp.Body.Close()
+
+			body, err := io.ReadAll(resp.Body)
+			if err != nil {
+				// Request was OK, but we hit an error reading the response body.
+				// This is likely a transient error, so we retry.
+				failures = append(failures, fmt.Sprintf("#%d/%d: failed to read response body: %v", i+1, maxRetries, err))
+				continue
+			}
+
+			return body, nil
+		}
+
+		if resp != nil {
+			var bodystr string
+			if resp.Body != nil {
+				body, rerr := io.ReadAll(resp.Body)
+				if rerr == nil {
+					bodystr = string(body)
+				}
+				resp.Body.Close()
+			}
+			failures = append(failures, fmt.Sprintf("#%d/%d: %d <%s> (err: %v)", i+1, maxRetries, resp.StatusCode, bodystr, err))
+
+			if resp.StatusCode >= 500 || (handleRateLimit && resp.StatusCode == http.StatusTooManyRequests) {
+				// Retry for 5xx (Server Errors)
+				// We're also handling rate limit here (without checking the Retry-After header), if handleRateLimit is true,
+				// since it's what e.g. OpenAI recommends (see https://github.com/openai/openai-cookbook/blob/457f4310700f93e7018b1822213ca99c613dbd1b/examples/How_to_handle_rate_limits.ipynb).
+				delay := baseDelay * time.Duration(1<<i)
+				jitter := time.Duration(rand.Int63n(int64(baseDelay)))
+				time.Sleep(delay + jitter)
+				continue
+			} else {
+				// Don't retry for other status codes
+				break
+			}
+		}
+	}
+
+	return nil, fmt.Errorf("retry limit (%d) exceeded or failed with non-retriable error: %v", maxRetries, strings.Join(failures, "; "))
 }

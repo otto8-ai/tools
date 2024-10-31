@@ -5,15 +5,20 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"maps"
 	"os"
 	"slices"
 	"strings"
 
+	"github.com/acorn-io/z"
 	"github.com/gptscript-ai/knowledge/pkg/client"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/documentloader"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/documentloader/structured"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/filetypes"
+	"github.com/gptscript-ai/knowledge/pkg/datastore/textsplitter"
+	"github.com/gptscript-ai/knowledge/pkg/flows"
+	flowconfig "github.com/gptscript-ai/knowledge/pkg/flows/config"
 	"github.com/spf13/cobra"
 )
 
@@ -22,6 +27,7 @@ type ClientLoad struct {
 	OutputFormat string            `name:"format" usage:"Choose an output format" default:"structured"`
 	Metadata     map[string]string `usage:"Metadata to attach to the loaded files" env:"METADATA"`
 	MetadataJSON string            `usage:"Metadata to attach to the loaded files in JSON format" env:"METADATA_JSON"`
+	ClientFlowsConfig
 }
 
 func (s *ClientLoad) Customize(cmd *cobra.Command) {
@@ -77,7 +83,51 @@ func (s *ClientLoad) run(ctx context.Context, input, output string) error {
 	var loader documentloader.LoaderFunc
 
 	if s.Loader == "" {
-		loader = documentloader.DefaultDocLoaderFunc(filetype, documentloader.DefaultDocLoaderFuncOpts{})
+		if s.FlowsFile != "" {
+			slog.Debug("Loading ingestion flows from config", "flows_file", s.FlowsFile)
+
+			flowCfg, err := flowconfig.Load(s.FlowsFile)
+			if err != nil {
+				return err
+			}
+
+			var flow *flowconfig.FlowConfigEntry
+			if s.Flow != "" {
+				flow, err = flowCfg.GetFlow(s.Flow)
+				if err != nil {
+					return err
+				}
+			} else {
+				flow, err = flowCfg.GetDefaultFlowConfigEntry()
+				if err != nil {
+					return err
+				}
+			}
+
+			var ingestionFlow *flows.IngestionFlow
+			for _, ingestionFlowConfig := range flow.Ingestion {
+				flow, err := ingestionFlowConfig.AsIngestionFlow(&flow.Globals.Ingestion)
+				if err != nil {
+					return err
+				}
+				if flow.SupportsFiletype(filetype) {
+					ingestionFlow = flow
+					break
+				}
+			}
+
+			if ingestionFlow != nil {
+				if err := ingestionFlow.FillDefaults(filetype, z.Pointer(textsplitter.NewTextSplitterOpts())); err != nil {
+					return err
+				}
+				loader = ingestionFlow.Load
+				slog.Debug("Loaded ingestion flow from config", "flows_file", s.FlowsFile)
+			}
+		}
+
+		if loader == nil {
+			loader = documentloader.DefaultDocLoaderFunc(filetype, documentloader.DefaultDocLoaderFuncOpts{})
+		}
 	} else {
 		var err error
 		loader, err = documentloader.GetDocumentLoaderFunc(s.Loader, nil)
