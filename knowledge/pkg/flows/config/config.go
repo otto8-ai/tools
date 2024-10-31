@@ -197,7 +197,10 @@ func (i *IngestionFlowConfig) AsIngestionFlow(globals *FlowConfigGlobalsIngestio
 			if err != nil {
 				return nil, err
 			}
+		} else {
+			cfg = nil
 		}
+
 		loaderFunc, err := documentloader.GetDocumentLoaderFunc(name, cfg)
 		if err != nil {
 			return nil, err
