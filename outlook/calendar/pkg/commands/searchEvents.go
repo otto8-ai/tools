@@ -36,9 +36,9 @@ func SearchEvents(ctx context.Context, query string, start, end time.Time) error
 		}
 
 		for _, event := range result {
-			if strings.Contains(util.Deref(event.GetSubject()), query) {
+			if strings.Contains(strings.ToLower(util.Deref(event.GetSubject())), strings.ToLower(query)) {
 				calendarEventsInSubject[cal] = append(calendarEventsInSubject[cal], event)
-			} else if strings.Contains(util.Deref(event.GetBodyPreview()), query) {
+			} else if strings.Contains(strings.ToLower(util.Deref(event.GetBodyPreview())), strings.ToLower(query)) {
 				calendarEventsInPreview[cal] = append(calendarEventsInPreview[cal], event)
 			}
 		}
