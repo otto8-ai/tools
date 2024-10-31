@@ -14,7 +14,6 @@ Param: spreadsheet_id: The ID of the Spreadsheet (Optional, if not provided, the
 Param: spreadsheet_name: The name of the Spreadsheet (Optional, if not provided, the spreadsheet_id is required)
 Param: range: The range of cells on the Spreadsheet to read (Optional, by default reads the entire Spreadsheet)
 Param: sheet_name: The name of the page to read from (Optional, by default reads the first page)
-Param: show_cell_ref: Show the cell reference in the output. Value must be true or false. (Optional, by default shows the cell references)
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/readSpreadsheet.py
 

@@ -14,7 +14,6 @@ async def main():
         raise ValueError("Either spreadsheet_id or spreadsheet_name parameter must be set")
     range = os.getenv('RANGE')
     sheet_name = os.getenv('SHEET_NAME')
-    show_cell_ref = os.getenv('SHOW_CELL_REF', 'true').lower() == 'true'
 
     service = gspread_client()
     try:
