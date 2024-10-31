@@ -33,12 +33,6 @@ type PDFOptions struct {
 	// Page number to start loading from (default is 1).
 	StartPage uint
 
-	// Maximum number of pages to load (0 for all pages).
-	MaxPages uint
-
-	// Source is the name of the pdf document
-	Source string
-
 	// Number of goroutines to load pdf documents
 	NumThread int
 
