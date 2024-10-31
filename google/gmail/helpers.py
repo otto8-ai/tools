@@ -3,6 +3,7 @@ import sys
 from email.mime.text import MIMEText
 
 import gptscript
+from gptscript.datasets import DatasetElement
 
 
 def create_message(to, cc, bcc, subject, message_text):
@@ -60,28 +61,23 @@ async def list_messages(service, query, max_results):
             if not next_page_token:
                 break
 
-        if len(all_messages) > 10:
+        try:
             gptscript_client = gptscript.GPTScript()
-            try:
-                dataset = await gptscript_client.create_dataset(
-                    os.getenv("GPTSCRIPT_WORKSPACE_ID"),
-                    f"gmail_{query}",
-                    f"list of emails in Gmail for query {query}")
-                for message in all_messages:
-                    msg_id, msg_str = message_to_string(service, message)
-                    await gptscript_client.add_dataset_element(
-                        os.getenv("GPTSCRIPT_WORKSPACE_ID"),
-                        dataset.id,
-                        msg_id,
-                        msg_str
-                    )
-                print(f"Created dataset with ID {dataset.id} with {len(all_messages)} emails")
-                return
-            except Exception as e:
-                print("An error occurred while creating the dataset:", e, file=sys.stderr)
-                pass  # Ignore errors if we got any, and just print the results.
 
-        display_list_messages(service, all_messages)
+            dataset = await gptscript_client.create_dataset(
+                os.getenv("GPTSCRIPT_WORKSPACE_ID"),
+                f"gmail_{query}",
+                f"list of emails in Gmail for query {query}")
+
+            elements = []
+            for message in all_messages:
+                msg_id, msg_str = message_to_string(service, message)
+                elements.append(DatasetElement(name=msg_id, description="", contents=msg_str))
+
+            await gptscript_client.add_dataset_elements(os.getenv("GPTSCRIPT_WORKSPACE_ID"), dataset.id, elements)
+            print(f"Created dataset with ID {dataset.id} with {len(all_messages)} emails")
+        except Exception as e:
+            print("An error occurred while creating the dataset:", e)
 
     except HttpError as err:
         print(err)
@@ -130,28 +126,23 @@ async def list_drafts(service, max_results=None):
             if not next_page_token:
                 break
 
-        if len(all_drafts) > 10:
-            try:
-                gptscript_client = gptscript.GPTScript()
-                dataset = await gptscript_client.create_dataset(
-                    os.getenv("GPTSCRIPT_WORKSPACE_ID"),
-                    "gmail_drafts",
-                    "list of drafts in Gmail")
-                for draft in all_drafts:
-                    draft_id, draft_str = draft_to_string(service, draft)
-                    await gptscript_client.add_dataset_element(
-                        os.getenv("GPTSCRIPT_WORKSPACE_ID"),
-                        dataset.id,
-                        draft_id,
-                        draft_str
-                    )
-                print(f"Created dataset with ID {dataset.id} with {len(all_drafts)} drafts")
-                return
-            except Exception as e:
-                print("An error occurred while creating the dataset:", e, file=sys.stderr)
-                pass  # Ignore errors if we got any, and just print the results.
+        try:
+            gptscript_client = gptscript.GPTScript()
 
-        display_list_drafts(service, all_drafts)
+            dataset = await gptscript_client.create_dataset(
+                os.getenv("GPTSCRIPT_WORKSPACE_ID"),
+                "gmail_drafts",
+                "list of drafts in Gmail")
+
+            elements = []
+            for draft in all_drafts:
+                draft_id, draft_str = draft_to_string(service, draft)
+                elements.append(DatasetElement(name=draft_id, description="", contents=draft_str))
+
+            await gptscript_client.add_dataset_elements(os.getenv("GPTSCRIPT_WORKSPACE_ID"), dataset.id, elements)
+            print(f"Created dataset with ID {dataset.id} with {len(all_drafts)} drafts")
+        except Exception as e:
+            print("An error occurred while creating the dataset:", e)
 
     except HttpError as err:
         print(f"An error occurred: {err}")

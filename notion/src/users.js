@@ -1,5 +1,4 @@
 import {GPTScript} from "@gptscript-ai/gptscript";
-import {min} from "./util.js";
 
 export async function listUsers(client, max) {
     if (max === undefined) {
@@ -22,19 +21,24 @@ export async function listUsers(client, max) {
         nextCursor = response.next_cursor
     }
 
-    if (min(users.length, max) > 10) {
-        try {
-            const gptscriptClient = new GPTScript()
-            const dataset = await gptscriptClient.createDataset(process.env.GPTSCRIPT_WORKSPACE_DIR, "notion_users", "list of notion users")
-            for (let i = 0; i < min(users.length, max); i++) {
-                await gptscriptClient.addDatasetElement(process.env.GPTSCRIPT_WORKSPACE_DIR, dataset.id, users[i].name + users[i].id, "", `${users[i].name} (ID: ${users[i].id})`)
+    try {
+        const gptscriptClient = new GPTScript()
+        const dataset = await gptscriptClient.createDataset(process.env.GPTSCRIPT_WORKSPACE_ID, "notion_users", "list of notion users")
+        let elements = users.map(user => {
+            return {
+                name: user.name + user.id,
+                description: `${user.name} (ID: ${user.id})`,
+                contents: `${user.name} (ID: ${user.id})`,
             }
-            console.log(`Created dataset with ID ${dataset.id} with ${min(users.length, max)} users`)
-            return
-        } catch (e) {} // Ignore errors if we got any. We'll just print the results below.
-    }
+        })
 
-    for (let i = 0; i < max && i < users.length; i++) {
-        console.log(`${users[i].name} (ID: ${users[i].id})`)
+        if (max < elements.length) {
+            elements = elements.slice(0, max)
+        }
+        await gptscriptClient.addDatasetElements(process.env.GPTSCRIPT_WORKSPACE_ID, dataset.id, elements)
+
+        console.log(`Created dataset with ID ${dataset.id} with ${elements.length} users`)
+    } catch (e) {
+        console.log("Failed to create dataset:", e)
     }
 }

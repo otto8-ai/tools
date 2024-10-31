@@ -1,4 +1,3 @@
-import {min} from "./util.js";
 import {GPTScript} from "@gptscript-ai/gptscript";
 
 export async function search(client, query, max) {
@@ -22,30 +21,30 @@ export async function search(client, query, max) {
         nextCursor = response.next_cursor
     }
 
-    if (min(results.length, max) > 10) {
-        try {
-            const gptscriptClient = new GPTScript()
-            const dataset = await gptscriptClient.createDataset(process.env.GPTSCRIPT_WORKSPACE_DIR, `${query}_notion_search`, `search results from Notion for query ${query}`)
-            for (let i = 0; i < min(results.length, max); i++) {
-                await gptscriptClient.addDatasetElement(
-                    process.env.GPTSCRIPT_WORKSPACE_DIR,
-                    dataset.id,
-                    results[i].name+results[i].id,
-                    `Notion page named ${results[i].name}`,
-                    `${resultToString(results[i])}`)
-            }
-            console.log(`Created dataset with ID ${dataset.id} with ${min(results.length, max)} search results`)
-            return
-        } catch (e) {} // Ignore errors if we got any. We'll just print the results below.
-    }
-
     if (results.length === 0) {
         console.log("No results found")
         return
     }
 
-    for (let i = 0; i < min(max, results.length); i++) {
-        console.log(resultToString(results[i]))
+    try {
+        const gptscriptClient = new GPTScript()
+        const dataset = await gptscriptClient.createDataset(process.env.GPTSCRIPT_WORKSPACE_ID, `${query}_notion_search`, `search results from Notion for query ${query}`)
+        let elements = results.map(result => {
+            return {
+                name: result.name + result.id,
+                description: `Notion page named ${result.name}`,
+                contents: resultToString(result),
+            }
+        })
+
+        if (max < elements.length) {
+            elements = elements.slice(0, max)
+        }
+        await gptscriptClient.addDatasetElements(process.env.GPTSCRIPT_WORKSPACE_ID, dataset.id, elements)
+
+        console.log(`Created dataset with ID ${dataset.id} with ${elements.length} search results`)
+    } catch (e) {
+        console.log("Failed to create dataset:", e)
     }
 }
 
