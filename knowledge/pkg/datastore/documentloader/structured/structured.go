@@ -29,8 +29,14 @@ func (s *Structured) Load(ctx context.Context, reader io.Reader) ([]vs.Document,
 	}
 
 	docs := make([]vs.Document, 0, len(input.Documents))
-	for _, doc := range input.Documents {
+	for i, doc := range input.Documents {
 		maps.Merge(maps.Copy(input.Metadata), doc.Metadata)
+
+		// Set a metadata key for the document index, if not already set.
+		if _, ok := doc.Metadata[vs.DocMetadataKeyDocIndex]; !ok {
+			doc.Metadata[vs.DocMetadataKeyDocIndex] = i
+		}
+
 		docs = append(docs, vs.Document{
 			Content:  doc.Content,
 			Metadata: doc.Metadata,

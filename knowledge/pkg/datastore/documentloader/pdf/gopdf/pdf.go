@@ -188,8 +188,9 @@ func (l *PDF) Load(ctx context.Context) ([]vs.Document, error) {
 		doc := vs.Document{
 			Content: strings.TrimSpace(text),
 			Metadata: map[string]any{
-				"page":       page,
-				"totalPages": maxPages,
+				"page":                    page,
+				"totalPages":              maxPages,
+				vs.DocMetadataKeyDocIndex: page - 1,
 			},
 		}
 
@@ -203,14 +204,4 @@ func (l *PDF) Load(ctx context.Context) ([]vs.Document, error) {
 	}
 
 	return docs, nil
-}
-
-// LoadAndSplit loads PDF documents from the provided reader and splits them using the specified text splitter.
-func (l *PDF) LoadAndSplit(ctx context.Context, splitter types.TextSplitter) ([]vs.Document, error) {
-	docs, err := l.Load(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return splitter.SplitDocuments(docs)
 }

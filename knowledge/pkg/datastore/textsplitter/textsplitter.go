@@ -78,7 +78,7 @@ func GetTextSplitter(name string, config any) (dstypes.TextSplitter, error) {
 			cfg = customCfg
 		}
 		slog.Debug("TextSplitter", "config", cfg)
-		return FromLangchain(NewLcgoTextSplitter(cfg)), nil
+		return FromLangchain(NewLcgoTextSplitter(cfg), "lcgo_text"), nil
 	case "markdown":
 		cfg := NewTextSplitterOpts()
 		if config != nil {
@@ -93,7 +93,7 @@ func GetTextSplitter(name string, config any) (dstypes.TextSplitter, error) {
 			cfg = customCfg
 		}
 		slog.Debug("MarkdownSplitter", "config", cfg)
-		return FromLangchain(NewLcgoMarkdownSplitter(cfg)), nil
+		return FromLangchain(NewLcgoMarkdownSplitter(cfg), "lcgo_markdown"), nil
 	default:
 		return nil, fmt.Errorf("unknown text splitter %q", name)
 	}

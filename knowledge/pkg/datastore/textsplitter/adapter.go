@@ -9,6 +9,7 @@ import (
 
 type golcSplitterAdapter struct {
 	golcschema.TextSplitter
+	name string
 }
 
 func (a *golcSplitterAdapter) SplitDocuments(docs []vs.Document) ([]vs.Document, error) {
@@ -16,8 +17,12 @@ func (a *golcSplitterAdapter) SplitDocuments(docs []vs.Document) ([]vs.Document,
 	return types.FromGolcDocs(golcdocs), err
 }
 
-func FromGolc(splitter golcschema.TextSplitter) types.TextSplitter {
-	return &golcSplitterAdapter{splitter}
+func (a *golcSplitterAdapter) Name() string {
+	return a.name
+}
+
+func FromGolc(splitter golcschema.TextSplitter, name string) types.TextSplitter {
+	return &golcSplitterAdapter{splitter, name}
 }
 
 func AsGolc(splitter types.TextSplitter) golcschema.TextSplitter {
@@ -27,7 +32,8 @@ func AsGolc(splitter types.TextSplitter) golcschema.TextSplitter {
 // --- langchaingo ---
 
 type langchainSplitterAdapter struct {
-	lc lcgosplitter.TextSplitter
+	lc   lcgosplitter.TextSplitter
+	name string
 }
 
 func (a *langchainSplitterAdapter) SplitDocuments(docs []vs.Document) ([]vs.Document, error) {
@@ -35,12 +41,12 @@ func (a *langchainSplitterAdapter) SplitDocuments(docs []vs.Document) ([]vs.Docu
 	return types.FromLangchainDocs(lcdocs), err
 }
 
-func FromLangchain(splitter lcgosplitter.TextSplitter) types.TextSplitter {
-	return &langchainSplitterAdapter{splitter}
+func (a *langchainSplitterAdapter) Name() string {
+	return a.name
 }
 
-func LangchainToNative(splitter lcgosplitter.TextSplitter) types.TextSplitter {
-	return FromLangchain(splitter)
+func FromLangchain(splitter lcgosplitter.TextSplitter, name string) types.TextSplitter {
+	return &langchainSplitterAdapter{splitter, name}
 }
 
 func AsLangchain(splitter types.TextSplitter) lcgosplitter.TextSplitter {

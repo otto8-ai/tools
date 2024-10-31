@@ -9,8 +9,8 @@ func DefaultTextSplitter(filetype string, textSplitterOpts *TextSplitterOpts) ty
 	if textSplitterOpts == nil {
 		textSplitterOpts = z.Pointer(NewTextSplitterOpts())
 	}
-	genericTextSplitter := FromLangchain(NewLcgoTextSplitter(*textSplitterOpts))
-	markdownTextSplitter := FromLangchain(NewLcgoMarkdownSplitter(*textSplitterOpts))
+	genericTextSplitter := FromLangchain(NewLcgoTextSplitter(*textSplitterOpts), "lcgo_text")
+	markdownTextSplitter := FromLangchain(NewLcgoMarkdownSplitter(*textSplitterOpts), "lcgo_markdown")
 
 	switch filetype {
 	case ".md", "text/markdown":

@@ -45,8 +45,10 @@ type PDFOptions struct {
 	// EnablePageMerge
 	EnablePageMerge bool
 
-	// PageMergeTokenLimit - maximum number of tokens allowed in a single document
-	PageMergeTokenLimit int
+	// ChunkSize - maximum number of tokens allowed in a single document
+	ChunkSize int
+
+	ChunkOverlap int
 
 	// TokenEncoding - encoding for tokenizer to use for page merging
 	TokenEncoding string
@@ -85,9 +87,10 @@ func NewPDF(r io.Reader, optFns ...func(o *PDFOptions)) (*PDF, error) {
 	}
 
 	opts := PDFOptions{
-		StartPage:           1,
-		EnablePageMerge:     true,
-		PageMergeTokenLimit: defaults.ChunkSizeTokens,
+		StartPage:       1,
+		EnablePageMerge: true,
+		ChunkSize:       defaults.ChunkSizeTokens,
+		ChunkOverlap:    defaults.ChunkOverlapTokens,
 	}
 
 	for _, fn := range optFns {
@@ -171,6 +174,7 @@ func (l *PDF) Load(ctx context.Context) ([]vs.Document, error) {
 					Metadata: map[string]any{
 						"page":       pageNum + 1,
 						"totalPages": numPages,
+						"docIndex":   pageNum,
 					},
 				}
 
@@ -198,7 +202,8 @@ func (l *PDF) mergePages(docs []vs.Document, docTokenCounts []int, totalPages in
 		return docs
 	}
 
-	mergedDocs := make([]vs.Document, 0, len(docs))
+	sizeLimit := l.opts.ChunkSize - l.opts.ChunkOverlap
+
 	type pDoc struct {
 		pageStart int
 		pageEnd   int
@@ -206,6 +211,7 @@ func (l *PDF) mergePages(docs []vs.Document, docTokenCounts []int, totalPages in
 		tokens    int
 	}
 
+	var mergedDocs []vs.Document
 	var currentDoc pDoc
 	for i, doc := range docs {
 		// If the current document is empty, set it to the current document and continue
@@ -222,14 +228,15 @@ func (l *PDF) mergePages(docs []vs.Document, docTokenCounts []int, totalPages in
 
 		// Check if adding the next page will exceed the token limit
 		// If it does, append the current document to the list and start over
-		if currentDoc.tokens+docTokenCounts[i] > l.opts.PageMergeTokenLimit {
+		if currentDoc.tokens+docTokenCounts[i] > sizeLimit {
 			// Append currentDoc to mergedDocs, as we reached the token limit
 			mergedDocs = append(mergedDocs, vs.Document{
 				Content: currentDoc.content,
 				Metadata: map[string]any{
-					"pages":      fmt.Sprintf("%d-%d", currentDoc.pageStart, currentDoc.pageEnd),
-					"totalPages": totalPages,
-					"tokenCount": currentDoc.tokens,
+					"pages":                   fmt.Sprintf("%d-%d", currentDoc.pageStart, currentDoc.pageEnd),
+					"totalPages":              totalPages,
+					"tokenCount":              currentDoc.tokens,
+					vs.DocMetadataKeyDocIndex: len(mergedDocs),
 				},
 			})
 			// Start a new document for the next pages
@@ -253,9 +260,10 @@ func (l *PDF) mergePages(docs []vs.Document, docTokenCounts []int, totalPages in
 		mergedDocs = append(mergedDocs, vs.Document{
 			Content: currentDoc.content,
 			Metadata: map[string]any{
-				"pages":      fmt.Sprintf("%d-%d", currentDoc.pageStart, currentDoc.pageEnd),
-				"totalPages": totalPages,
-				"tokenCount": currentDoc.tokens,
+				"pages":                   fmt.Sprintf("%d-%d", currentDoc.pageStart, currentDoc.pageEnd),
+				"totalPages":              totalPages,
+				"tokenCount":              currentDoc.tokens,
+				vs.DocMetadataKeyDocIndex: len(mergedDocs),
 			},
 		})
 	}
@@ -263,14 +271,4 @@ func (l *PDF) mergePages(docs []vs.Document, docTokenCounts []int, totalPages in
 	slog.Debug("Merged PDF pages", "totalPages", totalPages, "mergedPages", len(mergedDocs))
 
 	return mergedDocs
-}
-
-// LoadAndSplit loads PDF documents from the provided reader and splits them using the specified text splitter.
-func (l *PDF) LoadAndSplit(ctx context.Context, splitter types.TextSplitter) ([]vs.Document, error) {
-	docs, err := l.Load(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return splitter.SplitDocuments(docs)
 }
