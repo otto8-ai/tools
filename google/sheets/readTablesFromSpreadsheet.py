@@ -2,6 +2,7 @@ import asyncio
 import os
 
 from gptscript import GPTScript
+from gptscript.datasets import DatasetElement
 
 from auth import gspread_client
 
@@ -51,29 +52,25 @@ async def main():
         if current_table:
             tables.append(current_table)
 
-        if len(tables) > 10:
-            try:
-                gptscript_client = GPTScript()
-                dataset = await gptscript_client.create_dataset(
-                    os.getenv("GPTSCRIPT_WORKSPACE_DIR"), f"{spreadsheet.id}_tables", ""
-                )
+        try:
+            gptscript_client = GPTScript()
 
-                for index, table in enumerate(tables):
-                    table_text = "\n".join([f"[{', '.join(row)}]" for row in table])
-                    await gptscript_client.add_dataset_element(
-                        os.getenv("GPTSCRIPT_WORKSPACE_DIR"), dataset.id, f"Table {index + 1}", table_text
-                    )
+            dataset = await gptscript_client.create_dataset(
+                os.getenv("GPTSCRIPT_WORKSPACE_ID"), f"{spreadsheet.id}_tables", ""
+            )
 
-                print(f"Created dataset with ID {dataset.id} with {len(tables)} tables")
-                return
-            except Exception:
-                pass  # Ignore errors if we got any, and just print the results.
+            elements = []
+            for index, table in enumerate(tables):
+                table_text = "\n".join([f"[{', '.join(row)}]" for row in table])
+                elements.append(DatasetElement(name=f"Table {index + 1}", description="", contents=table_text))
 
-        for index, table in enumerate(tables):
-            print(f"Table {index + 1}:")
-            for row in table:
-                print(row)
-            print("-" * 40)
+            await gptscript_client.add_dataset_elements(os.getenv("GPTSCRIPT_WORKSPACE_ID"), dataset.id, elements)
+
+            print(f"Created dataset with ID {dataset.id} with {len(tables)} tables")
+            return
+        except Exception as e:
+            print("An error occurred while creating the dataset:", e)
+
     except Exception as err:
         print(err)
 
