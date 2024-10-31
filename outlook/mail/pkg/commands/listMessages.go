@@ -37,36 +37,34 @@ func ListMessages(ctx context.Context, folderID string) error {
 		return fmt.Errorf("failed to list mail: %w", err)
 	}
 
-	if len(messages) > 10 {
-		gptscriptClient, err := gptscript.NewGPTScript()
-		if err != nil {
-			return fmt.Errorf("failed to create GPTScript client: %w", err)
-		}
-		workspaceID := os.Getenv("GPTSCRIPT_WORKSPACE_ID")
-		dataset, err := gptscriptClient.CreateDataset(ctx, workspaceID, fmt.Sprintf("%s_outlook_mail", folderID), "Outlook mail messages in folder "+folderID)
-		if err != nil {
-			return fmt.Errorf("failed to create dataset: %w", err)
-		}
-		var elements []gptscript.DatasetElement
-		for _, message := range messages {
-			messageStr, err := printers.MessageToString(message, false)
-			if err != nil {
-				return fmt.Errorf("failed to convert message to string: %w", err)
-			}
-			elements = append(elements, gptscript.DatasetElement{
-				DatasetElementMeta: gptscript.DatasetElementMeta{
-					Name:        util.Deref(message.GetId()),
-					Description: util.Deref(message.GetSubject()),
-				},
-				Contents: messageStr,
-			})
-		}
-		if err := gptscriptClient.AddDatasetElements(ctx, workspaceID, dataset.ID, elements); err != nil {
-			return fmt.Errorf("failed to add dataset elements: %w", err)
-		}
-		fmt.Printf("Created dataset with ID %s with %d messages\n", dataset.ID, len(messages))
-		return nil
+	gptscriptClient, err := gptscript.NewGPTScript()
+	if err != nil {
+		return fmt.Errorf("failed to create GPTScript client: %w", err)
 	}
 
-	return printers.PrintMessages(messages, false)
+	workspaceID := os.Getenv("GPTSCRIPT_WORKSPACE_ID")
+
+	dataset, err := gptscriptClient.CreateDataset(ctx, workspaceID, fmt.Sprintf("%s_outlook_mail", folderID), "Outlook mail messages in folder "+folderID)
+	if err != nil {
+		return fmt.Errorf("failed to create dataset: %w", err)
+	}
+	var elements []gptscript.DatasetElement
+	for _, message := range messages {
+		messageStr, err := printers.MessageToString(message, false)
+		if err != nil {
+			return fmt.Errorf("failed to convert message to string: %w", err)
+		}
+		elements = append(elements, gptscript.DatasetElement{
+			DatasetElementMeta: gptscript.DatasetElementMeta{
+				Name:        util.Deref(message.GetId()),
+				Description: util.Deref(message.GetSubject()),
+			},
+			Contents: messageStr,
+		})
+	}
+	if err := gptscriptClient.AddDatasetElements(ctx, workspaceID, dataset.ID, elements); err != nil {
+		return fmt.Errorf("failed to add dataset elements: %w", err)
+	}
+	fmt.Printf("Created dataset with ID %s with %d messages\n", dataset.ID, len(messages))
+	return nil
 }
