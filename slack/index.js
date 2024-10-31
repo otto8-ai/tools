@@ -1,6 +1,7 @@
 import { WebClient } from "@slack/web-api"
 import {
-  getChannelHistory, getChannelHistoryByTime,
+  getChannelHistory,
+  getChannelHistoryByTime,
   getDMHistory,
   getDMThreadHistory,
   getMessageLink,
@@ -14,6 +15,7 @@ import {
   sendDMInThread,
   sendMessage,
   sendMessageInThread,
+  userContext,
 } from "./src/tools.js"
 
 if (process.argv.length !== 3) {
@@ -71,6 +73,9 @@ switch (command) {
     break
   case "getDMThreadHistory":
     await getDMThreadHistory(webClient, process.env.USERIDS, process.env.THREADID, process.env.LIMIT)
+    break
+  case "userContext":
+    await userContext(webClient)
     break
   default:
     console.error(`Unknown command: ${command}`)

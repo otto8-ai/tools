@@ -1,6 +1,18 @@
 import { GPTScript } from "@gptscript-ai/gptscript"
 import { Mutex } from "async-mutex"
 
+export async function userContext(webClient) {
+    const result = await webClient.auth.test({})
+    const userResult = await webClient.users.info({user: result.user_id})
+    console.log(`## Slack user info\n`)
+    console.log(`Logged in as ${userResult.user.name}`)
+    console.log(`Real Name: ${userResult.user.profile.real_name}`)
+    console.log(`Display Name: ${userResult.user.profile.display_name}`)
+    console.log(`User ID: ${result.user_id}`)
+    console.log(`Default time zone: ${userResult.user.tz_label} (UTC offset ${userResult.user.tz_offset / 3600} hours)`)
+    console.log(`\n## End of Slack user info`)
+}
+
 export async function listChannels(webClient) {
     const publicChannels = await webClient.conversations.list({limit: 100, types: 'public_channel'})
     const privateChannels = await webClient.conversations.list({limit: 100, types: 'private_channel'})
