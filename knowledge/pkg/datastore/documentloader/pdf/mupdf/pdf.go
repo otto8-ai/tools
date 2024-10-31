@@ -24,7 +24,7 @@ import (
 // Compile time check to ensure PDF satisfies the DocumentLoader interface.
 var _ types.DocumentLoader = (*PDF)(nil)
 
-var mupdfLock sync.Mutex
+var MuPDFLock sync.Mutex
 
 type PDFOptions struct {
 	// Password for encrypted PDF files.
@@ -44,10 +44,10 @@ type PDFOptions struct {
 
 	ChunkOverlap int
 
-	// TokenEncoding - encoding for tokenizer to use for page merging
+	// TokenEncoding - encoding for Tokenizer to use for page merging
 	TokenEncoding string
 
-	// Tokenizer - target model for tokenizer to use for page merging
+	// Tokenizer - target model for Tokenizer to use for page merging
 	TokenModel string
 }
 
@@ -64,13 +64,13 @@ func WithDisablePageMerge() func(o *PDFOptions) {
 	}
 }
 
-// PDF represents a PDF document loader that implements the DocumentLoader interface.
+// PDF represents a PDF Document loader that implements the DocumentLoader interface.
 type PDF struct {
-	opts      PDFOptions
-	document  *fitz.Document
-	converter *mdconv.Converter
-	lock      *sync.Mutex
-	tokenizer *tiktoken.Tiktoken
+	Opts      PDFOptions
+	Document  *fitz.Document
+	Converter *mdconv.Converter
+	Lock      *sync.Mutex
+	Tokenizer *tiktoken.Tiktoken
 }
 
 // NewPDF creates a new PDF loader with the given options.
@@ -111,32 +111,32 @@ func NewPDF(r io.Reader, optFns ...func(o *PDFOptions)) (*PDF, error) {
 	}
 
 	return &PDF{
-		opts:      opts,
-		document:  doc,
-		converter: converter,
-		tokenizer: tk,
-		lock:      &sync.Mutex{},
+		Opts:      opts,
+		Document:  doc,
+		Converter: converter,
+		Tokenizer: tk,
+		Lock:      &sync.Mutex{},
 	}, nil
 }
 
-// Load loads the PDF document and returns a slice of vs.Document containing the page contents and metadata.
+// Load loads the PDF Document and returns a slice of vs.Document containing the page contents and metadata.
 func (l *PDF) Load(ctx context.Context) ([]vs.Document, error) {
-	docs := make([]vs.Document, l.document.NumPage())
+	docs := make([]vs.Document, l.Document.NumPage())
 
 	var docTokenCounts []int
-	if l.opts.EnablePageMerge {
-		docTokenCounts = make([]int, l.document.NumPage())
+	if l.Opts.EnablePageMerge {
+		docTokenCounts = make([]int, l.Document.NumPage())
 	}
-	numPages := l.document.NumPage()
+	numPages := l.Document.NumPage()
 
-	// We need a lock here, since MuPDF is not thread-safe and there are some edge cases that can cause a CGO panic.
+	// We need a Lock here, since MuPDF is not thread-safe and there are some edge cases that can cause a CGO panic.
 	// See https://github.com/gptscript-ai/knowledge/issues/135
-	mupdfLock.Lock()
-	defer mupdfLock.Unlock()
+	MuPDFLock.Lock()
+	defer MuPDFLock.Unlock()
 	g, childCtx := errgroup.WithContext(ctx)
-	g.SetLimit(l.opts.NumThread)
+	g.SetLimit(l.Opts.NumThread)
 	for pageNum := 0; pageNum < numPages; pageNum++ {
-		html, err := l.document.HTML(pageNum, true)
+		html, err := l.Document.HTML(pageNum, true)
 		if err != nil {
 			return nil, err
 		}
@@ -156,7 +156,7 @@ func (l *PDF) Load(ctx context.Context) ([]vs.Document, error) {
 					return err
 				}
 
-				markdown, err := l.converter.ConvertString(ret)
+				markdown, err := l.Converter.ConvertString(ret)
 				if err != nil {
 					return err
 				}
@@ -172,12 +172,12 @@ func (l *PDF) Load(ctx context.Context) ([]vs.Document, error) {
 					},
 				}
 
-				l.lock.Lock()
+				l.Lock.Lock()
 				docs[pageNum] = doc
-				if l.opts.EnablePageMerge {
-					docTokenCounts[pageNum] = len(l.tokenizer.Encode(content, []string{}, []string{"all"}))
+				if l.Opts.EnablePageMerge {
+					docTokenCounts[pageNum] = len(l.Tokenizer.Encode(content, []string{}, []string{"all"}))
 				}
-				l.lock.Unlock()
+				l.Lock.Unlock()
 				return nil
 			}
 		})
@@ -192,11 +192,11 @@ func (l *PDF) Load(ctx context.Context) ([]vs.Document, error) {
 }
 
 func (l *PDF) mergePages(docs []vs.Document, docTokenCounts []int, totalPages int) []vs.Document {
-	if !l.opts.EnablePageMerge {
+	if !l.Opts.EnablePageMerge {
 		return docs
 	}
 
-	sizeLimit := l.opts.ChunkSize - l.opts.ChunkOverlap
+	sizeLimit := l.Opts.ChunkSize - l.Opts.ChunkOverlap
 
 	type pDoc struct {
 		pageStart int
@@ -208,7 +208,7 @@ func (l *PDF) mergePages(docs []vs.Document, docTokenCounts []int, totalPages in
 	var mergedDocs []vs.Document
 	var currentDoc pDoc
 	for i, doc := range docs {
-		// If the current document is empty, set it to the current document and continue
+		// If the current Document is empty, set it to the current Document and continue
 		// TODO: (we just assume that it's impossible to exceed the token limit with a single page)
 		if currentDoc.content == "" {
 			currentDoc = pDoc{
@@ -233,7 +233,7 @@ func (l *PDF) mergePages(docs []vs.Document, docTokenCounts []int, totalPages in
 					vs.DocMetadataKeyDocIndex: len(mergedDocs),
 				},
 			})
-			// Start a new document for the next pages
+			// Start a new Document for the next pages
 			currentDoc = pDoc{
 				pageStart: i + 1,
 				pageEnd:   i + 1,
@@ -243,13 +243,13 @@ func (l *PDF) mergePages(docs []vs.Document, docTokenCounts []int, totalPages in
 			continue
 		}
 
-		// If the token limit is not exceeded, append the content of the current page to the current document
+		// If the token limit is not exceeded, append the content of the current page to the current Document
 		currentDoc.content += "\n" + doc.Content
 		currentDoc.tokens += docTokenCounts[i]
 		currentDoc.pageEnd = i + 1
 	}
 
-	// Add any remaining content as a new document
+	// Add any remaining content as a new Document
 	if currentDoc.content != "" {
 		mergedDocs = append(mergedDocs, vs.Document{
 			Content: currentDoc.content,

@@ -11,6 +11,7 @@ import (
 	"github.com/gptscript-ai/knowledge/pkg/datastore/documentloader/ocr/openai"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/documentloader/pdf/defaults"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/documentloader/pdf/mupdf"
+	"github.com/gptscript-ai/knowledge/pkg/datastore/documentloader/smartpdf"
 	"github.com/gptscript-ai/knowledge/pkg/output"
 	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
 	"github.com/mitchellh/mapstructure"
@@ -63,4 +64,25 @@ func init() {
 	}
 
 	OpenAIOCRConfig = openai.OpenAIOCR{}
+
+	// SmartPDF (depends on MuPDF and OpenAI OCR)
+	SmartPDFGetter = func(config any) (LoaderFunc, error) {
+		var smartPDFConfig smartpdf.SmartPDFConfig
+		if config != nil {
+			if err := mapstructure.Decode(config, &smartPDFConfig); err != nil {
+				return nil, fmt.Errorf("failed to decode SmartPDF configuration: %w", err)
+			}
+			slog.Debug("SmartPDF custom config (decoded)", "smartPDFConfig", output.RedactSensitive(smartPDFConfig))
+		}
+		return func(ctx context.Context, reader io.Reader) ([]vs.Document, error) {
+			smartPDF, err := smartpdf.NewSmartPDF(reader, smartPDFConfig)
+			if err != nil {
+				slog.Error("Failed to create SmartPDF loader", "error", err)
+				return nil, err
+			}
+			return smartPDF.Load(ctx)
+		}, nil
+	}
+
+	SmartPDFConfig = smartpdf.SmartPDFConfig{}
 }
