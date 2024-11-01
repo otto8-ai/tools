@@ -15,7 +15,7 @@
     "typescript": "^5.4.5"
   },
   "dependencies": {
-    "@gptscript-ai/gptscript": "https://github.com/gptscript-ai/node-gptscript#306861b8b5aea2ea0481c180067a1687d2726530",
+    "@gptscript-ai/gptscript": "https://github.com/gptscript-ai/node-gptscript#56135fadee9445c452f54547b72db864ebae40a9",
     "axios": "^1.7.7",
     "env-paths": "^3.0.0",
     "file-type": "^19.6.0",

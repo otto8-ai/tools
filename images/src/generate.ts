@@ -40,39 +40,38 @@ const generateImages = async (
       n: quantity,
     });
 
+    const client = new gptscript.GPTScript()
+    const dataset = await client.createDataset(
+      process.env.GPTSCRIPT_WORKSPACE_ID!,
+      createHash('sha256').update(prompt).digest('hex').substring(0, 16),
+      `Generated images for "${prompt}"`
+    )
+
     // Download all images concurrently
     const imageUrls = response.data.map(image => image.url).filter(url => url != null)
-    const client = new gptscript.GPTScript()
-    const filePaths = await Promise.all(
-      imageUrls.map(url => download(client, url))
-    );
-
-    // Output the workspace file paths of the generated images
-    filePaths.forEach(filePath => {
-      console.log(filePath)
-    })
+    await Promise.all(
+      imageUrls.map(url => download(client, dataset.id, url))
+    )
+    console.log(`Created dataset with ID ${dataset.id} with ${imageUrls.length} images`)
   } catch (error) {
     console.log('Error while generating images:', error);
     process.exit(1);
   }
 }
 
-async function download(client: gptscript.GPTScript, imageUrl: string): Promise<string> {
+async function download(client: gptscript.GPTScript, datasetId: string, imageUrl: string) {
   const response = await axios.get(imageUrl, {
     responseType: 'arraybuffer'
   })
   const content = Buffer.from(response.data, 'binary')
 
-
-  // Generate a SHA-256 hash of the imageURL to use as the filename
-  let filePath= `${createHash('sha256').update(imageUrl).digest('hex')}.png`;
-  if (process.env.OTTO_THREAD_ID !== undefined) {
-    filePath = `files/${filePath}`
-  }
-
-  await client.writeFileInWorkspace(filePath, content)
-
-  return filePath
+  await client.addDatasetElement(
+    process.env.GPTSCRIPT_WORKSPACE_ID!,
+    datasetId,
+    createHash('sha256').update(imageUrl).digest('hex').substring(0, 8),
+    '',
+    content
+  )
 }
 
 export { generateImages };
