@@ -52,7 +52,7 @@ async def main():
                 elements.append(DatasetElement(
                     name=cell_reference,
                     description="",
-                    contents=value if value != "" else " "
+                    contents=(value if value != "" else " ").encode("utf-8"),
                 ))
 
             await gptscript_client.add_dataset_elements(os.getenv("GPTSCRIPT_WORKSPACE_ID"), dataset.id, elements)

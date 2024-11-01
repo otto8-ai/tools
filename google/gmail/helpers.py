@@ -72,7 +72,7 @@ async def list_messages(service, query, max_results):
             elements = []
             for message in all_messages:
                 msg_id, msg_str = message_to_string(service, message)
-                elements.append(DatasetElement(name=msg_id, description="", contents=msg_str))
+                elements.append(DatasetElement(name=msg_id, description="", contents=msg_str.encode("utf-8")))
 
             await gptscript_client.add_dataset_elements(os.getenv("GPTSCRIPT_WORKSPACE_ID"), dataset.id, elements)
             print(f"Created dataset with ID {dataset.id} with {len(all_messages)} emails")
@@ -137,7 +137,7 @@ async def list_drafts(service, max_results=None):
             elements = []
             for draft in all_drafts:
                 draft_id, draft_str = draft_to_string(service, draft)
-                elements.append(DatasetElement(name=draft_id, description="", contents=draft_str))
+                elements.append(DatasetElement(name=draft_id, description="", contents=draft_str.encode("utf-8")))
 
             await gptscript_client.add_dataset_elements(os.getenv("GPTSCRIPT_WORKSPACE_ID"), dataset.id, elements)
             print(f"Created dataset with ID {dataset.id} with {len(all_drafts)} drafts")

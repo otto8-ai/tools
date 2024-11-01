@@ -48,7 +48,7 @@ func ListMailFolders(ctx context.Context) error {
 				Name:        util.Deref(folder.GetId()),
 				Description: util.Deref(folder.GetDisplayName()),
 			},
-			Contents: folderStr,
+			Contents: []byte(folderStr),
 		})
 	}
 

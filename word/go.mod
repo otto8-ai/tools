@@ -5,7 +5,7 @@ go 1.23.1
 require (
 	code.sajari.com/docconv/v2 v2.0.0-pre.4
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.14.0
-	github.com/gptscript-ai/go-gptscript v0.9.6-0.20241028114905-1fce3cceae35
+	github.com/gptscript-ai/go-gptscript v0.9.6-0.20241101143642-3a3a70ca44b6
 	github.com/microsoftgraph/msgraph-sdk-go v1.48.0
 )
 

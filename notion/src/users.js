@@ -28,7 +28,7 @@ export async function listUsers(client, max) {
             return {
                 name: user.name + user.id,
                 description: `${user.name} (ID: ${user.id})`,
-                contents: `${user.name} (ID: ${user.id})`,
+                contents: Buffer.from(`${user.name} (ID: ${user.id})`),
             }
         })
 

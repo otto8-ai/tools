@@ -62,7 +62,11 @@ async def main():
             elements = []
             for index, table in enumerate(tables):
                 table_text = "\n".join([f"[{', '.join(row)}]" for row in table])
-                elements.append(DatasetElement(name=f"Table {index + 1}", description="", contents=table_text))
+                elements.append(DatasetElement(
+                    name=f"Table {index + 1}",
+                    description="",
+                    contents=table_text.encode("utf-8")
+                ))
 
             await gptscript_client.add_dataset_elements(os.getenv("GPTSCRIPT_WORKSPACE_ID"), dataset.id, elements)
 

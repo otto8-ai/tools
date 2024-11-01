@@ -78,7 +78,7 @@ func ListEvents(ctx context.Context, start, end time.Time) error {
 					Name:        name,
 					Description: util.Deref(event.GetBodyPreview()),
 				},
-				Contents: printers.EventToString(ctx, c, cal, event),
+				Contents: []byte(printers.EventToString(ctx, c, cal, event)),
 			})
 		}
 	}

@@ -8,7 +8,7 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.14.0
 	github.com/JohannesKaufmann/html-to-markdown v1.6.0
 	github.com/gomarkdown/markdown v0.0.0-20240930133441-72d49d9543d8
-	github.com/gptscript-ai/go-gptscript v0.9.6-0.20241023195750-c09e0f56b39b
+	github.com/gptscript-ai/go-gptscript v0.9.6-0.20241101143642-3a3a70ca44b6
 	github.com/gptscript-ai/tools/outlook/common v0.0.0-20241008222508-3c6174b443e7
 	github.com/microsoftgraph/msgraph-sdk-go v1.47.0
 )
