@@ -7,7 +7,7 @@
   "author": "",
   "license": "Apache-2.0",
   "dependencies": {
-    "@gptscript-ai/gptscript": "github:gptscript-ai/node-gptscript#ea42fed5208e0c8371d652204790965fa3c0a9ea",
+    "@gptscript-ai/gptscript": "github:gptscript-ai/node-gptscript#b30db3cf4fe87b1ee09a20752baf2263b1e5c7be",
     "@notionhq/client": "^2.2.14"
   }
 }

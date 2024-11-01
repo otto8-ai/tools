@@ -12,7 +12,7 @@ export async function listChannels(webClient) {
             return {
                 name: channel.name,
                 description: channel.purpose.value || '',
-                contents: channelToString(channel)
+                contents: Buffer.from(channelToString(channel))
             }
         })
         await gptscriptClient.addDatasetElements(process.env.GPTSCRIPT_WORKSPACE_ID, dataset.id, elements)
@@ -42,7 +42,7 @@ export async function searchChannels(webClient, query) {
             return {
                 name: channel.name,
                 description: `${channel.name} (ID: ${channel.id})`,
-                contents: channelToString(channel)
+                contents: Buffer.from(channelToString(channel))
             }
         })
         await gptscriptClient.addDatasetElements(process.env.GPTSCRIPT_WORKSPACE_ID, dataset.id, elements)
@@ -98,7 +98,7 @@ export async function getThreadHistory(webClient, channelId, threadId, limit) {
             return {
                 name: reply.ts,
                 description: '',
-                contents: await messageToString(webClient, reply)
+                contents: Buffer.from(await messageToString(webClient, reply))
             }
         }))
         await gptscriptClient.addDatasetElements(process.env.GPTSCRIPT_WORKSPACE_ID, dataset.id, elements)
@@ -132,7 +132,7 @@ export async function search(webClient, query) {
             return {
                 name: `${message.iid}_${message.ts}`,
                 description: '',
-                contents: await messageToString(webClient, message)
+                contents: Buffer.from(await messageToString(webClient, message))
             }
         }))
         await gptscriptClient.addDatasetElements(process.env.GPTSCRIPT_WORKSPACE_ID, dataset.id, elements)
@@ -180,7 +180,7 @@ export async function listUsers(webClient) {
             return {
                 name: user.name,
                 description: user.profile.real_name,
-                contents: userToString(user)
+                contents: Buffer.from(userToString(user))
             }
         })
         await gptscriptClient.addDatasetElements(process.env.GPTSCRIPT_WORKSPACE_ID, dataset.id, elements)
@@ -202,7 +202,7 @@ export async function searchUsers(webClient, query) {
             return {
                 name: user.name,
                 description: user.profile.real_name,
-                contents: userToString(user)
+                contents: Buffer.from(userToString(user))
             }
         })
         await gptscriptClient.addDatasetElements(process.env.GPTSCRIPT_WORKSPACE_ID, dataset.id, elements)
@@ -281,7 +281,7 @@ export async function getDMHistory(webClient, userIds, limit) {
             return {
                 name: message.ts,
                 description: '',
-                contents: await messageToString(webClient, message)
+                contents: Buffer.from(await messageToString(webClient, message))
             }
         }))
         await gptscriptClient.addDatasetElements(process.env.GPTSCRIPT_WORKSPACE_ID, dataset.id, elements)
@@ -320,7 +320,7 @@ export async function getDMThreadHistory(webClient, userIds, threadId, limit) {
             return {
                 name: reply.ts,
                 description: '',
-                contents: await messageToString(webClient, reply)
+                contents: Buffer.from(await messageToString(webClient, reply))
             }
         }))
         await gptscriptClient.addDatasetElements(process.env.GPTSCRIPT_WORKSPACE_ID, dataset.id, elements)

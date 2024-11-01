@@ -33,7 +33,7 @@ export async function search(client, query, max) {
             return {
                 name: result.name + result.id,
                 description: `Notion page named ${result.name}`,
-                contents: resultToString(result),
+                contents: Buffer.from(resultToString(result)),
             }
         })
 
