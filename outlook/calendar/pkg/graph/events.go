@@ -84,6 +84,7 @@ func CreateEvent(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, i
 	body := models.NewItemBody()
 	body.SetContent(&info.Body)
 	body.SetContentType(util.Ptr(models.TEXT_BODYTYPE))
+	requestBody.SetBody(body)
 
 	requestBody.SetIsOnlineMeeting(&info.IsOnline)
 
