@@ -48,7 +48,7 @@ func GetWorksheetData(ctx context.Context, workbookID, worksheetID string) error
 			DatasetElementMeta: gptscript.DatasetElementMeta{
 				Name: fmt.Sprintf("row_%d", i),
 			},
-			Contents: string(rowJSON),
+			Contents: rowJSON,
 		})
 
 		if i == 5000 { // Stop after 5k rows. It's just too many, at least for now.

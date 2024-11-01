@@ -40,7 +40,7 @@ func ListDocs(ctx context.Context) error {
 				Name:        info.Name,
 				Description: fmt.Sprintf("%s (ID: %s)", info.Name, info.ID),
 			},
-			Contents: info.String(),
+			Contents: []byte(info.String()),
 		})
 	}
 

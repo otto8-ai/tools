@@ -59,7 +59,7 @@ func ListMessages(ctx context.Context, folderID string) error {
 				Name:        util.Deref(message.GetId()),
 				Description: util.Deref(message.GetSubject()),
 			},
-			Contents: messageStr,
+			Contents: []byte(messageStr),
 		})
 	}
 	if err := gptscriptClient.AddDatasetElements(ctx, workspaceID, dataset.ID, elements); err != nil {
