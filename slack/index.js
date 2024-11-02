@@ -49,7 +49,7 @@ switch (command) {
     await sendMessage(webClient, process.env.CHANNELID, process.env.TEXT)
     break
   case "sendMessageInThread":
-    await sendMessageInThread(webClient, process.env.THREADID, process.env.TEXT)
+    await sendMessageInThread(webClient, process.env.CHANNELID, process.env.THREADID, process.env.TEXT)
     break
   case "listUsers":
     await listUsers(webClient)
