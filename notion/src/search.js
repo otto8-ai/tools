@@ -30,9 +30,23 @@ export async function search(client, query, max) {
         const gptscriptClient = new GPTScript()
         const dataset = await gptscriptClient.createDataset(process.env.GPTSCRIPT_WORKSPACE_ID, `${query}_notion_search`, `search results from Notion for query ${query}`)
         let elements = results.map(result => {
+            let name = ""
+            if (result.properties.title !== undefined && result.properties.title.title.length > 0) {
+                name = result.properties.title.title[0].plain_text
+            } else if (result.properties.Name !== undefined && result.properties.Name.title.length > 0) {
+                name = result.properties.Name.title[0].plain_text
+            } else if (result.title !== undefined && result.title.length > 0) {
+                name = result.title[0].plain_text
+            }
+
+            let type = "page"
+            if (result.object === "database") {
+                type = "database"
+            }
+
             return {
-                name: result.name + result.id,
-                description: `Notion page named ${result.name}`,
+                name: result.id,
+                description: `Notion ${type} named ${name}`,
                 contents: Buffer.from(resultToString(result)),
             }
         })
