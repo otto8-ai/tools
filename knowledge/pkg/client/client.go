@@ -8,7 +8,6 @@ import (
 	dstypes "github.com/gptscript-ai/knowledge/pkg/datastore/types"
 	"github.com/gptscript-ai/knowledge/pkg/flows"
 	"github.com/gptscript-ai/knowledge/pkg/index"
-	"github.com/gptscript-ai/knowledge/pkg/server/types"
 )
 
 type IngestWorkspaceOpts struct {
@@ -41,7 +40,7 @@ type Client interface {
 	GetDataset(ctx context.Context, datasetID string) (*index.Dataset, error)
 	FindFile(ctx context.Context, searchFile index.File) (*index.File, error)
 	DeleteFile(ctx context.Context, datasetID, fileID string) error
-	ListDatasets(ctx context.Context) ([]types.Dataset, error)
+	ListDatasets(ctx context.Context) ([]index.Dataset, error)
 	Ingest(ctx context.Context, datasetID string, name string, data []byte, opts datastore.IngestOpts) ([]string, error)
 	IngestPaths(ctx context.Context, datasetID string, opts *IngestPathsOpts, paths ...string) (int, int, error) // returns number of files ingested, number of files skipped and first encountered error
 	AskDirectory(ctx context.Context, path string, query string, opts *IngestPathsOpts, ropts *datastore.RetrieveOpts) (*dstypes.RetrievalResponse, error)

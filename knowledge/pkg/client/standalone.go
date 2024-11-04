@@ -12,7 +12,6 @@ import (
 	dstypes "github.com/gptscript-ai/knowledge/pkg/datastore/types"
 	"github.com/gptscript-ai/knowledge/pkg/index"
 	"github.com/gptscript-ai/knowledge/pkg/log"
-	"github.com/gptscript-ai/knowledge/pkg/server/types"
 )
 
 type StandaloneClient struct {
@@ -58,14 +57,14 @@ func (c *StandaloneClient) GetDataset(ctx context.Context, datasetID string) (*i
 	return c.Datastore.GetDataset(ctx, datasetID)
 }
 
-func (c *StandaloneClient) ListDatasets(ctx context.Context) ([]types.Dataset, error) {
+func (c *StandaloneClient) ListDatasets(ctx context.Context) ([]index.Dataset, error) {
 	ds, err := c.Datastore.ListDatasets(ctx)
 	if err != nil {
 		return nil, err
 	}
-	r := make([]types.Dataset, len(ds))
+	r := make([]index.Dataset, len(ds))
 	for i, d := range ds {
-		r[i] = types.Dataset{
+		r[i] = index.Dataset{
 			ID: d.ID,
 		}
 	}
