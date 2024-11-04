@@ -33,9 +33,10 @@ Args: query: the search query
 
 ---
 Name: Create Page
-Description: Creates a new page in Notion
+Description: Creates a new page in Notion. Do not attempt to update a page using this tool.
 Credential: ./credential
 Share Tools: Search
+Share Context: Notion Context
 Args: name: the name of the page to create
 Args: contents: the contents of the page in plain text
 Args: parentPageId: ID of the page that will be the parent of the new page
@@ -82,6 +83,19 @@ Args: rowId: the ID of the row to update
 Args: properties: a JSON string containing all of the key-value pairs to update
 
 #!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js updateDatabaseRow
+
+---
+Name: Notion Context
+Type: Context
+
+#!sys.echo
+
+## Instructions for using Notion tools
+
+You have access to a set of tools to interact with Notion.
+You cannot use the Create Page tool to update the contents of a page. It is only for creating new pages.
+
+## End of instructions for using Notion tools
 
 ---
 !metadata:*:category
