@@ -13,4 +13,3 @@ for maingo in $(find -L . -name main.go); do
         go build -ldflags="-s -w" -o bin/gptscript-go-tool .
     )
 done
-
