@@ -14,7 +14,7 @@ const ContentFilterPostprocessorName = "content_filter"
 type ContentFilterPostprocessor struct {
 	Question string // Question about the content, that can be answered with yes or no
 	Include  bool   // Whether to include or exclude the documents for which the answer is yes
-	LLM      llm.LLM
+	Model    llm.LLMConfig
 }
 
 var promptTemplate string = `You're an expert content analyst.
@@ -27,17 +27,22 @@ The content is:
 {.content}
 
 --- End of Content ---
-Reply only with {"result": <true-or-false>}.`
+Reply only with {"result": <true-or-false>}. Do not include anything else in your response, just raw JSON without markdown syntax.`
 
 type cfpResponse struct {
 	Result bool `json:"result"`
 }
 
 func (c *ContentFilterPostprocessor) Transform(ctx context.Context, response *types.RetrievalResponse) error {
+	m, err := llm.NewFromConfig(c.Model)
+	if err != nil {
+		return err
+	}
+
 	for i, resp := range response.Responses {
 		var filteredDocs []vs.Document
 		for _, doc := range resp.ResultDocuments {
-			res, err := c.LLM.Prompt(ctx, promptTemplate, map[string]any{
+			res, err := m.Prompt(ctx, promptTemplate, map[string]any{
 				"question": c.Question,
 				"content":  doc.Content,
 			})

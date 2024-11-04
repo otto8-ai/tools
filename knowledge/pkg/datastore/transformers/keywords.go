@@ -11,21 +11,18 @@ import (
 
 const KeywordExtractorName = "keywords"
 
-func NewKeyWordExtractor(numKeywords int, llm llm.LLM) *KeywordExtractor {
-	return &KeywordExtractor{
-		NumKeywords: numKeywords,
-		LLM:         llm,
-	}
-}
-
 type KeywordExtractor struct {
 	NumKeywords int
-	LLM         llm.LLM
+	Model       llm.LLMConfig
 }
 
 func (k *KeywordExtractor) extractKeywords(ctx context.Context, doc vs.Document) ([]string, error) {
+	m, err := llm.NewFromConfig(k.Model)
+	if err != nil {
+		return nil, err
+	}
 	// Implement keyword extraction here
-	result, err := k.LLM.Prompt(ctx, tpl, map[string]any{"numKeywords": k.NumKeywords, "content": strings.TrimSpace(doc.Content)})
+	result, err := m.Prompt(ctx, tpl, map[string]any{"numKeywords": k.NumKeywords, "content": strings.TrimSpace(doc.Content)})
 	if err != nil {
 		return nil, err
 	}
