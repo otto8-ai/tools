@@ -1,5 +1,3 @@
-//go:build !(linux && arm64) && !(windows && arm64)
-
 package mupdf
 
 import (
