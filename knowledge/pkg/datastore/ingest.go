@@ -14,7 +14,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/filetypes"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/textsplitter"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/transformers"
 	"github.com/gptscript-ai/knowledge/pkg/flows"
 	"github.com/gptscript-ai/knowledge/pkg/index"
@@ -24,7 +23,6 @@ type IngestOpts struct {
 	FileMetadata        *index.FileMetadata
 	IsDuplicateFuncName string
 	IsDuplicateFunc     IsDuplicateFunc
-	TextSplitterOpts    *textsplitter.TextSplitterOpts
 	IngestionFlows      []flows.IngestionFlow
 	ExtraMetadata       map[string]any
 }
@@ -142,7 +140,7 @@ func (s *Datastore) Ingest(ctx context.Context, datasetID string, name string, c
 		}
 	}
 
-	if err := ingestionFlow.FillDefaults(filetype, opts.TextSplitterOpts); err != nil {
+	if err := ingestionFlow.FillDefaults(filetype); err != nil {
 		return nil, err
 	}
 

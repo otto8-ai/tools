@@ -11,12 +11,10 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/acorn-io/z"
 	"github.com/gptscript-ai/knowledge/pkg/client"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/documentloader"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/documentloader/structured"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/filetypes"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/textsplitter"
 	"github.com/gptscript-ai/knowledge/pkg/flows"
 	flowconfig "github.com/gptscript-ai/knowledge/pkg/flows/config"
 	"github.com/spf13/cobra"
@@ -117,7 +115,7 @@ func (s *ClientLoad) run(ctx context.Context, input, output string) error {
 			}
 
 			if ingestionFlow != nil {
-				if err := ingestionFlow.FillDefaults(filetype, z.Pointer(textsplitter.NewTextSplitterOpts())); err != nil {
+				if err := ingestionFlow.FillDefaults(filetype); err != nil {
 					return err
 				}
 				loader = ingestionFlow.Load

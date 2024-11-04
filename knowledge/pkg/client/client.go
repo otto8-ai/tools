@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/gptscript-ai/knowledge/pkg/datastore"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/textsplitter"
 	dstypes "github.com/gptscript-ai/knowledge/pkg/datastore/types"
 	"github.com/gptscript-ai/knowledge/pkg/flows"
 	"github.com/gptscript-ai/knowledge/pkg/index"
@@ -15,7 +14,6 @@ type IngestWorkspaceOpts struct {
 }
 
 type SharedIngestionOpts struct {
-	TextSplitterOpts    *textsplitter.TextSplitterOpts
 	IngestionFlows      []flows.IngestionFlow
 	IsDuplicateFuncName string
 	Metadata            map[string]string

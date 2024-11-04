@@ -6,6 +6,7 @@ import (
 
 	"dario.cat/mergo"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/defaults"
+	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/load"
 	dstypes "github.com/gptscript-ai/knowledge/pkg/datastore/types"
 	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
 	"github.com/mitchellh/mapstructure"
@@ -29,6 +30,10 @@ func NewTextSplitterOpts() TextSplitterOpts {
 		ModelName:    defaults.TokenModel,
 		EncodingName: defaults.TokenEncoding,
 	}
+}
+
+func (opts *TextSplitterOpts) Configure() error {
+	return load.FillConfigEnv("KNOW_TEXTSPLITTER_", opts)
 }
 
 // NewLcgoTextSplitter returns a new langchain-go text splitter.

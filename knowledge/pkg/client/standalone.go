@@ -111,7 +111,6 @@ func (c *StandaloneClient) IngestFromWorkspace(ctx context.Context, datasetID st
 		},
 		IsDuplicateFuncName: opts.IsDuplicateFuncName,
 		ExtraMetadata:       meta,
-		TextSplitterOpts:    opts.TextSplitterOpts,
 		IngestionFlows:      opts.IngestionFlows,
 	}
 
@@ -167,7 +166,6 @@ func (c *StandaloneClient) IngestPaths(ctx context.Context, datasetID string, op
 		}
 
 		if opts != nil {
-			iopts.TextSplitterOpts = opts.TextSplitterOpts
 			iopts.IngestionFlows = opts.IngestionFlows
 		}
 
