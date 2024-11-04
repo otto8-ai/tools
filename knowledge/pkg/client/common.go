@@ -19,6 +19,7 @@ import (
 	"github.com/gptscript-ai/knowledge/pkg/index"
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/sync/semaphore"
+	"gorm.io/gorm"
 )
 
 func ingestPaths(ctx context.Context, c Client, opts *IngestPathsOpts, datasetID string, ingestionFunc func(path string, metadata map[string]any) error, paths ...string) (int, int, error) {
@@ -283,7 +284,7 @@ func getOrCreateDataset(ctx context.Context, c Client, datasetID string, create 
 	if ds == nil {
 		if create {
 			ds, err = c.CreateDataset(ctx, datasetID)
-			if err != nil {
+			if err != nil && !errors.Is(err, gorm.ErrDuplicatedKey) { // ignore duplicate key error - we just want to be sure the dataset exists
 				return nil, err
 			}
 		} else {
