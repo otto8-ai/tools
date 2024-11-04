@@ -66,3 +66,7 @@ system:
     reference: ./website-cleaner
   result-formatter:
     reference: ./result-formatter
+
+modelProviders:
+  otto8-model-provider:
+    reference: ./otto8-model-provider
