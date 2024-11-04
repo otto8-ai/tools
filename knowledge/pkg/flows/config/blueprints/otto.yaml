@@ -1,3 +1,7 @@
+# Default Flows used for Otto.
+# We have two flows here, since we separated loading (i.e. parsing files into Markdown-in-JSON format) and ingestion
+# Since ingestion only works on the pre-processed JSON files, we need a different flow for the loading process, which does
+# not expect JSON files to be structured in the knowledge-specific format.
 flows:
   otto:
     default: true
@@ -9,13 +13,19 @@ flows:
     ingestion:
       - filetypes: [".json"]
         documentloader:
-          name: structured
+          name: structured # knowledge-specific JSON format (pre-processed input created by `knowledge load`)
     retrieval:
       retriever:
         name: basic
         options:
           topK: 10
+
   ottoload:
+    globals:
+      ingestion:
+        textsplitter:
+          chunkSize: 2048
+          chunkOverlap: 256
     ingestion:
       - filetypes: [".pdf"]
         documentloader:
