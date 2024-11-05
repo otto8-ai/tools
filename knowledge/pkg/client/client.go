@@ -6,7 +6,7 @@ import (
 	"github.com/gptscript-ai/knowledge/pkg/datastore"
 	dstypes "github.com/gptscript-ai/knowledge/pkg/datastore/types"
 	"github.com/gptscript-ai/knowledge/pkg/flows"
-	"github.com/gptscript-ai/knowledge/pkg/index"
+	types2 "github.com/gptscript-ai/knowledge/pkg/index/types"
 )
 
 type IngestWorkspaceOpts struct {
@@ -33,19 +33,19 @@ type IngestPathsOpts struct {
 }
 
 type Client interface {
-	CreateDataset(ctx context.Context, datasetID string) (*index.Dataset, error)
+	CreateDataset(ctx context.Context, datasetID string) (*types2.Dataset, error)
 	DeleteDataset(ctx context.Context, datasetID string) error
-	GetDataset(ctx context.Context, datasetID string) (*index.Dataset, error)
-	FindFile(ctx context.Context, searchFile index.File) (*index.File, error)
+	GetDataset(ctx context.Context, datasetID string) (*types2.Dataset, error)
+	FindFile(ctx context.Context, searchFile types2.File) (*types2.File, error)
 	DeleteFile(ctx context.Context, datasetID, fileID string) error
-	ListDatasets(ctx context.Context) ([]index.Dataset, error)
+	ListDatasets(ctx context.Context) ([]types2.Dataset, error)
 	Ingest(ctx context.Context, datasetID string, name string, data []byte, opts datastore.IngestOpts) ([]string, error)
 	IngestPaths(ctx context.Context, datasetID string, opts *IngestPathsOpts, paths ...string) (int, int, error) // returns number of files ingested, number of files skipped and first encountered error
 	AskDirectory(ctx context.Context, path string, query string, opts *IngestPathsOpts, ropts *datastore.RetrieveOpts) (*dstypes.RetrievalResponse, error)
-	PrunePath(ctx context.Context, datasetID string, path string, keep []string) ([]index.File, error)
+	PrunePath(ctx context.Context, datasetID string, path string, keep []string) ([]types2.File, error)
 	DeleteDocuments(ctx context.Context, datasetID string, documentIDs ...string) error
 	Retrieve(ctx context.Context, datasetIDs []string, query string, opts datastore.RetrieveOpts) (*dstypes.RetrievalResponse, error)
 	ExportDatasets(ctx context.Context, path string, datasets ...string) error
 	ImportDatasets(ctx context.Context, path string, datasets ...string) error
-	UpdateDataset(ctx context.Context, dataset index.Dataset, opts *datastore.UpdateDatasetOpts) (*index.Dataset, error)
+	UpdateDataset(ctx context.Context, dataset types2.Dataset, opts *datastore.UpdateDatasetOpts) (*types2.Dataset, error)
 }

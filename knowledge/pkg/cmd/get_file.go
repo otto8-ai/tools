@@ -9,8 +9,7 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/gptscript-ai/knowledge/pkg/datastore"
-	"github.com/gptscript-ai/knowledge/pkg/index"
+	"github.com/gptscript-ai/knowledge/pkg/index/types"
 	"github.com/spf13/cobra"
 )
 
@@ -33,7 +32,7 @@ func (s *ClientGetFile) Run(cmd *cobra.Command, args []string) error {
 
 	fileRef := args[0]
 
-	searchFile := index.File{
+	searchFile := types.File{
 		Dataset: s.Dataset,
 	}
 
@@ -57,7 +56,7 @@ func (s *ClientGetFile) Run(cmd *cobra.Command, args []string) error {
 
 	file, err := c.FindFile(cmd.Context(), searchFile)
 	if err != nil {
-		if errors.Is(err, datastore.ErrDBFileNotFound) {
+		if errors.Is(err, types.ErrDBFileNotFound) {
 			fmt.Printf("File not found: %s\n", fileRef)
 			return nil
 		}

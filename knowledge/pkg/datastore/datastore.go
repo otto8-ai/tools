@@ -13,6 +13,7 @@ import (
 
 	"github.com/gptscript-ai/knowledge/pkg/config"
 	etypes "github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/types"
+	"github.com/gptscript-ai/knowledge/pkg/index/types"
 	"github.com/gptscript-ai/knowledge/pkg/log"
 	"github.com/gptscript-ai/knowledge/pkg/output"
 
@@ -23,7 +24,7 @@ import (
 )
 
 type Datastore struct {
-	Index                  *index.DB
+	Index                  index.Index
 	Vectorstore            vectorstore.VectorStore
 	EmbeddingConfig        config.EmbeddingsConfig
 	EmbeddingModelProvider etypes.EmbeddingModelProvider
@@ -119,7 +120,7 @@ func NewDatastore(ctx context.Context, indexDSN string, automigrate bool, vector
 	}
 
 	if defaultDS == nil {
-		err = ds.NewDataset(context.Background(), index.Dataset{ID: "default"})
+		err = ds.NewDataset(context.Background(), types.Dataset{ID: "default"})
 		if err != nil {
 			return nil, fmt.Errorf("failed to create default dataset: %w", err)
 		}

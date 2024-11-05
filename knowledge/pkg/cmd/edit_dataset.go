@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/gptscript-ai/knowledge/pkg/datastore"
-	"github.com/gptscript-ai/knowledge/pkg/index"
+	"github.com/gptscript-ai/knowledge/pkg/index/types"
 	"github.com/spf13/cobra"
 )
 
@@ -42,7 +42,7 @@ func (s *ClientEditDataset) Run(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("dataset not found: %s", datasetID)
 	}
 
-	updatedDataset := index.Dataset{
+	updatedDataset := types.Dataset{
 		ID: dataset.ID,
 	}
 
