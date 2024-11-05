@@ -10,7 +10,7 @@ import (
 	"github.com/gptscript-ai/go-gptscript"
 	"github.com/gptscript-ai/knowledge/pkg/datastore"
 	dstypes "github.com/gptscript-ai/knowledge/pkg/datastore/types"
-	"github.com/gptscript-ai/knowledge/pkg/index"
+	types2 "github.com/gptscript-ai/knowledge/pkg/index/types"
 	"github.com/gptscript-ai/knowledge/pkg/log"
 )
 
@@ -30,7 +30,7 @@ func NewStandaloneClient(ctx context.Context, ds *datastore.Datastore) (*Standal
 	}, nil
 }
 
-func (c *StandaloneClient) FindFile(ctx context.Context, searchFile index.File) (*index.File, error) {
+func (c *StandaloneClient) FindFile(ctx context.Context, searchFile types2.File) (*types2.File, error) {
 	return c.Datastore.FindFile(ctx, searchFile)
 }
 
@@ -38,8 +38,8 @@ func (c *StandaloneClient) DeleteFile(ctx context.Context, datasetID, fileID str
 	return c.Datastore.DeleteFile(ctx, datasetID, fileID)
 }
 
-func (c *StandaloneClient) CreateDataset(ctx context.Context, datasetID string) (*index.Dataset, error) {
-	ds := index.Dataset{
+func (c *StandaloneClient) CreateDataset(ctx context.Context, datasetID string) (*types2.Dataset, error) {
+	ds := types2.Dataset{
 		ID: datasetID,
 	}
 	err := c.Datastore.NewDataset(ctx, ds)
@@ -53,18 +53,18 @@ func (c *StandaloneClient) DeleteDataset(ctx context.Context, datasetID string) 
 	return c.Datastore.DeleteDataset(ctx, datasetID)
 }
 
-func (c *StandaloneClient) GetDataset(ctx context.Context, datasetID string) (*index.Dataset, error) {
+func (c *StandaloneClient) GetDataset(ctx context.Context, datasetID string) (*types2.Dataset, error) {
 	return c.Datastore.GetDataset(ctx, datasetID)
 }
 
-func (c *StandaloneClient) ListDatasets(ctx context.Context) ([]index.Dataset, error) {
+func (c *StandaloneClient) ListDatasets(ctx context.Context) ([]types2.Dataset, error) {
 	ds, err := c.Datastore.ListDatasets(ctx)
 	if err != nil {
 		return nil, err
 	}
-	r := make([]index.Dataset, len(ds))
+	r := make([]types2.Dataset, len(ds))
 	for i, d := range ds {
-		r[i] = index.Dataset{
+		r[i] = types2.Dataset{
 			ID: d.ID,
 		}
 	}
@@ -103,7 +103,7 @@ func (c *StandaloneClient) IngestFromWorkspace(ctx context.Context, datasetID st
 	}
 
 	iopts := datastore.IngestOpts{
-		FileMetadata: &index.FileMetadata{
+		FileMetadata: &types2.FileMetadata{
 			Name:         finfo.Name,
 			AbsolutePath: fmt.Sprintf("ws://%s/%s", finfo.WorkspaceID, file),
 			Size:         finfo.Size,
@@ -155,7 +155,7 @@ func (c *StandaloneClient) IngestPaths(ctx context.Context, datasetID string, op
 		filename := filepath.Base(path)
 
 		iopts := datastore.IngestOpts{
-			FileMetadata: &index.FileMetadata{
+			FileMetadata: &types2.FileMetadata{
 				Name:         filepath.Base(path),
 				AbsolutePath: abspath,
 				Size:         finfo.Size(),
@@ -177,7 +177,7 @@ func (c *StandaloneClient) IngestPaths(ctx context.Context, datasetID string, op
 	return ingestPaths(ctx, c, opts, datasetID, ingestFile, paths...)
 }
 
-func (c *StandaloneClient) PrunePath(ctx context.Context, datasetID string, path string, keep []string) ([]index.File, error) {
+func (c *StandaloneClient) PrunePath(ctx context.Context, datasetID string, path string, keep []string) ([]types2.File, error) {
 	abs, err := filepath.Abs(path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get absolute path for %s: %w", path, err)
@@ -211,6 +211,6 @@ func (c *StandaloneClient) ImportDatasets(ctx context.Context, path string, data
 	return c.Datastore.ImportDatasetsFromFile(ctx, path, datasets...)
 }
 
-func (c *StandaloneClient) UpdateDataset(ctx context.Context, dataset index.Dataset, opts *datastore.UpdateDatasetOpts) (*index.Dataset, error) {
+func (c *StandaloneClient) UpdateDataset(ctx context.Context, dataset types2.Dataset, opts *datastore.UpdateDatasetOpts) (*types2.Dataset, error) {
 	return c.Datastore.UpdateDataset(ctx, dataset, opts)
 }

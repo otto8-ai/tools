@@ -16,7 +16,7 @@ import (
 	"github.com/gptscript-ai/knowledge/pkg/datastore/documentloader"
 	remotes "github.com/gptscript-ai/knowledge/pkg/datastore/documentloader/remote"
 	dstypes "github.com/gptscript-ai/knowledge/pkg/datastore/types"
-	"github.com/gptscript-ai/knowledge/pkg/index"
+	"github.com/gptscript-ai/knowledge/pkg/index/types"
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/sync/semaphore"
 	"gorm.io/gorm"
@@ -274,8 +274,8 @@ func AskDir(ctx context.Context, c Client, path string, query string, opts *Inge
 	return c.Retrieve(ctx, []string{datasetID}, query, *ropts)
 }
 
-func getOrCreateDataset(ctx context.Context, c Client, datasetID string, create bool) (*index.Dataset, error) {
-	var ds *index.Dataset
+func getOrCreateDataset(ctx context.Context, c Client, datasetID string, create bool) (*types.Dataset, error) {
+	var ds *types.Dataset
 	var err error
 	ds, err = c.GetDataset(ctx, datasetID)
 	if err != nil {

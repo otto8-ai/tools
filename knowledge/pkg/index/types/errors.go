@@ -1,4 +1,4 @@
-package datastore
+package types
 
 import (
 	"errors"
@@ -8,3 +8,6 @@ import (
 var ErrDBDocumentNotFound = errors.New("document not found in database")
 
 var ErrDBDatasetExists = errors.New("dataset already exists in database")
+
+// ErrDBFileNotFound is returned when a file is not found.
+var ErrDBFileNotFound = errors.New("file not found in database")

@@ -2,31 +2,21 @@ package index
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"log"
 	"log/slog"
-	"net/http"
 	"strings"
 	"time"
 
 	"github.com/gptscript-ai/knowledge/pkg/index/postgres"
 	"github.com/gptscript-ai/knowledge/pkg/index/sqlite"
-
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
 
-type DB struct {
-	gormDB      *gorm.DB
-	sqlDB       *sql.DB
-	autoMigrate bool
-}
-
-func New(ctx context.Context, dsn string, autoMigrate bool) (*DB, error) {
+func New(ctx context.Context, dsn string, autoMigrate bool) (Index, error) {
 	var (
-		db      *gorm.DB
-		sqlDB   *sql.DB
+		indexDB Index
 		err     error
 		gormCfg = &gorm.Config{
 			Logger: logger.New(log.Default(), logger.Config{
@@ -43,9 +33,9 @@ func New(ctx context.Context, dsn string, autoMigrate bool) (*DB, error) {
 
 	switch dialect {
 	case "sqlite":
-		db, sqlDB, err = sqlite.New(ctx, dsn, gormCfg)
+		indexDB, err = sqlite.New(ctx, dsn, gormCfg, autoMigrate)
 	case "postgres":
-		db, sqlDB, err = postgres.New(ctx, dsn, gormCfg)
+		indexDB, err = postgres.New(ctx, dsn, gormCfg, autoMigrate)
 	default:
 		err = fmt.Errorf("unsupported dialect: %q", dialect)
 	}
@@ -53,39 +43,5 @@ func New(ctx context.Context, dsn string, autoMigrate bool) (*DB, error) {
 		return nil, fmt.Errorf("failed to open index DB: %w", err)
 	}
 
-	return &DB{
-		gormDB:      db,
-		sqlDB:       sqlDB,
-		autoMigrate: autoMigrate,
-	}, nil
-}
-
-func (db *DB) AutoMigrate() error {
-	if !db.autoMigrate {
-		return nil
-	}
-
-	return db.gormDB.AutoMigrate(
-		&Dataset{},
-		&File{},
-		&Document{},
-	)
-}
-
-func (db *DB) Check(w http.ResponseWriter, _ *http.Request) {
-	if err := db.sqlDB.Ping(); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		_, _ = w.Write([]byte(err.Error()))
-		return
-	}
-
-	_, _ = w.Write([]byte(`{"status": "ok"}`))
-}
-
-func (db *DB) Close() error {
-	return db.sqlDB.Close()
-}
-
-func (db *DB) WithContext(ctx context.Context) *gorm.DB {
-	return db.gormDB.WithContext(ctx)
+	return indexDB, nil
 }

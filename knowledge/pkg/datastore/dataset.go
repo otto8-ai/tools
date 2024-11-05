@@ -2,28 +2,21 @@ package datastore
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log/slog"
 
-	"github.com/gptscript-ai/knowledge/pkg/index"
-	"gorm.io/gorm"
+	"github.com/gptscript-ai/knowledge/pkg/index/types"
 )
 
 type UpdateDatasetOpts struct {
 	ReplaceMedata bool
 }
 
-func (s *Datastore) NewDataset(ctx context.Context, dataset index.Dataset) error {
+func (s *Datastore) NewDataset(ctx context.Context, dataset types.Dataset) error {
 	// Create dataset
-	tx := s.Index.WithContext(ctx).Create(&dataset)
-	if tx.Error != nil {
-		if errors.Is(tx.Error, gorm.ErrDuplicatedKey) {
-			return fmt.Errorf("dataset already exists: %w", tx.Error)
-		}
-		return tx.Error
+	if err := s.Index.CreateDataset(ctx, dataset); err != nil {
+		return err
 	}
-	tx.Commit()
 
 	// Create collection
 	err := s.Vectorstore.CreateCollection(ctx, dataset.ID)
@@ -36,12 +29,9 @@ func (s *Datastore) NewDataset(ctx context.Context, dataset index.Dataset) error
 
 func (s *Datastore) DeleteDataset(ctx context.Context, datasetID string) error {
 	// Delete dataset
-	slog.Info("Deleting dataset", "id", datasetID)
-	tx := s.Index.WithContext(ctx).Delete(&index.Dataset{}, "id = ?", datasetID)
-	if tx.Error != nil {
-		return tx.Error
+	if err := s.Index.DeleteDataset(ctx, datasetID); err != nil {
+		return err
 	}
-	tx.Commit()
 
 	// Delete collection
 	err := s.Vectorstore.RemoveCollection(ctx, datasetID)
@@ -51,40 +41,20 @@ func (s *Datastore) DeleteDataset(ctx context.Context, datasetID string) error {
 	return nil
 }
 
-func (s *Datastore) GetDataset(ctx context.Context, datasetID string) (*index.Dataset, error) {
-	// Get dataset with files and associated documents preloaded
-	dataset := &index.Dataset{}
-	tx := s.Index.WithContext(ctx).Preload("Files.Documents").First(dataset, "id = ?", datasetID)
-	if tx.Error != nil {
-		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
-			return nil, nil
-		}
-		return nil, fmt.Errorf("failed to get dataset %q from DB: %w", datasetID, tx.Error)
-	}
-
-	return dataset, nil
+func (s *Datastore) GetDataset(ctx context.Context, datasetID string) (*types.Dataset, error) {
+	return s.Index.GetDataset(ctx, datasetID)
 }
 
-func (s *Datastore) ListDatasets(ctx context.Context) ([]index.Dataset, error) {
-	tx := s.Index.WithContext(ctx).Find(&[]index.Dataset{})
-	if tx.Error != nil {
-		return nil, tx.Error
-	}
-
-	var datasets []index.Dataset
-	if err := tx.Scan(&datasets).Error; err != nil {
-		return nil, err
-	}
-
-	return datasets, nil
+func (s *Datastore) ListDatasets(ctx context.Context) ([]types.Dataset, error) {
+	return s.Index.ListDatasets(ctx)
 }
 
-func (s *Datastore) UpdateDataset(ctx context.Context, updatedDataset index.Dataset, opts *UpdateDatasetOpts) (*index.Dataset, error) {
+func (s *Datastore) UpdateDataset(ctx context.Context, updatedDataset types.Dataset, opts *UpdateDatasetOpts) (*types.Dataset, error) {
 	if opts == nil {
 		opts = &UpdateDatasetOpts{}
 	}
 
-	var origDS *index.Dataset
+	var origDS *types.Dataset
 	var err error
 
 	if updatedDataset.ID == "" {

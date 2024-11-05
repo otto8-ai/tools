@@ -9,6 +9,7 @@ import (
 
 	"github.com/gptscript-ai/knowledge/pkg/datastore/documentloader"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings"
+	"github.com/gptscript-ai/knowledge/pkg/index/types"
 	"github.com/gptscript-ai/knowledge/pkg/log"
 	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
 
@@ -16,11 +17,10 @@ import (
 	"github.com/gptscript-ai/knowledge/pkg/datastore/filetypes"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/transformers"
 	"github.com/gptscript-ai/knowledge/pkg/flows"
-	"github.com/gptscript-ai/knowledge/pkg/index"
 )
 
 type IngestOpts struct {
-	FileMetadata        *index.FileMetadata
+	FileMetadata        *types.FileMetadata
 	IsDuplicateFuncName string
 	IsDuplicateFunc     IsDuplicateFunc
 	IngestionFlows      []flows.IngestionFlow
@@ -54,7 +54,7 @@ func (s *Datastore) Ingest(ctx context.Context, datasetID string, name string, c
 		if err != nil {
 			return nil, fmt.Errorf("failed to get embedding model provider config: %w", err)
 		}
-		nds := index.Dataset{
+		nds := types.Dataset{
 			ID:                       datasetID,
 			EmbeddingsProviderConfig: &ncfg,
 		}
@@ -199,9 +199,9 @@ func (s *Datastore) Ingest(ctx context.Context, datasetID string, name string, c
 	statusLog.Debug("Added documents to vectorstore", "duration", time.Since(startTime))
 
 	// Record file and documents in database
-	dbDocs := make([]index.Document, len(docIDs))
+	dbDocs := make([]types.Document, len(docIDs))
 	for idx, docID := range docIDs {
-		dbDocs[idx] = index.Document{
+		dbDocs[idx] = types.Document{
 			ID:      docID,
 			FileID:  fileID,
 			Dataset: datasetID,
@@ -209,11 +209,11 @@ func (s *Datastore) Ingest(ctx context.Context, datasetID string, name string, c
 		}
 	}
 
-	dbFile := index.File{
+	dbFile := types.File{
 		ID:        fileID,
 		Dataset:   datasetID,
 		Documents: dbDocs,
-		FileMetadata: index.FileMetadata{
+		FileMetadata: types.FileMetadata{
 			Name: filename,
 		},
 	}
@@ -227,10 +227,10 @@ func (s *Datastore) Ingest(ctx context.Context, datasetID string, name string, c
 	iLog := statusLog.With("component", "index")
 	iLog.Info("Inserting file and documents into index")
 	startTime = time.Now()
-	tx := s.Index.WithContext(ctx).Create(&dbFile)
-	if tx.Error != nil {
-		iLog.With("status", "failed").With("error", tx.Error).Error("Failed to create file in Index")
-		return nil, fmt.Errorf("failed to create file: %w", tx.Error)
+	err = s.Index.CreateFile(ctx, dbFile)
+	if err != nil {
+		iLog.With("status", "failed").With("error", err).Error("Failed to create file in Index")
+		return nil, fmt.Errorf("failed to create file: %w", err)
 	}
 	iLog.Info("Created file in index", "duration", time.Since(startTime))
 

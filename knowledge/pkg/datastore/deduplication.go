@@ -3,10 +3,9 @@ package datastore
 import (
 	"context"
 	"errors"
-	"gorm.io/gorm"
 	"log/slog"
 
-	"github.com/gptscript-ai/knowledge/pkg/index"
+	"github.com/gptscript-ai/knowledge/pkg/index/types"
 )
 
 // IsDuplicateFunc is a function that determines whether a document is a duplicate or if it should be ingested.
@@ -24,32 +23,35 @@ var IsDuplicateFuncs = map[string]IsDuplicateFunc{
 
 // DedupeByFileMetadata is a deduplication function that checks if the document is a duplicate based on the file metadata.
 func DedupeByFileMetadata(ctx context.Context, d *Datastore, datasetID string, content []byte, opts IngestOpts) (bool, error) {
-	var count int64
-	err := d.Index.WithContext(ctx).Model(&index.File{}).
-		Where("dataset = ?", datasetID).
-		Where("absolute_path = ?", opts.FileMetadata.AbsolutePath).
-		Where("size = ?", opts.FileMetadata.Size).
-		Where("modified_at = ?", opts.FileMetadata.ModifiedAt).
-		Count(&count).Error
+	searchMeta := types.FileMetadata{
+		AbsolutePath: opts.FileMetadata.AbsolutePath,
+		Size:         opts.FileMetadata.Size,
+		ModifiedAt:   opts.FileMetadata.ModifiedAt,
+	}
 
-	if err != nil {
+	res, err := d.Index.FindFileByMetadata(ctx, datasetID, searchMeta, false)
+	if err != nil && !errors.Is(err, types.ErrDBFileNotFound) {
 		return false, err
 	}
-	return count > 0, nil
+
+	if res == nil || res.ID == "" {
+		return false, nil
+	}
+
+	return true, nil
 }
 
 func DedupeUpsert(ctx context.Context, d *Datastore, datasetID string, content []byte, opts IngestOpts) (bool, error) {
-	var res index.File
-	err := d.Index.WithContext(ctx).Model(&index.File{}).
-		Where("dataset = ?", datasetID).
-		Where("absolute_path = ?", opts.FileMetadata.AbsolutePath).
-		First(&res).Error
+	searchMeta := types.FileMetadata{
+		AbsolutePath: opts.FileMetadata.AbsolutePath,
+	}
 
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+	res, err := d.Index.FindFileByMetadata(ctx, datasetID, searchMeta, false)
+	if err != nil && !errors.Is(err, types.ErrDBFileNotFound) {
 		return false, err
 	}
 
-	if res.ID == "" {
+	if res == nil || res.ID == "" {
 		return false, nil
 	}
 
