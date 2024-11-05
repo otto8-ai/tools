@@ -6,35 +6,13 @@ Share Tools: Transcribe YouTube Video
 
 ---
 Name: Transcribe YouTube Video
-Description: Get a text transcript of a YouTube video and clean it up.
-Param: video_url: The URL of a YouTube video. (e.g. https://www.youtube.com/watch?v=VIDEO_ID or https://youtu.be/VIDEO_ID)
-Tool: Fetch Raw YouTube Transcript, Generate Raw YouTube Transcript, github.com/gptscript-ai/context/workspace
-Share Tools: github.com/gptscript-ai/context/workspace
-
-First, take the video_url parameter and pass it to the Fetch Raw YouTube Transcript tool to get a raw transcript.
-If that tool fails, then try calling the Generate Raw YouTube Transcript tool to generate a raw transcript.
-Process that transcript and add the missing punctuation. Clean up any misspellings or errors in the transcript.
-Do not truncate or reword any of the text, just add punctuation and correct mistakes.
-Write the corrected text to a file in the $GPTSCRIPT_WORKSPACE_DIR with a filename based on the VIDEO_ID.
-Let the user know where the file is located, and give a short 2 sentence summary of the video.
-
----
-Name: Fetch Raw YouTube Transcript 
-Metadata: index: false
-Description: Get YouTube's raw text transcript of a video.
-Param: video_url: The URL of a YouTube video. (e.g. https://www.youtube.com/watch?v=VIDEO_ID or https://youtu.be/VIDEO_ID)
+Description: Get YouTube's text transcript for a video.
+Credential: github.com/gptscript-ai/credentials/model-provider
+Tool: github.com/gptscript-ai/datasets/filter
+Param: video_url: The URL of a YouTube video. (e.g. URLs in the form https://www.youtube.com/watch?v=<VIDEO_ID>, https://youtu.be/<VIDEO_ID>, or https://www.youtube.com/live/<VIDEO_ID>).
+Param: model: (Optional) The name of the model to use when cleaning up and summarizing the transcript. Defaults to "gpt-4o".
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/transcriber.py
-
----
-Name: Generate Raw YouTube Transcript
-Metadata: index: false
-Description: Generates and returns a raw text transcript of a YouTube video.
-Credential: github.com/gptscript-ai/credentials/model-provider
-Tools: github.com/gptscript-ai/context/workspace
-param: video_url: The URL of a YouTube video. (e.g. https://www.youtube.com/watch?v=VIDEO_ID or https://youtu.be/VIDEO_ID)
-
-#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/advTranscriber.py
 
 ---
 !metadata:*:category
