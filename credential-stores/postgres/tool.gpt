@@ -1,0 +1,26 @@
+Name: PostgreSQL Credential Store Helper
+Share Tools: store, get, list, erase
+
+---
+name: store
+stdin: true
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool store
+
+---
+name: get
+stdin: true
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool get
+
+---
+name: list
+stdin: true
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool list
+
+---
+name: erase
+stdin: true
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool erase

@@ -3,12 +3,12 @@ set -e
 
 cd $(dirname $0)/..
 
-for gomod in $(find . -name go.mod); do
-    if [ $(basename $(dirname $gomod)) == common ]; then
+for maingo in $(find -L . -name main.go); do
+    if [ $(basename $(dirname $maingo)) == common ]; then
         continue
     fi
     (
-        cd $(dirname $gomod)
+        cd $(dirname $maingo)
         echo Building $PWD
         go build -ldflags="-s -w" -o bin/gptscript-go-tool .
     )
