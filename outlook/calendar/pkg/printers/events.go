@@ -75,11 +75,16 @@ func PrintEvent(event models.Eventable, detailed bool) {
 	if detailed {
 		fmt.Printf("  Location: %s\n", util.Deref(event.GetLocation().GetDisplayName()))
 		fmt.Printf("  Is All Day: %t\n", util.Deref(event.GetIsAllDay()))
+		isRecurring := false
+		if event.GetSeriesMasterId() != nil {
+			isRecurring = true
+		}
+		fmt.Printf("  Is Recurring: %t\n", isRecurring)
 		fmt.Printf("  Is Cancelled: %t\n", util.Deref(event.GetIsCancelled()))
 		fmt.Printf("  Is Online Meeting: %t\n", util.Deref(event.GetIsOnlineMeeting()))
 		fmt.Printf("  Response Status: %s\n", event.GetResponseStatus().GetResponse().String())
 		fmt.Printf("  Attendees: %s\n", strings.Join(util.Map(event.GetAttendees(), func(a models.Attendeeable) string {
-			return fmt.Sprintf("%s (%s)", util.Deref(a.GetEmailAddress().GetName()), util.Deref(a.GetEmailAddress().GetAddress()))
+			return fmt.Sprintf("%s (%s), Response: %s", util.Deref(a.GetEmailAddress().GetName()), util.Deref(a.GetEmailAddress().GetAddress()), a.GetStatus().GetResponse().String())
 		}), ", "))
 		body, err := html2text.FromString(util.Deref(event.GetBody().GetContent()), html2text.Options{
 			PrettyTables: true,
