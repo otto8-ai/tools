@@ -6,6 +6,10 @@ import (
 	"github.com/gptscript-ai/knowledge/pkg/config"
 )
 
+type DatasetCreateOpts struct {
+	ErrOnExists bool
+}
+
 // Dataset refers to a VectorDB data space.
 // @Description Dataset refers to a VectorDB data space.
 type Dataset struct {

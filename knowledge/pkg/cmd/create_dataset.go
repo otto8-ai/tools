@@ -3,11 +3,13 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/gptscript-ai/knowledge/pkg/index/types"
 	"github.com/spf13/cobra"
 )
 
 type ClientCreateDataset struct {
 	Client
+	ErrOnExists bool `usage:"Return an error if the dataset already exists"`
 }
 
 func (s *ClientCreateDataset) Customize(cmd *cobra.Command) {
@@ -24,7 +26,7 @@ func (s *ClientCreateDataset) Run(cmd *cobra.Command, args []string) error {
 
 	datasetID := args[0]
 
-	ds, err := c.CreateDataset(cmd.Context(), datasetID)
+	ds, err := c.CreateDataset(cmd.Context(), datasetID, &types.DatasetCreateOpts{ErrOnExists: s.ErrOnExists})
 	if err != nil {
 		return err
 	}

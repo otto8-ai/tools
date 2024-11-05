@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	etypes "github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/types"
+	dbtypes "github.com/gptscript-ai/knowledge/pkg/index/types"
 	"github.com/gptscript-ai/knowledge/pkg/vectorstore/chromem"
 	"github.com/gptscript-ai/knowledge/pkg/vectorstore/pgvector"
 	sqlite_vec "github.com/gptscript-ai/knowledge/pkg/vectorstore/sqlite-vec"
@@ -15,7 +16,7 @@ import (
 )
 
 type VectorStore interface {
-	CreateCollection(ctx context.Context, collection string) error
+	CreateCollection(ctx context.Context, collection string, opts *dbtypes.DatasetCreateOpts) error
 	AddDocuments(ctx context.Context, docs []types.Document, collection string) ([]string, error)                                                                                 // @return documentIDs, error
 	SimilaritySearch(ctx context.Context, query string, numDocuments int, collection string, where map[string]string, whereDocument []cg.WhereDocument) ([]types.Document, error) //nolint:lll
 	RemoveCollection(ctx context.Context, collection string) error

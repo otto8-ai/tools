@@ -283,7 +283,7 @@ func getOrCreateDataset(ctx context.Context, c Client, datasetID string, create 
 	}
 	if ds == nil {
 		if create {
-			ds, err = c.CreateDataset(ctx, datasetID)
+			ds, err = c.CreateDataset(ctx, datasetID, nil)
 			if err != nil && !errors.Is(err, gorm.ErrDuplicatedKey) { // ignore duplicate key error - we just want to be sure the dataset exists
 				return nil, err
 			}

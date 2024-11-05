@@ -49,19 +49,22 @@ func (db *DB) WithContext(ctx context.Context) *gorm.DB {
 	return db.GormDB.WithContext(ctx)
 }
 
-func (db *DB) CreateDataset(ctx context.Context, dataset Dataset) error {
+func (db *DB) CreateDataset(ctx context.Context, dataset Dataset, opts *DatasetCreateOpts) error {
 	gdb := db.GormDB.WithContext(ctx)
 
 	slog.Debug("Creating dataset in DB", "id", dataset.ID, "metadata", dataset.Metadata)
 	err := gdb.Create(&dataset).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
-			return fmt.Errorf("dataset already exists: %w", err)
+			if opts != nil && opts.ErrOnExists {
+				return fmt.Errorf("dataset already exists: %w", err)
+			}
+		} else {
+			return err
 		}
-		return err
+	} else {
+		gdb.Commit()
 	}
-
-	gdb.Commit()
 	return nil
 }
 

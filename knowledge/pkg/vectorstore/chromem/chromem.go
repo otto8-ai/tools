@@ -12,6 +12,7 @@ import (
 
 	"github.com/gptscript-ai/knowledge/pkg/datastore/types"
 	"github.com/gptscript-ai/knowledge/pkg/env"
+	dbtypes "github.com/gptscript-ai/knowledge/pkg/index/types"
 	"github.com/gptscript-ai/knowledge/pkg/log"
 	"github.com/gptscript-ai/knowledge/pkg/vectorstore/errors"
 	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
@@ -62,7 +63,7 @@ func New(dsn string, embeddingFunc chromem.EmbeddingFunc) (*ChromemStore, error)
 	}, nil
 }
 
-func (s *ChromemStore) CreateCollection(_ context.Context, name string) error {
+func (s *ChromemStore) CreateCollection(_ context.Context, name string, opts *dbtypes.DatasetCreateOpts) error {
 	_, err := s.db.CreateCollection(name, nil, s.embeddingFunc)
 	if err != nil {
 		return err

@@ -120,7 +120,7 @@ func NewDatastore(ctx context.Context, indexDSN string, automigrate bool, vector
 	}
 
 	if defaultDS == nil {
-		err = ds.NewDataset(context.Background(), types.Dataset{ID: "default"})
+		err = ds.CreateDataset(context.Background(), types.Dataset{ID: "default"}, nil)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create default dataset: %w", err)
 		}
