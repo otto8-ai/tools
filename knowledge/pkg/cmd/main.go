@@ -19,7 +19,6 @@ func init() {
 func New() *cobra.Command {
 	return cmd.Command(
 		&Knowledge{},
-		new(Server),
 		new(ClientCreateDataset),
 		new(ClientGetDataset),
 		new(ClientListDatasets),

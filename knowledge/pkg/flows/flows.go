@@ -52,11 +52,11 @@ func (f *IngestionFlow) Transform(ctx context.Context, docs []vs.Document) ([]vs
 	return docs, nil
 }
 
-func NewDefaultIngestionFlow(filetype string, textsplitterOpts *textsplitter.TextSplitterOpts) (IngestionFlow, error) {
+func NewDefaultIngestionFlow(filetype string) (IngestionFlow, error) {
 	ingestionFlow := IngestionFlow{
 		Filetypes: []string{filetype},
 	}
-	if err := ingestionFlow.FillDefaults(filetype, textsplitterOpts); err != nil {
+	if err := ingestionFlow.FillDefaults(filetype); err != nil {
 		return IngestionFlow{}, err
 	}
 	return ingestionFlow, nil
@@ -66,7 +66,7 @@ func (f *IngestionFlow) SupportsFiletype(filetype string) bool {
 	return slices.Contains(f.Filetypes, filetype) || slices.Contains(f.Filetypes, "*")
 }
 
-func (f *IngestionFlow) FillDefaults(filetype string, textsplitterOpts *textsplitter.TextSplitterOpts) error {
+func (f *IngestionFlow) FillDefaults(filetype string) error {
 	if f.Load == nil {
 		f.Load = documentloader.DefaultDocLoaderFunc(filetype, documentloader.DefaultDocLoaderFuncOpts{Archive: documentloader.ArchiveOpts{
 			ErrOnUnsupportedFiletype: false,
@@ -74,9 +74,8 @@ func (f *IngestionFlow) FillDefaults(filetype string, textsplitterOpts *textspli
 		}})
 	}
 	if f.Splitter == nil {
-		if textsplitterOpts == nil {
-			textsplitterOpts = z.Pointer(textsplitter.NewTextSplitterOpts())
-		}
+		textsplitterOpts := z.Pointer(textsplitter.NewTextSplitterOpts())
+
 		slog.Debug("Using default text splitter", "filetype", filetype, "textSplitterOpts", textsplitterOpts)
 
 		if len(f.Globals.SplitterOpts) > 0 {
@@ -86,6 +85,9 @@ func (f *IngestionFlow) FillDefaults(filetype string, textsplitterOpts *textspli
 			slog.Debug("Overriding text splitter options with globals from flows config", "filetype", filetype, "textSplitterOpts", textsplitterOpts)
 		}
 
+		if err := textsplitterOpts.Configure(); err != nil {
+			return fmt.Errorf("failed to configure text splitter options: %w", err)
+		}
 		f.Splitter = textsplitter.DefaultTextSplitter(filetype, textsplitterOpts)
 	}
 	if len(f.Transformations) == 0 {

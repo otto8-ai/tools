@@ -16,7 +16,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/gptscript-ai/knowledge/pkg/client"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/textsplitter"
 	flowconfig "github.com/gptscript-ai/knowledge/pkg/flows/config"
 )
 
@@ -25,7 +24,6 @@ type ClientIngest struct {
 	Dataset string `usage:"Target Dataset ID" short:"d" default:"default" env:"KNOW_DATASET"`
 	Prune   bool   `usage:"Prune deleted files" env:"KNOW_INGEST_PRUNE"`
 	ClientIngestOpts
-	textsplitter.TextSplitterOpts
 	ClientFlowsConfig
 }
 
@@ -98,7 +96,6 @@ func (s *ClientIngest) run(ctx context.Context, filePath string) error {
 
 	ingestOpts := &client.IngestPathsOpts{
 		SharedIngestionOpts: client.SharedIngestionOpts{
-			TextSplitterOpts:    &s.TextSplitterOpts,
 			IsDuplicateFuncName: s.DeduplicationFuncName,
 			Metadata:            metadata,
 		},
