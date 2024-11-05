@@ -38,11 +38,11 @@ func (c *StandaloneClient) DeleteFile(ctx context.Context, datasetID, fileID str
 	return c.Datastore.DeleteFile(ctx, datasetID, fileID)
 }
 
-func (c *StandaloneClient) CreateDataset(ctx context.Context, datasetID string) (*types2.Dataset, error) {
+func (c *StandaloneClient) CreateDataset(ctx context.Context, datasetID string, opts *types2.DatasetCreateOpts) (*types2.Dataset, error) {
 	ds := types2.Dataset{
 		ID: datasetID,
 	}
-	err := c.Datastore.NewDataset(ctx, ds)
+	err := c.Datastore.CreateDataset(ctx, ds, opts)
 	if err != nil {
 		return &ds, err
 	}

@@ -33,7 +33,7 @@ type IngestPathsOpts struct {
 }
 
 type Client interface {
-	CreateDataset(ctx context.Context, datasetID string) (*types2.Dataset, error)
+	CreateDataset(ctx context.Context, datasetID string, opts *types2.DatasetCreateOpts) (*types2.Dataset, error)
 	DeleteDataset(ctx context.Context, datasetID string) error
 	GetDataset(ctx context.Context, datasetID string) (*types2.Dataset, error)
 	FindFile(ctx context.Context, searchFile types2.File) (*types2.File, error)

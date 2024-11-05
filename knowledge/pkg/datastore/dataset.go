@@ -12,14 +12,14 @@ type UpdateDatasetOpts struct {
 	ReplaceMedata bool
 }
 
-func (s *Datastore) NewDataset(ctx context.Context, dataset types.Dataset) error {
+func (s *Datastore) CreateDataset(ctx context.Context, dataset types.Dataset, opts *types.DatasetCreateOpts) error {
 	// Create dataset
-	if err := s.Index.CreateDataset(ctx, dataset); err != nil {
+	if err := s.Index.CreateDataset(ctx, dataset, opts); err != nil {
 		return err
 	}
 
 	// Create collection
-	err := s.Vectorstore.CreateCollection(ctx, dataset.ID)
+	err := s.Vectorstore.CreateCollection(ctx, dataset.ID, opts)
 	if err != nil {
 		return err
 	}

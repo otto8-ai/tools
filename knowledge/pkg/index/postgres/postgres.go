@@ -51,8 +51,8 @@ func (i *Index) ImportDatasetsFromFile(ctx context.Context, path string) error {
 	return fmt.Errorf("postgres: ImportDatasetsFromFile not implemented")
 }
 
-func (i *Index) CreateDataset(ctx context.Context, dataset types.Dataset) error {
-	return i.DB.CreateDataset(ctx, dataset)
+func (i *Index) CreateDataset(ctx context.Context, dataset types.Dataset, opts *types.DatasetCreateOpts) error {
+	return i.DB.CreateDataset(ctx, dataset, opts)
 }
 
 func (i *Index) GetDataset(ctx context.Context, datasetID string) (*types.Dataset, error) {

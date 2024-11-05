@@ -12,6 +12,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/gptscript-ai/knowledge/pkg/env"
+	dbtypes "github.com/gptscript-ai/knowledge/pkg/index/types"
 	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -232,7 +233,7 @@ func (v VectorStore) getCollectionUUID(ctx context.Context, collection string) (
 	return cuuid, nil
 }
 
-func (v VectorStore) CreateCollection(ctx context.Context, collection string) error {
+func (v VectorStore) CreateCollection(ctx context.Context, collection string, opts *dbtypes.DatasetCreateOpts) error {
 	slog.Debug("Creating collection", "collection", collection, "store", "pgvector")
 	tx, err := v.conn.Begin(ctx)
 	if err != nil {
@@ -247,7 +248,14 @@ func (v VectorStore) CreateCollection(ctx context.Context, collection string) er
 	}
 
 	_, err = tx.Exec(ctx, fmt.Sprintf(`INSERT INTO %s (uuid, name) VALUES($1, $2)`, v.collectionTableName), uuid.New().String(), collection)
+	var pgErr *pgconn.PgError
 	if err != nil {
+		if ok := errors.As(err, &pgErr); ok && pgErr != nil && pgErr.Code == "23505" {
+			if !opts.ErrOnExists {
+				slog.Debug("Collection already exists but that's fine", "collection", collection)
+				return nil
+			}
+		}
 		return fmt.Errorf("failed to create collection %s: %w", collection, err)
 	}
 

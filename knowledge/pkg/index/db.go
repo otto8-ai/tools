@@ -24,6 +24,7 @@ func New(ctx context.Context, dsn string, autoMigrate bool) (Index, error) {
 				Colorful:      true,
 				LogLevel:      logger.Silent,
 			}),
+			TranslateError: true,
 		}
 	)
 

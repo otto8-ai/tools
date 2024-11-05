@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	sqlitevec "github.com/asg017/sqlite-vec-go-bindings/ncruces"
+	dbtypes "github.com/gptscript-ai/knowledge/pkg/index/types"
 	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
 	"github.com/ncruces/go-sqlite3"
 	cg "github.com/philippgille/chromem-go"
@@ -70,7 +71,7 @@ func (v *VectorStore) prepareTables(ctx context.Context) error {
 	return nil
 }
 
-func (v *VectorStore) CreateCollection(ctx context.Context, collection string) error {
+func (v *VectorStore) CreateCollection(ctx context.Context, collection string, opts *dbtypes.DatasetCreateOpts) error {
 	emb, err := v.embeddingFunc(ctx, "dummy text")
 	if err != nil {
 		return fmt.Errorf("failed to get embedding: %w", err)
