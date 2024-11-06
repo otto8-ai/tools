@@ -20,6 +20,7 @@ import (
 	"github.com/gptscript-ai/knowledge/pkg/datastore/defaults"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/load"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/openai"
+	"github.com/gptscript-ai/knowledge/pkg/log"
 	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/sync/semaphore"
@@ -194,6 +195,8 @@ func EncodeImageToBase64(img image.Image) (string, error) {
 func (o *OpenAIOCR) SendImageToOpenAI(ctx context.Context, base64Image string) (string, error) {
 	url := fmt.Sprintf("%s/chat/completions", o.BaseURL)
 
+	ctx = log.ToCtx(ctx, log.FromCtx(ctx).With("tool", "openai-ocr"))
+
 	headers := map[string]string{
 		"Content-Type":  "application/json",
 		"Authorization": "Bearer " + o.APIKey,
@@ -247,6 +250,8 @@ func requestWithExponentialBackoff(ctx context.Context, client *http.Client, req
 	var resp *http.Response
 	var err error
 
+	logger := log.FromCtx(ctx)
+
 	var failures []string
 
 	// Save the original request body
@@ -254,7 +259,8 @@ func requestWithExponentialBackoff(ctx context.Context, client *http.Client, req
 	if req.Body != nil {
 		bodyBytes, err = io.ReadAll(req.Body)
 		if err != nil {
-			return nil, fmt.Errorf("failed to read request body: %v", err)
+			failures = append(failures, fmt.Sprintf("failed to read request body: %v", err))
+			return nil, fmt.Errorf("failed to read request body: %v; failures: %v", err, strings.Join(failures, "; "))
 		}
 	}
 
@@ -270,9 +276,10 @@ func requestWithExponentialBackoff(ctx context.Context, client *http.Client, req
 
 			body, err := io.ReadAll(resp.Body)
 			if err != nil {
-				// Request was OK, but we hit an error reading the response body.
-				// This is likely a transient error, so we retry.
-				failures = append(failures, fmt.Sprintf("#%d/%d: failed to read response body: %v", i+1, maxRetries, err))
+				// Log the error and retry for transient error reading response body
+				msg := fmt.Sprintf("#%d/%d: failed to read response body: %v", i+1, maxRetries, err)
+				logger.Warn("Request failed - Retryable", "error", msg)
+				failures = append(failures, msg)
 				continue
 			}
 
@@ -288,9 +295,12 @@ func requestWithExponentialBackoff(ctx context.Context, client *http.Client, req
 				}
 				resp.Body.Close()
 			}
-			failures = append(failures, fmt.Sprintf("#%d/%d: %d <%s> (err: %v)", i+1, maxRetries, resp.StatusCode, bodystr, err))
+
+			msg := fmt.Sprintf("#%d/%d: %d <%s> (err: %v)", i+1, maxRetries, resp.StatusCode, bodystr, err)
+			failures = append(failures, msg)
 
 			if resp.StatusCode >= 500 || (handleRateLimit && resp.StatusCode == http.StatusTooManyRequests) {
+				logger.Warn("Request failed - Retryable", "error", msg)
 				// Retry for 5xx (Server Errors)
 				// We're also handling rate limit here (without checking the Retry-After header), if handleRateLimit is true,
 				// since it's what e.g. OpenAI recommends (see https://github.com/openai/openai-cookbook/blob/457f4310700f93e7018b1822213ca99c613dbd1b/examples/How_to_handle_rate_limits.ipynb).
@@ -299,11 +309,17 @@ func requestWithExponentialBackoff(ctx context.Context, client *http.Client, req
 				time.Sleep(delay + jitter)
 				continue
 			} else {
-				// Don't retry for other status codes
+				// Non-retriable error
+				logger.Error("Request failed - Non-retryable", "error", msg)
 				break
 			}
+		} else {
+			// Log connection errors (client.Do error) and retry if needed
+			msg := fmt.Sprintf("#%d/%d: failed to send request: %v", i+1, maxRetries, err)
+			logger.Warn("Request failed - Retryable", "error", msg)
+			failures = append(failures, msg)
 		}
 	}
 
-	return nil, fmt.Errorf("retry limit (%d) exceeded or failed with non-retriable error: %v", maxRetries, strings.Join(failures, "; "))
+	return nil, fmt.Errorf("retry limit (%d) exceeded or failed with non-retriable error(s): %v", maxRetries, strings.Join(failures, "; "))
 }
