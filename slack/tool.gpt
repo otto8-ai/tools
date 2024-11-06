@@ -8,7 +8,7 @@ Share Tools: List Channels, Search Channels, Get Channel History, Get Channel Hi
 Name: List Channels
 Description: List all channels in the Slack workspace. Returns the name and ID for each channel
 Share Context: Slack Context
-Share Context: github.com/gptscript-ai/datasets/context
+Tools: github.com/gptscript-ai/datasets/filter
 Credential: ./credential
 
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js listChannels
@@ -17,7 +17,7 @@ Credential: ./credential
 Name: Search Channels
 Description: Search for channels in the Slack workspace
 Share Context: Slack Context
-Share Context: github.com/gptscript-ai/datasets/context
+Tools: github.com/gptscript-ai/datasets/filter
 Credential: ./credential
 Param: query: the search query
 
@@ -27,7 +27,7 @@ Param: query: the search query
 Name: Get Channel History
 Description: Get the chat history for a channel in the Slack workspace
 Share Context: Slack Context
-Share Context: github.com/gptscript-ai/datasets/context
+Tools: github.com/gptscript-ai/datasets/filter
 Credential: ./credential
 Share Tools: List Channels, Search Channels
 Param: channelid: the ID of the channel to get the history for
@@ -39,7 +39,7 @@ Param: limit: the number of messages to return - recommend starting with 10 and 
 Name: Get Channel History by Time
 Description: Get the chat history for a channel in the Slack workspace within a specific time range
 Share Context: Slack Context
-Share Context: github.com/gptscript-ai/datasets/context
+Tools: github.com/gptscript-ai/datasets/filter
 Credential: ./credential
 Share Tools: List Channels, Search Channels
 Param: channelid: the ID of the channel to get the history for
@@ -53,7 +53,7 @@ Param: end: the end time in RFC 3339 format
 Name: Get Thread History
 Description: Get the chat history for a particular thread
 Share Context: Slack Context
-Share Context: github.com/gptscript-ai/datasets/context
+Tools: github.com/gptscript-ai/datasets/filter
 Credential: ./credential
 Share Tools: List Channels, Get Channel History, Search Messages
 Param: channelid: the ID of the channel containing the thread
@@ -66,7 +66,7 @@ Param: limit: the number of messages to return
 Name: Search Messages
 Description: Search for messages in the Slack workspace
 Share Context: Slack Context
-Share Context: github.com/gptscript-ai/datasets/context
+Tools: github.com/gptscript-ai/datasets/filter
 Credential: ./credential
 Param: query: the search query
 
@@ -99,7 +99,7 @@ Param: text: the text to send
 Name: List Users
 Description: List all users in the Slack workspace.
 Share Context: Slack Context
-Share Context: github.com/gptscript-ai/datasets/context
+Tools: github.com/gptscript-ai/datasets/filter
 Credential: ./credential
 
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js listUsers
@@ -108,7 +108,7 @@ Credential: ./credential
 Name: Search Users
 Description: Search for users in the Slack workspace
 Share Context: Slack Context
-Share Context: github.com/gptscript-ai/datasets/context
+Tools: github.com/gptscript-ai/datasets/filter
 Credential: ./credential
 Param: query: the search query
 
@@ -152,7 +152,7 @@ Param: messageid: the ID of the message
 Name: Get DM History
 Description: Get the chat history for a direct message conversation
 Share Context: Slack Context
-Share Context: github.com/gptscript-ai/datasets/context
+Tools: github.com/gptscript-ai/datasets/filter
 Credential: ./credential
 Share Tools: List Users, Search Users
 Param: userids: comma-separated list of user IDs for the conversation (example: USER1ID,USER2ID), or just one ID for an individual conversation
@@ -164,7 +164,7 @@ Param: limit: the number of messages to return
 Name: Get DM Thread History
 Description: Get the chat history for a thread in a direct message conversation
 Share Context: Slack Context
-Share Context: github.com/gptscript-ai/datasets/context
+Tools: github.com/gptscript-ai/datasets/filter
 Credential: ./credential
 Share Tools: List Users, Search Users, Get DM History
 Param: userids: comma-separated list of user IDs for the conversation (example: USER1ID,USER2ID), or just one ID for an individual conversation
@@ -176,7 +176,7 @@ Param: limit: the number of messages to return
 ---
 Name: Slack Context
 Type: context
-Share Context: Current Date and Time from ../time
+Share Context: ../time
 
 #!sys.echo
 

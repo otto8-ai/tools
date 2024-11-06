@@ -8,7 +8,7 @@ Share Tools: List Docs, Get Doc
 Name: List Docs
 Description: List all Microsoft Word documents available to the user in OneDrive
 Share Context: Word Context
-Share Context: github.com/otto8-ai/datasets/context
+Tools: github.com/gptscript-ai/datasets/filter
 Credential: ./credential
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listDocs
