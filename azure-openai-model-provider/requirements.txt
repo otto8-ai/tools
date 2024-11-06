@@ -1,0 +1,7 @@
+fastapi
+uvicorn[standard]
+openai
+azure-identity
+azure-mgmt-resource
+azure-mgmt-cognitiveservices
+gptscript

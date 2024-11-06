@@ -56,7 +56,7 @@ async def _stream_chat_completion(content: Any, api_key: str):
     async with httpx.AsyncClient(timeout=httpx.Timeout(30 * 60.0)) as client:
         async with client.stream(
                 "POST",
-                f"{otto_url}/api/chat/completions",
+                f"{otto_url}/api/llm-proxy/chat/completions",
                 json=content,
                 headers={
                     "Authorization": f"Bearer {api_key}",
