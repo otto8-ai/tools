@@ -1,0 +1,5 @@
+Name: OpenAI Model Provider
+Description: Model Provider for OpenAI
+Metadata: envVars: OTTO_OPENAI_MODEL_PROVIDER_API_KEY
+#!sys.echo
+https://api.openai.com/v1

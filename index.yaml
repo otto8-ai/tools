@@ -66,7 +66,13 @@ system:
     reference: ./website-cleaner
   result-formatter:
     reference: ./result-formatter
-
-modelProviders:
   otto8-model-provider:
     reference: ./otto8-model-provider
+
+modelProviders:
+  openai-model-provider:
+    reference: ./openai-model-provider
+  anthropic-model-provider:
+    reference: ./anthropic-model-provider
+  azure-openai-model-provider:
+    reference: ./azure-openai-model-provider

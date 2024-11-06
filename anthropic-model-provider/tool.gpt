@@ -1,0 +1,6 @@
+Name: Anthropic Claude3 Model Provider
+Description: Model provider for Anthropic hosted Claude3 models
+Metadata: envVars: OTTO_ANTHROPIC_MODEL_PROVIDER_API_KEY
+Model Provider: true
+
+#!sys.daemon /usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py
