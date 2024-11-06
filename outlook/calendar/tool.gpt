@@ -16,7 +16,7 @@ Credential: ./credential
 Name: List Events Today
 Description: List all events for today in all calendars available to the user.
 Share Context: Outlook Calendar Context
-Share Context: github.com/gptscript-ai/datasets/context
+Tools: github.com/gptscript-ai/datasets/filter
 Credential: ./credential
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listEventsToday
@@ -25,7 +25,7 @@ Credential: ./credential
 Name: List Events
 Description: List all events in the given time frame in all calendars available to the user.
 Share Context: Outlook Calendar Context
-Share Context: github.com/gptscript-ai/datasets/context
+Tools: github.com/gptscript-ai/datasets/filter
 Credential: ./credential
 Param: start: The start date and time of the time frame, in RFC 3339 format.
 Param: end: The end date and time of the time frame, in RFC 3339 format.
@@ -93,7 +93,7 @@ Param: owner_type: The type of the owner of the calendar or group. Possible valu
 Name: Search Events
 Description: Search for events based on a query string.
 Share Context: Outlook Calendar Context
-Share Context: github.com/gptscript-ai/datasets/context
+Tools: github.com/gptscript-ai/datasets/filter
 Credential: ./credential
 Param: query: (Required) The search query.
 Param: start: (Required) The start date and time of the time frame to search within, in RFC 3339 format.
@@ -124,7 +124,7 @@ Credential: ./credential
 ---
 Name: Outlook Calendar Context
 Type: context
-Share Context: Current Date and Time from ../../time
+Share Context: ../../time
 Share Tools: Get Default Timezone
 
 #!sys.echo

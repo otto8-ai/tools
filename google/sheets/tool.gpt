@@ -9,7 +9,7 @@ Name: Read Spreadsheet
 Description: Read data from a Google Sheet. Spreadsheet ID is required if the spreadsheet does not belong to the user.
 Share Context: Google Sheets Context
 Credential: ../credential
-Share Context: github.com/gptscript-ai/datasets/context
+Tools: github.com/gptscript-ai/datasets/filter
 Param: spreadsheet_id: The ID of the Spreadsheet (Optional, if not provided, the spreadsheet_name is required)
 Param: spreadsheet_name: The name of the Spreadsheet (Optional, if not provided, the spreadsheet_id is required)
 Param: range: The range of cells on the Spreadsheet to read (Optional, by default reads the entire Spreadsheet)
@@ -22,7 +22,7 @@ Name: Read Tables From Spreadsheet
 Description: Detect multiple tables and read data from a Google Sheet. Spreadsheet ID is required if the spreadsheet does not belong to the user.
 Share Context: Google Sheets Context
 Credential: ../credential
-Share Context: github.com/gptscript-ai/datasets/context
+Tools: github.com/gptscript-ai/datasets/filter
 Param: spreadsheet_id: The ID of the Spreadsheet (Optional, if not provided, the spreadsheet_name is required)
 Param: spreadsheet_name: The name of the Spreadsheet (Optional, if not provided, the spreadsheet_id is required)
 Param: range: The range of cells on the Spreadsheet to read (Optional, by default reads the entire Spreadsheet)

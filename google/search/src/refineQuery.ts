@@ -5,7 +5,7 @@ export async function refineQuery(query: string): Promise<string> {
     agents: [],
     arguments: { type: 'object' },
     chat: false,
-    context: ['Current Date and Time from github.com/otto8-ai/tools/time'],
+    context: ['github.com/otto8-ai/tools/time'],
     credentials: [],
     description: '',
     export: [],

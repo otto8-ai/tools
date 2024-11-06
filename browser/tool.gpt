@@ -110,7 +110,7 @@ Tools: service
 Name: Browser Context
 Metadata: index: false
 Type: context
-Share Context: Current Date and Time from ../time
+Share Context: ../time
 
 #!sys.echo
 
