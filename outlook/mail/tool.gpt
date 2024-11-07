@@ -116,9 +116,6 @@ When creating a draft message, ensure the body is valid markdown and there are n
 
 Do not attempt to forward emails. Email forwarding is not supported.
 
-When the user asks for messages from a specific time frame, call the Get Default Timezone tool and use that time zone,
-unless the user specifies a different time zone.
-
 ## End of instructions for using the Microsoft Outlook Mail tools
 
 ---
