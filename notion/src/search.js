@@ -46,7 +46,7 @@ export async function search(client, query, max) {
             return {
                 name: `${result.id}`,
                 description: `Notion ${type} named ${name}`,
-                contents: resultToString(result),
+                contents: resultToString(result, name),
             }
         })
 
@@ -64,16 +64,12 @@ export async function search(client, query, max) {
     }
 }
 
-function resultToString(res) {
+function resultToString(res, name) {
     let str = ''
     switch (res.object) {
         case "page":
             str += `- ID: ${res.id}\n`
-            if (res.properties.title !== undefined && res.properties.title.title.length > 0) {
-                str += `  Title: ${res.properties.title.title[0].plain_text}\n`
-            } else if (res.properties.Name !== undefined && res.properties.Name.title.length > 0) {
-                str += `  Name: ${res.properties.Name.title[0].plain_text}\n`
-            }
+            str += `  Name: ${name}\n`
             str += `  URL: ${res.url}\n`
             str += `  Type: page\n`
             str += `  Parent Type: ${res.parent.type}\n`
@@ -86,7 +82,7 @@ function resultToString(res) {
             }
             break
         case "database":
-            str += `- Title: ${res.title[0].plain_text}\n`
+            str += `- Title: ${name}\n`
             str += `  ID: ${res.id}\n`
             str += `  URL: ${res.url}\n`
             str += `  Type: database\n`
