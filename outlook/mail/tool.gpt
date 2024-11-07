@@ -92,6 +92,13 @@ Param: destination_folder_id: The ID of the folder to move the message into.
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool moveMessage
 
 ---
+Name: Get Default Timezone
+Description: Get the user's default timezone.
+Credential: ./credential
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool getDefaultTimezone
+
+---
 Name: Outlook Mail Context
 Type: context
 Share Context: ../../time
@@ -108,6 +115,9 @@ When printing a single message or a list of messages, use Markdown formatting.
 When creating a draft message, ensure the body is valid markdown and there are no broken links. Draft bodies may include markdown-compatible inline HTML for styling purposes.
 
 Do not attempt to forward emails. Email forwarding is not supported.
+
+When the user asks for messages from a specific time frame, call the Get Default Timezone tool and use that time zone,
+unless the user specifies a different time zone.
 
 ## End of instructions for using the Microsoft Outlook Mail tools
 
