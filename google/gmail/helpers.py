@@ -64,18 +64,18 @@ async def list_messages(service, query, max_results):
         try:
             gptscript_client = gptscript.GPTScript()
 
-            dataset = await gptscript_client.create_dataset(
-                os.getenv("GPTSCRIPT_WORKSPACE_ID"),
-                f"gmail_{query}",
-                f"list of emails in Gmail for query {query}")
-
             elements = []
             for message in all_messages:
                 msg_id, msg_str = message_to_string(service, message)
-                elements.append(DatasetElement(name=msg_id, description="", contents=msg_str.encode("utf-8")))
+                elements.append(DatasetElement(name=msg_id, description="", contents=msg_str))
 
-            await gptscript_client.add_dataset_elements(os.getenv("GPTSCRIPT_WORKSPACE_ID"), dataset.id, elements)
-            print(f"Created dataset with ID {dataset.id} with {len(all_messages)} emails")
+            dataset_id = await gptscript_client.add_dataset_elements(
+                elements,
+                name=f"gmail_{query}",
+                description=f"list of emails in Gmail for query {query}"
+            )
+
+            print(f"Created dataset with ID {dataset_id} with {len(elements)} emails")
         except Exception as e:
             print("An error occurred while creating the dataset:", e)
 
@@ -129,18 +129,14 @@ async def list_drafts(service, max_results=None):
         try:
             gptscript_client = gptscript.GPTScript()
 
-            dataset = await gptscript_client.create_dataset(
-                os.getenv("GPTSCRIPT_WORKSPACE_ID"),
-                "gmail_drafts",
-                "list of drafts in Gmail")
-
             elements = []
             for draft in all_drafts:
                 draft_id, draft_str = draft_to_string(service, draft)
-                elements.append(DatasetElement(name=draft_id, description="", contents=draft_str.encode("utf-8")))
+                elements.append(DatasetElement(name=draft_id, description="", contents=draft_str))
 
-            await gptscript_client.add_dataset_elements(os.getenv("GPTSCRIPT_WORKSPACE_ID"), dataset.id, elements)
-            print(f"Created dataset with ID {dataset.id} with {len(all_drafts)} drafts")
+            dataset_id = await gptscript_client.add_dataset_elements(elements, name=f"gmail_drafts")
+
+            print(f"Created dataset with ID {dataset_id} with {len(elements)} drafts")
         except Exception as e:
             print("An error occurred while creating the dataset:", e)
 

@@ -41,23 +41,21 @@ async def main():
         try:
             gptscript_client = GPTScript()
 
-            dataset = await gptscript_client.create_dataset(
-                os.getenv("GPTSCRIPT_WORKSPACE_ID"),
-                f"{spreadsheet.id}_data",
-                f"data for Google Sheet with ID {spreadsheet.id}",
-            )
-
             elements = []
             for cell_reference, value in cell_values.items():
                 elements.append(DatasetElement(
                     name=cell_reference,
                     description="",
-                    contents=(value if value != "" else " ").encode("utf-8"),
+                    contents=value if value != "" else " "
                 ))
 
-            await gptscript_client.add_dataset_elements(os.getenv("GPTSCRIPT_WORKSPACE_ID"), dataset.id, elements)
+            dataset_id = await gptscript_client.add_dataset_elements(
+                elements,
+                name=f"{spreadsheet.id}_data",
+                description=f"data for Google Sheet with ID {spreadsheet.id}"
+            )
 
-            print(f"Dataset created with ID {dataset.id} with {len(cell_values)} elements")
+            print(f"Dataset created with ID {dataset_id} with {len(elements)} elements")
         except Exception as e:
             print("An error occurred while creating the dataset:", e)
 

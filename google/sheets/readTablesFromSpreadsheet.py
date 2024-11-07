@@ -55,10 +55,6 @@ async def main():
         try:
             gptscript_client = GPTScript()
 
-            dataset = await gptscript_client.create_dataset(
-                os.getenv("GPTSCRIPT_WORKSPACE_ID"), f"{spreadsheet.id}_tables", ""
-            )
-
             elements = []
             for index, table in enumerate(tables):
                 table_text = "\n".join([f"[{', '.join(row)}]" for row in table])
@@ -68,9 +64,9 @@ async def main():
                     contents=table_text.encode("utf-8")
                 ))
 
-            await gptscript_client.add_dataset_elements(os.getenv("GPTSCRIPT_WORKSPACE_ID"), dataset.id, elements)
+            dataset_id = await gptscript_client.add_dataset_elements(elements, name=f"{spreadsheet.id}_tables")
 
-            print(f"Created dataset with ID {dataset.id} with {len(tables)} tables")
+            print(f"Created dataset with ID {dataset_id} with {len(elements)} tables")
             return
         except Exception as e:
             print("An error occurred while creating the dataset:", e)
