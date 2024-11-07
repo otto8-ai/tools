@@ -45,6 +45,18 @@ Param: owner_type: The type of the owner of the calendar or group. Possible valu
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool getEventDetails
 
 ---
+Name: Get Event Attachments
+Description: Download the attachments for a particular event.
+Share Context: Outlook Calendar Context
+Credential: ./credential
+Share Tools: List Calendars, List Events, Search Events
+Param: event_id: The unique ID of the event.
+Param: calendar_id: The unique ID of the calendar or group the event belongs to. If unset, uses the default calendar.
+Param: owner_type: The type of the owner of the calendar or group. Possible values are "user" or "group". Required if calendar_id is set.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool getEventAttachments
+
+---
 Name: Create Event
 Description: Create a new event.
 Share Context: Outlook Calendar Context, Recurrence Context

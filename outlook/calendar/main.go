@@ -50,6 +50,11 @@ func main() {
 			fmt.Println(err)
 			os.Exit(1)
 		}
+	case "getEventAttachments":
+		if err := commands.GetEventAttachments(context.Background(), os.Getenv("EVENT_ID"), os.Getenv("CALENDAR_ID"), graph.OwnerType(os.Getenv("OWNER_TYPE"))); err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
 	case "createEvent":
 		info := graph.CreateEventInfo{
 			Attendees:  strings.Split(os.Getenv("ATTENDEES"), ","),
