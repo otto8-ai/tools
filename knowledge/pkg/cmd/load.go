@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"maps"
 	"os"
+	"path/filepath"
 	"slices"
 	"strings"
 
@@ -135,7 +136,8 @@ func (s *ClientLoad) run(ctx context.Context, input, output string) error {
 	}
 
 	if loader == nil {
-		return fmt.Errorf("unsupported file type %q", input)
+		fmt.Printf("{\"unsupportedFiletype\": \"%s (%s)\"}\n", filepath.Ext(input), filetype)
+		os.Exit(0)
 	}
 
 	docs, err := loader(ctx, bytes.NewReader(inputBytes))
