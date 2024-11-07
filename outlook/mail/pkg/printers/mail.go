@@ -11,26 +11,6 @@ import (
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 )
 
-func PrintMailFolders(folders []models.MailFolderable) error {
-	for _, folder := range folders {
-		if err := PrintMailFolder(folder); err != nil {
-			return err
-		}
-		fmt.Println()
-	}
-	return nil
-}
-
-func PrintMailFolder(folder models.MailFolderable) error {
-	folderStr, err := MailFolderToString(folder)
-	if err != nil {
-		return fmt.Errorf("failed to convert mail folder to string: %w", err)
-	}
-
-	fmt.Println(folderStr)
-	return nil
-}
-
 func MailFolderToString(folder models.MailFolderable) (string, error) {
 	var result strings.Builder
 	if err := replaceMailFolderIDs(folder); err != nil {
@@ -46,16 +26,6 @@ func MailFolderToString(folder models.MailFolderable) (string, error) {
 	result.WriteString(fmt.Sprintf("Total item count: %d\n", util.Deref(folder.GetTotalItemCount())))
 
 	return result.String(), nil
-}
-
-func PrintMessages(messages []models.Messageable, detailed bool) error {
-	for _, msg := range messages {
-		if err := PrintMessage(msg, detailed); err != nil {
-			return fmt.Errorf("failed to print message: %w", err)
-		}
-		fmt.Println()
-	}
-	return nil
 }
 
 func PrintMessage(msg models.Messageable, detailed bool) error {

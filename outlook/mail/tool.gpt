@@ -39,6 +39,7 @@ Name: Search Messages
 Description: Search for messages. At least one of subject, from_address, or from_name must be specified.
 Share Context: Outlook Mail Context
 Credential: Outlook Mail OAuth Read Credential from ./credential
+Tools: github.com/gptscript-ai/datasets/filter
 Share Tools: List Mail Folders
 Param: subject: (Optional) Search query for the subject of the message.
 Param: from_address: (Optional) Search query for the email address of the sender.
