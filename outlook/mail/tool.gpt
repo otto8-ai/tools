@@ -93,7 +93,7 @@ Param: destination_folder_id: The ID of the folder to move the message into.
 
 ---
 Name: Get Default Timezone
-Description: Get the user's default timezone.
+Type: context
 Credential: ./credential
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool getDefaultTimezone
@@ -101,7 +101,7 @@ Credential: ./credential
 ---
 Name: Outlook Mail Context
 Type: context
-Share Context: ../../time
+Share Context: ../../time, Get Default Timezone
 
 #!sys.echo
 
