@@ -28,7 +28,6 @@ export async function search(client, query, max) {
 
     try {
         const gptscriptClient = new GPTScript()
-        const dataset = await gptscriptClient.createDataset(process.env.GPTSCRIPT_WORKSPACE_ID, `${query}_notion_search`, `search results from Notion for query ${query}`)
         let elements = results.map(result => {
             let name = ""
             if (result.properties.title !== undefined && result.properties.title.title.length > 0) {
@@ -45,18 +44,21 @@ export async function search(client, query, max) {
             }
 
             return {
-                name: result.id,
+                name: `${result.id}`,
                 description: `Notion ${type} named ${name}`,
-                contents: Buffer.from(resultToString(result)),
+                contents: resultToString(result),
             }
         })
 
         if (max < elements.length) {
             elements = elements.slice(0, max)
         }
-        await gptscriptClient.addDatasetElements(process.env.GPTSCRIPT_WORKSPACE_ID, dataset.id, elements)
 
-        console.log(`Created dataset with ID ${dataset.id} with ${elements.length} search results`)
+        const datasetID = await gptscriptClient.addDatasetElements(elements, {
+            name: `${query}_notion_search`,
+            description: `search results from Notion for query ${query}`
+        })
+        console.log(`Created dataset with ID ${datasetID} with ${elements.length} search results`)
     } catch (e) {
         console.log("Failed to create dataset:", e)
     }

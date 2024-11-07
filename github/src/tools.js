@@ -25,17 +25,19 @@ export async function searchIssuesAndPRs(octokit, owner, repo, query, perPage = 
 
     try {
         const gptscriptClient = new GPTScript();
-        const dataset = await gptscriptClient.createDataset(process.env.GPTSCRIPT_WORKSPACE_ID, `${query}_github_issues_prs`, `Search results for ${query} on GitHub`);
         const elements = items.map(issue => {
             return {
-                name: issue.id,
+                name: `${issue.id}`,
                 description: '',
-                contents: Buffer.from(`#${issue.number} - ${issue.title} (ID: ${issue.id}) - ${issue.html_url}`)
+                contents: `#${issue.number} - ${issue.title} (ID: ${issue.id}) - ${issue.html_url}`
             }
         });
-        await gptscriptClient.addDatasetElements(process.env.GPTSCRIPT_WORKSPACE_ID, dataset.id, elements);
+        const datasetID = await gptscriptClient.addDatasetElements(elements, {
+            name: `${query}_github_issues_prs`,
+            description: `Search results for ${query} on GitHub`
+        })
 
-        console.log(`Created dataset with ID ${dataset.id} with ${elements.length} results`);
+        console.log(`Created dataset with ID ${datasetID} with ${elements.length} results`);
     } catch (e) {
         console.log('Failed to create dataset:', e)
     }
@@ -93,21 +95,18 @@ export async function listIssueComments(octokit, owner, repo, issueNumber) {
 
     try {
         const gptscriptClient = new GPTScript();
-        const dataset = await gptscriptClient.createDataset(
-            process.env.GPTSCRIPT_WORKSPACE_ID,
-            `${owner}_${repo}_issue_${issueNumber}_comments`,
-            `Comments for issue #${issueNumber} in ${owner}/${repo}`
-        );
         const elements = data.map(comment => {
             return {
-                name: comment.id,
+                name: `${comment.id}`,
                 description: '',
-                contents: Buffer.from(`Comment by ${comment.user.login}: ${comment.body} - https://github.com/${owner}/${repo}/issues/${issueNumber}#issuecomment-${comment.id}`)
+                contents: `Comment by ${comment.user.login}: ${comment.body} - https://github.com/${owner}/${repo}/issues/${issueNumber}#issuecomment-${comment.id}`
             }
         });
-        await gptscriptClient.addDatasetElements(process.env.GPTSCRIPT_WORKSPACE_ID, dataset.id, elements);
-
-        console.log(`Created dataset with ID ${dataset.id} with ${elements.length} comments`);
+        const datasetID = await gptscriptClient.addDatasetElements(elements, {
+            name: `${owner}_${repo}_issue_${issueNumber}_comments`,
+            description: `Comments for issue #${issueNumber} in ${owner}/${repo}`
+        })
+        console.log(`Created dataset with ID ${datasetID} with ${elements.length} comments`);
     } catch (e) {
         console.log('Failed to create dataset:', e);
     }
@@ -179,21 +178,18 @@ export async function listPRComments(octokit, owner, repo, prNumber) {
 
     try {
         const gptscriptClient = new GPTScript();
-        const dataset = await gptscriptClient.createDataset(
-            process.env.GPTSCRIPT_WORKSPACE_ID,
-            `${owner}_${repo}_pr_${prNumber}_comments`,
-            `Comments for PR #${prNumber} in ${owner}/${repo}`
-        );
         const elements = data.map(comment => {
             return {
-                name: comment.id,
+                name: `${comment.id}`,
                 description: '',
-                contents: Buffer.from(`Comment by ${comment.user.login}: ${comment.body} - https://github.com/${owner}/${repo}/pull/${prNumber}#issuecomment-${comment.id}`)
+                contents: `Comment by ${comment.user.login}: ${comment.body} - https://github.com/${owner}/${repo}/pull/${prNumber}#issuecomment-${comment.id}`
             }
         });
-        await gptscriptClient.addDatasetElements(process.env.GPTSCRIPT_WORKSPACE_ID, dataset.id, elements);
-
-        console.log(`Created dataset with ID ${dataset.id} with ${elements.length} comments`);
+        const datasetID = await gptscriptClient.addDatasetElements(elements, {
+            name: `${owner}_${repo}_pr_${prNumber}_comments`,
+            description: `Comments for PR #${prNumber} in ${owner}/${repo}`
+        })
+        console.log(`Created dataset with ID ${datasetID} with ${elements.length} comments`);
     } catch (e) {
         console.log('Failed to create dataset:', e);
     }
@@ -219,22 +215,18 @@ export async function listRepos(octokit, owner) {
 
     try {
         const gptscriptClient = new GPTScript();
-        const dataset = await gptscriptClient.createDataset(
-            process.env.GPTSCRIPT_WORKSPACE_ID,
-            `${owner}_github_repos`,
-            `GitHub repos for ${owner}`
-        );
-
         const elements = repos.data.map(repo => {
             return {
-                name: repo.id,
+                name: `${repo.id}`,
                 description: '',
-                contents: Buffer.from(`${repo.name} (ID: ${repo.id}) - https://github.com/${owner}/${repo.name}`)
+                contents: `${repo.name} (ID: ${repo.id}) - https://github.com/${owner}/${repo.name}`
             }
         });
-        await gptscriptClient.addDatasetElements(process.env.GPTSCRIPT_WORKSPACE_ID, dataset.id, elements);
-
-        console.log(`Created dataset with ID ${dataset.id} with ${elements.length} repositories`);
+        const datasetID = await gptscriptClient.addDatasetElements(elements, {
+            name: `${owner}_github_repos`,
+            description: `GitHub repos for ${owner}`
+        })
+        console.log(`Created dataset with ID ${datasetID} with ${elements.length} repositories`);
     } catch (e) {
         console.log('Failed to create dataset:', e);
     }
