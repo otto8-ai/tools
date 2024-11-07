@@ -4,11 +4,13 @@ import { Mutex } from "async-mutex"
 export async function userContext(webClient) {
     const result = await webClient.auth.test({})
     const userResult = await webClient.users.info({user: result.user_id})
+    console.log("## Slack user info")
     console.log(`Logged in as ${userResult.user.name}`)
     console.log(`Real Name: ${userResult.user.profile.real_name}`)
     console.log(`Display Name: ${userResult.user.profile.display_name}`)
     console.log(`User ID: ${result.user_id}`)
     console.log(`Default time zone: ${userResult.user.tz_label} (UTC offset ${userResult.user.tz_offset / 3600} hours)`)
+    console.log("## End of Slack user info")
 }
 
 export async function listChannels(webClient) {
