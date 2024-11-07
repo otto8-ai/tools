@@ -3,7 +3,6 @@ package commands
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"github.com/gptscript-ai/go-gptscript"
 	"github.com/gptscript-ai/tools/word/pkg/client"
@@ -27,12 +26,6 @@ func ListDocs(ctx context.Context) error {
 		return fmt.Errorf("failed to create GPTScript client: %w", err)
 	}
 
-	workspaceID := os.Getenv("GPTSCRIPT_WORKSPACE_ID")
-	dataset, err := gptscriptClient.CreateDataset(ctx, workspaceID, "word_docs_list", "List of Word documents")
-	if err != nil {
-		return fmt.Errorf("failed to create dataset: %w", err)
-	}
-
 	var elements []gptscript.DatasetElement
 	for _, info := range infos {
 		elements = append(elements, gptscript.DatasetElement{
@@ -40,14 +33,14 @@ func ListDocs(ctx context.Context) error {
 				Name:        info.Name,
 				Description: fmt.Sprintf("%s (ID: %s)", info.Name, info.ID),
 			},
-			Contents: []byte(info.String()),
+			Contents: info.String(),
 		})
 	}
 
-	if err := gptscriptClient.AddDatasetElements(ctx, workspaceID, dataset.ID, elements); err != nil {
-		return fmt.Errorf("failed to add elements to dataset: %w", err)
-	}
+	datasetID, err := gptscriptClient.CreateDatasetWithElements(ctx, elements, gptscript.DatasetOptions{
+		Name: "word_docs_list",
+	})
 
-	fmt.Printf("Created dataset with ID %s with %d docs\n", dataset.ID, len(elements))
+	fmt.Printf("Created dataset with ID %s with %d docs\n", datasetID, len(elements))
 	return nil
 }

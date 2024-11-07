@@ -3,7 +3,6 @@ package commands
 import (
 	"context"
 	"fmt"
-	"os"
 	"strings"
 	"time"
 
@@ -46,15 +45,9 @@ func SearchEvents(ctx context.Context, query string, start, end time.Time) error
 
 	allCalendarEvents := util.Merge(calendarEventsInSubject, calendarEventsInPreview)
 
-	workspaceID := os.Getenv("GPTSCRIPT_WORKSPACE_ID")
 	gptscriptClient, err := gptscript.NewGPTScript()
 	if err != nil {
 		return fmt.Errorf("failed to create GPTScript client: %w", err)
-	}
-
-	dataset, err := gptscriptClient.CreateDataset(ctx, workspaceID, "event_search "+query, "Search results for Outlook Calendar events")
-	if err != nil {
-		return fmt.Errorf("failed to create dataset: %w", err)
 	}
 
 	var elements []gptscript.DatasetElement
@@ -66,15 +59,19 @@ func SearchEvents(ctx context.Context, query string, start, end time.Time) error
 					Name:        name,
 					Description: util.Deref(event.GetBodyPreview()),
 				},
-				Contents: []byte(printers.EventToString(ctx, c, cal, event)),
+				Contents: printers.EventToString(ctx, c, cal, event),
 			})
 		}
 	}
 
-	if err := gptscriptClient.AddDatasetElements(ctx, workspaceID, dataset.ID, elements); err != nil {
-		return fmt.Errorf("failed to add dataset elements: %w", err)
+	datasetID, err := gptscriptClient.CreateDatasetWithElements(ctx, elements, gptscript.DatasetOptions{
+		Name:        "event_search " + query,
+		Description: "Search results for Outlook Calendar events",
+	})
+	if err != nil {
+		return fmt.Errorf("failed to create dataset with elements: %w", err)
 	}
 
-	fmt.Printf("Created dataset with ID %s with %d events\n", dataset.ID, len(elements))
+	fmt.Printf("Created dataset with ID %s with %d events\n", datasetID, len(elements))
 	return nil
 }

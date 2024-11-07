@@ -6,7 +6,7 @@ replace github.com/gptscript-ai/tools/outlook/common => ../common
 
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.14.0
-	github.com/gptscript-ai/go-gptscript v0.9.6-0.20241101143642-3a3a70ca44b6
+	github.com/gptscript-ai/go-gptscript v0.9.6-0.20241106212914-ba040ce8f47b
 	github.com/gptscript-ai/tools/outlook/common v0.0.0-20241029131940-7d95a94b38c2
 	github.com/jaytaylor/html2text v0.0.0-20230321000545-74c2419ad056
 	github.com/microsoft/kiota-abstractions-go v1.6.1

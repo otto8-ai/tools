@@ -23,21 +23,22 @@ export async function listUsers(client, max) {
 
     try {
         const gptscriptClient = new GPTScript()
-        const dataset = await gptscriptClient.createDataset(process.env.GPTSCRIPT_WORKSPACE_ID, "notion_users", "list of notion users")
         let elements = users.map(user => {
             return {
-                name: user.name + user.id,
+                name: `${user.name} ${user.id}`,
                 description: `${user.name} (ID: ${user.id})`,
-                contents: Buffer.from(`${user.name} (ID: ${user.id})`),
+                contents: `${user.name} (ID: ${user.id})`,
             }
         })
 
         if (max < elements.length) {
             elements = elements.slice(0, max)
         }
-        await gptscriptClient.addDatasetElements(process.env.GPTSCRIPT_WORKSPACE_ID, dataset.id, elements)
 
-        console.log(`Created dataset with ID ${dataset.id} with ${elements.length} users`)
+        const datasetID = await gptscriptClient.addDatasetElements(elements, {
+            name: "notion_users",
+        })
+        console.log(`Created dataset with ID ${datasetID} with ${elements.length} users`)
     } catch (e) {
         console.log("Failed to create dataset:", e)
     }

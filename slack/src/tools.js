@@ -7,17 +7,18 @@ export async function listChannels(webClient) {
 
     try {
         const gptscriptClient = new GPTScript()
-        const dataset = await gptscriptClient.createDataset(process.env.GPTSCRIPT_WORKSPACE_ID, 'slack_channels', 'list of slack channels')
         const elements = [...publicChannels.channels, ...privateChannels.channels].map(channel => {
             return {
-                name: channel.name,
-                description: channel.purpose.value || '',
-                contents: Buffer.from(channelToString(channel))
+                name: `${channel.name}`,
+                description: `${channel.purpose.value || ''}`,
+                contents: channelToString(channel)
             }
         })
-        await gptscriptClient.addDatasetElements(process.env.GPTSCRIPT_WORKSPACE_ID, dataset.id, elements)
 
-        console.log(`Created dataset with ID ${dataset.id} with ${publicChannels.channels.length + privateChannels.channels.length} channels`)
+        const datasetID = await gptscriptClient.addDatasetElements(elements, {
+            name: "slack_channels"
+        })
+        console.log(`Created dataset with ID ${datasetID} with ${publicChannels.channels.length + privateChannels.channels.length} channels`)
     } catch (e) {
         console.log('Failed to create dataset:', e)
     }
@@ -37,17 +38,18 @@ export async function searchChannels(webClient, query) {
 
     try {
         const gptscriptClient = new GPTScript()
-        const dataset = await gptscriptClient.createDataset(process.env.GPTSCRIPT_WORKSPACE_ID, `${query}_slack_channels`, `list of slack channels matching search query "${query}"`)
         const elements = [...publicChannels, ...privateChannels].map(channel => {
             return {
-                name: channel.name,
+                name: `${channel.name}`,
                 description: `${channel.name} (ID: ${channel.id})`,
-                contents: Buffer.from(channelToString(channel))
+                contents: channelToString(channel)
             }
         })
-        await gptscriptClient.addDatasetElements(process.env.GPTSCRIPT_WORKSPACE_ID, dataset.id, elements)
-
-        console.log(`Created dataset with ID ${dataset.id} with ${publicChannels.length + privateChannels.length} channels`)
+        const datasetID = await gptscriptClient.addDatasetElements(elements, {
+            name: `${query}_slack_channels`,
+            description: `list of slack channels matching search query "${query}"`
+        })
+        console.log(`Created dataset with ID ${datasetID} with ${publicChannels.length + privateChannels.length} channels`)
     } catch (e) {
         console.log('Failed to create dataset:', e)
     }
@@ -93,17 +95,18 @@ export async function getThreadHistory(webClient, channelId, threadId, limit) {
 
     try {
         const gptscriptClient = new GPTScript()
-        const dataset = await gptscriptClient.createDataset(process.env.GPTSCRIPT_WORKSPACE_ID, `slack_thread_${threadId}`, `thread history for thread "${threadId}"`)
         const elements = await Promise.all(replies.messages.map(async (reply) => {
             return {
-                name: reply.ts,
+                name: `${reply.ts}`,
                 description: '',
-                contents: Buffer.from(await messageToString(webClient, reply))
+                contents: await messageToString(webClient, reply)
             }
         }))
-        await gptscriptClient.addDatasetElements(process.env.GPTSCRIPT_WORKSPACE_ID, dataset.id, elements)
-
-        console.log(`Created dataset with ID ${dataset.id} with ${replies.messages.length} thread replies`)
+        const datasetID = await gptscriptClient.addDatasetElements(elements, {
+            name: `slack_thread_${threadId}`,
+            description: `thread history for thread "${threadId}"`
+        })
+        console.log(`Created dataset with ID ${datasetID} with ${replies.messages.length} thread replies`)
     } catch (e) {
         console.log('Failed to create dataset:', e)
     }
@@ -127,17 +130,18 @@ export async function search(webClient, query) {
 
     try {
         const gptscriptClient = new GPTScript()
-        const dataset = await gptscriptClient.createDataset(process.env.GPTSCRIPT_WORKSPACE_ID, `slack_search_${query}`, `search results for query "${query}"`)
         const elements = await Promise.all(result.messages.matches.map(async (message) => {
             return {
                 name: `${message.iid}_${message.ts}`,
                 description: '',
-                contents: Buffer.from(await messageToString(webClient, message))
+                contents: await messageToString(webClient, message)
             }
         }))
-        await gptscriptClient.addDatasetElements(process.env.GPTSCRIPT_WORKSPACE_ID, dataset.id, elements)
-
-        console.log(`Created dataset with ID ${dataset.id} with ${result.messages.matches.length} search results`)
+        const datasetID = await gptscriptClient.addDatasetElements(elements, {
+            name: `slack_search_${query}`,
+            description: `search results for query "${query}"`
+        })
+        console.log(`Created dataset with ID ${datasetID} with ${result.messages.matches.length} search results`)
     } catch (e) {
         console.log('Failed to create dataset:', e)
     }
@@ -175,17 +179,17 @@ export async function listUsers(webClient) {
 
     try {
         const gptscriptClient = new GPTScript()
-        const dataset = await gptscriptClient.createDataset(process.env.GPTSCRIPT_WORKSPACE_ID, 'slack_users', 'list of slack users')
         const elements = users.members.map(user => {
             return {
-                name: user.name,
-                description: user.profile.real_name,
-                contents: Buffer.from(userToString(user))
+                name: `${user.name}`,
+                description: `${user.profile.real_name}`,
+                contents: userToString(user)
             }
         })
-        await gptscriptClient.addDatasetElements(process.env.GPTSCRIPT_WORKSPACE_ID, dataset.id, elements)
-
-        console.log(`Created dataset with ID ${dataset.id} with ${users.members.length} users`)
+        const datasetID = await gptscriptClient.addDatasetElements(elements, {
+            name: "slack_users"
+        })
+        console.log(`Created dataset with ID ${datasetID} with ${users.members.length} users`)
     } catch (e) {
         console.log('Failed to create dataset:', e)
     }
@@ -197,17 +201,18 @@ export async function searchUsers(webClient, query) {
 
     try {
         const gptscriptClient = new GPTScript()
-        const dataset = await gptscriptClient.createDataset(process.env.GPTSCRIPT_WORKSPACE_ID, `${query}_slack_users`, `list of slack users matching search query "${query}"`)
         const elements = matchingUsers.map(user => {
             return {
-                name: user.name,
-                description: user.profile.real_name,
-                contents: Buffer.from(userToString(user))
+                name: `${user.name}`,
+                description: `${user.profile.real_name}`,
+                contents: userToString(user)
             }
         })
-        await gptscriptClient.addDatasetElements(process.env.GPTSCRIPT_WORKSPACE_ID, dataset.id, elements)
-
-        console.log(`Created dataset with ID ${dataset.id} with ${matchingUsers.length} users`)
+        const datasetID = await gptscriptClient.addDatasetElements(elements, {
+            name: `${query}_slack_users`,
+            description: `list of slack users matching search query "${query}"`
+        })
+        console.log(`Created dataset with ID ${datasetID} with ${matchingUsers.length} users`)
     } catch (e) {
         console.log('Failed to create dataset:', e)
     }
@@ -276,17 +281,18 @@ export async function getDMHistory(webClient, userIds, limit) {
 
     try {
         const gptscriptClient = new GPTScript()
-        const dataset = await gptscriptClient.createDataset(process.env.GPTSCRIPT_WORKSPACE_ID, `slack_dm_history_${userIds}`, `chat history for DM with users "${userIds}"`)
         const elements = await Promise.all(history.messages.map(async (message) => {
             return {
-                name: message.ts,
+                name: `${message.ts}`,
                 description: '',
-                contents: Buffer.from(await messageToString(webClient, message))
+                contents: await messageToString(webClient, message)
             }
         }))
-        await gptscriptClient.addDatasetElements(process.env.GPTSCRIPT_WORKSPACE_ID, dataset.id, elements)
-
-        console.log(`Created dataset with ID ${dataset.id} with ${history.messages.length} messages`)
+        const datasetID = await gptscriptClient.addDatasetElements(elements, {
+            name: `slack_dm_history_${userIds}`,
+            description: `chat history for DM with users "${userIds}"`
+        })
+        console.log(`Created dataset with ID ${datasetID} with ${history.messages.length} messages`)
     } catch (e) {
         console.log('Failed to create dataset:', e)
     }
@@ -315,17 +321,18 @@ export async function getDMThreadHistory(webClient, userIds, threadId, limit) {
 
     try {
         const gptscriptClient = new GPTScript()
-        const dataset = await gptscriptClient.createDataset(process.env.GPTSCRIPT_WORKSPACE_ID, `slack_dm_thread_${threadId}`, `thread history for DM with users "${userIds}"`)
         const elements = await Promise.all(replies.messages.map(async (reply) => {
             return {
-                name: reply.ts,
+                name: `${reply.ts}`,
                 description: '',
-                contents: Buffer.from(await messageToString(webClient, reply))
+                contents: await messageToString(webClient, reply)
             }
         }))
-        await gptscriptClient.addDatasetElements(process.env.GPTSCRIPT_WORKSPACE_ID, dataset.id, elements)
-
-        console.log(`Created dataset with ID ${dataset.id} with ${replies.messages.length} thread replies`)
+        const datasetID = await gptscriptClient.addDatasetElements(elements, {
+            name: `slack_dm_thread_${threadId}`,
+            description: `thread history for DM with users "${userIds}"`
+        })
+        console.log(`Created dataset with ID ${datasetID} with ${replies.messages.length} thread replies`)
     } catch (e) {
         console.log('Failed to create dataset:', e)
     }
@@ -437,21 +444,22 @@ async function printHistory(webClient, channelId, history) {
         data.set(message.ts, messageStr)
     }
 
-    if (data.size > 10) {
-        try {
-            const gptscriptClient = new GPTScript()
-            const dataset = await gptscriptClient.createDataset(process.env.GPTSCRIPT_WORKSPACE_ID, `slack_history_${channelId}`, `chat history for channel "${channelId}"`)
-
-            for (const [key, value] of data.entries()) {
-                await gptscriptClient.addDatasetElement(process.env.GPTSCRIPT_WORKSPACE_ID, dataset.id, key, "", value)
-            }
-
-            console.log(`Created dataset with ID ${dataset.id} with ${data.size} messages`)
-            return
-        } catch (e) {} // Ignore errors if we got any. We'll just print the results below.
-    }
-
-    for (const [key, value] of data.entries()) {
-        console.log(value)
+    try {
+        const gptscriptClient = new GPTScript()
+        const elements = []
+        for (const [key, value] of data.entries()) {
+            elements.push({
+                name: `${key}`,
+                description: '',
+                contents: `${value}`
+            })
+        }
+        const datasetID = await gptscriptClient.addDatasetElements(elements, {
+            name: `slack_history_${channelId}`,
+            description: `chat history for channel "${channelId}"`
+        })
+        console.log(`Created dataset with ID ${datasetID} with ${elements.length} messages`)
+    } catch (e) {
+        console.log('Failed to create dataset:', e)
     }
 }

@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"os"
 
 	"github.com/gptscript-ai/go-gptscript"
 	"github.com/gptscript-ai/tools/excel/pkg/client"
@@ -28,15 +27,6 @@ func GetWorksheetData(ctx context.Context, workbookID, worksheetID string) error
 		return fmt.Errorf("failed to create gptscript client: %w", err)
 	}
 
-	dataset, err := gptscriptClient.CreateDataset(ctx,
-		os.Getenv("GPTSCRIPT_WORKSPACE_ID"),
-		fmt.Sprintf("%s_%s_worksheet_data", worksheetID, workbookID),
-		fmt.Sprintf("Data from Excel worksheet %s in workbook %s", worksheetID, workbookID),
-	)
-	if err != nil {
-		return err
-	}
-
 	var elements []gptscript.DatasetElement
 	for i, row := range data {
 		rowJSON, err := json.Marshal(row)
@@ -48,7 +38,7 @@ func GetWorksheetData(ctx context.Context, workbookID, worksheetID string) error
 			DatasetElementMeta: gptscript.DatasetElementMeta{
 				Name: fmt.Sprintf("row_%d", i),
 			},
-			Contents: rowJSON,
+			Contents: string(rowJSON),
 		})
 
 		if i == 5000 { // Stop after 5k rows. It's just too many, at least for now.
@@ -56,10 +46,14 @@ func GetWorksheetData(ctx context.Context, workbookID, worksheetID string) error
 		}
 	}
 
-	if err := gptscriptClient.AddDatasetElements(ctx, os.Getenv("GPTSCRIPT_WORKSPACE_ID"), dataset.ID, elements); err != nil {
+	datasetID, err := gptscriptClient.CreateDatasetWithElements(ctx, elements, gptscript.DatasetOptions{
+		Name:        fmt.Sprintf("%s_%s_worksheet_data", worksheetID, workbookID),
+		Description: fmt.Sprintf("Data from Excel worksheet %s in workbook %s", worksheetID, workbookID),
+	})
+	if err != nil {
 		return fmt.Errorf("failed to add elements: %w", err)
 	}
 
-	fmt.Printf("Dataset created with ID: %s\n", dataset.ID)
+	fmt.Printf("Dataset created with ID: %s\n", datasetID)
 	return nil
 }

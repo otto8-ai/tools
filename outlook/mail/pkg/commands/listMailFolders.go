@@ -3,7 +3,6 @@ package commands
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"github.com/gptscript-ai/go-gptscript"
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/client"
@@ -29,13 +28,6 @@ func ListMailFolders(ctx context.Context) error {
 		return fmt.Errorf("failed to create GPTScript client: %w", err)
 	}
 
-	workspaceID := os.Getenv("GPTSCRIPT_WORKSPACE_ID")
-
-	dataset, err := gptscriptClient.CreateDataset(ctx, workspaceID, "outlook_mail_folders", "Outlook mail folders")
-	if err != nil {
-		return fmt.Errorf("failed to create dataset: %w", err)
-	}
-
 	var elements []gptscript.DatasetElement
 	for _, folder := range result {
 		folderStr, err := printers.MailFolderToString(folder)
@@ -48,14 +40,17 @@ func ListMailFolders(ctx context.Context) error {
 				Name:        util.Deref(folder.GetId()),
 				Description: util.Deref(folder.GetDisplayName()),
 			},
-			Contents: []byte(folderStr),
+			Contents: folderStr,
 		})
 	}
 
-	if err := gptscriptClient.AddDatasetElements(ctx, workspaceID, dataset.ID, elements); err != nil {
-		return fmt.Errorf("failed to add dataset elements: %w", err)
+	datasetID, err := gptscriptClient.CreateDatasetWithElements(ctx, elements, gptscript.DatasetOptions{
+		Name: "outlook_mail_folders",
+	})
+	if err != nil {
+		return fmt.Errorf("failed to create dataset with elements: %w", err)
 	}
 
-	fmt.Printf("Created dataset with ID %s with %d folders\n", dataset.ID, len(result))
+	fmt.Printf("Created dataset with ID %s with %d folders\n", datasetID, len(result))
 	return nil
 }
