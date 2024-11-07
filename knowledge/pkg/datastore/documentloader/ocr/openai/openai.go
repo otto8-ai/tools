@@ -9,7 +9,6 @@ import (
 	"image"
 	"image/png"
 	"io"
-	"log/slog"
 	"math/rand"
 	"net/http"
 	"strings"
@@ -106,16 +105,61 @@ If you identify a specific page type, like book cover, table of contents, etc., 
 
 func (o *OpenAIOCR) Load(ctx context.Context, reader io.Reader) ([]vs.Document, error) {
 	if o.Prompt == "" {
-		o.Prompt = `What is in this image? If it's a pure text page, try to return it verbatim.
-Don't add any additional text as the output will be used for a retrieval pipeline later on.
-Leave out introductory sentences like "The image seems to contain...", etc.
-For images and tabular data, try to describe the content in a way that it's useful for retrieval later on.
-If you identify a specific page type, like book cover, table of contents, etc., please add that information to the beginning of the text.
+		o.Prompt = `Convert the content of the image into markdown format, ensuring the appropriate structure for various components including tables, lists, and other images. You will not add any of your own commentary to your response. Consider the following:
+
+- **Tables:** If the image contains tables, convert them into markdown tables. Ensure that all columns and rows from the table are accurately captured. Do not convert tables into JSON unless every column and row, with all data, can be properly represented.
+- **Lists:** If the image contains lists, convert them into markdown lists.
+- **Images:** If the image contains other images, summarize each image into text and wrap it with ` + "`<image></image>`" + ` tags.
+
+# Steps
+
+1. **Image Analysis:** Identify the various elements in the image such as tables, lists, and other images.
+   
+2. **Markdown Conversion:**
+- For tables, use the markdown format for tables. Make sure all columns and rows are preserved, including headers and any blank cells.
+- For lists, use markdown list conventions (ordered or unordered as per the original).
+- For images, write a brief descriptive summary of the image content and wrap it using ` + "`<image></image>`" + ` tags.
+
+3. **Compile:** Assemble all converted elements into cohesive markdown-formatted text.
+
+# Output Format
+
+- The output should be in markdown format, accurately representing each element from the image with appropriate markdown syntax. Pay close attention to the structure of tables, ensuring that no columns or rows are omitted.
+
+# Examples
+
+**Input Example 1:**
+
+An image containing a table with five columns and three rows, a list, and another image.
+
+**Output Example 1:**
+
+` + "```" + `
+| Column 1 | Column 2 | Column 3 | Column 4 | Column 5 |
+| -------- | -------- | -------- | -------- | -------- |
+| Row 1    | Data 2   | Data 3   | Data 4   | Data 5   |
+| Row 2    | Data 2   | Data 3   | Data 4   |          |
+| Row 3    | Data 2   |          | Data 4   | Data 5   |
+
+- List Item 1
+- List Item 2
+- List Item 3
+
+<image></image>
+Image description with as much detail as possible here.
+</image>
+` + "```" + `
+
+# Notes
+
+- Ensure that the markdown syntax is correct and renders well when processed.
+- Preserve column and row structure for tables, ensuring no data is lost or misrepresented.
+- Be attentive to the layout and order of elements as they appear in the image.
 `
 	}
 
-	if err := load.FillConfigEnv("OPENAI_", &o.OpenAIConfig); err != nil {
-		return nil, fmt.Errorf("error filling OpenAI config: %w", err)
+	if err := o.Configure(); err != nil {
+		return nil, fmt.Errorf("error configuring OpenAI OCR: %w", err)
 	}
 
 	// We don't pull this into the concurrent loop because we first want to make sure that the PDF can be converted to images completely
@@ -131,6 +175,8 @@ If you identify a specific page type, like book cover, table of contents, etc., 
 
 	g, ctx := errgroup.WithContext(ctx)
 
+	logger := log.FromCtx(ctx)
+	logger.Debug("Processing images", "totalPages", len(images))
 	for i, img := range images {
 		pageNo := i + 1
 
@@ -140,7 +186,6 @@ If you identify a specific page type, like book cover, table of contents, etc., 
 			}
 			defer sem.Release(1)
 
-			slog.Debug("Processing PDF image", "page", pageNo, "totalPages", len(images))
 			base64Image, err := EncodeImageToBase64(img)
 			if err != nil {
 				return fmt.Errorf("error encoding image to base64: %w", err)
