@@ -189,6 +189,9 @@ func (s *ClientLoad) run(ctx context.Context, input, output string) error {
 			})
 		}
 
+		if commonMetadata == nil {
+			commonMetadata = map[string]any{}
+		}
 		commonMetadata["source"] = input
 
 		for k, v := range metadata {
