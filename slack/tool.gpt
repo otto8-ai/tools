@@ -174,9 +174,17 @@ Param: limit: the number of messages to return
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js getDMThreadHistory
 
 ---
+Name: User Context
+Description: Get information about the logged in user and default time zone.
+Credential: ./credential
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js userContext
+
+---
 Name: Slack Context
 Type: context
 Share Context: ../time
+Share Tools: User Context
 
 #!sys.echo
 
@@ -186,6 +194,8 @@ You have access to a set of tools to interact with a Slack workspace.
 
 Do not provide channel, thread, or message IDs in the output, as these are not helpful for the user.
 When you use the search_messages tool, you can use normal Slack search filters. If you filter by user, use the full username, which can be obtained from the list_users or search_users tools.
+
+If you are asked about messages in a particular time frame, call the User Context tool to make sure you know which time zone to use.
 
 ## End of instructions for using Slack tools
 
