@@ -47,6 +47,7 @@ Param: from_name: (Optional) Search query for the name of the sender.
 Param: folder_id: (Optional) The ID of the folder to search in. If unset, will search all folders.
 Param: start: (Optional) The start date and time of the time frame to search within, in RFC 3339 format.
 Param: end: (Optional) The end date and time of the time frame to search within, in RFC 3339 format.
+Param: limit: (Optional, default 10) The maximum number of messages to return.
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool searchMessages
 

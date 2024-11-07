@@ -3,6 +3,7 @@ package commands
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/gptscript-ai/go-gptscript"
 	"github.com/gptscript-ai/tools/outlook/common/id"
@@ -13,7 +14,18 @@ import (
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/util"
 )
 
-func SearchMessages(ctx context.Context, subject, fromAddress, fromName, folderID, start, end string) error {
+func SearchMessages(ctx context.Context, subject, fromAddress, fromName, folderID, start, end, limit string) error {
+	var (
+		limitInt = 10
+		err      error
+	)
+	if limit != "" {
+		limitInt, err = strconv.Atoi(limit)
+		if err != nil {
+			return fmt.Errorf("failed to parse limit: %w", err)
+		}
+	}
+
 	trueFolderID, err := id.GetOutlookID(folderID)
 	if err != nil {
 		return fmt.Errorf("failed to get folder ID: %w", err)
@@ -24,7 +36,7 @@ func SearchMessages(ctx context.Context, subject, fromAddress, fromName, folderI
 		return fmt.Errorf("failed to create client: %w", err)
 	}
 
-	messages, err := graph.SearchMessages(ctx, c, subject, fromAddress, fromName, trueFolderID, start, end)
+	messages, err := graph.SearchMessages(ctx, c, subject, fromAddress, fromName, trueFolderID, start, end, limitInt)
 	if err != nil {
 		return fmt.Errorf("failed to search messages: %w", err)
 	}

@@ -43,6 +43,7 @@ func main() {
 			os.Getenv("FOLDER_ID"),
 			os.Getenv("START"),
 			os.Getenv("END"),
+			os.Getenv("LIMIT"),
 		); err != nil {
 			fmt.Printf("failed to search messages: %v\n", err)
 			os.Exit(1)
