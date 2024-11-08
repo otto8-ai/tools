@@ -17,6 +17,7 @@ import (
 
 	"dario.cat/mergo"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/load"
+	"github.com/gptscript-ai/knowledge/pkg/log"
 	cg "github.com/philippgille/chromem-go"
 )
 
@@ -113,7 +114,7 @@ func (p *EmbeddingModelProviderOpenAI) EmbeddingFunc() (cg.EmbeddingFunc, error)
 
 		slog.Debug("Using Azure OpenAI API", "deploymentURL", deploymentURL.String(), "APIVersion", p.APIVersion)
 
-		embeddingFunc = cg.NewEmbeddingFuncAzureOpenAI(
+		embeddingFunc = NewEmbeddingFuncAzureOpenAI(
 			p.APIKey,
 			deploymentURL.String(),
 			p.APIVersion,
@@ -248,10 +249,11 @@ func NewEmbeddingFuncOpenAICompat(config *OpenAICompatConfig) cg.EmbeddingFunc {
 }
 
 func requestWithExponentialBackoff(ctx context.Context, client *http.Client, req *http.Request, maxRetries int, handleRateLimit bool) ([]byte, error) {
-
 	const baseDelay = time.Millisecond * 200
 	var resp *http.Response
 	var err error
+
+	logger := log.FromCtx(ctx)
 
 	var failures []string
 
@@ -260,7 +262,8 @@ func requestWithExponentialBackoff(ctx context.Context, client *http.Client, req
 	if req.Body != nil {
 		bodyBytes, err = io.ReadAll(req.Body)
 		if err != nil {
-			return nil, fmt.Errorf("failed to read request body: %v", err)
+			failures = append(failures, fmt.Sprintf("failed to read request body: %v", err))
+			return nil, fmt.Errorf("failed to read request body: %v; failures: %v", err, strings.Join(failures, "; "))
 		}
 	}
 
@@ -272,16 +275,14 @@ func requestWithExponentialBackoff(ctx context.Context, client *http.Client, req
 
 		resp, err = client.Do(req)
 		if err == nil && resp.StatusCode == http.StatusOK {
-			if resp.Body == nil {
-				return nil, fmt.Errorf("response body is nil")
-			}
 			defer resp.Body.Close()
 
 			body, err := io.ReadAll(resp.Body)
 			if err != nil {
-				// Request was OK, but we hit an error reading the response body.
-				// This is likely a transient error, so we retry.
-				failures = append(failures, fmt.Sprintf("#%d/%d: failed to read response body: %v", i+1, maxRetries, err))
+				// Log the error and retry for transient error reading response body
+				msg := fmt.Sprintf("#%d/%d: failed to read response body: %v", i+1, maxRetries, err)
+				logger.Warn("Request failed - Retryable", "error", msg)
+				failures = append(failures, msg)
 				continue
 			}
 
@@ -297,9 +298,12 @@ func requestWithExponentialBackoff(ctx context.Context, client *http.Client, req
 				}
 				resp.Body.Close()
 			}
-			failures = append(failures, fmt.Sprintf("#%d/%d: %d <%s> (err: %v)", i+1, maxRetries, resp.StatusCode, bodystr, err))
+
+			msg := fmt.Sprintf("#%d/%d: %d <%s> (err: %v)", i+1, maxRetries, resp.StatusCode, bodystr, err)
+			failures = append(failures, msg)
 
 			if resp.StatusCode >= 500 || (handleRateLimit && resp.StatusCode == http.StatusTooManyRequests) {
+				logger.Warn("Request failed - Retryable", "error", msg)
 				// Retry for 5xx (Server Errors)
 				// We're also handling rate limit here (without checking the Retry-After header), if handleRateLimit is true,
 				// since it's what e.g. OpenAI recommends (see https://github.com/openai/openai-cookbook/blob/457f4310700f93e7018b1822213ca99c613dbd1b/examples/How_to_handle_rate_limits.ipynb).
@@ -308,14 +312,21 @@ func requestWithExponentialBackoff(ctx context.Context, client *http.Client, req
 				time.Sleep(delay + jitter)
 				continue
 			} else {
-				// Don't retry for other status codes
+				// Non-retriable error
+				logger.Error("Request failed - Non-retryable", "error", msg)
 				break
 			}
+		} else {
+			// Log connection errors (client.Do error) and retry if needed
+			msg := fmt.Sprintf("#%d/%d: failed to send request: %v", i+1, maxRetries, err)
+			logger.Warn("Request failed - Retryable", "error", msg)
+			failures = append(failures, msg)
 		}
-
 	}
 
-	return nil, fmt.Errorf("requesting embeddings - retry limit (%d) exceeded or failed with non-retriable error: %v", maxRetries, strings.Join(failures, "; "))
+	logger.Error("request retry limit exceeded or failed with non-retriable error(s)", "request", req)
+
+	return nil, fmt.Errorf("retry limit (%d) exceeded or failed with non-retriable error(s): %v", maxRetries, strings.Join(failures, "; "))
 }
 
 type OpenAICompatConfig struct {
@@ -358,4 +369,19 @@ func (c *OpenAICompatConfig) WithQueryParams(queryParams map[string]string) *Ope
 func (c *OpenAICompatConfig) WithNormalized(normalized bool) *OpenAICompatConfig {
 	c.normalized = &normalized
 	return c
+}
+
+const (
+	azureDefaultAPIVersion = "2024-02-01"
+)
+
+// NewEmbeddingFuncAzureOpenAI returns a function that creates embeddings for a text
+// using the Azure OpenAI API.
+// The `deploymentURL` is the URL of the deployed model, e.g. "https://YOUR_RESOURCE_NAME.openai.azure.com/openai/deployments/YOUR_DEPLOYMENT_NAME"
+// See https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/embeddings?tabs=console#how-to-get-embeddings
+func NewEmbeddingFuncAzureOpenAI(apiKey string, deploymentURL string, apiVersion string, model string) cg.EmbeddingFunc {
+	if apiVersion == "" {
+		apiVersion = azureDefaultAPIVersion
+	}
+	return NewEmbeddingFuncOpenAICompat(NewOpenAICompatConfig(deploymentURL, apiKey, model).WithHeaders(map[string]string{"api-key": apiKey}).WithQueryParams(map[string]string{"api-version": apiVersion}))
 }
