@@ -26,6 +26,8 @@ async function main (): Promise<void> {
 
   app.post('/*', (async (req: Request, res: Response): Promise<void> => {
     try {
+      const responseStart = performance.now()
+
       const data = req.body
       const maxResults = Number.isInteger(Number(data.maxResults)) ? parseInt(data.maxResults as string, 10) : 3
       const model: string = data.model !== '' ? data.model : 'gpt-4o-mini'
@@ -39,14 +41,23 @@ async function main (): Promise<void> {
           query,
           maxResults
         )
+        const searchEnd = performance.now()
 
         // Extract the relevant citations from the content of each page
         const refinedResults = await refine(
           model,
           searchResults
         )
+        const refineEnd = performance.now()
 
-        res.status(200).send(JSON.stringify(refinedResults))
+        res.status(200).send(JSON.stringify({
+          duration: {
+            search: (searchEnd - responseStart) / 1000,
+            refine: (refineEnd - searchEnd) / 1000,
+            response: (refineEnd - responseStart) / 1000
+          },
+          ...refinedResults
+        }))
       })
     } catch (error: unknown) {
       const msg = error instanceof Error ? error.message : String(error)
