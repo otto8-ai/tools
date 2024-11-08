@@ -183,13 +183,16 @@ Credential: ./credential
 ---
 Name: Slack Context
 Type: context
-Share Context: ../time, User Context
+Share Context: ../time
+Share Tools: User Context
 
 #!sys.echo
 
 ## Instructions for using Slack tools
 
 You have access to a set of tools to interact with a Slack workspace.
+
+Before calling any other Slack tools, call the User Context tool so that you know the default time zone and the user's information.
 
 Do not provide channel, thread, or message IDs in the output, as these are not helpful for the user.
 When you use the search_messages tool, you can use normal Slack search filters. If you filter by user, use the full username, which can be obtained from the list_users or search_users tools.
