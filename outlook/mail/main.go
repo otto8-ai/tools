@@ -72,6 +72,11 @@ func main() {
 			fmt.Printf("failed to move message: %v\n", err)
 			os.Exit(1)
 		}
+	case "getDefaultTimezone":
+		if err := commands.GetDefaultTimezone(context.Background()); err != nil {
+			fmt.Printf("failed to get default timezone: %v\n", err)
+			os.Exit(1)
+		}
 	default:
 		fmt.Printf("Unknown command: %s\n", command)
 		os.Exit(1)
