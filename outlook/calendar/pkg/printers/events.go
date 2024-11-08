@@ -93,6 +93,20 @@ func PrintEvent(event models.Eventable, detailed bool) {
 			fmt.Printf("  Body: %s\n", strings.ReplaceAll(body, "\n", "\n  "))
 			fmt.Printf("  (End Body)\n")
 		}
+		attachments := event.GetAttachments()
+		if len(attachments) > 0 {
+			for _, attachment := range attachments {
+				attachmentType := util.Deref(attachment.GetOdataType())
+				if attachmentType == "#microsoft.graph.fileAttachment" {
+					fileAttachment := attachment.(*models.FileAttachment)
+					fmt.Printf("File Attachment: %s, Size: %d bytes, Content Type: %s\n", *fileAttachment.GetName(), *fileAttachment.GetSize(), *fileAttachment.GetContentType())
+				} else if attachmentType == "#microsoft.graph.itemAttachment" {
+					itemAttachment := attachment.(*models.ItemAttachment)
+					fmt.Printf("Item Attachment: %s\n", *itemAttachment.GetName())
+				}
+			}
+		}
+		fmt.Printf("You can open the event using this link: %s\n", util.Deref(event.GetWebLink()))
 	}
 	fmt.Println()
 }

@@ -22,24 +22,42 @@ type CreateEventInfo struct {
 }
 
 func GetEvent(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, eventID, calendarID string, owner OwnerType) (models.Eventable, error) {
+	expand := []string{"attachments"}
 	if calendarID != "" {
 		switch owner {
 		case OwnerTypeUser:
-			resp, err := client.Me().Calendars().ByCalendarId(calendarID).Events().ByEventId(eventID).Get(ctx, &users.ItemCalendarsItemEventsEventItemRequestBuilderGetRequestConfiguration{})
+			requestParameters := &users.ItemCalendarsItemEventsEventItemRequestBuilderGetQueryParameters{
+				Expand: expand,
+			}
+			configuration := &users.ItemCalendarsItemEventsEventItemRequestBuilderGetRequestConfiguration{
+				QueryParameters: requestParameters,
+			}
+			resp, err := client.Me().Calendars().ByCalendarId(calendarID).Events().ByEventId(eventID).Get(ctx, configuration)
 			if err != nil {
 				return nil, fmt.Errorf("failed to get event: %w", err)
 			}
 			return resp, nil
 		case OwnerTypeGroup:
-			resp, err := client.Groups().ByGroupId(calendarID).Events().ByEventId(eventID).Get(ctx, &groups.ItemEventsEventItemRequestBuilderGetRequestConfiguration{})
+			requestParameters := &groups.ItemEventsEventItemRequestBuilderGetQueryParameters{
+				Expand: expand,
+			}
+			configuration := &groups.ItemEventsEventItemRequestBuilderGetRequestConfiguration{
+				QueryParameters: requestParameters,
+			}
+			resp, err := client.Groups().ByGroupId(calendarID).Events().ByEventId(eventID).Get(ctx, configuration)
 			if err != nil {
 				return nil, fmt.Errorf("failed to get event: %w", err)
 			}
 			return resp, nil
 		}
 	}
-
-	resp, err := client.Me().Events().ByEventId(eventID).Get(ctx, &users.ItemEventsEventItemRequestBuilderGetRequestConfiguration{})
+	requestParameters := &users.ItemEventsEventItemRequestBuilderGetQueryParameters{
+		Expand: expand,
+	}
+	configuration := &users.ItemEventsEventItemRequestBuilderGetRequestConfiguration{
+		QueryParameters: requestParameters,
+	}
+	resp, err := client.Me().Events().ByEventId(eventID).Get(ctx, configuration)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get event: %w", err)
 	}
