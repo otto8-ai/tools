@@ -35,7 +35,15 @@ func main() {
 			os.Exit(1)
 		}
 	case "searchMessages":
-		if err := commands.SearchMessages(context.Background(), os.Getenv("SUBJECT"), os.Getenv("FROM_ADDRESS"), os.Getenv("FROM_NAME"), os.Getenv("FOLDER_ID")); err != nil {
+		if err := commands.SearchMessages(
+			context.Background(),
+			os.Getenv("SUBJECT"),
+			os.Getenv("FROM_ADDRESS"),
+			os.Getenv("FROM_NAME"),
+			os.Getenv("FOLDER_ID"),
+			os.Getenv("START"),
+			os.Getenv("END"),
+		); err != nil {
 			fmt.Printf("failed to search messages: %v\n", err)
 			os.Exit(1)
 		}
