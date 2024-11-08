@@ -121,10 +121,11 @@ func scrape(ctx context.Context, converter *md.Converter, logOut *logrus.Logger,
 		visited[e.Request.URL.String()] = struct{}{}
 
 		output.Files[e.Request.URL.String()] = FileDetails{
-			FilePath:  filePath,
-			URL:       e.Request.URL.String(),
-			UpdatedAt: updatedAt,
-			Checksum:  checksum,
+			FilePath:    filePath,
+			URL:         e.Request.URL.String(),
+			UpdatedAt:   updatedAt,
+			Checksum:    checksum,
+			SizeInBytes: int64(len([]byte(markdown))),
 		}
 
 		output.State.WebsiteCrawlingState.Pages[e.Request.URL.String()] = PageDetails{

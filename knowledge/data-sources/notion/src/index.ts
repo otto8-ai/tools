@@ -12,6 +12,7 @@ interface OutputMetadata {
       updatedAt: string;
       filePath: string;
       url: string;
+      sizeInBytes: number;
     };
   };
   status: string;
@@ -33,14 +34,13 @@ async function writePageToFile(
   client: Client,
   page: PageObjectResponse,
   gptscriptClient: any
-) {
+): Promise<number> {
   const pageId = page.id;
   const pageContent = await getPageContent(client, pageId);
   const filePath = getPath(page);
-  await gptscriptClient.writeFileInWorkspace(
-    filePath,
-    Buffer.from(pageContent)
-  );
+  const buffer = Buffer.from(pageContent);
+  await gptscriptClient.writeFileInWorkspace(filePath, buffer);
+  return buffer.length;
 }
 
 function getPath(page: PageObjectResponse): string {
@@ -176,11 +176,12 @@ async function main() {
       output.files[page.url].updatedAt !== page.last_edited_time
     ) {
       console.error(`Writing page url: ${page.url}`);
-      await writePageToFile(client, page, gptscriptClient);
+      const sizeInBytes = await writePageToFile(client, page, gptscriptClient);
       output.files[page.url] = {
         url: page.url,
         filePath: getPath(page!),
         updatedAt: page.last_edited_time,
+        sizeInBytes: sizeInBytes,
       };
     } else {
       console.error(`Skipping page url: ${page.url}`);
