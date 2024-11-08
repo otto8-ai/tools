@@ -30,9 +30,12 @@ flows:
       - filetypes: [".pdf"]
         documentloader:
           name: smartpdf
-      - filetypes: [ ".pptx" ]
+      - filetypes: [ ".pptx", ".doc", ".ppt" ]
+        converter:
+          name: soffice
+          targetFormat: pdf
         documentloader:
-          name: convert_smartpdf
+          name: smartpdf
           options:
             fallbackOptions:
               onImageCount: 1

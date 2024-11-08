@@ -9,7 +9,6 @@ import (
 	"log/slog"
 	"strings"
 
-	"github.com/gptscript-ai/knowledge/pkg/datastore/documentloader/converter"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/documentloader/pdf/gopdf"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/documentloader/structured"
 	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
@@ -40,7 +39,7 @@ func GetDocumentLoaderConfig(name string) (any, error) {
 			return nil, fmt.Errorf("MuPDF is not available")
 		}
 		return MuPDFConfig, nil
-	case "smartpdf", "convert_smartpdf":
+	case "smartpdf":
 		if SmartPDFConfig == nil {
 			return nil, fmt.Errorf("SmartPDF is not available")
 		}
@@ -66,30 +65,6 @@ var OpenAIOCRConfig any
 
 var SmartPDFGetter func(config any) (LoaderFunc, error) = nil
 var SmartPDFConfig any
-
-func ConvertSmartPDFLoaderFunc(config any) (LoaderFunc, error) {
-	if SmartPDFGetter == nil {
-		return nil, fmt.Errorf("SmartPDF is not available")
-	}
-	sloader, err := SmartPDFGetter(config)
-	if err != nil {
-		return nil, err
-	}
-	c, err := converter.NewSofficeConverter()
-	if err != nil {
-		slog.Warn("Failed to create soffice converter", "error", err)
-		return nil, err
-	}
-
-	return func(ctx context.Context, reader io.Reader) ([]vs.Document, error) {
-		var err error
-		reader, err = c.Convert(ctx, reader, "pdf")
-		if err != nil {
-			return nil, err
-		}
-		return sloader(ctx, reader)
-	}, nil
-}
 
 func GetDocumentLoaderFunc(name string, config any) (LoaderFunc, error) {
 	switch name {
@@ -122,11 +97,6 @@ func GetDocumentLoaderFunc(name string, config any) (LoaderFunc, error) {
 			return nil, fmt.Errorf("SmartPDF is not available")
 		}
 		return SmartPDFGetter(config)
-	case "convert_smartpdf":
-		if SmartPDFGetter == nil {
-			return nil, fmt.Errorf("SmartPDF is not available")
-		}
-		return ConvertSmartPDFLoaderFunc(config)
 	case "pdf", "gopdf":
 		var pdfConfig gopdf.PDFOptions
 		if config != nil {

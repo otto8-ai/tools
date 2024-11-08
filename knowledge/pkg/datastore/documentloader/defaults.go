@@ -14,7 +14,6 @@ import (
 	"strings"
 
 	"code.sajari.com/docconv/v2"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/documentloader/converter"
 	pdfdefaults "github.com/gptscript-ai/knowledge/pkg/datastore/documentloader/pdf/defaults"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/filetypes"
 	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
@@ -51,21 +50,6 @@ func DefaultDocLoaderFunc(filetype string, opts DefaultDocLoaderFuncOpts) Loader
 	switch filetype {
 	case ".pdf", "application/pdf":
 		return func(ctx context.Context, reader io.Reader) ([]vs.Document, error) {
-			return pdfdefaults.DefaultPDFReaderFunc(ctx, reader)
-		}
-	case ".pptx", "application/vnd.openxmlformats-officedocument.presentationml.presentation":
-		c, err := converter.NewSofficeConverter()
-		if err != nil {
-			slog.Warn("Failed to create soffice converter", "error", err)
-			return nil
-		}
-
-		return func(ctx context.Context, reader io.Reader) ([]vs.Document, error) {
-			var err error
-			reader, err = c.Convert(ctx, reader, "pdf")
-			if err != nil {
-				return nil, err
-			}
 			return pdfdefaults.DefaultPDFReaderFunc(ctx, reader)
 		}
 	case ".html", "text/html":

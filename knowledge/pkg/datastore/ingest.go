@@ -28,10 +28,10 @@ type IngestOpts struct {
 }
 
 // Ingest loads a document from a reader and adds it to the dataset.
-func (s *Datastore) Ingest(ctx context.Context, datasetID string, name string, content []byte, opts IngestOpts) ([]string, error) {
+func (s *Datastore) Ingest(ctx context.Context, datasetID string, filename string, content []byte, opts IngestOpts) ([]string, error) {
 	ingestionStart := time.Now()
-	if name == "" {
-		return nil, fmt.Errorf("name is required")
+	if filename == "" {
+		return nil, fmt.Errorf("filename is required")
 	}
 
 	statusLog := log.FromCtx(ctx).With("phase", "store")
@@ -92,8 +92,6 @@ func (s *Datastore) Ingest(ctx context.Context, datasetID string, name string, c
 	} else if opts.IsDuplicateFunc != nil {
 		isDuplicate = opts.IsDuplicateFunc
 	}
-
-	filename := name
 
 	// Generate ID
 	fUUID, err := uuid.NewUUID()
@@ -159,7 +157,7 @@ func (s *Datastore) Ingest(ctx context.Context, datasetID string, name string, c
 	em := &transformers.ExtraMetadata{Metadata: metadata}
 	ingestionFlow.Transformations = append(ingestionFlow.Transformations, em)
 
-	docs, err := ingestionFlow.Run(ctx, bytes.NewReader(content))
+	docs, err := ingestionFlow.Run(ctx, bytes.NewReader(content), filename)
 	if err != nil {
 		statusLog.With("status", "failed").Error("Ingestion Flow failed", "error", err)
 		return nil, fmt.Errorf("ingestion flow failed for file %q: %w", filename, err)
