@@ -19,13 +19,11 @@ func GetDefaultTimezone(ctx context.Context) error {
 		return fmt.Errorf("failed to get mailbox settings: %w", err)
 	}
 
-	fmt.Println("## Time zone info")
 	if tz := settings.GetTimeZone(); tz != nil && *tz != "" {
 		fmt.Println("The user's default time zone is", *tz)
 	} else {
 		fmt.Println("The user's default time zone not defined")
 	}
-	fmt.Println("## End of time zone info")
 
 	return nil
 }

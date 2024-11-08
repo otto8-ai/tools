@@ -97,7 +97,7 @@ Param: destination_folder_id: The ID of the folder to move the message into.
 
 ---
 Name: Get Default Timezone
-Type: context
+Description: Get the default timezone for the user.
 Credential: ./credential
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool getDefaultTimezone
@@ -105,13 +105,16 @@ Credential: ./credential
 ---
 Name: Outlook Mail Context
 Type: context
-Share Context: ../../time, Get Default Timezone
+Share Context: ../../time
+Share Tools: Get Default Timezone
 
 #!sys.echo
 
 ## Instructions for using the Microsoft Outlook Mail tools
 
 You have access to tools for the Microsoft Outlook Mail API.
+
+Before calling any other Outlook tools, call Get Default Timezone tool, so that you know the user's timezone.
 
 Do not output mail folder IDs or message IDs because they are not helpful for the user. The message IDs are needed for getting message details, deleting a message, or moving a message.
 When printing a list of messages for the user, include the body preview. When printing a single message and its details, print the full body. Always include the email link.
