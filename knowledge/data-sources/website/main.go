@@ -40,10 +40,11 @@ type PageDetails struct {
 }
 
 type FileDetails struct {
-	FilePath  string `json:"filePath,omitempty"`
-	URL       string `json:"url,omitempty"`
-	UpdatedAt string `json:"updatedAt,omitempty"`
-	Checksum  string `json:"checksum,omitempty"`
+	FilePath    string `json:"filePath,omitempty"`
+	URL         string `json:"url,omitempty"`
+	UpdatedAt   string `json:"updatedAt,omitempty"`
+	Checksum    string `json:"checksum,omitempty"`
+	SizeInBytes int64  `json:"sizeInBytes,omitempty"`
 }
 
 func main() {

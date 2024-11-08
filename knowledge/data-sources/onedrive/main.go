@@ -72,9 +72,10 @@ func (s StaticTokenCredential) GetToken(ctx context.Context, options policy.Toke
 }
 
 type FileDetails struct {
-	FilePath  string `json:"filePath"`
-	URL       string `json:"url"`
-	UpdatedAt string `json:"updatedAt"`
+	FilePath    string `json:"filePath"`
+	URL         string `json:"url"`
+	SizeInBytes int64  `json:"sizeInBytes"`
+	UpdatedAt   string `json:"updatedAt"`
 }
 
 func main() {
@@ -246,6 +247,7 @@ func saveToMetadata(ctx context.Context, logErr *logrus.Logger, output *Metadata
 			detail.FilePath = relativePath
 			detail.URL = *item.Item.GetWebUrl()
 			detail.UpdatedAt = (*item.Item.GetLastModifiedDateTime()).String()
+			detail.SizeInBytes = *item.Item.GetSize()
 			output.Files[*item.Item.GetId()] = detail
 		}
 		files[*item.Item.GetId()] = FileState{
