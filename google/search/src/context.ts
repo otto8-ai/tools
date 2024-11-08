@@ -13,7 +13,7 @@ export async function newBrowserContext (sessionDir: string, javaScriptEnabled: 
           viewport: null,
           args: ['--start-maximized', '--disable-blink-features=AutomationControlled'],
           ignoreDefaultArgs: ['--enable-automation'],
-          javaScriptEnabled: javaScriptEnabled
+          javaScriptEnabled
         })
       break
     case 'chrome':
@@ -26,7 +26,7 @@ export async function newBrowserContext (sessionDir: string, javaScriptEnabled: 
           channel: 'chrome',
           args: ['--start-maximized', '--disable-blink-features=AutomationControlled'],
           ignoreDefaultArgs: ['--enable-automation'],
-          javaScriptEnabled: javaScriptEnabled
+          javaScriptEnabled
         })
       break
     case 'firefox':
@@ -36,7 +36,7 @@ export async function newBrowserContext (sessionDir: string, javaScriptEnabled: 
           userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Firefox/89.0 Safari/537.36',
           headless: true,
           viewport: null,
-          javaScriptEnabled: javaScriptEnabled
+          javaScriptEnabled
         })
       break
     case 'edge':
@@ -49,7 +49,7 @@ export async function newBrowserContext (sessionDir: string, javaScriptEnabled: 
           channel: 'msedge',
           args: ['--start-maximized', '--disable-blink-features=AutomationControlled'],
           ignoreDefaultArgs: ['--enable-automation'],
-          javaScriptEnabled: javaScriptEnabled
+          javaScriptEnabled
         })
       break
     default:
@@ -62,7 +62,7 @@ export async function newBrowserContext (sessionDir: string, javaScriptEnabled: 
 let systemBrowser: string | undefined
 
 async function getSystemBrowser (): Promise<string> {
-  if (systemBrowser) {
+  if (systemBrowser != null) {
     return systemBrowser
   }
 
@@ -87,5 +87,5 @@ async function getSystemBrowser (): Promise<string> {
     }
   }
 
-  throw new Error(`No supported browsers (Chrome, Edge, Firefox) are installed. ${errors}`)
+  throw new Error(`No supported browsers (Chrome, Edge, Firefox) are installed: ${JSON.stringify(errors)}`)
 }

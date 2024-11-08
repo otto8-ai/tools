@@ -3,7 +3,7 @@ import os from 'node:os'
 import path from 'node:path'
 import { type IncomingHttpHeaders } from 'node:http'
 import { createHash } from 'node:crypto'
-import { type BrowserContext, type Page } from 'playwright'
+import { type BrowserContext } from 'playwright'
 import { newBrowserContext } from './context.ts'
 import { Mutex } from 'async-mutex'
 
@@ -21,12 +21,13 @@ const APP_CACHE_DIR = (() => {
   }
 })()
 
-async function clearAppCacheDir(): Promise<void> {
+async function clearAppCacheDir (): Promise<void> {
   try {
     await fs.rm(APP_CACHE_DIR, { recursive: true, force: true })
     console.log(`Cleared APP_CACHE_DIR at startup: ${APP_CACHE_DIR}`)
-  } catch (error) {
-    console.error(`Failed to clear APP_CACHE_DIR: ${error}`)
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error(`Failed to clear APP_CACHE_DIR: ${msg}`)
   }
 }
 
@@ -52,11 +53,11 @@ export class SessionManager {
     return sessionManager
   }
 
-  async withSession (sessionId: string, fn: (browserContext: BrowserContext ) => Promise<void>): Promise<void> {
+  async withSession (sessionId: string, fn: (browserContext: BrowserContext) => Promise<void>): Promise<void> {
     let managedSession: ManagedSession | undefined
     await this.sessionsLock.runExclusive(async () => {
       managedSession = this.sessions.get(sessionId)
-      if (!managedSession) {
+      if (managedSession == null) {
         managedSession = { session: await Session.create(sessionId) }
         this.sessions.set(sessionId, managedSession)
       }
@@ -74,7 +75,7 @@ export class SessionManager {
   private async deleteSession (sessionId: string): Promise<void> {
     await this.sessionsLock.runExclusive(async () => {
       const managedSession = this.sessions.get(sessionId)
-      if (managedSession) {
+      if (managedSession != null) {
         const { session, cleanupTimeout } = managedSession
         if (cleanupTimeout != null) clearTimeout(cleanupTimeout)
         await session?.close()
