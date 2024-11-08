@@ -39,6 +39,7 @@ Name: Search Messages
 Description: Search for messages. At least one of subject, from_address, or from_name must be specified.
 Share Context: Outlook Mail Context
 Credential: Outlook Mail OAuth Read Credential from ./credential
+Tools: github.com/gptscript-ai/datasets/filter
 Share Tools: List Mail Folders
 Param: subject: (Optional) Search query for the subject of the message.
 Param: from_address: (Optional) Search query for the email address of the sender.
@@ -46,6 +47,7 @@ Param: from_name: (Optional) Search query for the name of the sender.
 Param: folder_id: (Optional) The ID of the folder to search in. If unset, will search all folders.
 Param: start: (Optional) The start date and time of the time frame to search within, in RFC 3339 format.
 Param: end: (Optional) The end date and time of the time frame to search within, in RFC 3339 format.
+Param: limit: (Optional, default 10) The maximum number of messages to return.
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool searchMessages
 

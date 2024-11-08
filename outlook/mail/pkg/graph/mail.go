@@ -38,7 +38,7 @@ func GetMessageDetails(ctx context.Context, client *msgraphsdkgo.GraphServiceCli
 	return result, nil
 }
 
-func SearchMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, subject, fromAddress, fromName, folderID, start, end string) ([]models.Messageable, error) {
+func SearchMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, subject, fromAddress, fromName, folderID, start, end string, limit int) ([]models.Messageable, error) {
 	var (
 		result models.MessageCollectionResponseable
 		err    error
@@ -78,7 +78,7 @@ func SearchMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceClient
 			QueryParameters: &users.ItemMailFoldersItemMessagesRequestBuilderGetQueryParameters{
 				Orderby: []string{"receivedDateTime DESC"},
 				Filter:  util.Ptr(strings.Join(filter, " and ")),
-				Top:     util.Ptr(int32(10)),
+				Top:     util.Ptr(int32(limit)),
 			},
 		})
 	} else {
@@ -86,7 +86,7 @@ func SearchMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceClient
 			QueryParameters: &users.ItemMessagesRequestBuilderGetQueryParameters{
 				Orderby: []string{"receivedDateTime DESC"},
 				Filter:  util.Ptr(strings.Join(filter, " and ")),
-				Top:     util.Ptr(int32(10)),
+				Top:     util.Ptr(int32(limit)),
 			},
 		})
 	}
