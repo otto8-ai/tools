@@ -45,7 +45,7 @@ func SearchMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceClient
 		filter []string
 	)
 
-	// It is important that start and end filters are first in the list.
+	// It is important that a receivedDateTime filter is first in the list.
 	// Details in the first answer on this question:
 	// https://learn.microsoft.com/en-us/answers/questions/656200/graph-api-to-filter-results-on-from-and-subject-an
 	if end != "" {
