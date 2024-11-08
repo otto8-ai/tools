@@ -11,7 +11,7 @@ import (
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/printers"
 )
 
-func SearchMessages(ctx context.Context, subject, fromAddress, fromName, folderID string) error {
+func SearchMessages(ctx context.Context, subject, fromAddress, fromName, folderID, start, end string) error {
 	trueFolderID, err := id.GetOutlookID(folderID)
 	if err != nil {
 		return fmt.Errorf("failed to get folder ID: %w", err)
@@ -22,7 +22,7 @@ func SearchMessages(ctx context.Context, subject, fromAddress, fromName, folderI
 		return fmt.Errorf("failed to create client: %w", err)
 	}
 
-	messages, err := graph.SearchMessages(ctx, c, subject, fromAddress, fromName, trueFolderID)
+	messages, err := graph.SearchMessages(ctx, c, subject, fromAddress, fromName, trueFolderID, start, end)
 	if err != nil {
 		return fmt.Errorf("failed to search messages: %w", err)
 	}

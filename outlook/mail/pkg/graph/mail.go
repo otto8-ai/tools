@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/gomarkdown/markdown"
 	"github.com/gomarkdown/markdown/html"
@@ -37,13 +38,24 @@ func GetMessageDetails(ctx context.Context, client *msgraphsdkgo.GraphServiceCli
 	return result, nil
 }
 
-func SearchMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, subject, fromAddress, fromName, folderID string) ([]models.Messageable, error) {
+func SearchMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, subject, fromAddress, fromName, folderID, start, end string) ([]models.Messageable, error) {
 	var (
 		result models.MessageCollectionResponseable
 		err    error
 		filter []string
 	)
 
+	// It is important that a receivedDateTime filter is first in the list.
+	// Details in the first answer on this question:
+	// https://learn.microsoft.com/en-us/answers/questions/656200/graph-api-to-filter-results-on-from-and-subject-an
+	if end != "" {
+		filter = append(filter, fmt.Sprintf("receivedDateTime le %s", end))
+	} else {
+		// Using the receivedDateTime in the orderBy parameter requires us to have it in the filter as well.
+		// So we ask for messages that were received prior to tomorrow, which should be all messages.
+		tomorrow := time.Now().Add(time.Hour * 24).Format(time.RFC3339)
+		filter = append(filter, fmt.Sprintf("receivedDateTime le %s", tomorrow))
+	}
 	if subject != "" {
 		filter = append(filter, fmt.Sprintf("contains(subject, '%s')", subject))
 	}
@@ -53,6 +65,9 @@ func SearchMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceClient
 	if fromName != "" {
 		filter = append(filter, fmt.Sprintf("contains(from/emailAddress/name, '%s')", fromName))
 	}
+	if start != "" {
+		filter = append(filter, fmt.Sprintf("receivedDateTime ge %s", start))
+	}
 
 	if len(filter) == 0 {
 		return nil, fmt.Errorf("at least one of subject, from_address, or from_name must be provided")
@@ -61,15 +76,17 @@ func SearchMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceClient
 	if folderID != "" {
 		result, err = client.Me().MailFolders().ByMailFolderId(folderID).Messages().Get(ctx, &users.ItemMailFoldersItemMessagesRequestBuilderGetRequestConfiguration{
 			QueryParameters: &users.ItemMailFoldersItemMessagesRequestBuilderGetQueryParameters{
-				Filter: util.Ptr(strings.Join(filter, " and ")),
-				Top:    util.Ptr(int32(10)),
+				Orderby: []string{"receivedDateTime DESC"},
+				Filter:  util.Ptr(strings.Join(filter, " and ")),
+				Top:     util.Ptr(int32(10)),
 			},
 		})
 	} else {
 		result, err = client.Me().Messages().Get(ctx, &users.ItemMessagesRequestBuilderGetRequestConfiguration{
 			QueryParameters: &users.ItemMessagesRequestBuilderGetQueryParameters{
-				Filter: util.Ptr(strings.Join(filter, " and ")),
-				Top:    util.Ptr(int32(10)),
+				Orderby: []string{"receivedDateTime DESC"},
+				Filter:  util.Ptr(strings.Join(filter, " and ")),
+				Top:     util.Ptr(int32(10)),
 			},
 		})
 	}
