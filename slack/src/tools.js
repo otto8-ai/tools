@@ -207,7 +207,15 @@ export async function listUsers(webClient) {
 
 export async function searchUsers(webClient, query) {
     const users = await webClient.users.list()
-    const matchingUsers = users.members.filter(user => user.name.includes(query) || user.profile.real_name.includes(query))
+    const matchingUsers = users.members.filter(user => {
+        return user.name.includes(query) ||
+            user.profile.real_name.includes(query) ||
+            user.profile.display_name.includes(query)
+    })
+    if (matchingUsers.length === 0) {
+        console.log('No users found')
+        return
+    }
 
     try {
         const gptscriptClient = new GPTScript()
