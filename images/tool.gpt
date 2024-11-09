@@ -17,7 +17,8 @@ Param: images: (required) Comma delimited list containing one or more image URIs
 ---
 Name: Generate Images
 Credential: github.com/gptscript-ai/credentials/model-provider
-Description: Generates images based on the specified parameters and returns a list of URLs to the generated images
+Description: Generates images based on the specified parameters and returns a list of file paths to the generated images
+Share Context: Images Context
 Param: model: (optional) A model with image generation capabilities to use for the generation (default dall-e-3)
 Param: prompt: (required) Text describing the images to generate
 Param: size: (optional) Dimensions of the images to generate in. One of [1024x1024, 256x256, 512x512, 1792x1024, 1024x1792] (default 1024x1024)
@@ -25,6 +26,18 @@ Param: quality: (optional) Quality of the generated image. One of [standard, hd]
 Param: quantity: (optional) Quantity of distinct images to generate (default 1, max 10)
 
 #!/usr/bin/env npm --silent --prefix ${GPTSCRIPT_TOOL_DIR} run tool -- generateImages
+
+---
+Name: Images Context
+Type: context
+
+#!sys.echo
+
+## Instructions for using the Images tools
+
+When referencing generated image paths, always use the exact file path returned by the Generate Images tool without any modification. **Do not add any protocol prefixes** (such as `http://` or `https://`). Only use the exact path as provided.
+
+## End of instructions for using the Images tools
 
 ---
 !metadata:*:category
