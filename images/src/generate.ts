@@ -6,6 +6,8 @@ import { createHash } from 'node:crypto'
 type ImageSize = '1024x1024' | '256x256' | '512x512' | '1792x1024' | '1024x1792';
 type ImageQuality = 'standard' | 'hd';
 
+const threadId = process.env.OTTO_THREAD_ID;
+
 const generateImages = async (
   model: string = 'dall-e-3',
   prompt: string = '',
@@ -49,6 +51,9 @@ const generateImages = async (
 
     // Output the workspace file paths of the generated images
     filePaths.forEach(filePath => {
+      if (threadId !== undefined) {
+        filePath = `/api/threads/${threadId}/file/${filePath}`
+      }
       console.log(filePath)
     })
   } catch (error) {
@@ -63,14 +68,10 @@ async function download(client: gptscript.GPTScript, imageUrl: string): Promise<
   })
   const content = Buffer.from(response.data, 'binary')
 
-
   // Generate a SHA-256 hash of the imageURL to use as the filename
-  let filePath= `${createHash('sha256').update(imageUrl).digest('hex')}.png`;
-  if (process.env.OTTO_THREAD_ID !== undefined) {
-    filePath = `files/${filePath}`
-  }
+  const filePath = `generated_image_${createHash('sha256').update(imageUrl).digest('hex').substring(0, 8)}.png`;
 
-  await client.writeFileInWorkspace(filePath, content)
+  await client.writeFileInWorkspace(`${threadId ? 'files/' : ''}${filePath}`, content);
 
   return filePath
 }
