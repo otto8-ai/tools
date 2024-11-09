@@ -59,6 +59,12 @@ func main() {
 			Recurrence: os.Getenv("RECURRENCE"),
 		}
 
+		// Unset the BODY variable so that it does not mess up writing files to the workspace later on.
+		if err := os.Unsetenv("BODY"); err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
 		isOnline, err := strconv.ParseBool(os.Getenv("IS_ONLINE"))
 		if err != nil {
 			fmt.Println(err)

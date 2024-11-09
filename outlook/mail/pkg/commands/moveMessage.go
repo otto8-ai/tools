@@ -12,12 +12,12 @@ import (
 )
 
 func MoveMessage(ctx context.Context, messageID, destinationFolderID string) error {
-	trueMessageID, err := id.GetOutlookID(messageID)
+	trueMessageID, err := id.GetOutlookID(ctx, messageID)
 	if err != nil {
 		return fmt.Errorf("failed to get message ID: %w", err)
 	}
 
-	trueDestinationFolderID, err := id.GetOutlookID(destinationFolderID)
+	trueDestinationFolderID, err := id.GetOutlookID(ctx, destinationFolderID)
 	if err != nil {
 		return fmt.Errorf("failed to get destination folder ID: %w", err)
 	}
@@ -33,7 +33,7 @@ func MoveMessage(ctx context.Context, messageID, destinationFolderID string) err
 	}
 
 	// Save the new message ID
-	newMessageID, err := id.SetOutlookID(util.Deref(message.GetId()))
+	newMessageID, err := id.SetOutlookID(ctx, util.Deref(message.GetId()))
 	if err != nil {
 		return fmt.Errorf("failed to save new message ID: %w", err)
 	}

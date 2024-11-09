@@ -1,84 +1,142 @@
 package id
 
 import (
+	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
-	"log"
-	"os"
-	"path"
 	"strconv"
 
-	"github.com/glebarez/sqlite"
-	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
+	"github.com/gptscript-ai/go-gptscript"
 )
 
-type CacheObject struct {
-	ID        uint   `gorm:"primaryKey;autoIncrement"`
-	OutlookID string `gorm:"index"`
+type Cache struct {
+	OutlookToNumber map[string]int `json:"outlookToNumber"`
+	NumberToOutlook map[int]string `json:"numberToOutlook"`
 }
 
-var dbPath = path.Join(os.Getenv("GPTSCRIPT_WORKSPACE_DIR"), "outlookcache.db")
+const cacheLocation = "outlookcache.json"
 
-func loadDB() (*gorm.DB, error) {
-	db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{
-		Logger: logger.New(log.New(os.Stdout, "\r\n", log.LstdFlags), logger.Config{LogLevel: logger.Error, IgnoreRecordNotFoundError: true}),
-	})
+func loadCache(ctx context.Context, gs *gptscript.GPTScript) (Cache, error) {
+	cacheBytes, err := gs.ReadFileInWorkspace(ctx, cacheLocation)
 	if err != nil {
-		return nil, fmt.Errorf("failed to load the Outlook cache database: %w", err)
+		var notFoundError *gptscript.NotFoundInWorkspaceError
+		if errors.As(err, &notFoundError) {
+			return Cache{
+				OutlookToNumber: make(map[string]int),
+				NumberToOutlook: make(map[int]string),
+			}, nil
+		}
+		return Cache{}, fmt.Errorf("failed to read the Outlook cache file: %w", err)
 	}
 
-	if err = db.AutoMigrate(&CacheObject{}); err != nil {
-		return nil, fmt.Errorf("failed to migrate the Outlook cache database: %w", err)
+	var cache Cache
+	if err = json.Unmarshal(cacheBytes, &cache); err != nil {
+		return Cache{}, fmt.Errorf("failed to unmarshal the Outlook cache: %w", err)
 	}
-
-	return db, nil
+	return cache, nil
 }
 
-func GetOutlookID(id string) (string, error) {
-	if id == "" {
-		return "", fmt.Errorf("ID is required")
-	}
-
-	idNum, err := strconv.Atoi(id)
+func writeCache(ctx context.Context, gs *gptscript.GPTScript, c Cache) error {
+	cacheBytes, err := json.Marshal(c)
 	if err != nil {
-		// If the ID does not convert to a number, it's most likely already an Outlook ID, so we just return it back.
-		return id, nil
+		return fmt.Errorf("failed to marshal the Outlook cache: %w", err)
 	}
 
-	db, err := loadDB()
+	if err = gs.WriteFileInWorkspace(ctx, cacheLocation, cacheBytes); err != nil {
+		return fmt.Errorf("failed to write the Outlook cache file: %w", err)
+	}
+	return nil
+}
+
+func GetOutlookID(ctx context.Context, id string) (string, error) {
+	ids, err := GetOutlookIDs(ctx, []string{id})
 	if err != nil {
 		return "", err
 	}
-
-	var cache CacheObject
-	if err = db.First(&cache, idNum).Error; err != nil {
-		return "", fmt.Errorf("failed to get the Outlook ID: %w", err)
-	}
-
-	return cache.OutlookID, nil
+	return ids[id], nil
 }
 
-func SetOutlookID(outlookID string) (string, error) {
-	if outlookID == "" {
-		return "", fmt.Errorf("Outlook ID is required")
+func GetOutlookIDs(ctx context.Context, ids []string) (map[string]string, error) {
+	if len(ids) == 0 {
+		return map[string]string{}, nil
 	}
 
-	db, err := loadDB()
+	gs, err := gptscript.NewGPTScript()
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize the GPTScript client: %w", err)
+	}
+
+	cache, err := loadCache(ctx, gs)
+	if err != nil {
+		return nil, err
+	}
+
+	results := map[string]string{}
+	for _, id := range ids {
+		idNum, err := strconv.Atoi(id)
+		if err != nil {
+			// If the ID does not convert to a number, it's most likely already an Outlook ID, so we just return it back.
+			results[id] = id
+			continue
+		}
+
+		outlookID, ok := cache.NumberToOutlook[idNum]
+		if !ok {
+			return nil, fmt.Errorf("error: Outlook ID not found")
+		}
+
+		results[id] = outlookID
+	}
+
+	return results, nil
+}
+
+func SetOutlookID(ctx context.Context, outlookID string) (string, error) {
+	ids, err := SetOutlookIDs(ctx, []string{outlookID})
 	if err != nil {
 		return "", err
 	}
+	return ids[outlookID], nil
+}
 
-	// First we try looking for an existing one.
-	var existing CacheObject
-	if err = db.Where("outlook_id = ?", outlookID).First(&existing).Error; err == nil {
-		return strconv.Itoa(int(existing.ID)), nil
+func SetOutlookIDs(ctx context.Context, outlookIDs []string) (map[string]string, error) {
+	if len(outlookIDs) == 0 {
+		return map[string]string{}, nil
 	}
 
-	// If it doesn't exist, we create a new one.
-	cache := CacheObject{OutlookID: outlookID}
-	if err = db.Create(&cache).Error; err != nil {
-		return "", fmt.Errorf("failed to set the Outlook ID: %w", err)
+	gs, err := gptscript.NewGPTScript()
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize the GPTScript client: %w", err)
 	}
 
-	return strconv.Itoa(int(cache.ID)), nil
+	cache, err := loadCache(ctx, gs)
+	if err != nil {
+		return nil, err
+	}
+
+	results := map[string]string{}
+	mustWrite := false
+	for _, outlookID := range outlookIDs {
+		// First we try looking for an existing one.
+		numID, ok := cache.OutlookToNumber[outlookID]
+
+		// If it doesn't exist, we create a new one.
+		if !ok {
+			numID = len(cache.OutlookToNumber) + 1
+			cache.OutlookToNumber[outlookID] = numID
+			cache.NumberToOutlook[numID] = outlookID
+			mustWrite = true
+		}
+
+		results[outlookID] = strconv.Itoa(numID)
+	}
+
+	if mustWrite {
+		if err = writeCache(ctx, gs, cache); err != nil {
+			return nil, err
+		}
+	}
+
+	return results, nil
 }

@@ -11,7 +11,7 @@ import (
 )
 
 func SendDraft(ctx context.Context, draftID string) error {
-	trueDraftID, err := id.GetOutlookID(draftID)
+	trueDraftID, err := id.GetOutlookID(ctx, draftID)
 	if err != nil {
 		return fmt.Errorf("failed to get outlook ID: %w", err)
 	}

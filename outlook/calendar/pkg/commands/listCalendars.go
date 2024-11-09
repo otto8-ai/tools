@@ -8,6 +8,7 @@ import (
 	"github.com/gptscript-ai/tools/outlook/calendar/pkg/global"
 	"github.com/gptscript-ai/tools/outlook/calendar/pkg/graph"
 	"github.com/gptscript-ai/tools/outlook/calendar/pkg/printers"
+	"github.com/gptscript-ai/tools/outlook/calendar/pkg/util"
 	"github.com/gptscript-ai/tools/outlook/common/id"
 )
 
@@ -22,13 +23,16 @@ func ListCalendars(ctx context.Context) error {
 		return fmt.Errorf("failed to list calendars: %w", err)
 	}
 
-	// Translate Outlook IDs to friendly numerical IDs.
+	calendarIDs := util.Map(calendars, func(c graph.CalendarInfo) string {
+		return c.ID
+	})
+	translatedCalendarIDs, err := id.SetOutlookIDs(ctx, calendarIDs)
+	if err != nil {
+		return fmt.Errorf("failed to set calendar IDs: %w", err)
+	}
+
 	for i := range calendars {
-		calendarID, err := id.SetOutlookID(calendars[i].ID)
-		if err != nil {
-			return fmt.Errorf("failed to set calendar ID: %w", err)
-		}
-		calendars[i].ID = calendarID
+		calendars[i].ID = translatedCalendarIDs[calendars[i].ID]
 	}
 
 	printers.PrintCalendars(calendars)

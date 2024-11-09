@@ -11,7 +11,7 @@ import (
 )
 
 func DeleteMessage(ctx context.Context, messageID string) error {
-	trueMessageID, err := id.GetOutlookID(messageID)
+	trueMessageID, err := id.GetOutlookID(ctx, messageID)
 	if err != nil {
 		return fmt.Errorf("failed to get message ID: %w", err)
 	}

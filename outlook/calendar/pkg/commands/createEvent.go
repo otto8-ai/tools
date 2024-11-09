@@ -19,7 +19,7 @@ func CreateEvent(ctx context.Context, info graph.CreateEventInfo) error {
 
 	// If there is a calendar ID set on the info, translate it to the true Outlook ID.
 	if info.ID != "" {
-		trueCalendarID, err := id.GetOutlookID(info.ID)
+		trueCalendarID, err := id.GetOutlookID(ctx, info.ID)
 		if err != nil {
 			return fmt.Errorf("failed to get outlook ID: %w", err)
 		}
@@ -31,7 +31,7 @@ func CreateEvent(ctx context.Context, info graph.CreateEventInfo) error {
 		return fmt.Errorf("failed to create event: %w", err)
 	}
 
-	eventID, err := id.SetOutlookID(util.Deref(event.GetId()))
+	eventID, err := id.SetOutlookID(ctx, util.Deref(event.GetId()))
 	if err != nil {
 		return fmt.Errorf("failed to get event ID: %w", err)
 	}

@@ -26,6 +26,14 @@ func ListEvents(ctx context.Context, start, end time.Time) error {
 		return fmt.Errorf("failed to list calendars: %w", err)
 	}
 
+	calendarIDs := util.Map(calendars, func(cal graph.CalendarInfo) string {
+		return cal.ID
+	})
+	translatedCalendarIDs, err := id.SetOutlookIDs(ctx, calendarIDs)
+	if err != nil {
+		return fmt.Errorf("failed to set calendar IDs: %w", err)
+	}
+
 	calendarEvents := map[graph.CalendarInfo][]models.Eventable{}
 	for _, cal := range calendars {
 		if cal.ID == "" {
@@ -37,24 +45,33 @@ func ListEvents(ctx context.Context, start, end time.Time) error {
 			return fmt.Errorf("failed to list events for calendar %s: %w", util.Deref(cal.Calendar.GetName()), err)
 		}
 
-		// Translate Outlook IDs to friendly numerical IDs
-		calendarID, err := id.SetOutlookID(cal.ID)
-		if err != nil {
-			return fmt.Errorf("failed to set calendar ID: %w", err)
+		if len(events) == 0 {
+			continue
 		}
-		cal.ID = calendarID
+
+		// Update the ID to the translated ID
+		cal.ID = translatedCalendarIDs[cal.ID]
+
+		eventIDs := util.Map(events, func(event models.Eventable) string {
+			return util.Deref(event.GetId())
+		})
+		translatedEventIDs, err := id.SetOutlookIDs(ctx, eventIDs)
+		if err != nil {
+			return fmt.Errorf("failed to set event IDs: %w", err)
+		}
 
 		for i := range events {
-			eventID, err := id.SetOutlookID(util.Deref(events[i].GetId()))
-			if err != nil {
-				return fmt.Errorf("failed to set event ID: %w", err)
-			}
-			events[i].SetId(&eventID)
+			events[i].SetId(util.Ptr(translatedEventIDs[util.Deref(events[i].GetId())]))
 		}
 
 		if len(events) > 0 {
 			calendarEvents[cal] = events
 		}
+	}
+
+	if len(calendarEvents) == 0 {
+		fmt.Println("No events found")
+		return nil
 	}
 
 	gptscriptClient, err := gptscript.NewGPTScript()
