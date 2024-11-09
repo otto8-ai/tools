@@ -10,14 +10,14 @@ Credential: github.com/gptscript-ai/credentials/model-provider
 Description: Analyze images using a given prompt and return relevant information about the images
 Param: model: (optional) A model with vision capabilities to use for the analysis
 Param: prompt: (required) A prompt to analyze the images with
-Param: images: (required) Comma delimited list containing one or more image URIs to analyze. Valid URIs start with "http://" and "https://" for remote images, and "file://" for paths to local image files. Only supports jpeg and png. Commas in file paths should be escaped with a backslash
+Param: images: (required) Comma delimited list containing one or more image URIs to analyze. Valid URIs start with "http://" and "https://" for remote images, and no protocol for file paths to local images. Only supports jpeg and png. Commas in file paths should be escaped with a backslash
 
 #!/usr/bin/env npm --silent --prefix ${GPTSCRIPT_TOOL_DIR} run tool -- analyzeImages
 
 ---
 Name: Generate Images
 Credential: github.com/gptscript-ai/credentials/model-provider
-Description: Generates images based on the specified parameters and returns a list of file paths to the generated images
+Description: Generates images based on the specified parameters and returns a list of absolute file paths to the generated images
 Share Context: Images Context
 Param: model: (optional) A model with image generation capabilities to use for the generation (default dall-e-3)
 Param: prompt: (required) Text describing the images to generate
@@ -33,11 +33,12 @@ Type: context
 
 #!sys.echo
 
-## Instructions for using the Images tools
+## Instructions for using the Generate Images and Analyze Images tools ##
 
-When referencing generated image paths, always use the exact file path returned by the Generate Images tool without any modification. **Do not add any protocol prefixes** (such as `http://` or `https://`). Only use the exact path as provided.
+Always use the exact file paths returned by the Generate Images tool when embedding them in markdown.
+For example, if Generate Images returns `/api/threads/123abc/generated_image_defg1234.png`, you should use `![Image Title](/api/threads/123abc/generated_image_defg1234.png)` in your response.
 
-## End of instructions for using the Images tools
+## Instructions for using the Generate Images and Analyze Images tools ##
 
 ---
 !metadata:*:category
