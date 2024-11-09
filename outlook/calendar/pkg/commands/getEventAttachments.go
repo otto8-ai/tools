@@ -3,6 +3,8 @@ package commands
 import (
 	"context"
 	"fmt"
+	"log"
+
 	"github.com/gptscript-ai/go-gptscript"
 	"github.com/gptscript-ai/tools/outlook/calendar/pkg/client"
 	"github.com/gptscript-ai/tools/outlook/calendar/pkg/global"
@@ -10,18 +12,17 @@ import (
 	"github.com/gptscript-ai/tools/outlook/calendar/pkg/util"
 	"github.com/gptscript-ai/tools/outlook/common/id"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
-	"log"
 )
 
 func GetEventAttachments(ctx context.Context, eventID, calendarID string, owner graph.OwnerType) error {
-	trueEventID, err := id.GetOutlookID(eventID)
+	trueEventID, err := id.GetOutlookID(ctx, eventID)
 	if err != nil {
 		return fmt.Errorf("failed to get Outlook ID: %w", err)
 	}
 
 	var trueCalendarID string
 	if calendarID != "" {
-		trueCalendarID, err = id.GetOutlookID(calendarID)
+		trueCalendarID, err = id.GetOutlookID(ctx, calendarID)
 		if err != nil {
 			return fmt.Errorf("failed to get Outlook ID: %w", err)
 		}
@@ -41,16 +42,16 @@ func GetEventAttachments(ctx context.Context, eventID, calendarID string, owner 
 
 	attachments := event.GetAttachments()
 	if len(attachments) < 1 {
-	    return nil
+		return nil
 	}
 	gptscriptClient, _ := gptscript.NewGPTScript()
 	for _, attachment := range attachments {
 		attachmentType := util.Deref(attachment.GetOdataType())
 		if attachmentType != "#microsoft.graph.fileAttachment" {
-		    fmt.Printf("Skipping non-file attachment: %s\n", *attachment.GetId())
-		    continue
+			fmt.Printf("Skipping non-file attachment: %s\n", *attachment.GetId())
+			continue
 		}
-		
+
 		fileAttachment := attachment.(*models.FileAttachment)
 		fileName := *fileAttachment.GetName()
 		contentBytes := fileAttachment.GetContentBytes()
