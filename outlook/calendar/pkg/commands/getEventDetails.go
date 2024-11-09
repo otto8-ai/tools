@@ -13,14 +13,14 @@ import (
 )
 
 func GetEventDetails(ctx context.Context, eventID, calendarID string, owner graph.OwnerType) error {
-	trueEventID, err := id.GetOutlookID(eventID)
+	trueEventID, err := id.GetOutlookID(ctx, eventID)
 	if err != nil {
 		return fmt.Errorf("failed to get Outlook ID: %w", err)
 	}
 
 	var trueCalendarID string
 	if calendarID != "" {
-		trueCalendarID, err = id.GetOutlookID(calendarID)
+		trueCalendarID, err = id.GetOutlookID(ctx, calendarID)
 		if err != nil {
 			return fmt.Errorf("failed to get Outlook ID: %w", err)
 		}

@@ -23,7 +23,7 @@ func CreateDraft(ctx context.Context, info graph.DraftInfo) error {
 	}
 
 	// Get numerical ID for the draft
-	draftID, err := id.SetOutlookID(util.Deref(draft.GetId()))
+	draftID, err := id.SetOutlookID(ctx, util.Deref(draft.GetId()))
 	if err != nil {
 		return fmt.Errorf("failed to set draft ID: %w", err)
 	}

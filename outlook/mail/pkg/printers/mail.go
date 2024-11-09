@@ -6,16 +6,12 @@ import (
 	"time"
 
 	md "github.com/JohannesKaufmann/html-to-markdown"
-	"github.com/gptscript-ai/tools/outlook/common/id"
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/util"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 )
 
 func MailFolderToString(folder models.MailFolderable) (string, error) {
 	var result strings.Builder
-	if err := replaceMailFolderIDs(folder); err != nil {
-		return "", fmt.Errorf("failed to fix mail folder: %w", err)
-	}
 
 	result.WriteString(fmt.Sprintf("Name: %s\n", util.Deref(folder.GetDisplayName())))
 	result.WriteString(fmt.Sprintf("ID: %s\n", util.Deref(folder.GetId())))
@@ -39,9 +35,6 @@ func PrintMessage(msg models.Messageable, detailed bool) error {
 
 func MessageToString(msg models.Messageable, detailed bool) (string, error) {
 	var result strings.Builder
-	if err := replaceMessageIDs(msg); err != nil {
-		return "", fmt.Errorf("failed to fix message: %w", err)
-	}
 
 	result.WriteString(fmt.Sprintf("Subject: %s\n", util.Deref(msg.GetSubject())))
 	result.WriteString(fmt.Sprintf("Message ID: %s\n", util.Deref(msg.GetId())))
@@ -76,46 +69,4 @@ func MessageToString(msg models.Messageable, detailed bool) (string, error) {
 
 func recipientableToString(r models.Recipientable) string {
 	return fmt.Sprintf("%s (%s)", util.Deref(r.GetEmailAddress().GetName()), util.Deref(r.GetEmailAddress().GetAddress()))
-}
-
-// replaceMailFolderIDs replaces the ID values of the mail folder itself and its parent
-// with the corresponding numerical ID that we generate in the database.
-// This is necessary to do prior to printing it for the LLM.
-func replaceMailFolderIDs(folder models.MailFolderable) error {
-	newFolderID, err := id.SetOutlookID(util.Deref(folder.GetId()))
-	if err != nil {
-		return fmt.Errorf("failed to set folder ID: %w", err)
-	}
-
-	folder.SetId(util.Ptr(newFolderID))
-
-	if folder.GetParentFolderId() != nil {
-		newParentFolderID, err := id.SetOutlookID(util.Deref(folder.GetParentFolderId()))
-		if err != nil {
-			return fmt.Errorf("failed to set parent folder ID: %w", err)
-		}
-
-		folder.SetParentFolderId(util.Ptr(newParentFolderID))
-	}
-	return nil
-}
-
-// replaceMessageIDs replaces the ID values of the message itself and its parent folder
-// with the corresponding numerical ID that we generate in the database.
-// This is necessary to do prior to printing it for the LLM.
-func replaceMessageIDs(msg models.Messageable) error {
-	newMessageID, err := id.SetOutlookID(util.Deref(msg.GetId()))
-	if err != nil {
-		return fmt.Errorf("failed to set message ID: %w", err)
-	}
-
-	msg.SetId(util.Ptr(newMessageID))
-
-	newFolderID, err := id.SetOutlookID(util.Deref(msg.GetParentFolderId()))
-	if err != nil {
-		return fmt.Errorf("failed to set folder ID: %w", err)
-	}
-
-	msg.SetParentFolderId(util.Ptr(newFolderID))
-	return nil
 }

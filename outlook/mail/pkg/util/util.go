@@ -18,3 +18,13 @@ func Map[T, U any](arr []T, f func(T) U) []U {
 	}
 	return out
 }
+
+func Filter[T any](arr []T, f func(T) bool) []T {
+	var out []T
+	for _, v := range arr {
+		if f(v) {
+			out = append(out, v)
+		}
+	}
+	return out
+}

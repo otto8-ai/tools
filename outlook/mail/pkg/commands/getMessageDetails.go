@@ -9,10 +9,11 @@ import (
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/global"
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/graph"
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/printers"
+	"github.com/gptscript-ai/tools/outlook/mail/pkg/util"
 )
 
 func GetMessageDetails(ctx context.Context, messageID string) error {
-	trueMessageID, err := id.GetOutlookID(messageID)
+	trueMessageID, err := id.GetOutlookID(ctx, messageID)
 	if err != nil {
 		return fmt.Errorf("failed to get outlook ID: %w", err)
 	}
@@ -26,6 +27,14 @@ func GetMessageDetails(ctx context.Context, messageID string) error {
 	if err != nil {
 		return fmt.Errorf("failed to get message details: %w", err)
 	}
+
+	result.SetId(&trueMessageID)
+
+	parentFolderID, err := id.GetOutlookID(ctx, util.Deref(result.GetParentFolderId()))
+	if err != nil {
+		return fmt.Errorf("failed to get outlook ID: %w", err)
+	}
+	result.SetParentFolderId(&parentFolderID)
 
 	if err := printers.PrintMessage(result, true); err != nil {
 		return fmt.Errorf("failed to print message: %w", err)

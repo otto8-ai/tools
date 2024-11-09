@@ -85,11 +85,17 @@ func main() {
 }
 
 func getDraftInfoFromEnv() graph.DraftInfo {
-	return graph.DraftInfo{
+	info := graph.DraftInfo{
 		Subject:    os.Getenv("SUBJECT"),
 		Body:       os.Getenv("BODY"),
 		Recipients: strings.Split(os.Getenv("RECIPIENTS"), ","),
 		CC:         strings.Split(os.Getenv("CC"), ","),
 		BCC:        strings.Split(os.Getenv("BCC"), ","),
 	}
+
+	// We need to unset BODY, because if it's still set when we try to write files to the workspace,
+	// it will cause problems, since the workspace tools have an argument with the same name.
+	_ = os.Unsetenv("BODY")
+
+	return info
 }

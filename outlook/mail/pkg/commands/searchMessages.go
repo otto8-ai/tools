@@ -12,6 +12,7 @@ import (
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/graph"
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/printers"
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/util"
+	"github.com/microsoftgraph/msgraph-sdk-go/models"
 )
 
 func SearchMessages(ctx context.Context, subject, fromAddress, fromName, folderID, start, end, limit string) error {
@@ -26,7 +27,7 @@ func SearchMessages(ctx context.Context, subject, fromAddress, fromName, folderI
 		}
 	}
 
-	trueFolderID, err := id.GetOutlookID(folderID)
+	trueFolderID, err := id.GetOutlookID(ctx, folderID)
 	if err != nil {
 		return fmt.Errorf("failed to get folder ID: %w", err)
 	}
@@ -51,8 +52,28 @@ func SearchMessages(ctx context.Context, subject, fromAddress, fromName, folderI
 		return fmt.Errorf("failed to create GPTScript client: %w", err)
 	}
 
+	// Translate Outlook IDs to friendly IDs before we print.
+	messageIDs := util.Map(messages, func(message models.Messageable) string {
+		return util.Deref(message.GetId())
+	})
+	translatedMessageIDs, err := id.SetOutlookIDs(ctx, messageIDs)
+	if err != nil {
+		return fmt.Errorf("failed to translate message IDs: %w", err)
+	}
+
+	folderIDs := util.Map(messages, func(message models.Messageable) string {
+		return util.Deref(message.GetParentFolderId())
+	})
+	translatedFolderIDs, err := id.SetOutlookIDs(ctx, folderIDs)
+	if err != nil {
+		return fmt.Errorf("failed to translate folder IDs: %w", err)
+	}
+
 	var elements []gptscript.DatasetElement
 	for _, message := range messages {
+		message.SetId(util.Ptr(translatedMessageIDs[util.Deref(message.GetId())]))
+		message.SetParentFolderId(util.Ptr(translatedFolderIDs[util.Deref(message.GetParentFolderId())]))
+
 		messageStr, err := printers.MessageToString(message, false)
 		if err != nil {
 			return fmt.Errorf("failed to convert message to string: %w", err)

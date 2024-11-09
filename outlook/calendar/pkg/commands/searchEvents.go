@@ -12,6 +12,7 @@ import (
 	"github.com/gptscript-ai/tools/outlook/calendar/pkg/graph"
 	"github.com/gptscript-ai/tools/outlook/calendar/pkg/printers"
 	"github.com/gptscript-ai/tools/outlook/calendar/pkg/util"
+	"github.com/gptscript-ai/tools/outlook/common/id"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 )
 
@@ -26,6 +27,14 @@ func SearchEvents(ctx context.Context, query string, start, end time.Time) error
 		return fmt.Errorf("failed to list calendars: %w", err)
 	}
 
+	calendarIDs := util.Map(calendars, func(cal graph.CalendarInfo) string {
+		return cal.ID
+	})
+	translatedCalendarIDs, err := id.SetOutlookIDs(ctx, calendarIDs)
+	if err != nil {
+		return fmt.Errorf("failed to translate calendar IDs: %w", err)
+	}
+
 	calendarEventsInSubject := make(map[graph.CalendarInfo][]models.Eventable, len(calendars))
 	calendarEventsInPreview := make(map[graph.CalendarInfo][]models.Eventable, len(calendars))
 	for _, cal := range calendars {
@@ -34,7 +43,24 @@ func SearchEvents(ctx context.Context, query string, start, end time.Time) error
 			return fmt.Errorf("failed to search events: %w", err)
 		}
 
+		if len(result) == 0 {
+			continue
+		}
+
+		// Update the calendar ID to the translated ID
+		cal.ID = translatedCalendarIDs[cal.ID]
+
+		eventIDs := util.Map(result, func(event models.Eventable) string {
+			return util.Deref(event.GetId())
+		})
+		translatedEventIDs, err := id.SetOutlookIDs(ctx, eventIDs)
+		if err != nil {
+			return fmt.Errorf("failed to translate event IDs: %w", err)
+		}
+
 		for _, event := range result {
+			event.SetId(util.Ptr(translatedEventIDs[util.Deref(event.GetId())]))
+
 			if strings.Contains(strings.ToLower(util.Deref(event.GetSubject())), strings.ToLower(query)) {
 				calendarEventsInSubject[cal] = append(calendarEventsInSubject[cal], event)
 			} else if strings.Contains(strings.ToLower(util.Deref(event.GetBodyPreview())), strings.ToLower(query)) {
@@ -44,6 +70,10 @@ func SearchEvents(ctx context.Context, query string, start, end time.Time) error
 	}
 
 	allCalendarEvents := util.Merge(calendarEventsInSubject, calendarEventsInPreview)
+	if len(allCalendarEvents) == 0 {
+		fmt.Println("No events found")
+		return nil
+	}
 
 	gptscriptClient, err := gptscript.NewGPTScript()
 	if err != nil {
