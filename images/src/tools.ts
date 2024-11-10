@@ -14,8 +14,7 @@ try {
             analyzeImages(
                 process.env.MODEL,
                 process.env.PROMPT,
-                // Split the string into an array of image URLs, while being careful to handle URLs that contain commas.
-                process.env.IMAGES?.split(/(?<!\\),/).map(image => image.replace(/\\,/g, ',')),
+                process.env.IMAGES,
             )
             break
         case 'generateImages':
