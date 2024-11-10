@@ -1,5 +1,5 @@
 import { type BrowserContext, type Page } from '@playwright/test'
-import * as cheerio from 'cheerio'
+import * as cheerio from 'cheerio';
 import TurndownService from 'turndown'
 
 export interface SearchResult {
@@ -94,21 +94,31 @@ export async function getMarkdown (page: Page, url: string): Promise<string> {
 
   const $ = cheerio.load(content)
 
-  $('noscript').remove()
-  $('script').remove()
-  $('style').remove()
-  $('img').remove()
-  $('g').remove()
-  $('svg').remove()
-  $('iframe').remove()
+  // Remove common elements that are not part of the page content
+  $('noscript, script, style, img, g, svg, iframe').remove();
+  $('header, footer, nav, aside').remove();
+  $('.sidebar, .advertisement, .promo, .related-content').remove();
 
   let resp = ''
-  const turndownService = new TurndownService()
-  $('body').each(function () {
-    resp += turndownService.turndown($.html(this))
+  const turndownService = new TurndownService({
+    headingStyle: 'atx',
+    bulletListMarker: '-',
   })
 
-  return trunc(resp, 80000)
+  // Prioritize main content selectors, eventually falling back to the full body
+  const mainSelectors = ['main', 'article', '.content', '.post-content', '.entry-content', '.main-content', 'body'];
+  for (const selector of mainSelectors) {
+    if ($(selector).first().length < 1) {
+      continue;
+    }
+
+    $(selector).each(function () {
+      resp += turndownService.turndown($.html(this))
+    })
+    break
+  }
+
+  return trunc(resp, 50000)
 }
 
 function trunc (text: string, max: number): string {
