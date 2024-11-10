@@ -53,29 +53,28 @@ export class SessionManager {
   }
 
   async withSession (sessionId: string, fn: (browserContext: BrowserContext, openPages: Map<string, Page>) => Promise<void>): Promise<void> {
+    let managedSession: ManagedSession | undefined
     await this.sessionsLock.runExclusive(async () => {
-      let managedSession = this.sessions.get(sessionId)
+      managedSession = this.sessions.get(sessionId)
       if (!managedSession) {
         managedSession = { session: await Session.create(sessionId) }
         this.sessions.set(sessionId, managedSession)
       }
       if (managedSession.cleanupTimeout != null) clearTimeout(managedSession.cleanupTimeout)
+    })
 
-      await managedSession.session.lock.runExclusive(async () => {
-        if (managedSession.session.browserContext != null) {
-          await fn(managedSession.session.browserContext, managedSession.session.openPages)
-        }
+    if (managedSession?.session.browserContext != null) {
+        await fn(managedSession.session.browserContext, managedSession.session.openPages)
         managedSession.cleanupTimeout = setTimeout(() => {
           void this.deleteSession(sessionId)
         }, SESSION_TTL)
-      })
-    })
+    }
   }
 
   private async deleteSession (sessionId: string): Promise<void> {
     await this.sessionsLock.runExclusive(async () => {
       const managedSession = this.sessions.get(sessionId)
-      if (managedSession) {
+      if (managedSession != null) {
         const { session, cleanupTimeout } = managedSession
         if (cleanupTimeout != null) clearTimeout(cleanupTimeout)
         await session?.close()

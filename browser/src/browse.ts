@@ -84,9 +84,10 @@ export async function browse (page: Page, website: string, mode: string, tabID: 
     })
   }
 
-  if (printTabID) {
-    resp = `Tab ID: ${tabID}\n` + resp
-  }
+  // TODO: Add tab ID to the response once we reintroduce persistent tabs
+  // if (printTabID) {
+  //   resp = `Tab ID: ${tabID}\n` + resp
+  // }
   return resp.split('\n').filter(line => line.trim() !== '').join('\n')
 }
 

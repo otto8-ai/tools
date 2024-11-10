@@ -1,129 +1,15 @@
 Name: Browser
-Description: Tools to navigate websites using a browser.
+Description: Tools to browse the web
 Metadata: bundle: true
-Credentials: github.com/gptscript-ai/credentials/model-provider
-Share Tools: Browse, Get Page Contents, Filter, Fill, Enter, Scroll, Back, Forward, Screenshot
+Share Tools: Get Page Contents
 
 ---
 Name: Get Page Contents
-Share Context: Browser Context
 Tools: service
 Description: Returns the content of a website in Markdown format.
-Params: website: (optional) The HTTPS URL of the website to visit. If unspecified, the current tab will be used.
-Params: tabID: (optional) The ID of the tab. If unspecified, a new tab will be created.
+Params: website: (required) The HTTPS URL of the website to visit.
 
 #!http://service.daemon.gptscript.local/getPageContents
-
----
-Name: Browse
-Metadata: index: false
-Share Context: Browser Context
-Tools: service
-Description: Navigates to a website, but does not return the content.
-Params: website: (required) The URL of the website to visit. Must be an HTTPS URL.
-Params: tabID: (optional) The ID of the tab. If unspecified, a new tab will be created, and its ID will be returned.
-
-#!http://service.daemon.gptscript.local/browse
-
-
----
-Name: Filter
-Metadata: index: false
-Share Context: Browser Context
-Tools: service
-Description: filter the page to get elements based on specific id, html tag, or class.
-Params: filter: (required) the class (eg. '.foo') or id (eg. '#foo') of an object.
-Params: tabID: (required) The ID of the tab to filter contents of.
-Tools: service
-
-#!http://service.daemon.gptscript.local/getFilteredContent
-
----
-Name: Fill
-Metadata: index: false
-Share Context: Browser Context
-Tools: service
-Description: Fills text into an element on the web page. Useful for filling out forms and other input fields.
-Params: userInput: (required) Description of the element to fill. This will be used by the AI to determine which element to pick from the results. Be as detailed as possible.
-Params: keywords: (required) Comma-separated list of keywords related to the element. These will be used to search for the element on the page. ALWAYS include at least one keyword.
-Params: matchTextOnly: (optional, default false) Matches elements based on their text content and ignores their attributes. Useful for cases where the user has provided an exact piece of text that they want to interact with on the page.
-Params: content: The text to fill into the element.
-Params: tabID: (required) The ID of the tab.
-Tools: service
-
-#!http://service.daemon.gptscript.local/fill
-
----
-Name: Enter
-Metadata: index: false
-Share Context: Browser Context
-Tools: service
-Description: Presses the enter key. Useful after filling out a form or other input.
-Params: tabID: (required) The ID of the tab.
-Tools: service
-
-#!http://service.daemon.gptscript.local/enter
-
----
-Name: Scroll
-Metadata: index: false
-Share Context: Browser Context
-Tools: service
-Description: Scrolls to the bottom of the page, possibly loading more content. Useful for sites like Reddit which support infinite scroll.
-Params: tabID: (required) The ID of the tab.
-Tools: service
-
-#!http://service.daemon.gptscript.local/scrollToBottom
-
----
-Name: Screenshot
-Metadata: index: false
-Share Context: Browser Context
-Tools: service
-Description: Take a screenshot of the given tabID
-Params: tabID: (required) The ID of the tab.
-
-#!http://service.daemon.gptscript.local/screenshot
-
----
-Name: Back
-Metadata: index: false
-Share Context: Browser Context
-Tools: service
-Description: Navigates to back to the previous site in history.
-Params: tabID: (required) The ID of the tab.
-Tools: service
-
-#!http://service.daemon.gptscript.local/back
-
----
-Name: Forward
-Share Context: Browser Context
-Tools: service
-Description: Navigates to forward to the next site in history.
-Params: tabID: (required) The ID of the tab.
-Tools: service
-
-#!http://service.daemon.gptscript.local/forward
-
----
-Name: Browser Context
-Metadata: index: false
-Type: context
-Share Context: ../time
-
-#!sys.echo
-
-## Instructions for using browser tabs
-
-You can create new tabs with the `Browse` or `Get Page Contents` tools by passing them a `website` and omitting the `tabID`.
-You can reuse an existing tab by passing the `tabID` of the tab you want to reuse.
-Each browser tab has mutable state that changes with every tool call that uses its `tabID`.
-Do not make parallel tool calls with the same `tabID`.
-Browser tabs are ephemeral and will be closed after 10 minutes of inactivity. Do not reuse a tab if the last tool call with its `tabID` finished more than 10 minutes ago.
-
-## End of instructions for using browser tabs
-
 
 ---
 Name: service
