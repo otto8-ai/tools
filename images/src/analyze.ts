@@ -1,36 +1,26 @@
 import { fileTypeFromBuffer } from 'file-type';
-import fs from 'fs';
+import { resolve } from 'path';
+import { readFile } from 'fs/promises';
 import OpenAI from 'openai';
 import { ChatCompletionContentPartImage } from 'openai/resources/chat/completions';
+import { GPTScript } from '@gptscript-ai/gptscript';
 
-const resolveImageURL = async (image: string): Promise<string> => {
-  const uri = new URL(image)
-  switch (uri.protocol) {
-    case 'http:':
-    case 'https:':
-      return image;
-    case 'file:': {
-      const filePath = image.slice(7);
-      const data = fs.readFileSync(filePath);
-      const mime = (await fileTypeFromBuffer(data))?.mime;
-      if (mime !== 'image/jpeg' && mime !== 'image/png') {
-        throw new Error('Unsupported mimetype');
-      }
-      const base64 = data.toString('base64')
-      return `data:${mime};base64,${base64}`
-    }
-    default:
-      throw new Error('Unsupported protocol')
-  }
-};
-
-const analyzeImages = async (
+export async function analyzeImages(
   model: string = 'gpt-4o',
   prompt: string = '',
-  images: string[] = [],
-): Promise<void> => {
+  images: string = '[]',
+): Promise<void> {
   if (!prompt) {
-    throw new Error('No prompt provided. Please provide a prompt to send to the vision model.');
+    prompt = 'Provide a brief description of each image'
+  }
+
+  try {
+    images = JSON.parse(images)
+    if (!Array.isArray(images) || !images.every(item => typeof item === 'string')) {
+      throw new Error('Invalid images format, expected a JSON array of strings')
+    }
+  } catch (error) {
+    throw new Error('Failed to parse images, expected a JSON array of strings')
   }
   if (images.length === 0) {
     throw new Error('No images provided. Please provide a list of images to send to the vision model.');
@@ -67,4 +57,47 @@ const analyzeImages = async (
   }
 }
 
-export { analyzeImages }
+const supportedMimeTypes = ['image/jpeg', 'image/png'];
+
+async function resolveImageURL (image: string): Promise<string> {
+  // If the image is a URL, return it as is
+  if (image.includes('://')) {
+    const url = new URL(image)
+    switch (url.protocol) {
+      case 'http:':
+      case 'https:':
+        return image;
+      default:
+        throw new Error(`Unsupported image URL protocol: ${url.protocol}`)
+    }
+  }
+
+  // Read the image file from the workspace and check its MIME type
+  const data = await readImageFile(image)
+  const mime = (await fileTypeFromBuffer(data))?.mime
+  if (mime === undefined || !supportedMimeTypes.includes(mime)) {
+    throw new Error(`Unsupported image file type ${mime}, expected one of ${supportedMimeTypes.join(', ')}`)
+  }
+
+  // Encode the image file as a base64 string and return it as a data URL
+  const base64 = data.toString('base64')
+  return `data:${mime};base64,${base64}`
+}
+
+const threadId = process.env.OTTO_THREAD_ID;
+
+async function readImageFile(path: string): Promise<Buffer> {
+  if (threadId === undefined) {
+    // Not running in Otto, just read the file
+    return await readFile(resolve(path))
+  }
+
+  // The Generate Images tool returns file paths with a special prefix
+  // so that they can be rendered in the Otto UI.
+  // e.g. /api/threads/<thread-id>/file/generated_image_<hash>.png
+  // It must be stripped before reading the file from the workspace
+  path = path.replace(/^\/?api\/threads\/[a-z0-9]+\/file\//, '')
+
+  const client = new GPTScript()
+  return Buffer.from(await client.readFileInWorkspace(`files/${path}`))
+}

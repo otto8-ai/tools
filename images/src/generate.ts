@@ -8,13 +8,13 @@ type ImageQuality = 'standard' | 'hd';
 
 const threadId = process.env.OTTO_THREAD_ID;
 
-const generateImages = async (
+export async function generateImages(
   model: string = 'dall-e-3',
   prompt: string = '',
   size: string = '1024x1024',
   quality: string = 'standard',
   quantity: number = 1
-): Promise<void> => {
+): Promise<void> {
   if (!prompt) {
     throw new Error('No prompt provided. Please provide a prompt to generate images.');
   }
@@ -75,5 +75,3 @@ async function download(client: gptscript.GPTScript, imageUrl: string): Promise<
 
   return filePath
 }
-
-export { generateImages };

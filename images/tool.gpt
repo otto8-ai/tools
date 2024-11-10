@@ -1,23 +1,24 @@
 ---
 Name: Images
 Metadata: bundle: true
-Description: Tools for analyzing and generating images 
+Description: Tools for analyzing and generating images
 Share Tools: Analyze Images, Generate Images
 
 ---
 Name: Analyze Images
 Credential: github.com/gptscript-ai/credentials/model-provider
 Description: Analyze images using a given prompt and return relevant information about the images
+Share Context: Images Context
 Param: model: (optional) A model with vision capabilities to use for the analysis
-Param: prompt: (required) A prompt to analyze the images with
-Param: images: (required) Comma delimited list containing one or more image URIs to analyze. Valid URIs start with "http://" and "https://" for remote images, and no protocol for file paths to local images. Only supports jpeg and png. Commas in file paths should be escaped with a backslash
+Param: prompt: (optional) A prompt to analyze the images with (defaults "Provide a brief description of each image")
+Param: images: (required) A JSON array containing one or more URLs or file paths of images to analyze. Only supports jpegs and pngs.
 
 #!/usr/bin/env npm --silent --prefix ${GPTSCRIPT_TOOL_DIR} run tool -- analyzeImages
 
 ---
 Name: Generate Images
 Credential: github.com/gptscript-ai/credentials/model-provider
-Description: Generates images based on the specified parameters and returns a list of absolute file paths to the generated images
+Description: Generate images and return their file paths
 Share Context: Images Context
 Param: model: (optional) A model with image generation capabilities to use for the generation (default dall-e-3)
 Param: prompt: (required) Text describing the images to generate
@@ -35,8 +36,12 @@ Type: context
 
 ## Instructions for using the Generate Images and Analyze Images tools ##
 
-Always use the exact file paths returned by the Generate Images tool when embedding them in markdown.
+__Always use the exact file paths returned by the Generate Images tool when embedding them in markdown.__
 For example, if Generate Images returns `/api/threads/123abc/generated_image_defg1234.png`, you should use `![Image Title](/api/threads/123abc/generated_image_defg1234.png)` in your response.
+
+__Always pass the Analyze Images tool a valid JSON array for the `images` parameter. Do this even when you only have a single image to analyze. The array must always contain one or more URLs and or file paths.__
+e.g. Analyzing a single image: `["https://example.com/image1.png"]`
+e.g. Analyzing multiple images: `["https://example.com/image1.png", "cool.jpg", "/api/threads/123abc/generated_image_defg1234.png", "https://example.com/image2.png"]`
 
 ## Instructions for using the Generate Images and Analyze Images tools ##
 
