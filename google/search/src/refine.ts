@@ -6,7 +6,14 @@ const gptscript = new GPTScript()
 export async function refine (model: string, unrefined: SearchResults): Promise<SearchResults> {
   const now = new Date().toISOString()
   const refined = await Promise.all(
-    unrefined.results.map(async content => await refineResult(model, now, unrefined.query, content))
+    unrefined.results.map(async (result) => {
+      if (result.content?.length ?? 0 <= 10000) {
+        // Don't refine content that is 10k tokens or less
+        return result
+      }
+
+      return await refineResult(model, now, unrefined.query, result)
+    })
   )
 
   return {
@@ -24,6 +31,7 @@ async function refineResult (
   time: string,
   query: string,
   result: SearchResult): Promise<SearchResult> {
+
   const tool: ToolDef = {
     chat: false,
     jsonResponse: true,
