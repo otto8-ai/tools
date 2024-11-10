@@ -30,6 +30,17 @@ flows:
       - filetypes: [".pdf"]
         documentloader:
           name: smartpdf
+      - filetypes: [ ".pptx", ".doc", ".ppt" ]
+        converter:
+          name: soffice
+          targetFormat: pdf
+        documentloader:
+          name: smartpdf
+          options:
+            fallbackOptions:
+              onImageCount: 1
+              onTable: true
+              onEmptyContent: true
 
 
 

@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/gptscript-ai/knowledge/pkg/datastore/documentloader/converter"
 	"github.com/gptscript-ai/knowledge/pkg/output"
 
 	"github.com/gptscript-ai/knowledge/pkg/datastore/documentloader"
@@ -47,6 +48,7 @@ type FlowConfigGlobalsIngestion struct {
 
 type IngestionFlowConfig struct {
 	Filetypes      []string             `json:"filetypes" yaml:"filetypes" mapstructure:"filetypes"`
+	Converter      ConverterConfig      `json:"converter,omitempty" yaml:"converter" mapstructure:"converter"`
 	DocumentLoader DocumentLoaderConfig `json:"documentLoader,omitempty" yaml:"documentLoader" mapstructure:"documentLoader"`
 	TextSplitter   TextSplitterConfig   `json:"textSplitter,omitempty" yaml:"textSplitter" mapstructure:"textSplitter"`
 	Transformers   []TransformerConfig  `json:"transformers,omitempty" yaml:"transformers" mapstructure:"transformers"`
@@ -81,6 +83,11 @@ type TextSplitterConfig struct {
 
 type TransformerConfig struct {
 	GenericBaseConfig
+}
+
+type ConverterConfig struct {
+	GenericBaseConfig
+	flows.ConverterOpts
 }
 
 func FromBlueprint(name string) (*FlowConfig, error) {
@@ -151,6 +158,12 @@ func (f *FlowConfig) Validate() error {
 			if len(ingestion.Filetypes) == 0 {
 				return fmt.Errorf("flow %q.ingestion.[%d] has no filetypes specified", name, idx)
 			}
+
+			if ingestion.Converter.Name != "" {
+				if ingestion.Converter.TargetFormat == "" {
+					return fmt.Errorf("flow %q.ingestion.[%d].converter.targetFormat is required", name, idx)
+				}
+			}
 		}
 	}
 	return nil
@@ -180,6 +193,42 @@ func (i *IngestionFlowConfig) AsIngestionFlow(globals *FlowConfigGlobalsIngestio
 		Globals: flows.IngestionFlowGlobals{
 			SplitterOpts: globals.Textsplitter,
 		},
+	}
+
+	if i.Converter.Name != "" {
+		if i.Converter.TargetFormat == "" {
+			return nil, fmt.Errorf("converter target format is required")
+		}
+
+		name := strings.ToLower(strings.Trim(i.Converter.Name, " "))
+		cfg, err := converter.GetConverterConfig(name)
+		if err != nil {
+			return nil, err
+		}
+		if len(i.Converter.Options) > 0 {
+			jsondata, err := json.Marshal(i.Converter.Options)
+			if err != nil {
+				return nil, err
+			}
+			err = json.Unmarshal(jsondata, &cfg)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			cfg = nil
+		}
+		c, err := converter.GetConverter(name, cfg)
+		if err != nil {
+			return nil, err
+		}
+
+		flow.Converter = flows.Converter{
+			Converter: c,
+			ConverterOpts: flows.ConverterOpts{
+				TargetFormat: i.Converter.TargetFormat,
+				MustTry:      i.Converter.MustTry,
+			},
+		}
 	}
 
 	if i.DocumentLoader.Name != "" {

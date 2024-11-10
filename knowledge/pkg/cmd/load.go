@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log/slog"
 	"maps"
 	"os"
@@ -79,6 +80,7 @@ func (s *ClientLoad) run(ctx context.Context, input, output string) error {
 		return fmt.Errorf("failed to get filetype for input file %q: %w", input, err)
 	}
 
+	var converter flows.Converter
 	var loader documentloader.LoaderFunc
 
 	if s.Loader == "" {
@@ -120,6 +122,7 @@ func (s *ClientLoad) run(ctx context.Context, input, output string) error {
 					return err
 				}
 				loader = ingestionFlow.Load
+				converter = ingestionFlow.Converter
 				slog.Debug("Loaded ingestion flow from config", "flows_file", s.FlowsFile)
 			}
 		}
@@ -140,7 +143,17 @@ func (s *ClientLoad) run(ctx context.Context, input, output string) error {
 		os.Exit(0)
 	}
 
-	docs, err := loader(ctx, bytes.NewReader(inputBytes))
+	var reader io.Reader
+	if converter.Converter != nil {
+		reader, err = converter.Converter.Convert(ctx, bytes.NewReader(inputBytes), filepath.Ext(input), converter.TargetFormat)
+		if err != nil {
+			return fmt.Errorf("failed to convert input file %q: %w", input, err)
+		}
+	} else {
+		reader = bytes.NewReader(inputBytes)
+	}
+
+	docs, err := loader(ctx, reader)
 	if err != nil {
 		return fmt.Errorf("failed to load documents from file %q using loader %q: %w", input, s.Loader, err)
 	}
@@ -189,6 +202,9 @@ func (s *ClientLoad) run(ctx context.Context, input, output string) error {
 			})
 		}
 
+		if commonMetadata == nil {
+			commonMetadata = map[string]any{}
+		}
 		commonMetadata["source"] = input
 
 		for k, v := range metadata {

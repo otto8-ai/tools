@@ -20,6 +20,9 @@ var FirstclassFileExtensions = map[string]struct{}{
 	".csv":   {},
 	".ipynb": {},
 	".json":  {},
+	".pptx":  {},
+	".doc":   {},
+	".ppt":   {},
 }
 
 // GetFiletype returns the filetype of a file based on its filename or content.

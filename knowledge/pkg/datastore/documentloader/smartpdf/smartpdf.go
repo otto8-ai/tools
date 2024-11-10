@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/acorn-io/z"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/documentloader/ocr/openai"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/documentloader/pdf/mupdf"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/types"
@@ -22,8 +23,15 @@ import (
 var _ types.DocumentLoader = (*SmartPDF)(nil)
 
 type SmartPDFConfig struct {
-	MuPDF     mupdf.PDFOptions `mapstructure:"muPDF" json:"muPDF"`
-	OpenAIOCR openai.OpenAIOCR `mapstructure:"openAIOCR" json:"openAIOCR"`
+	MuPDF           mupdf.PDFOptions `mapstructure:"muPDF" json:"muPDF"`
+	OpenAIOCR       openai.OpenAIOCR `mapstructure:"openAIOCR" json:"openAIOCR"`
+	FallbackOptions FallbackOptions  `mapstructure:"fallbackOptions" json:"fallbackOptions"`
+}
+
+type FallbackOptions struct {
+	OnEmptyContent *bool `mapstructure:"onEmptyContent" json:"onEmptyContent,omitempty"`
+	OnImageCount   int   `mapstructure:"onImageCount" json:"onImageCount,omitempty"`
+	OnTable        *bool `mapstructure:"onTable" json:"onTable,omitempty"`
 }
 
 type SmartPDF struct {
@@ -33,11 +41,22 @@ type SmartPDF struct {
 	lock  *sync.Mutex
 }
 
+func (f *FallbackOptions) SetDefaults() {
+	if f.OnEmptyContent == nil {
+		f.OnEmptyContent = z.Pointer(true)
+	}
+	if f.OnTable == nil {
+		f.OnTable = z.Pointer(false)
+	}
+}
+
 func NewSmartPDF(file io.Reader, cfg SmartPDFConfig) (*SmartPDF, error) {
 	mpdf, err := mupdf.NewPDF(file, mupdf.WithConfig(cfg.MuPDF))
 	if err != nil {
 		return nil, err
 	}
+
+	cfg.FallbackOptions.SetDefaults()
 
 	cfg.OpenAIOCR.Prompt = `Convert the content of the image into markdown format, ensuring the appropriate structure for various components including tables, lists, and other images. You will not add any of your own commentary to your response. Consider the following:
 
@@ -116,7 +135,8 @@ func (s *SmartPDF) Load(ctx context.Context) ([]vs.Document, error) {
 	}
 	numPages := s.mupdf.Document.NumPage()
 
-	logger := log.FromCtx(ctx)
+	logger := log.FromCtx(ctx).With("loader", s.Name())
+	ctx = log.ToCtx(ctx, logger)
 
 	// We need a lock here, since MuPDF is not thread-safe and there are some edge cases that can cause a CGO panic.
 	// See https://github.com/gptscript-ai/knowledge/issues/135
@@ -138,7 +158,9 @@ func (s *SmartPDF) Load(ctx context.Context) ([]vs.Document, error) {
 				if err != nil {
 					return err
 				}
-				htmlDoc.Find("img").Remove()
+				imgs := htmlDoc.Find("img")
+				imgCount := imgs.Length()
+				imgs.Remove()
 
 				ret, err := htmlDoc.First().Html()
 				if err != nil {
@@ -152,10 +174,19 @@ func (s *SmartPDF) Load(ctx context.Context) ([]vs.Document, error) {
 
 				content := strings.TrimSpace(markdown)
 
-				if content == "" {
-					img, err := s.mupdf.Document.Image(pageNum)
+				tableCount := htmlDoc.Find("table").Length()
 
-					logger.Debug("MuPDF did not return content - Using VLM to process PDF image", "page", pageNum+1, "totalPages", numPages)
+				if (content == "" && z.Dereference(s.cfg.FallbackOptions.OnEmptyContent)) ||
+					(s.cfg.FallbackOptions.OnImageCount > 0 && imgCount >= s.cfg.FallbackOptions.OnImageCount) ||
+					(z.Dereference(s.cfg.FallbackOptions.OnTable) && tableCount > 0) {
+					img, err := s.mupdf.Document.Image(pageNum)
+					if err != nil {
+						return fmt.Errorf("error getting image from PDF: %w", err)
+					}
+					logger = logger.With("smartpdf", "openaiOCR")
+					childCtx = log.ToCtx(childCtx, logger)
+
+					logger.Debug("MuPDF page did not meet conditions - falling back to VLM mode", "page", pageNum+1, "totalPages", numPages, "contentLen", len(content), "imgCount", imgCount, "tableCount", tableCount)
 					base64Image, err := openai.EncodeImageToBase64(img)
 					if err != nil {
 						return fmt.Errorf("error encoding image to base64: %w", err)

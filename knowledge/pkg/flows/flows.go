@@ -10,6 +10,7 @@ import (
 
 	"github.com/acorn-io/z"
 	"github.com/google/uuid"
+	"github.com/gptscript-ai/knowledge/pkg/datastore/documentloader/converter"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/store"
 	"github.com/gptscript-ai/knowledge/pkg/log"
 	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
@@ -29,9 +30,20 @@ type IngestionFlowGlobals struct {
 	SplitterOpts map[string]any
 }
 
+type ConverterOpts struct {
+	MustTry      bool   `json:"mustTry,omitempty" yaml:"mustTry" mapstructure:"mustTry"`                // must try converting, even if the file extension is not supported "officially"
+	TargetFormat string `json:"targetFormat,omitempty" yaml:"targetFormat" mapstructure:"targetFormat"` // target format to convert to, e.g. pdf
+}
+
+type Converter struct {
+	Converter converter.Converter
+	ConverterOpts
+}
+
 type IngestionFlow struct {
 	Globals         IngestionFlowGlobals
 	Filetypes       []string
+	Converter       Converter
 	Load            documentloader.LoaderFunc
 	Splitter        dstypes.TextSplitter
 	Transformations []dstypes.DocumentTransformer
@@ -67,6 +79,11 @@ func (f *IngestionFlow) SupportsFiletype(filetype string) bool {
 }
 
 func (f *IngestionFlow) FillDefaults(filetype string) error {
+	if f.Converter.Converter != nil && f.Converter.TargetFormat != "" {
+		slog.Debug("Overriding filetype with converter target format", "filetype", filetype, "targetFormat", f.Converter.TargetFormat)
+		filetype = f.Converter.TargetFormat
+	}
+
 	if f.Load == nil {
 		f.Load = documentloader.DefaultDocLoaderFunc(filetype, documentloader.DefaultDocLoaderFuncOpts{Archive: documentloader.ArchiveOpts{
 			ErrOnUnsupportedFiletype: false,
@@ -96,11 +113,25 @@ func (f *IngestionFlow) FillDefaults(filetype string) error {
 	return nil
 }
 
-func (f *IngestionFlow) Run(ctx context.Context, reader io.Reader) ([]vs.Document, error) {
+func (f *IngestionFlow) Run(ctx context.Context, reader io.Reader, filename string) ([]vs.Document, error) {
 	var err error
 	var docs []vs.Document
 
 	phaseLog := log.FromCtx(ctx).With("phase", "parse")
+
+	/*
+	 * Convert the input file to a format that can be loaded by the document loader
+	 */
+	if f.Converter.Converter != nil {
+		convertLog := phaseLog.With("stage", "converter").With("converter", f.Converter.Converter.Name()).With("targetFormat", f.Converter.TargetFormat)
+		convertLog.With("status", "starting").Info("Starting converter")
+		reader, err = f.Converter.Converter.Convert(ctx, reader, filename, f.Converter.TargetFormat)
+		if err != nil {
+			convertLog.With("status", "failed").Error("Failed to convert file", "error", err)
+			return nil, fmt.Errorf("failed to convert file: %w", err)
+		}
+		convertLog.With("status", "completed").Info("Converted file")
+	}
 
 	/*
 	 * Load documents from the content
