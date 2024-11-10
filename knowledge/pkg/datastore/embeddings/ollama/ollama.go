@@ -1,11 +1,13 @@
 package ollama
 
 import (
-	"dario.cat/mergo"
 	"fmt"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/load"
-	cg "github.com/philippgille/chromem-go"
 	"strings"
+
+	"dario.cat/mergo"
+	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/load"
+	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/openai"
+	cg "github.com/philippgille/chromem-go"
 )
 
 type EmbeddingProviderOllama struct {
@@ -45,8 +47,8 @@ func (p *EmbeddingProviderOllama) fillDefaults() error {
 }
 
 func (p *EmbeddingProviderOllama) EmbeddingFunc() (cg.EmbeddingFunc, error) {
-	cfg := cg.NewOpenAICompatConfig(p.BaseURL, "", p.Model)
-	return cg.NewEmbeddingFuncOpenAICompat(cfg), nil
+	cfg := openai.NewOpenAICompatConfig(p.BaseURL, "", p.Model)
+	return openai.NewEmbeddingFuncOpenAICompat(cfg), nil
 }
 
 func (p *EmbeddingProviderOllama) Config() any {
