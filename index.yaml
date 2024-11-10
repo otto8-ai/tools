@@ -23,9 +23,6 @@ tools:
   google-sheets:
     reference: ./google/sheets
     all: true
-  google-youtube:
-    reference: ./google/youtube
-    all: true
   images:
     reference: ./images
     all: true
