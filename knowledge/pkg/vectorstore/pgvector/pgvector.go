@@ -453,7 +453,7 @@ func (v VectorStore) RemoveDocument(ctx context.Context, documentID string, coll
 		if err != nil {
 			return err
 		}
-		_, err = v.conn.Exec(ctx, fmt.Sprintf(`DELETE FROM %s WHERE collection_id = $1 AND  %s`, v.embeddingTableName, whereClause), args...)
+		_, err = v.conn.Exec(ctx, fmt.Sprintf(`DELETE FROM %s WHERE collection_id = $1 AND %s`, v.embeddingTableName, whereClause), args...)
 		return err
 	}
 
