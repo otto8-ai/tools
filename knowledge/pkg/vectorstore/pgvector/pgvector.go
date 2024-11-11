@@ -394,6 +394,8 @@ ORDER BY
 LIMIT $3`, v.embeddingTableName,
 		v.collectionTableName, v.collectionTableName, v.collectionTableName, collection,
 		whereClause)
+
+	slog.Debug("SimilaritySearch", "sql", sql, "store", "pgvector")
 	rows, err := v.conn.Query(ctx, sql, args...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query: %w", err)
@@ -457,7 +459,9 @@ func (v VectorStore) RemoveDocument(ctx context.Context, documentID string, coll
 		if err != nil {
 			return err
 		}
-		_, err = v.conn.Exec(ctx, fmt.Sprintf(`DELETE FROM %s WHERE collection_id = $1 AND %s`, v.embeddingTableName, whereClause), args...)
+		sql := fmt.Sprintf(`DELETE FROM %s WHERE collection_id = $1 AND %s`, v.embeddingTableName, whereClause)
+		slog.Debug("Remove documents", "sql", sql, "store", "pgvector")
+		_, err = v.conn.Exec(ctx, sql, args...)
 		return err
 	}
 
@@ -481,6 +485,7 @@ func (v VectorStore) GetDocuments(ctx context.Context, collection string, where 
 	}
 
 	sql := fmt.Sprintf(`SELECT uuid, document, cmetadata FROM %s WHERE collection_id = $1 AND %s`, v.embeddingTableName, whereClause)
+	slog.Debug("Get documents", "sql", sql, "store", "pgvector")
 	rows, err := v.conn.Query(ctx, sql, args...)
 	if err != nil {
 		return nil, err
@@ -511,9 +516,9 @@ func buildWhereClause(args []any, where map[string]string) (string, []any, error
 		return "TRUE", args, nil
 	}
 
-	whereClauses := make([]string, len(where))
+	whereClauses := make([]string, 0)
 	if args == nil {
-		args = make([]any, 2*len(where))
+		args = make([]any, 0)
 	}
 
 	argIndex := len(args) + 1 // Usually w start with index 2 because $1 is for cid
