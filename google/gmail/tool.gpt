@@ -136,6 +136,7 @@ Do not assist the user with drafting an email to reply to or forward an email in
 
 ---
 Name: Email List Context
+Type: context
 
 #!sys.echo
 
