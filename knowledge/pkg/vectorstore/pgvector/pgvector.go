@@ -356,15 +356,12 @@ func (v VectorStore) SimilaritySearch(ctx context.Context, query string, numDocu
 	if err != nil {
 		return nil, err
 	}
-	whereQuerys := make([]string, 0)
-	for k, v := range where {
-		whereQuerys = append(whereQuerys, fmt.Sprintf("(data.cmetadata ->> '%s') = '%s'", k, v))
-	}
-	whereQuery := strings.Join(whereQuerys, " AND ")
-	if len(whereQuery) == 0 {
-		whereQuery = "TRUE"
-	}
 	dims := len(queryEmbedding)
+
+	whereClause, args, err := buildWhereClause([]any{dims, pgvector.NewVector(queryEmbedding), numDocuments}, where)
+	if err != nil {
+		return nil, err
+	}
 	sql := fmt.Sprintf(`WITH filtered_embedding_dims AS MATERIALIZED (
     SELECT
         *
@@ -392,10 +389,10 @@ ORDER BY
 	data.similarity DESC
 LIMIT $3`, v.embeddingTableName,
 		v.collectionTableName, v.collectionTableName, v.collectionTableName, collection,
-		whereQuery)
-	rows, err := v.conn.Query(ctx, sql, dims, pgvector.NewVector(queryEmbedding), numDocuments)
+		whereClause)
+	rows, err := v.conn.Query(ctx, sql, args...)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to query: %w", err)
 	}
 	defer rows.Close()
 
@@ -452,15 +449,11 @@ func (v VectorStore) RemoveDocument(ctx context.Context, documentID string, coll
 
 	// Where clause takes precedence over documentID for consistency with chromem-go's behavior, as that was the default before
 	if len(where) > 0 {
-		whereQuerys := make([]string, 0)
-		for k, v := range where {
-			whereQuerys = append(whereQuerys, fmt.Sprintf("(cmetadata ->> '%s') = '%s'", k, v))
+		whereClause, args, err := buildWhereClause([]any{cid}, where)
+		if err != nil {
+			return err
 		}
-		whereQuery := strings.Join(whereQuerys, " AND ")
-		if len(whereQuery) == 0 {
-			whereQuery = "TRUE"
-		}
-		_, err = v.conn.Exec(ctx, fmt.Sprintf(`DELETE FROM %s WHERE collection_id = $1 AND  %s`, v.embeddingTableName, whereQuery), cid)
+		_, err = v.conn.Exec(ctx, fmt.Sprintf(`DELETE FROM %s WHERE collection_id = $1 AND  %s`, v.embeddingTableName, whereClause), args...)
 		return err
 	}
 
@@ -478,17 +471,13 @@ func (v VectorStore) GetDocuments(ctx context.Context, collection string, where 
 		return nil, err
 	}
 
-	whereQuerys := make([]string, 0)
-	for k, v := range where {
-		whereQuerys = append(whereQuerys, fmt.Sprintf("(cmetadata ->> '%s') = '%s'", k, v))
-	}
-	whereQuery := strings.Join(whereQuerys, " AND ")
-	if len(whereQuery) == 0 {
-		whereQuery = "TRUE"
+	whereClause, args, err := buildWhereClause([]any{cid}, where)
+	if err != nil {
+		return nil, err
 	}
 
-	sql := fmt.Sprintf(`SELECT uuid, document, cmetadata FROM %s WHERE collection_id = $1 AND %s`, v.embeddingTableName, whereQuery)
-	rows, err := v.conn.Query(ctx, sql, cid)
+	sql := fmt.Sprintf(`SELECT uuid, document, cmetadata FROM %s WHERE collection_id = $1 AND %s`, v.embeddingTableName, whereClause)
+	rows, err := v.conn.Query(ctx, sql, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -511,4 +500,27 @@ func (v VectorStore) ImportCollectionsFromFile(ctx context.Context, path string,
 
 func (v VectorStore) ExportCollectionsToFile(ctx context.Context, path string, collections ...string) error {
 	return fmt.Errorf("function ExportCollectionsToFile not implemented for vectorstore pgvector")
+}
+
+func buildWhereClause(args []any, where map[string]string) (string, []any, error) {
+	if len(where) == 0 {
+		return "TRUE", args, nil
+	}
+
+	whereClauses := make([]string, len(where))
+	if args == nil {
+		args = make([]any, 2*len(where))
+	}
+
+	argIndex := len(args) + 1 // Usually w start with index 2 because $1 is for cid
+	for k, v := range where {
+		whereClauses = append(whereClauses, fmt.Sprintf("(cmetadata ->> $%d) = $%d", argIndex, argIndex+1))
+		args = append(args, k, v)
+		argIndex += 2
+	}
+	whereClause := strings.Join(whereClauses, " AND ")
+	if len(whereClause) == 0 {
+		whereClause = "TRUE"
+	}
+	return whereClause, args, nil
 }
