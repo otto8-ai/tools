@@ -9,7 +9,6 @@ type ImageQuality = 'standard' | 'hd';
 const threadId = process.env.OTTO_THREAD_ID;
 
 export async function generateImages(
-  model: string = 'dall-e-3',
   prompt: string = '',
   size: string = '1024x1024',
   quality: string = 'standard',
@@ -35,7 +34,7 @@ export async function generateImages(
 
   try {
     const response = await openai.images.generate({
-      model,
+      model: 'dall-e-3',
       prompt,
       size: size as ImageSize,
       quality: quality as ImageQuality,

@@ -30,7 +30,6 @@ async function main (): Promise<void> {
 
       const data = req.body
       const maxResults = Number.isInteger(Number(data.maxResults)) ? parseInt(data.maxResults as string, 10) : 3
-      const model: string = data.model !== '' ? data.model : 'gpt-4o-mini'
       const query: string = data.query ?? ''
       const sessionID = getSessionId(req.headers)
 
@@ -44,10 +43,7 @@ async function main (): Promise<void> {
         const searchEnd = performance.now()
 
         // Extract the relevant citations from the content of each page
-        const refinedResults = await refine(
-          model,
-          searchResults
-        )
+        const refinedResults = await refine(searchResults)
         const refineEnd = performance.now()
 
         res.status(200).send(JSON.stringify({

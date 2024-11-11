@@ -3,7 +3,7 @@ import { type SearchResults, type SearchResult } from './search.ts'
 
 const gptscript = new GPTScript()
 
-export async function refine (model: string, unrefined: SearchResults): Promise<SearchResults> {
+export async function refine (unrefined: SearchResults): Promise<SearchResults> {
   const now = new Date().toISOString()
   const refined = await Promise.all(
     unrefined.results.map(async (result) => {
@@ -12,7 +12,7 @@ export async function refine (model: string, unrefined: SearchResults): Promise<
         return result
       }
 
-      return await refineResult(model, now, unrefined.query, result)
+      return await refineResult(now, unrefined.query, result)
     })
   )
 
@@ -27,7 +27,6 @@ function hasContent (content?: string | string[]): boolean {
 }
 
 async function refineResult (
-  model: string,
   time: string,
   query: string,
   result: SearchResult): Promise<SearchResult> {
@@ -35,7 +34,7 @@ async function refineResult (
   const tool: ToolDef = {
     chat: false,
     jsonResponse: true,
-    modelName: model,
+    modelName: 'gpt-4o-mini',
     temperature: 0.0,
     arguments: {
       type: 'object',

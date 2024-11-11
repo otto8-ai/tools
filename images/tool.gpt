@@ -9,7 +9,6 @@ Name: Analyze Images
 Credential: github.com/gptscript-ai/credentials/model-provider
 Description: Analyze images using a given prompt and return relevant information about the images
 Share Context: Images Context
-Param: model: (optional) A model with vision capabilities to use for the analysis
 Param: prompt: (optional) A prompt to analyze the images with (defaults "Provide a brief description of each image")
 Param: images: (required) A JSON array containing one or more URLs or file paths of images to analyze. Only supports jpegs and pngs.
 
@@ -20,7 +19,6 @@ Name: Generate Images
 Credential: github.com/gptscript-ai/credentials/model-provider
 Description: Generate images and return their file paths
 Share Context: Images Context
-Param: model: (optional) A model with image generation capabilities to use for the generation (default dall-e-3)
 Param: prompt: (required) Text describing the images to generate
 Param: size: (optional) Dimensions of the images to generate in. One of [1024x1024, 256x256, 512x512, 1792x1024, 1024x1792] (default 1024x1024)
 Param: quality: (optional) Quality of the generated image. One of [standard, hd] (default standard)

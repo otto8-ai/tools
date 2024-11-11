@@ -12,14 +12,12 @@ try {
     switch (command) {
         case 'analyzeImages':
             analyzeImages(
-                process.env.MODEL,
                 process.env.PROMPT,
                 process.env.IMAGES,
             )
             break
         case 'generateImages':
             generateImages(
-                process.env.MODEL,
                 process.env.PROMPT,
                 process.env.SIZE,
                 process.env.QUALITY,
