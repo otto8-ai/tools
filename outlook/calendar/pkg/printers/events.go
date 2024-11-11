@@ -3,13 +3,12 @@ package printers
 import (
 	"context"
 	"fmt"
-	"strings"
-
 	"github.com/gptscript-ai/tools/outlook/calendar/pkg/graph"
 	"github.com/gptscript-ai/tools/outlook/calendar/pkg/util"
 	"github.com/jaytaylor/html2text"
 	msgraphsdkgo "github.com/microsoftgraph/msgraph-sdk-go"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
+	"strings"
 )
 
 func EventToString(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, calendar graph.CalendarInfo, event models.Eventable) string {
@@ -28,8 +27,9 @@ func EventToString(ctx context.Context, client *msgraphsdkgo.GraphServiceClient,
 	var sb strings.Builder
 	sb.WriteString("Subject: " + util.Deref(event.GetSubject()) + "\n")
 	sb.WriteString("  ID: " + util.Deref(event.GetId()) + "\n")
-	sb.WriteString("  Start: " + util.Deref(event.GetStart().GetDateTime()) + "\n")
-	sb.WriteString("  End: " + util.Deref(event.GetEnd().GetDateTime()) + "\n")
+	startTZ, endTZ := EventDisplayTimeZone(event)
+	sb.WriteString("  Start: " + util.Deref(event.GetStart().GetDateTime()) + startTZ + "\n")
+	sb.WriteString("  End: " + util.Deref(event.GetEnd().GetDateTime()) + endTZ + "\n")
 	sb.WriteString("  In calendar: " + calendarName + " (ID " + calendar.ID + ")\n")
 	return sb.String()
 }
@@ -37,8 +37,9 @@ func EventToString(ctx context.Context, client *msgraphsdkgo.GraphServiceClient,
 func PrintEvent(event models.Eventable, detailed bool) {
 	fmt.Printf("Subject: %s\n", util.Deref(event.GetSubject()))
 	fmt.Printf("  ID: %s\n", util.Deref(event.GetId()))
-	fmt.Printf("  Start: %s\n", util.Deref(event.GetStart().GetDateTime()))
-	fmt.Printf("  End: %s\n", util.Deref(event.GetEnd().GetDateTime()))
+	startTZ, endTZ := EventDisplayTimeZone(event)
+	fmt.Printf("  Start: %s%s\n", util.Deref(event.GetStart().GetDateTime()), startTZ)
+	fmt.Printf("  End: %s%s\n", util.Deref(event.GetEnd().GetDateTime()), endTZ)
 
 	if detailed {
 		fmt.Printf("  Location: %s\n", util.Deref(event.GetLocation().GetDisplayName()))
@@ -77,4 +78,23 @@ func PrintEvent(event models.Eventable, detailed bool) {
 		fmt.Printf("You can open the event using this link: %s\n", util.Deref(event.GetWebLink()))
 	}
 	fmt.Println()
+}
+
+func EventDisplayTimeZone(event models.Eventable) (string, string) {
+	// No TZ for all day events to avoid messing up the start/end times during conversion
+	startTZ, endTZ := "", ""
+	if util.Deref(event.GetIsAllDay()) {
+		return startTZ, endTZ
+	}
+	// Assume that timestamps are UTC by default, but verify
+	if util.Deref(event.GetStart().GetTimeZone()) == "UTC" {
+		startTZ = "Z"
+	} else {
+		startTZ = " " + util.Deref(event.GetStart().GetTimeZone())
+	}
+	if util.Deref(event.GetEnd().GetTimeZone()) == "UTC" {
+		endTZ = "Z"
+		endTZ = " " + util.Deref(event.GetEnd().GetTimeZone())
+	}
+	return startTZ, endTZ
 }
