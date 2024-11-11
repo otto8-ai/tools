@@ -57,6 +57,9 @@ export async function analyzeImages(
 }
 
 const supportedMimeTypes = ['image/jpeg', 'image/png'];
+const threadId = process.env.OTTO_THREAD_ID
+const ottoServerUrl = process.env.OTTO_SERVER_URL
+const imageGenBaseUrl = (threadId && ottoServerUrl) ? `${ottoServerUrl}/api/threads/${threadId}/file/` : null
 
 async function resolveImageURL (image: string): Promise<string> {
   // If the image is a URL, return it as is
@@ -65,7 +68,12 @@ async function resolveImageURL (image: string): Promise<string> {
     switch (url.protocol) {
       case 'http:':
       case 'https:':
-        return image;
+        if (imageGenBaseUrl == null || !image.startsWith(imageGenBaseUrl)) {
+          return image
+        }
+        // This is a generated image download link, strip the base URL and retrieve the file from the workspace
+        image = image.replace(imageGenBaseUrl, '')
+        break
       default:
         throw new Error(`Unsupported image URL protocol: ${url.protocol}`)
     }
@@ -82,8 +90,6 @@ async function resolveImageURL (image: string): Promise<string> {
   const base64 = data.toString('base64')
   return `data:${mime};base64,${base64}`
 }
-
-const threadId = process.env.OTTO_THREAD_ID;
 
 async function readImageFile(path: string): Promise<Buffer> {
   if (threadId === undefined) {

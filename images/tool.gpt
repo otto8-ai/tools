@@ -6,9 +6,9 @@ Share Tools: Analyze Images, Generate Images
 
 ---
 Name: Analyze Images
-Credential: github.com/gptscript-ai/credentials/model-provider
 Description: Analyze images using a given prompt and return relevant information about the images
-Share Context: Images Context
+Credential: github.com/gptscript-ai/credentials/model-provider
+Share Context: Analyze Images Context
 Param: prompt: (optional) A prompt to analyze the images with (defaults "Provide a brief description of each image")
 Param: images: (required) A JSON array containing one or more URLs or file paths of images to analyze. Only supports jpegs and pngs.
 
@@ -16,9 +16,9 @@ Param: images: (required) A JSON array containing one or more URLs or file paths
 
 ---
 Name: Generate Images
+Description: Generate images images based on a given prompt
 Credential: github.com/gptscript-ai/credentials/model-provider
-Description: Generate images and return their file paths
-Share Context: Images Context
+Share Context: Generate Images Context
 Param: prompt: (required) Text describing the images to generate
 Param: size: (optional) Dimensions of the images to generate in. One of [1024x1024, 256x256, 512x512, 1792x1024, 1024x1792] (default 1024x1024)
 Param: quality: (optional) Quality of the generated image. One of [standard, hd] (default standard)
@@ -27,21 +27,36 @@ Param: quantity: (optional) Quantity of distinct images to generate (default 1, 
 #!/usr/bin/env npm --silent --prefix ${GPTSCRIPT_TOOL_DIR} run tool -- generateImages
 
 ---
-Name: Images Context
+Name: Generate Images Context
 Type: context
 
 #!sys.echo
 
-## Instructions for using the Generate Images and Analyze Images tools ##
+START TOOL USAGE: Generate Images
 
-__Always use the exact file paths returned by the Generate Images tool when embedding them in markdown.__
-For example, if Generate Images returns `/api/threads/123abc/generated_image_defg1234.png`, you should use `![Image Title](/api/threads/123abc/generated_image_defg1234.png)` in your response.
+The Generate Images tool returns JSON containing the `workspaceFilePath` and `downloadUrl` of every image it generates.
+Always use the `downloadUrl` of a generated image when embedding it in markdown.
 
-__Always pass the Analyze Images tool a valid JSON array for the `images` parameter. Do this even when you only have a single image to analyze. The array must always contain one or more URLs and or file paths.__
+END TOOL USAGE: Generate Images
+
+---
+Name: Analyze Images Context
+Type: context
+
+#!sys.echo
+
+START TOOL USAGE: Analyze Images
+
+Use the Analyze Images tool to whenever you need to inspect, compare, or answer questions about the contents of images.
+
+You can pass multiple images to the Analyze Images tool at once using a single call.
+
+The Analyze Images tool requires an `images` argument, which must be formatted as a JSON array containing one or more URLs or workspace file paths.
 e.g. Analyzing a single image: `["https://example.com/image1.png"]`
-e.g. Analyzing multiple images: `["https://example.com/image1.png", "cool.jpg", "/api/threads/123abc/generated_image_defg1234.png", "https://example.com/image2.png"]`
+e.g. Analyzing multiple images: `["https://example.com/image1.png", "cool.jpg", "generated_image_defg1234.png", "https://example.com/image2.png"]`
 
-## Instructions for using the Generate Images and Analyze Images tools ##
+
+END TOOL USAGE: Analyze Images tool
 
 ---
 !metadata:*:category
