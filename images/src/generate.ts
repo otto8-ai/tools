@@ -6,7 +6,9 @@ import { createHash } from 'node:crypto'
 type ImageSize = '1024x1024' | '256x256' | '512x512' | '1792x1024' | '1024x1792';
 type ImageQuality = 'standard' | 'hd';
 
-const threadId = process.env.OTTO_THREAD_ID;
+const threadId = process.env.OTTO_THREAD_ID
+const ottoServerUrl = process.env.OTTO_SERVER_URL
+const downloadBaseUrl = (threadId && ottoServerUrl) ? `${ottoServerUrl}/api/threads/${threadId}/file` : null
 
 export async function generateImages(
   prompt: string = '',
@@ -44,17 +46,28 @@ export async function generateImages(
     // Download all images concurrently
     const imageUrls = response.data.map(image => image.url).filter(url => url != null)
     const client = new gptscript.GPTScript()
-    const filePaths = await Promise.all(
-      imageUrls.map(url => download(client, url))
+    const generatedImages= await Promise.all(
+      imageUrls.map(async (url: string) => {
+        const filePath = await download(client, url)
+        if (!downloadBaseUrl) {
+          return {
+            filePath
+          }
+        }
+
+        return {
+          workspaceFilePath: filePath,
+          downloadUrl: `${downloadBaseUrl}/${filePath}`
+        }
+      })
     );
 
     // Output the workspace file paths of the generated images
-    filePaths.forEach(filePath => {
-      if (threadId !== undefined) {
-        filePath = `/api/threads/${threadId}/file/${filePath}`
-      }
-      console.log(filePath)
-    })
+    console.log(JSON.stringify({
+        prompt,
+        images: generatedImages
+      })
+    )
   } catch (error) {
     console.log('Error while generating images:', error);
     process.exit(1);
