@@ -234,6 +234,10 @@ func (v VectorStore) getCollectionUUID(ctx context.Context, collection string) (
 }
 
 func (v VectorStore) CreateCollection(ctx context.Context, collection string, opts *dbtypes.DatasetCreateOpts) error {
+	if opts == nil {
+		opts = &dbtypes.DatasetCreateOpts{}
+	}
+
 	slog.Debug("Creating collection", "collection", collection, "store", "pgvector")
 	tx, err := v.conn.Begin(ctx)
 	if err != nil {
