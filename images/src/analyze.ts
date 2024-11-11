@@ -6,7 +6,6 @@ import { ChatCompletionContentPartImage } from 'openai/resources/chat/completion
 import { GPTScript } from '@gptscript-ai/gptscript';
 
 export async function analyzeImages(
-  model: string = 'gpt-4o',
   prompt: string = '',
   images: string = '[]',
 ): Promise<void> {
@@ -38,7 +37,7 @@ export async function analyzeImages(
 
   const openai = new OpenAI();
   const response = await openai.chat.completions.create({
-    model: model,
+    model: 'gpt-4o',
     stream: true,
     messages: [
       {

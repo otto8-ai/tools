@@ -6,12 +6,10 @@ Share Tools: Search
 
 ---
 Name: Search
-Credential: github.com/gptscript-ai/credentials/model-provider
 Description: Search Google with a given query and return relevant information from the search results
 JSON Response: true
 Share Context: ../../time
 Tools: service
-Args: model: The LLM model to use for the search (optional, default gpt-4o-mini)
 Args: maxResults: The maximum number of search results to gather relevant information from (optional, default 3)
 Args: query: A question, statement, or topic to search with (required)
 
