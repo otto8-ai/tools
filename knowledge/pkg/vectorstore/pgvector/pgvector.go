@@ -516,9 +516,9 @@ func buildWhereClause(args []any, where map[string]string) (string, []any, error
 		return "TRUE", args, nil
 	}
 
-	whereClauses := make([]string, len(where))
+	whereClauses := make([]string, 0)
 	if args == nil {
-		args = make([]any, 2*len(where))
+		args = make([]any, 0)
 	}
 
 	argIndex := len(args) + 1 // Usually w start with index 2 because $1 is for cid
