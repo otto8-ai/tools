@@ -67,10 +67,10 @@ async def get_azure_config(model_name: str | None = None,
     global api_key
     global deployment_name
 
-    if 'OTTO_AZURE_OPENAI_MODEL_PROVIDER_ENDPOINT' in os.environ and 'OTTO_AZURE_OPENAI_MODEL_PROVIDER_API_KEY' in os.environ and 'OTTO_AZURE_OPENAI_MODEL_PROVIDER_DEPLOYMENT_NAME' in os.environ:
-        endpoint = os.environ['OTTO_AZURE_OPENAI_MODEL_PROVIDER_ENDPOINT']
-        api_key = os.environ['OTTO_AZURE_OPENAI_MODEL_PROVIDER_API_KEY']
-        deployment_name = os.environ['OTTO_AZURE_OPENAI_MODEL_PROVIDER_DEPLOYMENT_NAME']
+    if 'OTTO8_AZURE_OPENAI_MODEL_PROVIDER_ENDPOINT' in os.environ and 'OTTO8_AZURE_OPENAI_MODEL_PROVIDER_API_KEY' in os.environ and 'OTTO8_AZURE_OPENAI_MODEL_PROVIDER_DEPLOYMENT_NAME' in os.environ:
+        endpoint = os.environ['OTTO8_AZURE_OPENAI_MODEL_PROVIDER_ENDPOINT']
+        api_key = os.environ['OTTO8_AZURE_OPENAI_MODEL_PROVIDER_API_KEY']
+        deployment_name = os.environ['OTTO8_AZURE_OPENAI_MODEL_PROVIDER_DEPLOYMENT_NAME']
 
     if 'endpoint' in globals() and 'api_key' in globals() and 'deployment_name' in globals():
         return AzureConfig(
