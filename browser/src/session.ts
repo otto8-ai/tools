@@ -53,22 +53,23 @@ export class SessionManager {
   }
 
   async withSession (sessionId: string, fn: (browserContext: BrowserContext, openPages: Map<string, Page>) => Promise<void>): Promise<void> {
+    let managedSession: ManagedSession | undefined
     await this.sessionsLock.runExclusive(async () => {
-      let managedSession = this.sessions.get(sessionId)
+      managedSession = this.sessions.get(sessionId)
       if (!managedSession) {
         managedSession = { session: await Session.create(sessionId) }
         this.sessions.set(sessionId, managedSession)
       }
       if (managedSession.cleanupTimeout != null) clearTimeout(managedSession.cleanupTimeout)
+    })
 
-      await managedSession.session.lock.runExclusive(async () => {
-        if (managedSession.session.browserContext != null) {
-          await fn(managedSession.session.browserContext, managedSession.session.openPages)
-        }
+    await managedSession?.session.lock.runExclusive(async () => {
+      if (managedSession?.session.browserContext != null) {
+        await fn(managedSession.session.browserContext, managedSession.session.openPages)
         managedSession.cleanupTimeout = setTimeout(() => {
           void this.deleteSession(sessionId)
         }, SESSION_TTL)
-      })
+      }
     })
   }
 
@@ -118,13 +119,18 @@ async function mkSessionDir (sessionId: string): Promise<string> {
 }
 
 export function getSessionId (headers: IncomingHttpHeaders): string {
-  const workspaceId = getWorkspaceId(headers['x-gptscript-env'])
+  const workspaceId = getGPTScriptEnv(headers, 'GPTSCRIPT_WORKSPACE_ID')
   if (workspaceId == null) throw new Error('No GPTScript workspace ID provided')
 
   return createHash('sha256').update(workspaceId).digest('hex').substring(0, 16)
 }
 
-export function getWorkspaceId (envHeader: string | string[] | undefined): string | undefined {
+export function getWorkspaceId (headers: IncomingHttpHeaders): string | undefined {
+  return getGPTScriptEnv(headers, 'GPTSCRIPT_WORKSPACE_ID')
+}
+
+export function getGPTScriptEnv (headers: IncomingHttpHeaders, envKey: string): string | undefined {
+  const envHeader = headers?.['x-gptscript-env']
   const envArray = Array.isArray(envHeader) ? envHeader : [envHeader]
   for (const env of envArray) {
     if (env == null) {
@@ -133,10 +139,11 @@ export function getWorkspaceId (envHeader: string | string[] | undefined): strin
 
     for (const pair of env.split(',')) {
       const [key, value] = pair.split('=')
-      if (key === 'GPTSCRIPT_WORKSPACE_ID') {
-        return value ?? process.env.GPTSCRIPT_WORKSPACE_ID
+      if (key === envKey) {
+        return value ?? process.env?.[envKey]
       }
     }
   }
-  return process.env.GPTSCRIPT_WORKSPACE_ID
+
+  return process.env?.[envKey]
 }

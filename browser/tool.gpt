@@ -82,6 +82,7 @@ Share Context: Browser Context
 Tools: service
 Description: Take a screenshot of the given tabID
 Params: tabID: (required) The ID of the tab.
+Params: fullPage: (optional) Take a full page screenshot. Defaults to false, which takes a screenshot of the current viewport.
 
 #!http://service.daemon.gptscript.local/screenshot
 

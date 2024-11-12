@@ -36,29 +36,16 @@ async function main (): Promise<void> {
     const filter: string = data.filter ?? ''
 
     try {
-      if (process.env.GPTSCRIPT_WORKSPACE_ID === undefined) {
-        throw new Error('GPTScript workspace ID is not set')
-      }
-
       const sessionID = getSessionId(req.headers)
       await sessionManager.withSession(sessionID, async (browserContext, openPages) => {
-        let tabID = randomBytes(8).toString('hex')
-        let printTabID = true
-        if (data.tabID !== undefined) {
-          tabID = data.tabID
-          printTabID = false
-        }
+        const tabID = data.tabID ?? randomBytes(8).toString('hex')
+        const printTabID = data.tabID === undefined
 
-        let page: Page
-        if (openPages.has(tabID)) {
-          page = openPages.get(tabID)!
-          if (page.isClosed()) {
+        // Get the page for this tab, creating a new one if it doesn't exist or the existing page is closed
+        let page: Page = openPages.get(tabID)!
+        if (!openPages.has(tabID) || page.isClosed()) {
             page = await browserContext.newPage()
             openPages.set(tabID, page)
-          }
-        } else {
-          page = await browserContext.newPage()
-          openPages.set(tabID, page)
         }
         await page.bringToFront()
 
@@ -98,7 +85,7 @@ async function main (): Promise<void> {
             break
 
           case '/screenshot':
-            res.send(await screenshot(page, req.headers))
+            res.send(await screenshot(page, req.headers, tabID, data.fullPage))
             break
 
           case '/back':
