@@ -2,14 +2,13 @@
 Name: Google Sheets
 Metadata: bundle: true
 Description: Tools for accessing, creating, and modifying Google Sheets
-Share Tools: Read Spreadsheet, Read Tables From Spreadsheet, Create Spreadsheet, Append Cells To Spreadsheet, Update Cell In Spreadsheet
+Share Tools: Read Spreadsheet, Query Spreadsheet, Read Tables From Spreadsheet, Create Spreadsheet, Append Cells To Spreadsheet, Update Cell In Spreadsheet
 
 ---
 Name: Read Spreadsheet
 Description: Read data from a Google Sheet. Spreadsheet ID is required if the spreadsheet does not belong to the user.
 Share Context: Google Sheets Context
 Credential: ../credential
-Tools: github.com/gptscript-ai/datasets/filter
 Param: spreadsheet_id: The ID of the Spreadsheet (Optional, if not provided, the spreadsheet_name is required)
 Param: spreadsheet_name: The name of the Spreadsheet (Optional, if not provided, the spreadsheet_id is required)
 Param: range: The range of cells on the Spreadsheet to read (Optional, by default reads the entire Spreadsheet)
@@ -18,11 +17,23 @@ Param: sheet_name: The name of the page to read from (Optional, by default reads
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/readSpreadsheet.py
 
 ---
+Name: Query Spreadsheet
+Description: Filter and query specific data from a Google Sheet using a SQL-like syntax. Spreadsheet ID is required if the spreadsheet does not belong to the user.
+Share Context: Google Sheets Context
+Credential: ../credential
+Param: spreadsheet_id: The ID of the Spreadsheet (Optional, if not provided, the spreadsheet_name is required)
+Param: spreadsheet_name: The name of the Spreadsheet (Optional, if not provided, the spreadsheet_id is required)
+Param: query: The sql-like query to run against the spreadsheet. Should be the format expected by the pandas query function (e.g. "column1 == 'value1' and column2 > 10")
+Param: show_columns: a comma-delimited list of columns to show in the output (Optional, by default shows first 5 columns)
+Param: sheet_name: The name of the page to read from (Optional, by default reads the first page)
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/querySpreadsheet.py
+
+---
 Name: Read Tables From Spreadsheet
 Description: Detect multiple tables and read data from a Google Sheet. Spreadsheet ID is required if the spreadsheet does not belong to the user.
 Share Context: Google Sheets Context
 Credential: ../credential
-Tools: github.com/gptscript-ai/datasets/filter
 Param: spreadsheet_id: The ID of the Spreadsheet (Optional, if not provided, the spreadsheet_name is required)
 Param: spreadsheet_name: The name of the Spreadsheet (Optional, if not provided, the spreadsheet_id is required)
 Param: range: The range of cells on the Spreadsheet to read (Optional, by default reads the entire Spreadsheet)
@@ -75,6 +86,12 @@ Type: context
 You have access to a set of tools to access, create, and modify Google Sheets.
 Do not output sheet IDs because they are not helpful for the user.
 If the user does not provide a URL for the Google Sheet they want to work with, ask them to provide it.
+
+When reading data from a Google Sheet, always start by reading just the 2 rows to determine if the first row contains column names.
+If the user asks to filter or list only specific information from the spreadsheet, try to use the 'Query Spreadsheet' tool.
+Write the query such that it returns the minimum number of columns and rows necessary to answer the user request.
+
+Do your best to always return the complete data that the user asked for, even if it is a large dataset.
 
 ## End of instructions for using Google Sheets tools
 

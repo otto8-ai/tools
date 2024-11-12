@@ -20,3 +20,10 @@ func PrintWorksheetInfos(infos []graph.WorksheetInfo) {
 		fmt.Printf("  Workbook ID: %s\n", info.WorkbookID)
 	}
 }
+
+func PrintWorksheetTableInfos(infos []graph.Table) {
+	for _, info := range infos {
+		fmt.Printf("Name: %s\n", info.Name)
+		fmt.Printf("  Table ID: %s\n", info.ID)
+	}
+}

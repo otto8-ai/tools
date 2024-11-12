@@ -3,6 +3,7 @@ package graph
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -19,6 +20,24 @@ import (
 
 type WorkbookInfo struct {
 	ID, Name string
+}
+
+type Table struct {
+	ID, Name string
+}
+
+type HTTPErrorBody struct {
+	Error struct {
+		Code       string `json:"code,omitempty"`
+		Message    string `json:"message,omitempty"`
+		InnerError struct {
+			Code            string `json:"code,omitempty"`
+			Message         string `json:"message,omitempty"`
+			Date            string `json:"date,omitempty"`
+			RequestID       string `json:"request-id,omitempty"`
+			ClientRequestID string `json:"client-request-id,omitempty"`
+		} `json:"innerError,omitempty"`
+	} `json:"error,omitempty"`
 }
 
 func ListWorkbooks(ctx context.Context, c *msgraphsdkgo.GraphServiceClient) ([]WorkbookInfo, error) {
@@ -87,6 +106,103 @@ func GetWorksheetData(ctx context.Context, c *msgraphsdkgo.GraphServiceClient, w
 	if err != nil {
 		return nil, nil, err
 	}
+
+	usedRange, err := c.Drives().ByDriveId(util.Deref(drive.GetId())).Items().ByDriveItemId(workbookID).Workbook().Worksheets().ByWorkbookWorksheetId(worksheetID).UsedRange().Get(ctx, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	result, err := serialization.SerializeToJson(usedRange.GetValues())
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var data [][]any
+	if err = json.Unmarshal(result, &data); err != nil {
+		return nil, nil, fmt.Errorf("failed to unmarshal data: %w", err)
+	}
+	return data, usedRange, nil
+}
+
+func GetWorksheetTables(ctx context.Context, c *msgraphsdkgo.GraphServiceClient, workbookID, worksheetID string) ([]Table, error) {
+	drive, err := c.Me().Drive().Get(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+	result, err := c.Drives().ByDriveId(util.Deref(drive.GetId())).Items().ByDriveItemId(workbookID).Workbook().Worksheets().ByWorkbookWorksheetId(worksheetID).Tables().Get(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+	var tables []Table
+	for _, table := range result.GetValue() {
+		tables = append(tables, Table{ID: util.Deref(table.GetId()), Name: util.Deref(table.GetName())})
+	}
+
+	return tables, nil
+}
+
+func GetColumnIDFromName(ctx context.Context, c *msgraphsdkgo.GraphServiceClient, workbookID, worksheetID, tableID, columnName string) (string, error) {
+	drive, err := c.Me().Drive().Get(ctx, nil)
+	if err != nil {
+		return "", err
+	}
+	result, err := c.Drives().ByDriveId(util.Deref(drive.GetId())).Items().ByDriveItemId(workbookID).Workbook().Tables().ByWorkbookTableId(tableID).Columns().Get(ctx, nil)
+	if err != nil {
+		return "", err
+	}
+	for _, column := range result.GetValue() {
+		rangeColumnName := util.Deref(column.GetName())
+		if rangeColumnName == columnName {
+			return util.Deref(column.GetId()), nil
+		}
+	}
+	return "", errors.New("column not found")
+}
+
+func FilterWorksheetData(ctx context.Context, c *msgraphsdkgo.GraphServiceClient, workbookID, worksheetID, tableID, columnID string, filterValues []string) ([][]any, models.WorkbookRangeable, error) {
+	drive, err := c.Me().Drive().Get(ctx, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	criteria := map[string]any{
+		"criteria": map[string]any{
+			"filterOn": "Values",
+			"Values":   filterValues,
+		},
+	}
+
+	bodyJSON, err := json.Marshal(criteria)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, fmt.Sprintf("https://graph.microsoft.com/v1.0/me/drive/items/%s/workbook/worksheets/%s/tables/%s/columns/%s/filter/apply", workbookID, worksheetID, tableID, columnID), strings.NewReader(string(bodyJSON)))
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to create request: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+os.Getenv(global.CredentialEnv))
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to send request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusNoContent {
+		var errBody HTTPErrorBody
+		if err := json.NewDecoder(resp.Body).Decode(&errBody); err != nil {
+			return nil, nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+		}
+		return nil, nil, fmt.Errorf("error applying filter: %s", errBody.Error.Message)
+	}
+	defer func(clear *drives.ItemItemsItemWorkbookWorksheetsItemTablesItemColumnsItemFilterClearRequestBuilder, ctx context.Context, requestConfiguration *drives.ItemItemsItemWorkbookWorksheetsItemTablesItemColumnsItemFilterClearRequestBuilderPostRequestConfiguration) {
+		err := clear.Post(ctx, requestConfiguration)
+		if err != nil {
+			fmt.Printf("failed to clear filter: %s", err)
+		}
+	}(c.Drives().ByDriveId(util.Deref(drive.GetId())).Items().ByDriveItemId(workbookID).Workbook().Worksheets().ByWorkbookWorksheetId(worksheetID).Tables().ByWorkbookTableId(tableID).Columns().ByWorkbookTableColumnId(columnID).Filter().Clear(), ctx, nil)
 
 	usedRange, err := c.Drives().ByDriveId(util.Deref(drive.GetId())).Items().ByDriveItemId(workbookID).Workbook().Worksheets().ByWorkbookWorksheetId(worksheetID).UsedRange().Get(ctx, nil)
 	if err != nil {

@@ -3,9 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
-	"os"
-
 	"github.com/gptscript-ai/tools/excel/pkg/commands"
+	"os"
 )
 
 func main() {
@@ -24,6 +23,10 @@ func main() {
 		err = commands.ListWorksheets(context.Background(), os.Getenv("WORKBOOK_ID"))
 	case "getWorksheetData":
 		err = commands.GetWorksheetData(context.Background(), os.Getenv("WORKBOOK_ID"), os.Getenv("WORKSHEET_ID"))
+	case "getWorksheetTables":
+		err = commands.GetWorksheetTables(context.Background(), os.Getenv("WORKBOOK_ID"), os.Getenv("WORKSHEET_ID"))
+	case "filterWorksheetData":
+		err = commands.FilterWorksheetData(context.Background(), os.Getenv("WORKBOOK_ID"), os.Getenv("WORKSHEET_ID"), os.Getenv("FILTER_COLUMN"), os.Getenv("FILTER_VALUES"))
 	case "addWorksheetRow":
 		err = commands.AddWorksheetRow(context.Background(), os.Getenv("WORKBOOK_ID"), os.Getenv("WORKSHEET_ID"), os.Getenv("CONTENTS"))
 	case "createWorksheet":
