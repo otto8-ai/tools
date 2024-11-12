@@ -1,38 +1,57 @@
 import { type Page } from 'playwright'
-import * as gptscript from '@gptscript-ai/gptscript'
+import { GPTScript } from '@gptscript-ai/gptscript'
 import { getWorkspaceId, getGPTScriptEnv } from './session.ts'
 import { type IncomingHttpHeaders } from 'node:http'
+import { createHash } from 'node:crypto'
 
-const client = new gptscript.GPTScript();
-const ottoServerUrl = process.env.OTTO_SERVER_URL
+const client = new GPTScript()
 
-export async function screenshot (page: Page, headers: IncomingHttpHeaders, tabID: string, fullPage: boolean = false): Promise<string> {
-  // Detect if we are running in otto8
-  const screenshot = await page.screenshot({fullPage, animations: 'disabled'})
+export interface ScreenshotInfo {
+  tabID: string
+  tabPageUrl: string
+  takenAt: number
+  imageWorkspaceFile: string
+  imageDownloadUrl: string | undefined
+}
 
+export async function screenshot (
+  page: Page,
+  headers: IncomingHttpHeaders,
+  tabID: string,
+  fullPage: boolean = false): Promise<ScreenshotInfo> {
+  // Generate a unique workspace file name for the screenshot
   const timestamp = Date.now()
-  let screenshotName = `screenshot-${timestamp}_${page.url().replace(/[^a-zA-Z0-9]/g, '_')}.png`
+  const pageHash = createHash('sha256').update(page.url()).digest('hex').substring(0, 8)
+  const screenshotName = `screenshot-${timestamp}_${pageHash}.png`
+
   try {
+    // Take the screenshot
+    const screenshot = await page.screenshot({ fullPage, animations: 'disabled' })
+
     // If we are running in otto8, we need to save the screenshot in the files directory
     const workspaceId = getWorkspaceId(headers)
     const screenshotPath = workspaceId !== undefined ? `files/${screenshotName}` : screenshotName
+
+    // Save the screenshot to the workspace
     await client.writeFileInWorkspace(screenshotPath, screenshot, workspaceId)
   } catch (err) {
-    console.error(err)
-    throw new Error(`Failed to save screenshot to workspace`)
+    const msg = err instanceof Error ? err.message : String(err)
+    throw new Error(`Failed to save screenshot to workspace: ${msg}`)
   }
 
+  // Build the download URL used by the UI to display the image
   let downloadUrl: string | undefined
-  if (ottoServerUrl !== undefined) {
-    const threadId = getGPTScriptEnv(headers, 'OTTO_THREAD_ID')
+  const ottoServerUrl = getGPTScriptEnv(headers, 'OTTO8_SERVER_URL')
+  const threadId = getGPTScriptEnv(headers, 'OTTO8_THREAD_ID')
+  if (ottoServerUrl !== undefined && threadId !== undefined) {
     downloadUrl = `${ottoServerUrl}/api/threads/${threadId}/file/${screenshotName}`
   }
 
-  return JSON.stringify({screenshotInfo: {
-    tabID: tabID,
+  return {
+    tabID,
     tabPageUrl: page.url(),
     takenAt: timestamp,
     imageWorkspaceFile: screenshotName,
-    imageDownloadUrl: downloadUrl,
-  }})
+    imageDownloadUrl: downloadUrl
+  }
 }

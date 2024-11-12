@@ -11,6 +11,7 @@ Tools: service
 Description: Returns the content of a website in Markdown format.
 Params: website: (optional) The HTTPS URL of the website to visit. If unspecified, the current tab will be used.
 Params: tabID: (optional) The ID of the tab. If unspecified, a new tab will be created.
+Params: followMode: (optional) If true, the tool will produce a screenshot of the final page state. Defaults to false.
 
 #!http://service.daemon.gptscript.local/getPageContents
 
@@ -22,6 +23,7 @@ Tools: service
 Description: Navigates to a website, but does not return the content.
 Params: website: (required) The URL of the website to visit. Must be an HTTPS URL.
 Params: tabID: (optional) The ID of the tab. If unspecified, a new tab will be created, and its ID will be returned.
+Params: followMode: (optional) If true, the tool will produce a screenshot of the final page state. Defaults to false.
 
 #!http://service.daemon.gptscript.local/browse
 
@@ -49,6 +51,7 @@ Params: keywords: (required) Comma-separated list of keywords related to the ele
 Params: matchTextOnly: (optional, default false) Matches elements based on their text content and ignores their attributes. Useful for cases where the user has provided an exact piece of text that they want to interact with on the page.
 Params: content: The text to fill into the element.
 Params: tabID: (required) The ID of the tab.
+Params: followMode: (optional) If true, the tool will produce a screenshot of the final page state. Defaults to false.
 Tools: service
 
 #!http://service.daemon.gptscript.local/fill
@@ -60,6 +63,7 @@ Share Context: Browser Context
 Tools: service
 Description: Presses the enter key. Useful after filling out a form or other input.
 Params: tabID: (required) The ID of the tab.
+Params: followMode: (optional) If true, the tool will produce a screenshot of the final page state. Defaults to false.
 Tools: service
 
 #!http://service.daemon.gptscript.local/enter
@@ -71,6 +75,7 @@ Share Context: Browser Context
 Tools: service
 Description: Scrolls to the bottom of the page, possibly loading more content. Useful for sites like Reddit which support infinite scroll.
 Params: tabID: (required) The ID of the tab.
+Params: followMode: (optional) If true, the tool will produce a screenshot of the final page state. Defaults to false.
 Tools: service
 
 #!http://service.daemon.gptscript.local/scrollToBottom
@@ -93,6 +98,7 @@ Share Context: Browser Context
 Tools: service
 Description: Navigates to back to the previous site in history.
 Params: tabID: (required) The ID of the tab.
+Params: followMode: (optional) If true, the tool will produce a screenshot of the final page state. Defaults to false.
 Tools: service
 
 #!http://service.daemon.gptscript.local/back
@@ -103,6 +109,7 @@ Share Context: Browser Context
 Tools: service
 Description: Navigates to forward to the next site in history.
 Params: tabID: (required) The ID of the tab.
+Params: followMode: (optional) If true, the tool will produce a screenshot of the final page state. Defaults to false.
 Tools: service
 
 #!http://service.daemon.gptscript.local/forward
@@ -115,7 +122,7 @@ Share Context: ../time
 
 #!sys.echo
 
-## Instructions for using browser tabs
+START TOOL USAGE: The `tabID` parameter
 
 You can create new tabs with the `Browse` or `Get Page Contents` tools by passing them a `website` and omitting the `tabID`.
 You can reuse an existing tab by passing the `tabID` of the tab you want to reuse.
@@ -123,7 +130,29 @@ Each browser tab has mutable state that changes with every tool call that uses i
 Do not make parallel tool calls with the same `tabID`.
 Browser tabs are ephemeral and will be closed after 10 minutes of inactivity. Do not reuse a tab if the last tool call with its `tabID` finished more than 10 minutes ago.
 
-## End of instructions for using browser tabs
+END TOOL USAGE: The `tabID` parameter
+
+START TOOL USAGE: The `followMode` parameter
+
+Every tool that takes a `followMode` parameter will return a screenshot when `followMode=true`.
+
+When "follow mode" is enabled by the user, you must ALWAYS set `followMode=true` for EVERY tool call until "follow mode" is explicitly disabled by the user.
+
+While "follow mode" is enabled, do not make parallel tool calls. Execute each tool call synchronously, waiting for each to complete before making the next call.
+
+END TOOL USAGE: The `followMode` parameter
+
+START TOOL USAGE: The `screenshotInfo` response field
+
+Tools can return JSON objects containing a `screenshotInfo` field indicating that a screenshot of the page was taken.
+
+This field is an object that contains the `tabID`, `tabPageUrl`, `takenAt`, `imageWorkspaceFile`, and `imageDownloadUrl` of a screenshot.
+
+Screenshots can only be displayed to the user by embedding their `imageDownloadUrl` in markdown; e.g. `![screenshot](${imageDownloadUrl})`
+
+When the `screenshotInfo` field is present in tool response, ALWAYS stop what you're doing and display the respective screenshot to the user immediately before continuing.
+
+END TOOL USAGE: The `screenshotInfo` response field
 
 
 ---

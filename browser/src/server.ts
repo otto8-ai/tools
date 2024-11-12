@@ -7,7 +7,7 @@ import { enter } from './enter.ts'
 import { scrollToBottom } from './scrollToBottom.ts'
 import { randomBytes } from 'node:crypto'
 import { getSessionId, SessionManager } from './session.ts'
-import { screenshot } from './screenshot.ts'
+import { screenshot, ScreenshotInfo } from './screenshot.ts'
 
 async function main (): Promise<void> {
   console.log('Starting browser server')
@@ -34,12 +34,14 @@ async function main (): Promise<void> {
     const userInput: string = data.userInput ?? ''
     const keywords: string[] = (data.keywords ?? '').split(',')
     const filter: string = data.filter ?? ''
+    const followMode: boolean = data.followMode === 'false' ? false : Boolean(data.followMode)
 
     try {
       const sessionID = getSessionId(req.headers)
       await sessionManager.withSession(sessionID, async (browserContext, openPages) => {
         const tabID = data.tabID ?? randomBytes(8).toString('hex')
         const printTabID = data.tabID === undefined
+        let takeScreenshot = followMode
 
         // Get the page for this tab, creating a new one if it doesn't exist or the existing page is closed
         let page: Page = openPages.get(tabID)!
@@ -49,31 +51,32 @@ async function main (): Promise<void> {
         }
         await page.bringToFront()
 
+        let response: { result?: any, screenshotInfo?: ScreenshotInfo } = {}
         switch (req.path) {
           case '/browse':
             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-            res.send(await browse(page, website, 'browse', tabID, printTabID))
+            response.result = await browse(page, website, 'browse', tabID, printTabID)
             break
 
           case '/getFilteredContent':
-            res.send(await filterContent(page, tabID, printTabID, filter))
+            response.result = await filterContent(page, tabID, printTabID, filter)
             break
 
           case '/getPageContents':
-            res.send(await browse(page, website, 'getPageContents', tabID, printTabID))
+            response.result = await browse(page, website, 'getPageContents', tabID, printTabID)
             break
 
           case '/getPageLinks':
-            res.send(await browse(page, website, 'getPageLinks', tabID, printTabID))
+            response.result = await browse(page, website, 'getPageLinks', tabID, printTabID)
             break
 
           case '/getPageImages':
-            res.send(await browse(page, website, 'getPageImages', tabID, printTabID))
+            response.result = await browse(page, website, 'getPageImages', tabID, printTabID)
             break
 
           case '/fill':
             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-            await fill(page, model, userInput, data.content ?? '', keywords, (data.matchTextOnly as boolean) ?? false)
+            response.result = await fill(page, model, userInput, data.content ?? '', keywords, (data.matchTextOnly as boolean) ?? false)
             break
 
           case '/enter':
@@ -85,7 +88,7 @@ async function main (): Promise<void> {
             break
 
           case '/screenshot':
-            res.send(await screenshot(page, req.headers, tabID, data.fullPage))
+            takeScreenshot = true
             break
 
           case '/back':
@@ -99,6 +102,13 @@ async function main (): Promise<void> {
           default:
             throw new Error(`Unknown tool endpoint: ${req.path}`)
         }
+
+        if (takeScreenshot) {
+          const fullPage = data.fullPage === 'false' ? false : Boolean(data.fullPage)
+          response.screenshotInfo = await screenshot(page, req.headers, tabID, fullPage)
+        }
+
+        res.json(response)
       })
     } catch (e) {
       // Send a 200 status code GPTScript will pass the error to the LLM
