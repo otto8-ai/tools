@@ -22,13 +22,12 @@ func (c *SofficeConverter) Name() string {
 }
 
 func NewSofficeConverter() (*SofficeConverter, error) {
-	if _, err := exec.LookPath("soffice"); err != nil {
-		return nil, fmt.Errorf("soffice binary not found")
-	}
+
 	return &SofficeConverter{}, nil
 }
 
 func (c *SofficeConverter) Convert(ctx context.Context, reader io.Reader, sourceExt, outputFormat string) (io.Reader, error) {
+
 	// Convert the file using soffice
 	outputFormat = strings.ToLower(outputFormat)
 	sourceExt = strings.ToLower(sourceExt)
@@ -36,6 +35,10 @@ func (c *SofficeConverter) Convert(ctx context.Context, reader io.Reader, source
 	case "pdf": // nothing to do
 	default:
 		return nil, fmt.Errorf("soffice converter - unsupported output format %q", outputFormat)
+	}
+
+	if _, err := exec.LookPath("soffice"); err != nil {
+		return nil, fmt.Errorf("soffice binary not found")
 	}
 
 	tempfile, err := os.CreateTemp(os.TempDir(), fmt.Sprintf("knowledge-convsource-*.%s", strings.TrimPrefix(sourceExt, ".")))
