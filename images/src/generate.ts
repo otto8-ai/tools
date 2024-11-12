@@ -6,8 +6,8 @@ import { createHash } from 'node:crypto'
 type ImageSize = '1024x1024' | '256x256' | '512x512' | '1792x1024' | '1024x1792';
 type ImageQuality = 'standard' | 'hd';
 
-const threadId = process.env.OTTO_THREAD_ID
-const ottoServerUrl = process.env.OTTO_SERVER_URL
+const threadId = process.env.OTTO8_THREAD_ID
+const ottoServerUrl = process.env.OTTO8_SERVER_URL
 const downloadBaseUrl = (threadId && ottoServerUrl) ? `${ottoServerUrl}/api/threads/${threadId}/file` : null
 
 export async function generateImages(

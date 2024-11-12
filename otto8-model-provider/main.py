@@ -9,7 +9,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 
 debug = os.environ.get("GPTSCRIPT_DEBUG", "false") == "true"
-otto_url = os.environ.get("OTTO8_URL", "http://localhost:8080")
+otto8_url = os.environ.get("OTTO8_URL", "http://localhost:8080")
 app = FastAPI()
 
 
@@ -30,7 +30,7 @@ async def root():
 @app.get("/v1/models")
 async def list_models() -> JSONResponse:
     # Collect all the LLM providers
-    resp = httpx.get(f"{otto_url}/api/models")
+    resp = httpx.get(f"{otto8_url}/api/models")
     if resp.status_code != 200:
         return JSONResponse({"data": [], "error": resp.text}, status_code=resp.status_code)
 
@@ -56,7 +56,7 @@ async def _stream_chat_completion(content: Any, api_key: str):
     async with httpx.AsyncClient(timeout=httpx.Timeout(30 * 60.0)) as client:
         async with client.stream(
                 "POST",
-                f"{otto_url}/api/llm-proxy/chat/completions",
+                f"{otto8_url}/api/llm-proxy/chat/completions",
                 json=content,
                 headers={
                     "Authorization": f"Bearer {api_key}",

@@ -57,8 +57,8 @@ export async function analyzeImages(
 }
 
 const supportedMimeTypes = ['image/jpeg', 'image/png'];
-const threadId = process.env.OTTO_THREAD_ID
-const ottoServerUrl = process.env.OTTO_SERVER_URL
+const threadId = process.env.OTTO8_THREAD_ID
+const ottoServerUrl = process.env.OTTO8_SERVER_URL
 const imageGenBaseUrl = (threadId && ottoServerUrl) ? `${ottoServerUrl}/api/threads/${threadId}/file/` : null
 
 async function resolveImageURL (image: string): Promise<string> {
