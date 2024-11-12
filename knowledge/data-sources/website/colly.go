@@ -26,7 +26,7 @@ func crawlColly(ctx context.Context, input *MetadataInput, output *MetadataOutpu
 	folders := make(map[string]struct{})
 
 	for _, url := range input.WebsiteCrawlingConfig.URLs {
-		if err := scrape(ctx, converter, logOut, output, gptscript, visited, folders, url); err != nil {
+		if err := scrape(ctx, converter, logOut, output, gptscript, visited, folders, url, input.Limit); err != nil {
 			return fmt.Errorf("failed to scrape %s: %w", url, err)
 		}
 	}
@@ -46,7 +46,7 @@ func crawlColly(ctx context.Context, input *MetadataInput, output *MetadataOutpu
 	return writeMetadata(ctx, output, gptscript)
 }
 
-func scrape(ctx context.Context, converter *md.Converter, logOut *logrus.Logger, output *MetadataOutput, gptscriptClient *gptscript.GPTScript, visited map[string]struct{}, folders map[string]struct{}, url string) error {
+func scrape(ctx context.Context, converter *md.Converter, logOut *logrus.Logger, output *MetadataOutput, gptscriptClient *gptscript.GPTScript, visited map[string]struct{}, folders map[string]struct{}, url string, limit int) error {
 	collector := colly.NewCollector()
 	collector.OnHTML("body", func(e *colly.HTMLElement) {
 		if _, ok := visited[e.Request.URL.String()]; ok {
@@ -57,13 +57,16 @@ func scrape(ctx context.Context, converter *md.Converter, logOut *logrus.Logger,
 		visited[e.Request.URL.String()] = struct{}{}
 		markdown := converter.Convert(e.DOM)
 		hostname := e.Request.URL.Hostname()
-		urlPath := e.Request.URL.Path
+		urlPathWithQuery := e.Request.URL.Path
+		if e.Request.URL.RawQuery != "" {
+			urlPathWithQuery += "?" + url2.QueryEscape(e.Request.URL.RawQuery)
+		}
 
 		var filePath string
-		if urlPath == "" {
+		if urlPathWithQuery == "" {
 			filePath = path.Join(hostname, "index.md")
 		} else {
-			trimmedPath := strings.Trim(urlPath, "/")
+			trimmedPath := strings.Trim(urlPathWithQuery, "/")
 			if trimmedPath == "" {
 				filePath = path.Join(hostname, "index.md")
 			} else {
@@ -139,6 +142,9 @@ func scrape(ctx context.Context, converter *md.Converter, logOut *logrus.Logger,
 
 	collector.OnHTML("a[href]", func(e *colly.HTMLElement) {
 		link := e.Attr("href")
+		if len(visited) == limit {
+			return
+		}
 
 		baseURL, err := url2.Parse(url)
 		if err != nil {
@@ -226,10 +232,11 @@ func scrapePDF(ctx context.Context, logOut *logrus.Logger, output *MetadataOutpu
 
 	output.Status = fmt.Sprintf("Scraped %v", linkURL.String())
 	output.Files[linkURL.String()] = FileDetails{
-		FilePath:  filePath,
-		URL:       linkURL.String(),
-		UpdatedAt: time.Now().String(),
-		Checksum:  newChecksum,
+		FilePath:    filePath,
+		URL:         linkURL.String(),
+		UpdatedAt:   time.Now().String(),
+		Checksum:    newChecksum,
+		SizeInBytes: int64(len(data)),
 	}
 
 	if err := writeMetadata(ctx, output, gptscript); err != nil {

@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"strings"
+	"strconv"
 
 	"github.com/gptscript-ai/go-gptscript"
 	"github.com/sirupsen/logrus"
@@ -14,6 +14,7 @@ import (
 
 type MetadataInput struct {
 	WebsiteCrawlingConfig WebsiteCrawlingConfig `json:"websiteCrawlingConfig"`
+	Limit                 int                   `json:"limit"`
 }
 
 type WebsiteCrawlingConfig struct {
@@ -63,13 +64,13 @@ func main() {
 
 	inputData := os.Getenv("GPTSCRIPT_INPUT")
 	input := MetadataInput{}
-	for i := range input.WebsiteCrawlingConfig.URLs {
-		input.WebsiteCrawlingConfig.URLs[i] = strings.TrimSpace(input.WebsiteCrawlingConfig.URLs[i])
-	}
-
 	if err := json.Unmarshal([]byte(inputData), &input); err != nil {
 		logOut.WithError(fmt.Errorf("failed to unmarshal input data, error: %v", err)).Error()
 		os.Exit(0)
+	}
+
+	if input.Limit == 0 {
+		input.Limit = getFromEnvOrDefault("OTTO_WEBSCRAPER_LIMIT", 250)
 	}
 
 	output := MetadataOutput{}
@@ -103,6 +104,14 @@ func main() {
 		logOut.WithError(fmt.Errorf("failed to crawl website: error: %w", err)).Error()
 		os.Exit(0)
 	}
+}
+
+func getFromEnvOrDefault(env string, def int) int {
+	v, _ := strconv.Atoi(os.Getenv(env))
+	if v != 0 {
+		return v
+	}
+	return def
 }
 
 func writeMetadata(ctx context.Context, output *MetadataOutput, gptscript *gptscript.GPTScript) error {
