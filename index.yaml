@@ -73,3 +73,5 @@ modelProviders:
     reference: ./anthropic-model-provider
   azure-openai-model-provider:
     reference: ./azure-openai-model-provider
+  ollama-model-provider:
+    reference: ./ollama-model-provider
