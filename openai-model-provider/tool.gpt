@@ -1,4 +1,4 @@
-Name: OpenAI Model Provider
+Name: OpenAI
 Description: Model Provider for OpenAI
 Metadata: envVars: OTTO8_OPENAI_MODEL_PROVIDER_API_KEY
 #!sys.echo

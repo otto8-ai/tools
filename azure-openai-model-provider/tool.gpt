@@ -1,4 +1,4 @@
-Name: Azure OpenAI Provider
+Name: Azure OpenAI
 Description: Model provider for Azure OpenAI hosted models
 Metadata: envVars: OTTO8_AZURE_OPENAI_MODEL_PROVIDER_API_KEY,OTTO8_AZURE_OPENAI_MODEL_PROVIDER_ENDPOINT,OTTO8_AZURE_OPENAI_MODEL_PROVIDER_DEPLOYMENT_NAME
 Model Provider: true

@@ -1,4 +1,4 @@
-Name: Anthropic Claude3 Model Provider
+Name: Anthropic
 Description: Model provider for Anthropic hosted Claude3 models
 Metadata: envVars: OTTO8_ANTHROPIC_MODEL_PROVIDER_API_KEY
 Model Provider: true
