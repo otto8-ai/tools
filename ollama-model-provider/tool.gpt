@@ -1,0 +1,5 @@
+Name: Ollama
+Description: Model provider for models running on Ollama
+Model Provider: true
+
+#!sys.daemon /usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py
