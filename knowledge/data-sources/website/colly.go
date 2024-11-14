@@ -166,7 +166,7 @@ func scrape(ctx context.Context, converter *md.Converter, logOut *logrus.Logger,
 			}
 		} else {
 			// don't scrape if linkURL link to external host
-			if linkURL.Host != "" && baseURL.Host != linkURL.Host {
+			if linkURL.Host != "" && !isSameDomainOrSubdomain(linkURL.Host, baseURL.Host) {
 				return
 			}
 
@@ -199,6 +199,35 @@ func scrape(ctx context.Context, converter *md.Converter, logOut *logrus.Logger,
 		}
 	})
 	return collector.Visit(url)
+}
+
+func isSameDomainOrSubdomain(linkHostname, baseHostname string) bool {
+	if linkHostname == baseHostname {
+		return true
+	}
+
+	parts := strings.Split(baseHostname, ".")
+
+	// if baseHostname is x.y, linkHostname can be www*.x.y
+	if len(parts) == 2 {
+		if strings.HasSuffix(linkHostname, baseHostname) {
+			linkParts := strings.Split(linkHostname, ".")
+			if len(linkParts) == 3 && (linkParts[0] == "www" || (len(linkParts[0]) == 4 && strings.HasPrefix(linkParts[0], "www"))) {
+				return true
+			}
+		}
+	}
+
+	// if baseHostname is www*.x.y, linkHostname can be x.y
+	if len(parts) == 3 {
+		if parts[0] == "www" || (len(parts[0]) == 4 && strings.HasPrefix(parts[0], "www")) {
+			if linkHostname == parts[1]+"."+parts[2] {
+				return true
+			}
+		}
+	}
+
+	return false
 }
 
 func scrapePDF(ctx context.Context, logOut *logrus.Logger, output *MetadataOutput, visited map[string]struct{}, linkURL *url2.URL, baseURL *url2.URL, gptscript *gptscript.GPTScript) error {
