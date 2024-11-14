@@ -5,8 +5,10 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log/slog"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/gptscript-ai/knowledge/pkg/client"
 	"github.com/gptscript-ai/knowledge/pkg/config"
@@ -30,7 +32,12 @@ type ClientFlowsConfig struct {
 	Flow      string `usage:"Flow name" env:"KNOW_FLOW"`
 }
 
-func exitErr0(err error) {
+func exitErr0(err error, fields ...string) {
+	slog.Error("exiting with error", "error", err, "fields", strings.Join(fields, ";"))
+	e := fmt.Sprintf("%v", err)
+	if len(fields) > 0 {
+		e = fmt.Sprintf("%s [%s]", e, strings.Join(fields, ";"))
+	}
 	fmt.Println(fmt.Sprintf(`{"error": %q}`, err.Error()))
 	os.Exit(0)
 }

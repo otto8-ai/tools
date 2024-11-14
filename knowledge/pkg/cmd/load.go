@@ -42,7 +42,7 @@ func (s *ClientLoad) Run(cmd *cobra.Command, args []string) error {
 
 	err := s.run(cmd.Context(), input, output)
 	if err != nil {
-		exitErr0(err)
+		exitErr0(err, "cmd=load")
 	}
 	return nil
 }
@@ -233,10 +233,15 @@ func (s *ClientLoad) run(ctx context.Context, input, output string) error {
 	}
 
 	if strings.HasPrefix(output, "ws://") {
-		return c.GPTScript.WriteFileInWorkspace(ctx, strings.TrimPrefix(output, "ws://"), []byte(text))
+		err = c.GPTScript.WriteFileInWorkspace(ctx, strings.TrimPrefix(output, "ws://"), []byte(text))
+	} else {
+		err = os.WriteFile(output, []byte(text), 0666)
 	}
+	if err != nil {
+		return fmt.Errorf("failed to write output to %q: %w", output, err)
+	}
+	return nil
 
-	return os.WriteFile(output, []byte(text), 0666)
 }
 
 func dropCommon(target, common map[string]any) map[string]any {
