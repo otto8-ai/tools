@@ -10,6 +10,7 @@ import (
 	"net/http"
 	url2 "net/url"
 	"path"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -163,7 +164,24 @@ func scrape(ctx context.Context, converter *md.Converter, logOut *logrus.Logger,
 			if err := scrapePDF(ctx, logOut, output, visited, linkURL, baseURL, gptscriptClient); err != nil {
 				logOut.Infof("Failed to scrape PDF %s: %v", linkURL.String(), err)
 			}
-		} else if (linkURL.Host == "" || baseURL.Host == linkURL.Host) && strings.HasPrefix(linkURL.Path, baseURL.Path) {
+		} else {
+			// don't scrape if linkURL link to external host
+			if linkURL.Host != "" && !isSameDomainOrSubdomain(linkURL.Host, baseURL.Host) {
+				return
+			}
+
+			// if linkURL has absolute path and it doesn't match baseURL, skip
+			if strings.HasPrefix(linkURL.Path, "/") && !strings.HasPrefix(linkURL.Path, baseURL.Path) {
+				return
+			}
+
+			// if it is relative path, join with current path and check again
+			finalPath := filepath.Clean(filepath.Join(e.Request.URL.Path, linkURL.Path))
+
+			if !strings.HasPrefix(finalPath, baseURL.Path) {
+				return
+			}
+
 			if linkURL.Host == "" && !strings.HasPrefix(link, "#") {
 				fullLink := baseURL.ResolveReference(linkURL).String()
 				parsedLink, err := url2.Parse(fullLink)
@@ -175,13 +193,41 @@ func scrape(ctx context.Context, converter *md.Converter, logOut *logrus.Logger,
 				if parsedLink.Path == "/" {
 					parsedLink.Path = ""
 				}
-				e.Request.Visit(parsedLink.String())
-			} else if !strings.HasPrefix(link, "#") {
-				e.Request.Visit(linkURL.String())
+				linkURL = parsedLink
 			}
+			e.Request.Visit(linkURL.String())
 		}
 	})
 	return collector.Visit(url)
+}
+
+func isSameDomainOrSubdomain(linkHostname, baseHostname string) bool {
+	if linkHostname == baseHostname {
+		return true
+	}
+
+	parts := strings.Split(baseHostname, ".")
+
+	// if baseHostname is x.y, linkHostname can be www*.x.y
+	if len(parts) == 2 {
+		if strings.HasSuffix(linkHostname, baseHostname) {
+			linkParts := strings.Split(linkHostname, ".")
+			if len(linkParts) == 3 && (linkParts[0] == "www" || (len(linkParts[0]) == 4 && strings.HasPrefix(linkParts[0], "www"))) {
+				return true
+			}
+		}
+	}
+
+	// if baseHostname is www*.x.y, linkHostname can be x.y
+	if len(parts) == 3 {
+		if parts[0] == "www" || (len(parts[0]) == 4 && strings.HasPrefix(parts[0], "www")) {
+			if linkHostname == parts[1]+"."+parts[2] {
+				return true
+			}
+		}
+	}
+
+	return false
 }
 
 func scrapePDF(ctx context.Context, logOut *logrus.Logger, output *MetadataOutput, visited map[string]struct{}, linkURL *url2.URL, baseURL *url2.URL, gptscript *gptscript.GPTScript) error {
