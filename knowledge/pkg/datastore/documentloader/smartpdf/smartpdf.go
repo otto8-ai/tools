@@ -7,7 +7,6 @@ import (
 	"log/slog"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/acorn-io/z"
@@ -194,9 +193,7 @@ func (s *SmartPDF) Load(ctx context.Context) ([]vs.Document, error) {
 						return fmt.Errorf("error encoding image to base64: %w", err)
 					}
 
-					timeoutChildCtx, cancel := context.WithTimeout(gCtx, 1*time.Minute)
-					defer cancel()
-					result, err := s.cfg.OpenAIOCR.SendImageToOpenAI(timeoutChildCtx, base64Image)
+					result, err := s.cfg.OpenAIOCR.SendImageToOpenAI(gCtx, base64Image)
 					if err != nil {
 						return fmt.Errorf("error sending image to OpenAI: %w", err)
 					}

@@ -19,11 +19,14 @@ import (
 	"github.com/gptscript-ai/knowledge/pkg/datastore/defaults"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/load"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/openai"
+	"github.com/gptscript-ai/knowledge/pkg/env"
 	"github.com/gptscript-ai/knowledge/pkg/log"
 	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/sync/semaphore"
 )
+
+var OpenAIOCRAPITimeout = time.Duration(env.GetIntFromEnvOrDefault("KNOW_OPENAI_OCR_API_TIMEOUT_SECONDS", defaults.ModelAPIRequestTimeoutSeconds)) * time.Second
 
 type OpenAIOCR struct {
 	openai.OpenAIConfig `mapstructure:",squash"`
@@ -240,7 +243,11 @@ func EncodeImageToBase64(img image.Image) (string, error) {
 func (o *OpenAIOCR) SendImageToOpenAI(ctx context.Context, base64Image string) (string, error) {
 	url := fmt.Sprintf("%s/chat/completions", o.BaseURL)
 
-	ctx = log.ToCtx(ctx, log.FromCtx(ctx).With("tool", "openai-ocr"))
+	ctx = log.ToCtx(ctx, log.FromCtx(ctx).With("tool", "openai-ocr").With("ctxTimeout", OpenAIOCRAPITimeout))
+
+	var cancel context.CancelFunc
+	ctx, cancel = context.WithTimeout(ctx, OpenAIOCRAPITimeout)
+	defer cancel()
 
 	headers := map[string]string{
 		"Content-Type":  "application/json",
