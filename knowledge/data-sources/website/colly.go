@@ -10,6 +10,7 @@ import (
 	"net/http"
 	url2 "net/url"
 	"path"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -163,7 +164,24 @@ func scrape(ctx context.Context, converter *md.Converter, logOut *logrus.Logger,
 			if err := scrapePDF(ctx, logOut, output, visited, linkURL, baseURL, gptscriptClient); err != nil {
 				logOut.Infof("Failed to scrape PDF %s: %v", linkURL.String(), err)
 			}
-		} else if (linkURL.Host == "" || baseURL.Host == linkURL.Host) && strings.HasPrefix(linkURL.Path, baseURL.Path) {
+		} else {
+			// don't scrape if linkURL link to external host
+			if linkURL.Host != "" && baseURL.Host != linkURL.Host {
+				return
+			}
+
+			// if linkURL has absolute path and it doesn't match baseURL, skip
+			if strings.HasPrefix(linkURL.Path, "/") && !strings.HasPrefix(linkURL.Path, baseURL.Path) {
+				return
+			}
+
+			// if it is relative path, join with current path and check again
+			finalPath := filepath.Clean(filepath.Join(e.Request.URL.Path, linkURL.Path))
+
+			if !strings.HasPrefix(finalPath, baseURL.Path) {
+				return
+			}
+
 			if linkURL.Host == "" && !strings.HasPrefix(link, "#") {
 				fullLink := baseURL.ResolveReference(linkURL).String()
 				parsedLink, err := url2.Parse(fullLink)
@@ -175,10 +193,9 @@ func scrape(ctx context.Context, converter *md.Converter, logOut *logrus.Logger,
 				if parsedLink.Path == "/" {
 					parsedLink.Path = ""
 				}
-				e.Request.Visit(parsedLink.String())
-			} else if !strings.HasPrefix(link, "#") {
-				e.Request.Visit(linkURL.String())
+				linkURL = parsedLink
 			}
+			e.Request.Visit(linkURL.String())
 		}
 	})
 	return collector.Visit(url)
