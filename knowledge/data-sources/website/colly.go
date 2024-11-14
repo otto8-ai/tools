@@ -183,6 +183,9 @@ func scrape(ctx context.Context, converter *md.Converter, logOut *logrus.Logger,
 			}
 
 			if linkURL.Host == "" && !strings.HasPrefix(link, "#") {
+				if !strings.HasSuffix(baseURL.Path, "/") {
+					baseURL.Path += "/"
+				}
 				fullLink := baseURL.ResolveReference(linkURL).String()
 				parsedLink, err := url2.Parse(fullLink)
 				if err != nil {
