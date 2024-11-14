@@ -7,7 +7,6 @@ import (
 	"log/slog"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/acorn-io/z"
@@ -154,6 +153,8 @@ func (s *SmartPDF) Load(ctx context.Context) ([]vs.Document, error) {
 			case <-childCtx.Done():
 				return context.Canceled
 			default:
+				logger = log.FromCtx(childCtx).With("pdfPageNo", pageNum+1)
+
 				htmlDoc, err := goquery.NewDocumentFromReader(strings.NewReader(html))
 				if err != nil {
 					return err
@@ -184,7 +185,7 @@ func (s *SmartPDF) Load(ctx context.Context) ([]vs.Document, error) {
 						return fmt.Errorf("error getting image from PDF: %w", err)
 					}
 					logger = logger.With("smartpdf", "openaiOCR")
-					childCtx = log.ToCtx(childCtx, logger)
+					gCtx := log.ToCtx(childCtx, logger)
 
 					logger.Debug("MuPDF page did not meet conditions - falling back to VLM mode", "page", pageNum+1, "totalPages", numPages, "contentLen", len(content), "imgCount", imgCount, "tableCount", tableCount)
 					base64Image, err := openai.EncodeImageToBase64(img)
@@ -192,9 +193,7 @@ func (s *SmartPDF) Load(ctx context.Context) ([]vs.Document, error) {
 						return fmt.Errorf("error encoding image to base64: %w", err)
 					}
 
-					timeoutChildCtx, cancel := context.WithTimeout(childCtx, 1*time.Minute)
-					defer cancel()
-					result, err := s.cfg.OpenAIOCR.SendImageToOpenAI(timeoutChildCtx, base64Image)
+					result, err := s.cfg.OpenAIOCR.SendImageToOpenAI(gCtx, base64Image)
 					if err != nil {
 						return fmt.Errorf("error sending image to OpenAI: %w", err)
 					}

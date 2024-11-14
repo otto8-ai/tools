@@ -16,10 +16,14 @@ import (
 	"time"
 
 	"dario.cat/mergo"
+	"github.com/gptscript-ai/knowledge/pkg/datastore/defaults"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/load"
+	"github.com/gptscript-ai/knowledge/pkg/env"
 	"github.com/gptscript-ai/knowledge/pkg/log"
 	cg "github.com/philippgille/chromem-go"
 )
+
+var OpenAIEmbeddingAPITimeout = time.Duration(env.GetIntFromEnvOrDefault("KNOW_OPENAI_EMBEDDING_API_TIMEOUT_SECONDS", defaults.ModelAPIRequestTimeoutSeconds)) * time.Second
 
 const EmbeddingModelProviderOpenAIName string = "openai"
 
@@ -167,7 +171,7 @@ func NewEmbeddingFuncOpenAICompat(config *OpenAICompatConfig) cg.EmbeddingFunc {
 	// In our case though, the library user can set the timeout on the context,
 	// and it might have to be a long timeout, depending on the text length.
 	client := &http.Client{
-		Timeout: 120 * time.Second,
+		Timeout: 5 * time.Minute,
 	}
 
 	var checkedNormalized bool
@@ -208,6 +212,10 @@ func NewEmbeddingFuncOpenAICompat(config *OpenAICompatConfig) cg.EmbeddingFunc {
 			q.Add(k, v)
 		}
 		req.URL.RawQuery = q.Encode()
+
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, OpenAIEmbeddingAPITimeout)
+		defer cancel()
 
 		// Send the request and get the body.
 		body, err := requestWithExponentialBackoff(ctx, client, req, 5, true)
@@ -268,6 +276,12 @@ func requestWithExponentialBackoff(ctx context.Context, client *http.Client, req
 	}
 
 	for i := 0; i < maxRetries; i++ {
+		// Check if context was canceled (timeout) before retrying
+		if ctx.Err() != nil {
+			failures = append(failures, fmt.Sprintf("[!] Stopped by canceled context after try #%d/%d: %v", i, maxRetries, ctx.Err()))
+			break
+		}
+
 		// Reset body to the original request body
 		if bodyBytes != nil {
 			req.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))

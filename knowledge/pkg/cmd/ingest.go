@@ -60,7 +60,7 @@ func (s *ClientIngest) Run(cmd *cobra.Command, args []string) error {
 	filePath := args[0]
 	err := s.run(cmd.Context(), filePath)
 	if err != nil {
-		exitErr0(err)
+		exitErr0(err, "cmd=ingest")
 	}
 	return nil
 }
