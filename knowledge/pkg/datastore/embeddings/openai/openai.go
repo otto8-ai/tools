@@ -24,6 +24,7 @@ import (
 )
 
 var OpenAIEmbeddingAPITimeout = time.Duration(env.GetIntFromEnvOrDefault("KNOW_OPENAI_EMBEDDING_API_TIMEOUT_SECONDS", defaults.ModelAPIRequestTimeoutSeconds)) * time.Second
+var OpenAIEmbeddingAPIRequestTimeout = time.Duration(env.GetIntFromEnvOrDefault("KNOW_OPENAI_EMBEDDING_API_REQUEST_TIMEOUT_SECONDS", 120)) * time.Second
 
 const EmbeddingModelProviderOpenAIName string = "openai"
 
@@ -167,11 +168,8 @@ func NewEmbeddingFuncOpenAICompat(config *OpenAICompatConfig) cg.EmbeddingFunc {
 		panic("config must not be nil")
 	}
 
-	// We don't set a default timeout here, although it's usually a good idea.
-	// In our case though, the library user can set the timeout on the context,
-	// and it might have to be a long timeout, depending on the text length.
 	client := &http.Client{
-		Timeout: 5 * time.Minute,
+		Timeout: OpenAIEmbeddingAPIRequestTimeout, // per request timeout - the overall timeout is set on the context
 	}
 
 	var checkedNormalized bool
@@ -218,7 +216,7 @@ func NewEmbeddingFuncOpenAICompat(config *OpenAICompatConfig) cg.EmbeddingFunc {
 		defer cancel()
 
 		// Send the request and get the body.
-		body, err := requestWithExponentialBackoff(ctx, client, req, 5, true)
+		body, err := RequestWithExponentialBackoff(ctx, client, req, 5, true)
 		if err != nil {
 			return nil, fmt.Errorf("error sending request(s): %w", err)
 		}
@@ -256,7 +254,7 @@ func NewEmbeddingFuncOpenAICompat(config *OpenAICompatConfig) cg.EmbeddingFunc {
 	}
 }
 
-func requestWithExponentialBackoff(ctx context.Context, client *http.Client, req *http.Request, maxRetries int, handleRateLimit bool) ([]byte, error) {
+func RequestWithExponentialBackoff(ctx context.Context, client *http.Client, req *http.Request, maxRetries int, handleRateLimit bool) ([]byte, error) {
 	const baseDelay = time.Millisecond * 200
 	var resp *http.Response
 	var err error
