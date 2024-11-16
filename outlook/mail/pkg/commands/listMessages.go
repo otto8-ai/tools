@@ -3,6 +3,7 @@ package commands
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/gptscript-ai/go-gptscript"
 	"github.com/gptscript-ai/tools/outlook/common/id"
@@ -14,12 +15,24 @@ import (
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 )
 
-func ListMessages(ctx context.Context, folderID string) error {
+func ListMessages(ctx context.Context, folderID, start, end, limit string) error {
 	var (
-		trueFolderID string
-		err          error
+		// TODO: Change the default to a value < 1 when we have pagination implemented to trigger
+		// listing all messages.
+		limitInt int = 100
+		err      error
 	)
+	if limit != "" {
+		limitInt, err = strconv.Atoi(limit)
+		if err != nil {
+			return fmt.Errorf("failed to parse limit: %w", err)
+		}
+		if limitInt < 1 {
+			return fmt.Errorf("limit must be a positive integer")
+		}
+	}
 
+	var trueFolderID string
 	if folderID != "" {
 		trueFolderID, err = id.GetOutlookID(ctx, folderID)
 		if err != nil {
@@ -32,7 +45,7 @@ func ListMessages(ctx context.Context, folderID string) error {
 		return fmt.Errorf("failed to create client: %w", err)
 	}
 
-	messages, err := graph.ListMessages(ctx, c, trueFolderID)
+	messages, err := graph.ListMessages(ctx, c, trueFolderID, start, end, limitInt)
 	if err != nil {
 		return fmt.Errorf("failed to list mail: %w", err)
 	}

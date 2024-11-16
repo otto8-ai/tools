@@ -15,13 +15,31 @@ import (
 	"github.com/microsoftgraph/msgraph-sdk-go/users"
 )
 
-func ListMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, folderID string) ([]models.Messageable, error) {
+func ListMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, folderID, start, end string, limit int) ([]models.Messageable, error) {
+	queryParams := &users.ItemMailFoldersItemMessagesRequestBuilderGetQueryParameters{
+		Orderby: []string{"receivedDateTime DESC"},
+	}
+
+	if limit > 0 {
+		queryParams.Top = util.Ptr(int32(limit))
+	}
+
+	var filters []string
+	if start != "" {
+		filters = append(filters, fmt.Sprintf("receivedDateTime ge %s", start))
+	}
+	if end != "" {
+		filters = append(filters, fmt.Sprintf("receivedDateTime le %s", end))
+	}
+
+	if len(filters) > 0 {
+		queryParams.Filter = util.Ptr(strings.Join(filters, " and "))
+	}
+
 	result, err := client.Me().MailFolders().ByMailFolderId(folderID).Messages().Get(ctx, &users.ItemMailFoldersItemMessagesRequestBuilderGetRequestConfiguration{
-		QueryParameters: &users.ItemMailFoldersItemMessagesRequestBuilderGetQueryParameters{
-			Top: util.Ptr(int32(100)),
-		},
+		QueryParameters: queryParams,
 	})
-	// TODO - handle if there are more than 100
+	// TODO - handle pagination if there are more messages than can be returned in a single call
 	if err != nil {
 		return nil, fmt.Errorf("failed to list mail: %w", err)
 	}

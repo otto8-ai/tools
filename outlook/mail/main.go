@@ -25,7 +25,13 @@ func main() {
 			os.Exit(1)
 		}
 	case "listMessages":
-		if err := commands.ListMessages(context.Background(), os.Getenv("FOLDER_ID")); err != nil {
+		if err := commands.ListMessages(
+			context.Background(),
+			os.Getenv("FOLDER_ID"),
+			os.Getenv("START"),
+			os.Getenv("END"),
+			os.Getenv("LIMIT"),
+		); err != nil {
 			fmt.Printf("failed to list mail: %v\n", err)
 			os.Exit(1)
 		}
