@@ -8,11 +8,16 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from openai._streaming import Stream
 from openai._types import NOT_GIVEN
 from openai.types.chat import ChatCompletion, ChatCompletionChunk
+from openai.types.embedding import Embedding
+from openai import AzureOpenAI
 
-import helpers
 
+endpoint = os.environ.get("OTTO8_AZURE_OPENAI_MODEL_PROVIDER_ENDPOINT", "")
+api_key = os.environ.get("OTTO8_AZURE_OPENAI_MODEL_PROVIDER_API_KEY", "")
 debug = os.environ.get("GPTSCRIPT_DEBUG", "false") == "true"
 uri = "http://127.0.0.1:" + os.environ.get("PORT", "8000")
+
+azure_client = AzureOpenAI(azure_endpoint=endpoint, api_key=api_key, api_version="2024-02-01")
 
 
 def log(*args):
@@ -72,18 +77,8 @@ async def chat_completions(request: Request):
     messages = data["messages"]
     messages.insert(0, {"content": system, "role": "system"})
 
-    config = await helpers.get_azure_config(data["model"])
-    if config == None:
-        raise HTTPException(status_code=400,
-                            detail="Azure config not found. Please ensure you have configured the environment variables correctly.")
-
-    client = helpers.client(
-        endpoint=config.endpoint,
-        deployment_name=config.deployment_name,
-        api_key=config.api_key
-    )
     try:
-        res: Stream[ChatCompletionChunk] | ChatCompletion = client.chat.completions.create(model=data["model"],
+        res: Stream[ChatCompletionChunk] | ChatCompletion = azure_client.chat.completions.create(model=data["model"],
                                                                                            messages=messages,
                                                                                            tools=tools,
                                                                                            tool_choice=tool_choice,
@@ -104,6 +99,28 @@ async def chat_completions(request: Request):
             error_message = str(e)
         raise HTTPException(status_code=error_code, detail=f"Error occurred: {error_message}")
 
+
+@app.post("/v1/embeddings")
+async def embeddings(request: Request):
+    data = await request.body()
+    data = json.loads(data)
+
+    try:
+        res: Embedding = azure_client.embeddings.create(
+            model=data["model"],
+            input=data["input"],
+        )
+
+        return JSONResponse(content=jsonable_encoder(res))
+    except Exception as e:
+        try:
+            log("Error occurred: ", e.__dict__)
+            error_code = e.status_code
+            error_message = e.message
+        except:
+            error_code = 500
+            error_message = str(e)
+        raise HTTPException(status_code=error_code, detail=f"Error occurred: {error_message}")
 
 async def convert_stream(stream: Stream[ChatCompletionChunk]) -> AsyncIterable[str]:
     for chunk in stream:
