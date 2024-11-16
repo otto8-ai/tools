@@ -15,12 +15,15 @@ Credential: Outlook Mail OAuth Read Credential from ./credential
 
 ---
 Name: List Messages
-Description: Lists all messages in a folder.
+Description: Lists messages in a folder.
 Share Context: Outlook Mail Context
 Tools: github.com/gptscript-ai/datasets/filter
 Credential: Outlook Mail OAuth Read Credential from ./credential
 Share Tools: List Mail Folders
 Param: folder_id: The ID of the folder to list messages in.
+Param: start: (Optional) The start date and time of the time frame to list messages within, in RFC 3339 format.
+Param: end: (Optional) The end date and time of the time frame to list messages within, in RFC 3339 format.
+Param: limit: (Optional) The maximum number of messages to return. If unset, returns up to 100 messages.
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listMessages
 
