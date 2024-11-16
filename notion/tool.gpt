@@ -94,7 +94,7 @@ Type: Context
 
 You have access to a set of tools to interact with Notion.
 You cannot use the Create Page tool to update the contents of a page. It is only for creating new pages.
-Before creating a new page, confirm that the user wants to create a new page.
+Every time you are about to create a new page and the user isn't explicitly asking for one, ask them to confirm before proceeding.
 
 ## End of instructions for using Notion tools
 
