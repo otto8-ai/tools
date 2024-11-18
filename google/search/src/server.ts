@@ -8,12 +8,12 @@ async function main (): Promise<void> {
   const app = express()
 
   // Get port from the environment variable or use 9888 if it is not defined
-  const port = process.env.PORT ?? 9888
+  const port = parseInt(process.env.PORT ?? "9888", 10)
   delete (process.env.GPTSCRIPT_INPUT)
   app.use(bodyParser.json())
 
   // Start the server
-  const server = app.listen(port, () => {
+  const server = app.listen(port, "127.0.0.1", () => {
     console.log(`Server is listening on port ${port}`)
   })
 
