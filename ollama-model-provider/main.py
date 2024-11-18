@@ -6,7 +6,7 @@ from collections.abc import Mapping
 from datetime import datetime
 from typing import Any, AsyncIterable, Iterator, List, Optional
 
-import ollama
+from ollama import Client, Options
 import requests
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, StreamingResponse
@@ -16,6 +16,8 @@ from openai.types.chat.chat_completion_chunk import Choice, ChoiceDelta, ChoiceD
 
 debug = os.environ.get('DEBUG', False) == "true"
 uri = "http://127.0.0.1:" + os.environ.get("PORT", "8000")
+ollama_host = os.environ.get("OTTO8_OLLAMA_MODEL_PROVIDER_HOST", "127.0.0.1:11434")
+ollama_client = Client(host=ollama_host)
 
 
 def log(*args):
@@ -52,7 +54,7 @@ async def get_root():
 @app.get("/v1/models")
 async def list_models() -> JSONResponse:
     data: list[dict] = []
-    models = ollama.list()
+    models = ollama_client.list()
     for model in models['models']:
         # truncate nanoseconds to microseconds
         timestamp = model['modified_at']
@@ -110,12 +112,12 @@ async def chat_completions(request: Request):
             messages[index]['images'] = image_content
 
     try:
-        resp: Mapping[str, Any] | Iterator[Mapping[str, Any]] = ollama.chat(
+        resp: Mapping[str, Any] | Iterator[Mapping[str, Any]] = ollama_client.chat(
             model=data['model'],
             messages=messages,
             tools=data.get("tools", None),
             stream=False,  # @TODO Change to allow streaming once it is supported # data.get("resp", False),
-            options=ollama._types.Options(
+            options=Options(
                 temperature=data.get("temperature", None),
                 top_p=data.get("top_p", None),
             )
