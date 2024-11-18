@@ -1,0 +1,36 @@
+---
+Name: Bluesky
+Metadata: bundle: true
+Description: Tools for interacting with Bluesky (bsky.app)
+Share Tools: Search Posts, Search Users
+
+---
+Name: Search Posts
+Description: Search for posts on Bluesky
+JSON Response: true
+Share Context: ../time
+Share Tools: Search Users
+Param: query: A Lucene query to search for posts with.
+Param: since: (optional) ISO 8601 timestamp to search for posts since. Defaults to 7 days ago.
+Param: until: (optional) ISO 8601 timestamp to search for posts until. Defaults to now.
+Param: limit: (optional) The maximum number of posts to return. Must be an integer >=1 and <=100. Defaults to 25.
+
+#!/usr/bin/env npm --silent --prefix ${GPTSCRIPT_TOOL_DIR} run tool -- searchPosts
+
+---
+Name: Search Users
+Description: Search for users on Bluesky
+JSON Response: true
+Share Context: ../time
+Param: query: A Lucene query to search for users with.
+Param: limit: (optional) The maximum number of users to return. Must be an integer >=1 and <=100. Defaults to 25.
+
+#!/usr/bin/env npm --silent --prefix ${GPTSCRIPT_TOOL_DIR} run tool -- searchUsers
+
+---
+!metadata:*:category
+Bluesky
+
+---
+!metadata:*:icon
+/admin/assets/bluesky_logo.svg

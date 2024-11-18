@@ -5,6 +5,9 @@ tools:
   browser:
     reference: ./browser
     all: true
+  bluesky:
+    reference: ./bluesky
+    all: true
   slack:
     reference: ./slack
     all: true
