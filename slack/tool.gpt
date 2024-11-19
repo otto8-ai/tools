@@ -192,7 +192,7 @@ Share Tools: User Context
 
 You have access to a set of tools to interact with a Slack workspace.
 
-Before calling any other Slack tools, call the User Context tool so that you know the default time zone and the user's information.
+Wait to call the User Context tool until the user asks you something about Slack. Always call this tool before calling any other Slack tools.
 
 When mentioning a user in a message you create, use the format <@USERID>, including the angle brackets.
 The user ID can be obtained from the List Users or Search Users tool.
