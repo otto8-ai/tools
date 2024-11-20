@@ -2,16 +2,21 @@ package graph
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/gomarkdown/markdown"
 	"github.com/gomarkdown/markdown/html"
 	"github.com/gomarkdown/markdown/parser"
+	"github.com/gptscript-ai/go-gptscript"
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/util"
+	abstractions "github.com/microsoft/kiota-abstractions-go"
 	msgraphsdkgo "github.com/microsoftgraph/msgraph-sdk-go"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
+	"github.com/microsoftgraph/msgraph-sdk-go/models/odataerrors"
 	"github.com/microsoftgraph/msgraph-sdk-go/users"
 )
 
@@ -119,6 +124,7 @@ func SearchMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceClient
 type DraftInfo struct {
 	Subject, Body       string
 	Recipients, CC, BCC []string // slice of email addresses
+	Attachments         []string // slice of workspace file paths
 }
 
 var (
@@ -133,6 +139,12 @@ func CreateDraft(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, i
 	requestBody.SetIsDraft(util.Ptr(true))
 	requestBody.SetSubject(util.Ptr(info.Subject))
 	requestBody.SetToRecipients(emailAddressesToRecipientable(info.Recipients))
+
+	for _, file := range info.Attachments {
+		if file == "" {
+			return nil, fmt.Errorf("attachment file path cannot be empty")
+		}
+	}
 
 	if len(info.CC) > 0 {
 		requestBody.SetCcRecipients(emailAddressesToRecipientable(info.CC))
@@ -155,6 +167,12 @@ func CreateDraft(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, i
 		return nil, fmt.Errorf("failed to create draft message: %w", err)
 	}
 
+	if len(info.Attachments) > 0 {
+		if err := attachFiles(ctx, client, util.Deref(draft.GetId()), info.Attachments); err != nil {
+			return nil, fmt.Errorf("failed to attach files to draft: %w", err)
+		}
+	}
+
 	return draft, nil
 }
 
@@ -168,6 +186,98 @@ func emailAddressesToRecipientable(addresses []string) []models.Recipientable {
 		recipients = append(recipients, r)
 	}
 	return recipients
+}
+
+func attachFiles(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, draftID string, files []string) error {
+	gsClient, err := gptscript.NewGPTScript()
+	if err != nil {
+		return fmt.Errorf("failed to create GPTScript client: %w", err)
+	}
+
+	// Set an upload deadline to prevent the function from hanging indefinitely
+	uploadCtx, cancel := context.WithDeadline(ctx, time.Now().Add(time.Minute*5))
+	defer cancel()
+
+	// Note: While it's tempting to paralleize attachment uploads, Microsoft Graph API doesn't
+	// seem to support concurrent upload sessions (returns "change key" errors) or non-sequential
+	// file chunk uploads (returns "invalid start offset" errors).
+	var errs []error
+	for _, file := range files {
+		// Read the file from the workspace
+		data, err := gsClient.ReadFileInWorkspace(uploadCtx, filepath.Join("files", file))
+		if err != nil {
+			return fmt.Errorf("failed to read attachment file %s from workspace: %v", file, err)
+		}
+
+		if len(data) < 1 {
+			return fmt.Errorf("cannot attach empty file %s", file)
+		}
+
+		errs = append(errs, uploadFile(uploadCtx, client, draftID, file, data))
+	}
+
+	return errors.Join(errs...)
+}
+
+const uploadChunkSize = 1024 * 1024 // 1MB
+
+func uploadFile(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, draftID string, file string, data []byte) error {
+	// Prepare attachment info
+	attachment := models.NewAttachmentItem()
+	attachment.SetAttachmentType(util.Ptr(models.FILE_ATTACHMENTTYPE))
+	attachment.SetName(util.Ptr(filepath.Base(file)))
+	attachment.SetSize(util.Ptr(int64(len(data))))
+	attachment.SetAdditionalData(map[string]any{"@microsoft.graph.conflictBehavior": "replace"})
+
+	// Create the request body for the upload session
+	requestBody := users.NewItemMessagesItemAttachmentsCreateUploadSessionPostRequestBody()
+	requestBody.SetAttachmentItem(attachment)
+	requestBody.SetAdditionalData(map[string]any{"@microsoft.graph.conflictBehavior": "replace"})
+
+	// Create the upload session
+	session, err := client.Me().Messages().ByMessageId(draftID).Attachments().CreateUploadSession().Post(ctx, requestBody, nil)
+	if err != nil {
+		return fmt.Errorf("failed to create upload session for file %s: %v", file, err)
+	}
+
+	// Determine the number of chunks to upload
+	var (
+		totalSize = len(data)
+		numChunks = (totalSize + uploadChunkSize - 1) / uploadChunkSize
+	)
+
+	// Upload chunks sequentially
+	for i := 0; i < numChunks; i++ {
+		var (
+			start = i * uploadChunkSize
+			end   = start + uploadChunkSize
+		)
+		if end > totalSize {
+			end = totalSize
+		}
+
+		chunk := data[start:end]
+		contentRange := fmt.Sprintf("bytes %d-%d/%d", start, end-1, totalSize)
+
+		// Create a request to upload the chunk
+		requestInfo := abstractions.NewRequestInformation()
+		requestInfo.UrlTemplate = *session.GetUploadUrl()
+		requestInfo.Method = abstractions.PUT
+		requestInfo.Headers.Add("Content-Length", fmt.Sprintf("%d", len(chunk)))
+		requestInfo.Headers.Add("Content-Range", contentRange)
+		requestInfo.SetStreamContentAndContentType(chunk, "application/octet-stream")
+		errorMapping := abstractions.ErrorMappings{
+			"4XX": odataerrors.CreateODataErrorFromDiscriminatorValue,
+			"5XX": odataerrors.CreateODataErrorFromDiscriminatorValue,
+		}
+
+		// Upload the chunk
+		if err := client.BaseRequestBuilder.RequestAdapter.SendNoContent(ctx, requestInfo, errorMapping); err != nil {
+			return fmt.Errorf("failed to upload chunk %s for file %s: %v", contentRange, file, err)
+		}
+	}
+
+	return nil
 }
 
 func SendDraft(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, draftID string) error {
