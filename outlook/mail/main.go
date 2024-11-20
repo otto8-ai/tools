@@ -64,11 +64,6 @@ func main() {
 			fmt.Printf("failed to send draft: %v\n", err)
 			os.Exit(1)
 		}
-	case "sendMessage":
-		if err := commands.SendMessage(context.Background(), getDraftInfoFromEnv()); err != nil {
-			fmt.Printf("failed to send message: %v\n", err)
-			os.Exit(1)
-		}
 	case "deleteMessage":
 		if err := commands.DeleteMessage(context.Background(), os.Getenv("MESSAGE_ID")); err != nil {
 			fmt.Printf("failed to delete message: %v\n", err)
@@ -91,12 +86,18 @@ func main() {
 }
 
 func getDraftInfoFromEnv() graph.DraftInfo {
+	var attachments []string
+	if os.Getenv("ATTACHMENTS") != "" {
+		attachments = strings.Split(os.Getenv("ATTACHMENTS"), ",")
+	}
+
 	info := graph.DraftInfo{
-		Subject:    os.Getenv("SUBJECT"),
-		Body:       os.Getenv("BODY"),
-		Recipients: strings.Split(os.Getenv("RECIPIENTS"), ","),
-		CC:         strings.Split(os.Getenv("CC"), ","),
-		BCC:        strings.Split(os.Getenv("BCC"), ","),
+		Subject:     os.Getenv("SUBJECT"),
+		Body:        os.Getenv("BODY"),
+		Recipients:  strings.Split(os.Getenv("RECIPIENTS"), ","),
+		CC:          strings.Split(os.Getenv("CC"), ","),
+		BCC:         strings.Split(os.Getenv("BCC"), ","),
+		Attachments: attachments,
 	}
 
 	// We need to unset BODY, because if it's still set when we try to write files to the workspace,
