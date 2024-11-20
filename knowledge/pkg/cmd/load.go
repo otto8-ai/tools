@@ -9,6 +9,7 @@ import (
 	"log/slog"
 	"maps"
 	"os"
+	"path"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -66,19 +67,30 @@ func (s *ClientLoad) run(ctx context.Context, input, output string) error {
 	}
 
 	var inputBytes []byte
+	var filetype string
 	if strings.HasPrefix(input, "ws://") {
-		inputBytes, err = c.GPTScript.ReadFileInWorkspace(ctx, strings.TrimPrefix(input, "ws://"))
+		ext := path.Ext(input)
+		if _, ok := filetypes.FirstclassFileExtensions[ext]; ok {
+			filetype = ext
+		} else {
+			stat, err := c.GPTScript.StatFileInWorkspace(ctx, strings.TrimPrefix(input, "ws://"))
+			if err != nil {
+				return fmt.Errorf("failed to stat input file %q: %w", input, err)
+			}
+			filetype = stat.MimeType
+		}
 	} else {
 		inputBytes, err = os.ReadFile(input)
-	}
-	if err != nil {
-		return fmt.Errorf("failed to read input file %q: %w", input, err)
+		if err != nil {
+			return fmt.Errorf("failed to read input file %q: %w", input, err)
+		}
+		filetype, err = filetypes.GetFiletype(input, inputBytes)
+		if err != nil {
+			return fmt.Errorf("failed to get filetype for input file %q: %w", input, err)
+		}
 	}
 
-	filetype, err := filetypes.GetFiletype(input, inputBytes)
-	if err != nil {
-		return fmt.Errorf("failed to get filetype for input file %q: %w", input, err)
-	}
+	slog.Debug("Detected filetype", "filetype", filetype)
 
 	var converter flows.Converter
 	var loader documentloader.LoaderFunc
@@ -141,6 +153,13 @@ func (s *ClientLoad) run(ctx context.Context, input, output string) error {
 	if loader == nil {
 		fmt.Printf("{\"unsupportedFiletype\": \"%s (%s)\"}\n", filepath.Ext(input), filetype)
 		os.Exit(0)
+	}
+
+	if strings.HasPrefix(input, "ws://") {
+		inputBytes, err = c.GPTScript.ReadFileInWorkspace(ctx, strings.TrimPrefix(input, "ws://"))
+		if err != nil {
+			return fmt.Errorf("failed to read input file %q: %w", input, err)
+		}
 	}
 
 	var reader io.Reader

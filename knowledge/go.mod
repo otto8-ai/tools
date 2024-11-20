@@ -5,6 +5,7 @@ go 1.23.1
 toolchain go1.23.2
 
 replace (
+	github.com/gptscript-ai/go-gptscript => /home/thklein/git/github.com/gptscript-ai/go-gptscript
 	github.com/hupe1980/golc => github.com/iwilltry42/golc v0.0.113-0.20240802113826-d065a3c5b0c7 // nbformat extension
 	github.com/ledongthuc/pdf => github.com/iwilltry42/pdf v0.0.0-20240517145113-99fbaebc5dd3 // fix for reading some PDFs: https://github.com/ledongthuc/pdf/pull/36 + https://github.com/iwilltry42/pdf/pull/2
 	github.com/philippgille/chromem-go => github.com/iwilltry42/chromem-go v0.0.0-20241108083648-75828c6a4726
