@@ -1,222 +1,282 @@
 import { Client } from "@notionhq/client";
 import dotenv from "dotenv";
 import path from "path";
-import { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints";
+import {
+    PageObjectResponse,
+    SearchResponse,
+    ListBlockChildrenResponse,
+} from "@notionhq/client/build/src/api-endpoints";
 import { getPageContent } from "./page";
 
 dotenv.config();
 
 interface OutputMetadata {
-  files: {
-    [pageUrl: string]: {
-      updatedAt: string;
-      filePath: string;
-      url: string;
-      sizeInBytes: number;
+    files: {
+        [pageUrl: string]: {
+            updatedAt: string;
+            filePath: string;
+            url: string;
+            sizeInBytes: number;
+        };
     };
-  };
-  status: string;
-  state: {
-    notionState: {
-      pages: Record<
-        string,
-        {
-          title: string;
-          folderPath: string;
-          id: string;
-        }
-      >;
-    };
-  };
+    status: string;
 }
 
 async function writePageToFile(
-  client: Client,
-  page: PageObjectResponse,
-  gptscriptClient: any
+    path: string,
+    content: string,
+    gptscriptClient: any
 ): Promise<number> {
-  const pageId = page.id;
-  const pageContent = await getPageContent(client, pageId);
-  const filePath = getPath(page);
-  const buffer = Buffer.from(pageContent);
-  await gptscriptClient.writeFileInWorkspace(filePath, buffer);
-  return buffer.length;
+    const buffer = Buffer.from(content);
+    await gptscriptClient.writeFileInWorkspace(path, buffer);
+    return buffer.length;
 }
 
-function getPath(page: PageObjectResponse): string {
-  const pageId = page.id;
-  const fileDir = path.join(pageId.toString());
-  let title = (
-    (page.properties?.title ?? page.properties?.Name) as any
-  )?.title[0]?.plain_text
-    ?.trim()
-    .replaceAll(/\//g, "-");
-  if (!title) {
-    title = pageId.toString();
-  }
-  return path.join(fileDir, title + ".md");
+function getPath(page: PageObjectResponse, folderPath: string): string {
+    const pageId = page.id;
+    const fileDir = path.join(folderPath, pageId.toString());
+    let title = getTitle(page);
+    return path.join(fileDir, title + ".md");
 }
 
-function getTitle(page: PageObjectResponse): string {
-  let title = (
-    (page.properties?.title ?? page.properties?.Name) as any
-  )?.title[0]?.plain_text
-    ?.trim()
-    .replaceAll(/\//g, "-");
-  if (!title) {
-    title = page.id.toString();
-  }
-  return title;
+function getTitle(page: any): string {
+    if (page.type === "child_database") {
+        return page.child_database.title;
+    }
+
+    if (page.object !== "page") {
+        return "";
+    }
+    let title = (
+        (page.properties?.title ?? page.properties?.Name) as any
+    )?.title[0]?.plain_text
+        ?.trim()
+        .replaceAll(/\//g, "-");
+    if (!title) {
+        title = page.id.toString();
+    }
+    return title;
 }
 
 async function getPage(client: Client, pageId: string) {
-  const page = await client.pages.retrieve({ page_id: pageId });
-  return page as PageObjectResponse;
+    const page = await client.pages.retrieve({ page_id: pageId });
+    return page as PageObjectResponse;
+}
+
+async function getAllPagesIteratively(
+    client: Client,
+    output: OutputMetadata,
+    gptscriptClient: any
+) {
+    const pages = new Map<
+        string,
+        {
+            page: PageObjectResponse;
+            path: string;
+        }
+    >();
+    const stack: (PageObjectResponse | null)[] = [];
+
+    let cursor = null;
+    do {
+        const response: SearchResponse = await client.search({
+            page_size: 100,
+            start_cursor: cursor ?? undefined,
+            filter: { property: "object", value: "page" },
+        });
+
+        stack.push(...(response.results as PageObjectResponse[]));
+
+        cursor = response.has_more ? response.next_cursor : null;
+    } while (cursor);
+
+    while (stack.length > 0) {
+        const currentPage = stack.pop();
+        if (!currentPage) {
+            continue;
+        }
+
+        if (pages.has(currentPage.id)) {
+            continue;
+        }
+        if (currentPage.url) {
+            output.status = `Syncing page ${currentPage.url}...`;
+            await gptscriptClient.writeFileInWorkspace(
+                ".metadata.json",
+                Buffer.from(JSON.stringify(output, null, 2))
+            );
+        }
+        pages.set(currentPage.id, {
+            page: currentPage,
+            path: "",
+        });
+        let childCursor = null;
+        do {
+            try {
+                const childResponse: ListBlockChildrenResponse =
+                    await client.blocks.children.list({
+                        block_id: currentPage.id,
+                        page_size: 100,
+                        start_cursor: childCursor ?? undefined,
+                    });
+
+                for (const child of childResponse.results) {
+                    if (!pages.has(child.id)) {
+                        try {
+                            if ((child as any).type === "child_page") {
+                                const childPage = await getPage(
+                                    client,
+                                    child.id
+                                );
+                                stack.push(childPage);
+                            } else if ((child as any).has_children) {
+                                stack.push(child as any);
+                            } else if (
+                                (child as any).type === "child_database"
+                            ) {
+                                stack.push(child as any);
+                            }
+                        } catch (err: any) {
+                            console.error(
+                                `Failed to get page ${child.id}: ${err.message}`
+                            );
+                        }
+                    }
+                }
+
+                childCursor = childResponse.has_more
+                    ? childResponse.next_cursor
+                    : null;
+            } catch (err: any) {
+                console.error(
+                    `Failed to get children for block ${currentPage.id}: ${err.message}`
+                );
+                break;
+            }
+        } while (childCursor);
+    }
+
+    for (const pageData of pages.values()) {
+        let folderPath = "";
+        let p = pageData.page;
+        while (p.parent) {
+            try {
+                let parentId = "";
+                if (p.parent.type === "page_id") {
+                    parentId = p.parent.page_id;
+                } else if (p.parent.type === "block_id") {
+                    parentId = p.parent.block_id;
+                } else if (p.parent.type === "database_id") {
+                    parentId = p.parent.database_id;
+                }
+                const parentPage = pages.get(parentId)?.page;
+                if (!parentPage) {
+                    break;
+                }
+                const parentTitle = getTitle(parentPage);
+                if (parentTitle) {
+                    folderPath = path.join(parentTitle, folderPath);
+                }
+                p = parentPage;
+            } catch (err: any) {
+                folderPath = "";
+                break;
+            }
+        }
+        pageData.path = getPath(pageData.page, folderPath);
+    }
+
+    for (const [pageId, pageData] of pages.entries()) {
+        if (pageData.page.object !== "page") {
+            pages.delete(pageId);
+        }
+    }
+    return pages;
 }
 
 async function main() {
-  const client = new Client({
-    auth: process.env.NOTION_TOKEN,
-  });
+    const client = new Client({
+        auth: process.env.NOTION_TOKEN,
+    });
 
-  const gptscript = await import("@gptscript-ai/gptscript");
-  const gptscriptClient = new gptscript.GPTScript();
+    const gptscript = await import("@gptscript-ai/gptscript");
+    const gptscriptClient = new gptscript.GPTScript();
 
-  let output: OutputMetadata = {} as OutputMetadata;
-  let metadataFile;
-  try {
-    metadataFile = await gptscriptClient.readFileInWorkspace(".metadata.json");
-  } catch (err: any) {
-    // Ignore any error if the metadata file doesn't exist. Ideally we should check for only not existing error but sdk doesn't provide that
-  }
-  if (metadataFile) {
-    output = JSON.parse(metadataFile.toString());
-  }
-
-  if (!output.files) {
-    output.files = {};
-  }
-
-  if (!output.state) {
-    output.state = {} as {
-      notionState: {
-        pages: Record<
-          string,
-          { id: string; title: string; folderPath: string }
-        >;
-      };
-    };
-  }
-
-  if (!output.state.notionState) {
-    output.state.notionState = {} as {
-      pages: Record<string, { id: string; title: string; folderPath: string }>;
-    };
-  }
-
-  if (!output.state.notionState.pages) {
-    output.state.notionState.pages = {};
-  }
-
-  let syncedCount = 0;
-  const allPages = await client.search({
-    filter: { property: "object", value: "page" },
-  });
-
-  const pageUrls = new Set();
-  for (const page of allPages.results) {
-    let p = page as PageObjectResponse;
-    if (p.archived) {
-      continue;
+    let output: OutputMetadata = {} as OutputMetadata;
+    let metadataFile;
+    try {
+        metadataFile = await gptscriptClient.readFileInWorkspace(
+            ".metadata.json"
+        );
+    } catch (err: any) {
+        // Ignore any error if the metadata file doesn't exist. Ideally we should check for only not existing error but sdk doesn't provide that
     }
-    const pageId = p.id;
-    const pageUrl = p.url;
-    const pageTitle = getTitle(p);
-    pageUrls.add(pageUrl);
-    let folderPath = "";
-    while (p.parent && p.parent.type === "page_id") {
-      try {
-        const parentPage = await getPage(client, p.parent.page_id);
-        const parentTitle = getTitle(parentPage);
-        folderPath = path.join(parentTitle, folderPath);
-        p = parentPage;
-      } catch (err: any) {
-        folderPath = "";
-        break;
-      }
+    if (metadataFile) {
+        output = JSON.parse(metadataFile.toString());
     }
-    output.state.notionState.pages[pageUrl] = {
-      id: pageId,
-      title: pageTitle,
-      folderPath: folderPath,
-    };
-  }
 
-  await gptscriptClient.writeFileInWorkspace(
-    ".metadata.json",
-    Buffer.from(JSON.stringify(output, null, 2))
-  );
-
-  for (const pageUrl of Object.keys(output.state.notionState.pages)) {
-    if (
-      !allPages.results
-        .filter((p) => !(p as PageObjectResponse).archived)
-        .some((page) => (page as PageObjectResponse).url === pageUrl)
-    ) {
-      delete output.state.notionState.pages[pageUrl];
+    if (!output.files) {
+        output.files = {};
     }
-  }
 
-  for (const [pageUrl, pageDetails] of Object.entries(
-    output.state.notionState.pages
-  )) {
-    const page = await getPage(client, pageDetails.id);
-    if (
-      !output.files[pageUrl] ||
-      output.files[page.url].updatedAt !== page.last_edited_time
-    ) {
-      console.error(`Writing page url: ${page.url}`);
-      const sizeInBytes = await writePageToFile(client, page, gptscriptClient);
-      output.files[page.url] = {
-        url: page.url,
-        filePath: getPath(page!),
-        updatedAt: page.last_edited_time,
-        sizeInBytes: sizeInBytes,
-      };
-    } else {
-      console.error(`Skipping page url: ${page.url}`);
-    }
-    syncedCount++;
-    output.status = `${syncedCount}/${
-      Object.keys(output.state.notionState.pages).length
-    } number of pages have been synced`;
-    await gptscriptClient.writeFileInWorkspace(
-      ".metadata.json",
-      Buffer.from(JSON.stringify(output, null, 2))
+    let syncedCount = 0;
+    const allPages = await getAllPagesIteratively(
+        client,
+        output,
+        gptscriptClient
     );
-  }
-  for (const [pageUrl, fileInfo] of Object.entries(output.files)) {
-    if (!pageUrls.has(pageUrl)) {
-      try {
-        await gptscriptClient.deleteFileInWorkspace(fileInfo.filePath);
-        delete output.files[pageUrl];
-        console.error(`Deleted file and entry for page URL: ${pageUrl}`);
-      } catch (error) {
-        console.error(`Failed to delete file ${fileInfo.filePath}:`, error);
-      }
-    }
-  }
 
-  output.status = "";
-  await gptscriptClient.writeFileInWorkspace(
-    ".metadata.json",
-    Buffer.from(JSON.stringify(output, null, 2))
-  );
+    for (const [pageId, { page, path }] of allPages.entries()) {
+        if (
+            !output.files[pageId] ||
+            output.files[pageId].updatedAt !== page.last_edited_time
+        ) {
+            console.error(`Writing page url: ${page.url}`);
+            const content = await getPageContent(client, pageId);
+            const sizeInBytes = await writePageToFile(
+                path,
+                content,
+                gptscriptClient
+            );
+            output.files[pageId] = {
+                url: page.url,
+                filePath: path,
+                updatedAt: page.last_edited_time,
+                sizeInBytes: sizeInBytes,
+            };
+            syncedCount++;
+        }
+        output.status = `${syncedCount}/${allPages.size} number of pages have been synced`;
+        await gptscriptClient.writeFileInWorkspace(
+            ".metadata.json",
+            Buffer.from(JSON.stringify(output, null, 2))
+        );
+    }
+    for (const [pageId, fileInfo] of Object.entries(output.files)) {
+        if (!allPages.has(pageId)) {
+            try {
+                await gptscriptClient.deleteFileInWorkspace(fileInfo.filePath);
+                delete output.files[pageId];
+                console.error(`Deleted file and entry for page ID: ${pageId}`);
+            } catch (error) {
+                console.error(
+                    `Failed to delete file ${fileInfo.filePath}:`,
+                    error
+                );
+            }
+        }
+    }
+
+    output.status = "";
+    await gptscriptClient.writeFileInWorkspace(
+        ".metadata.json",
+        Buffer.from(JSON.stringify(output, null, 2))
+    );
 }
 
 main()
-  .then(() => process.exit(0))
-  .catch((err) => {
-    console.log(JSON.stringify({ error: err.message }));
-    process.exit(0);
-  });
+    .then(() => process.exit(0))
+    .catch((err) => {
+        console.log(JSON.stringify({ error: err.message }));
+        process.exit(0);
+    });
