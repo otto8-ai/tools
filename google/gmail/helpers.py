@@ -1,24 +1,59 @@
 import base64
-import sys
-from email.mime.text import MIMEText
-
+import os
 import gptscript
-from gptscript.datasets import DatasetElement
+from filetype import guess_mime
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
+from email import encoders
 
+async def create_message(to, cc, bcc, subject, message_text, attachments):
+    if attachments:
+        # Create a multipart message when there are attachments
+        gptscript_client = gptscript.GPTScript()
+        message = MIMEMultipart()
+        message.attach(MIMEText(message_text, 'plain'))
+    else:
+        # Use MIMEText for plain text messages without attachments
+        message = MIMEText(message_text, 'plain')
 
-def create_message(to, cc, bcc, subject, message_text):
-    message = MIMEText(message_text)
     message['to'] = to
     if cc is not None:
         message['cc'] = cc
     if bcc is not None:
         message['bcc'] = bcc
     message['subject'] = subject
+
+    # Read and attach any workspace files if provided
+    for filepath in attachments:
+        try:
+            # Get the file bytes from the workspace
+            wksp_file_path = await prepend_base_path('files', filepath)
+            file_content = await gptscript_client.read_file_in_workspace(wksp_file_path)
+
+            # Determine the MIME type and subtype
+            mime = guess_mime(file_content) or "application/octet-stream"
+            main_type, sub_type = mime.split('/', 1)
+
+            # Create the appropriate MIMEBase object for the attachment
+            mime_base = MIMEBase(main_type, sub_type)
+            mime_base.set_payload(file_content)
+            encoders.encode_base64(mime_base)
+
+            # Add header with the file name
+            mime_base.add_header(
+                'Content-Disposition',
+                f'attachment; filename="{filepath.split("/")[-1]}"'
+            )
+            message.attach(mime_base)
+        except Exception as e:
+            # Raise a new exception with the problematic file path included
+            raise Exception(f"Error attaching {filepath}: {e}")
+
+    # Encode the message as a base64 string
     raw_message = base64.urlsafe_b64encode(message.as_bytes()).decode('utf-8')
     return {'raw': raw_message}
 
-
-import os
 
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
@@ -37,6 +72,9 @@ def client(service_name: str, version: str):
     except HttpError as err:
         print(err)
         exit(1)
+
+
+from gptscript.datasets import DatasetElement
 
 
 async def list_messages(service, query, max_results):
@@ -235,3 +273,40 @@ def get_email_body(message):
     except Exception as e:
         print(f'Error while decoding the email body: {e}')
         return None
+
+async def prepend_base_path(base_path: str, file_path: str):
+    """
+    Prepend a base path to a file path if it's not already rooted in the base path.
+
+    Args:
+        base_path (str): The base path to prepend.
+        file_path (str): The file path to check and modify.
+
+    Returns:
+        str: The modified file path with the base path prepended if necessary.
+
+    Examples:
+      >>> prepend_base_path("files", "my-file.txt")
+      'files/my-file.txt'
+
+      >>> prepend_base_path("files", "files/my-file.txt")
+      'files/my-file.txt'
+
+      >>> prepend_base_path("files", "foo/my-file.txt")
+      'files/foo/my-file.txt'
+
+      >>> prepend_base_path("files", "bar/files/my-file.txt")
+      'files/bar/files/my-file.txt'
+
+      >>> prepend_base_path("files", "files/bar/files/my-file.txt")
+      'files/bar/files/my-file.txt'
+    """
+    # Split the file path into parts for checking
+    file_parts = os.path.normpath(file_path).split(os.sep)
+
+    # Check if the base path is already at the root
+    if file_parts[0] == base_path:
+        return file_path
+
+    # Prepend the base path
+    return os.path.join(base_path, file_path)

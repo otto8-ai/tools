@@ -78,6 +78,7 @@ Param: cc_emails: A comma separated list of email addresses to cc the email to (
 Param: bcc_emails: A comma separated list of email addresses to bcc the email to (Optional)
 Param: subject: Subject of the email
 Param: message: Message body of the email
+Param: attachments: A comma separated list of workspace file paths to attach to the email (Optional)
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/createDraft.py
 
