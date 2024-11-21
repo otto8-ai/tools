@@ -8,6 +8,7 @@ Share Tools: List Mail Folders, List Messages, Get Message Details, Search Messa
 Name: List Mail Folders
 Description: Lists all available mail folders.
 Share Context: Outlook Mail Context
+Share Context: Datasets Output Context from github.com/gptscript-ai/datasets/filter
 Tools: github.com/gptscript-ai/datasets/filter
 Credential: Outlook Mail OAuth Read Credential from ./credential
 
@@ -17,6 +18,7 @@ Credential: Outlook Mail OAuth Read Credential from ./credential
 Name: List Messages
 Description: Lists messages in a folder.
 Share Context: Outlook Mail Context
+Share Context: Datasets Output Context from github.com/gptscript-ai/datasets/filter
 Tools: github.com/gptscript-ai/datasets/filter
 Credential: Outlook Mail OAuth Read Credential from ./credential
 Share Tools: List Mail Folders
@@ -42,6 +44,7 @@ Name: Search Messages
 Description: Search for messages. At least one of subject, from_address, or from_name must be specified.
 Share Context: Outlook Mail Context
 Credential: Outlook Mail OAuth Read Credential from ./credential
+Share Context: Datasets Output Context from github.com/gptscript-ai/datasets/filter
 Tools: github.com/gptscript-ai/datasets/filter
 Share Tools: List Mail Folders
 Param: subject: (Optional) Search query for the subject of the message.
