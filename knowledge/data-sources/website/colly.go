@@ -49,7 +49,7 @@ func crawlColly(ctx context.Context, input *MetadataInput, output *MetadataOutpu
 func scrape(ctx context.Context, converter *md.Converter, logOut *logrus.Logger, output *MetadataOutput, gptscriptClient *gptscript.GPTScript, visited map[string]struct{}, folders map[string]struct{}, url string, limit int) error {
 	collector := colly.NewCollector()
 	collector.OnHTML("body", func(e *colly.HTMLElement) {
-		markdown := converter.Convert(e.DOM)
+		markdown := converter.Convert(RemoveNonMainContent(e.DOM))
 		hostname := e.Request.URL.Hostname()
 		urlPathWithQuery := e.Request.URL.Path
 		if e.Request.URL.RawQuery != "" {

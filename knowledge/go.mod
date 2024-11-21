@@ -14,7 +14,7 @@ replace (
 require (
 	code.sajari.com/docconv/v2 v2.0.0-pre.4
 	dario.cat/mergo v1.0.0
-	github.com/JohannesKaufmann/html-to-markdown/v2 v2.0.2-alpha
+	github.com/JohannesKaufmann/html-to-markdown/v2 v2.2.0
 	github.com/PuerkitoBio/goquery v1.9.2
 	github.com/acorn-io/cmd v0.0.0-20240728043647-5ee22f336de6
 	github.com/acorn-io/z v0.0.0-20231104012607-4cab1b3ec5e5
@@ -49,7 +49,7 @@ require (
 	github.com/stretchr/testify v1.9.0
 	github.com/swaggo/swag v1.16.3
 	github.com/tmc/langchaingo v0.1.12
-	golang.org/x/sync v0.8.0
+	golang.org/x/sync v0.9.0
 	gorm.io/driver/postgres v1.5.9
 	gorm.io/gorm v1.25.12
 	sigs.k8s.io/yaml v1.4.0
@@ -123,7 +123,7 @@ require (
 	github.com/levigross/exp-html v0.0.0-20120902181939-8df60c69a8f5 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/mattn/go-runewidth v0.0.15 // indirect
+	github.com/mattn/go-runewidth v0.0.16 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.26 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
@@ -154,11 +154,11 @@ require (
 	gitlab.com/golang-commonmark/markdown v0.0.0-20211110145824-bf3e522c626a // indirect
 	gitlab.com/golang-commonmark/mdurl v0.0.0-20191124015652-932350d1cb84 // indirect
 	gitlab.com/golang-commonmark/puny v0.0.0-20191124015043-9f83538fa04f // indirect
-	golang.org/x/crypto v0.28.0 // indirect
+	golang.org/x/crypto v0.29.0 // indirect
 	golang.org/x/exp v0.0.0-20240613232115-7f521ea00fb8 // indirect
-	golang.org/x/net v0.30.0 // indirect
-	golang.org/x/sys v0.26.0 // indirect
-	golang.org/x/text v0.19.0 // indirect
+	golang.org/x/net v0.31.0 // indirect
+	golang.org/x/sys v0.27.0 // indirect
+	golang.org/x/text v0.20.0 // indirect
 	golang.org/x/tools v0.23.0 // indirect
 	google.golang.org/api v0.184.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240610135401-a8a62080eff3 // indirect
