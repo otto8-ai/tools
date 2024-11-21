@@ -8,7 +8,7 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from openai._streaming import Stream
 from openai._types import NOT_GIVEN
 from openai.types.chat import ChatCompletion, ChatCompletionChunk
-from openai.types.embedding import Embedding
+from openai.types import CreateEmbeddingResponse, ImagesResponse
 from openai import AzureOpenAI
 
 
@@ -102,14 +102,10 @@ async def chat_completions(request: Request):
 
 @app.post("/v1/embeddings")
 async def embeddings(request: Request):
-    data = await request.body()
-    data = json.loads(data)
+    data = json.loads(await request.body())
 
     try:
-        res: Embedding = azure_client.embeddings.create(
-            model=data["model"],
-            input=data["input"],
-        )
+        res: CreateEmbeddingResponse = azure_client.embeddings.create(**data)
 
         return JSONResponse(content=jsonable_encoder(res))
     except Exception as e:
@@ -121,6 +117,26 @@ async def embeddings(request: Request):
             error_code = 500
             error_message = str(e)
         raise HTTPException(status_code=error_code, detail=f"Error occurred: {error_message}")
+
+
+@app.post("/v1/images/generations")
+async def image_generation(request: Request):
+    data = json.loads(await request.body())
+
+    try:
+        res: ImagesResponse = azure_client.images.generate(**data)
+
+        return JSONResponse(content=jsonable_encoder(res))
+    except Exception as e:
+        try:
+            log("Error occurred: ", e.__dict__)
+            error_code = e.status_code
+            error_message = e.message
+        except:
+            error_code = 500
+            error_message = str(e)
+        raise HTTPException(status_code=error_code, detail=f"Error occurred: {error_message}")
+
 
 async def convert_stream(stream: Stream[ChatCompletionChunk]) -> AsyncIterable[str]:
     for chunk in stream:
