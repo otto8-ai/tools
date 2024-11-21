@@ -182,12 +182,15 @@ func sync(ctx context.Context, logErr *logrus.Logger, input MetadataInput, outpu
 			return err
 		}
 		for _, child := range children {
-			items[*child.GetId()] = struct {
-				Item models.DriveItemable
-				Root string
-			}{
-				Item: child,
-				Root: root,
+			// We only sync item that is less than 50 MB, as most of the bigger files won't be supported from knowledge
+			if child.GetSize() != nil && *child.GetSize() < 1024*1024*50 {
+				items[*child.GetId()] = struct {
+					Item models.DriveItemable
+					Root string
+				}{
+					Item: child,
+					Root: root,
+				}
 			}
 		}
 	}

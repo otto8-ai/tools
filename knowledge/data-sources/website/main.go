@@ -32,12 +32,7 @@ type State struct {
 }
 
 type WebsiteCrawlingState struct {
-	Folders map[string]struct{}    `json:"folders"`
-	Pages   map[string]PageDetails `json:"pages"`
-}
-
-type PageDetails struct {
-	ParentURL string `json:"parentURL"`
+	Folders map[string]struct{} `json:"folders"`
 }
 
 type FileDetails struct {
@@ -89,10 +84,6 @@ func main() {
 
 	if output.Files == nil {
 		output.Files = make(map[string]FileDetails)
-	}
-
-	if output.State.WebsiteCrawlingState.Pages == nil {
-		output.State.WebsiteCrawlingState.Pages = make(map[string]PageDetails)
 	}
 
 	mode := os.Getenv("MODE")
