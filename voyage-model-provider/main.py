@@ -7,7 +7,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
 debug = os.environ.get("GPTSCRIPT_DEBUG", "false") == "true"
-client = AsyncClient(api_key=os.environ.get("OTTO8_VOYAGE_MODEL_PROVIDER_API_KEY", "pa-P3XFfrvvOj1hzJSdUmkV_O7RVngUQ-00HpsDzgRX8sc"))
+client = AsyncClient(api_key=os.environ.get("OTTO8_VOYAGE_MODEL_PROVIDER_API_KEY", ""))
 app = FastAPI()
 uri = "http://127.0.0.1:" + os.environ.get("PORT", "8000")
 
@@ -41,7 +41,7 @@ async def root():
 
 @app.get("/v1/models")
 async def list_models() -> JSONResponse:
-    return JSONResponse({"data": [{"id": voyage_models}]}, status_code=200)
+    return JSONResponse({"data": voyage_models}, status_code=200)
 
 
 @app.post("/v1/embeddings")
