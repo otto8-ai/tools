@@ -1,9 +1,6 @@
 import asyncio
 import os
 
-from gptscript import GPTScript
-from gptscript.datasets import DatasetElement
-
 from auth import gspread_client
 
 
@@ -31,33 +28,9 @@ async def main():
         if not values:
             print("No data found.")
             return
-
-        cell_values = dict()
-        for row_idx, row in enumerate(values, start=1):
-            for col_idx, value in enumerate(row, start=1):
-                cell_reference = get_cell_reference(row_idx, col_idx)
-                cell_values[cell_reference] = value
-
-        try:
-            gptscript_client = GPTScript()
-
-            elements = []
-            for cell_reference, value in cell_values.items():
-                elements.append(DatasetElement(
-                    name=cell_reference,
-                    description="",
-                    contents=value if value != "" else " "
-                ))
-
-            dataset_id = await gptscript_client.add_dataset_elements(
-                elements,
-                name=f"{spreadsheet.id}_data",
-                description=f"data for Google Sheet with ID {spreadsheet.id}"
-            )
-
-            print(f"Dataset created with ID {dataset_id} with {len(elements)} elements")
-        except Exception as e:
-            print("An error occurred while creating the dataset:", e)
+        else:
+            for row in values:
+                print(row)
 
     except Exception as err:
         print(err)
