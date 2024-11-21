@@ -78,3 +78,5 @@ modelProviders:
     reference: ./azure-openai-model-provider
   ollama-model-provider:
     reference: ./ollama-model-provider
+  voyage-model-provider:
+    reference: ./voyage-model-provider
