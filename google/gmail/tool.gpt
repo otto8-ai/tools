@@ -64,6 +64,7 @@ Credential: ../credential
 Share Contexts: ../../time, Email List Context
 Tools: github.com/gptscript-ai/datasets/filter
 Param: max_results: Maximum number of drafts to list (Optional: Default will list all drafts)
+Param: attachments: A comma separated list of workspace file paths to attach to the email (Optional)
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/listDrafts.py
 
