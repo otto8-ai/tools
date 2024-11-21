@@ -1,11 +1,10 @@
 import os
-import time
 from typing import Any
 
 import uvicorn
 import asyncio
 import httpx
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse, StreamingResponse
 
 debug = os.environ.get("GPTSCRIPT_DEBUG", "false") == "true"
@@ -52,6 +51,24 @@ async def completions(request: Request) -> StreamingResponse:
     )
 
 
+@app.post("/v1/{path:path}")
+async def generic_api_handler(request: Request) -> JSONResponse:
+    try:
+        resp = httpx.post(f"{otto8_url}/api/llm-proxy/"+request.path_params["path"], json=await request.json())
+        if resp.status_code != 200:
+            return JSONResponse({"error": resp.text}, status_code=resp.status_code)
+
+        return JSONResponse(await resp.json(), status_code=200)
+    except Exception as e:
+        try:
+            error_code = e.status_code
+            error_message = e.message
+        except:
+            error_code = 500
+            error_message = str(e)
+        raise HTTPException(status_code=error_code, detail=f"Error occurred: {error_message}")
+
+
 async def _stream_chat_completion(content: Any, api_key: str):
     async with httpx.AsyncClient(timeout=httpx.Timeout(30 * 60.0)) as client:
         async with client.stream(
@@ -69,7 +86,7 @@ async def _stream_chat_completion(content: Any, api_key: str):
                 yield chunk
 
 def get_api_key(request: Request) -> str:
-    env_header =request.headers.get("X-GPTScript-Env")
+    env_header = request.headers.get("X-GPTScript-Env")
     if env_header is None:
         return ""
 
