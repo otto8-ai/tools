@@ -148,7 +148,7 @@ func (s *Datastore) Ingest(ctx context.Context, datasetID string, filename strin
 	}
 
 	// Mandatory Transformation: Add filename to metadata -> append extraMetadata, but do not override filename or absPath
-	metadata := map[string]any{"filename": filename, "absPath": opts.FileMetadata.AbsolutePath}
+	metadata := map[string]any{"filename": filename, "absPath": opts.FileMetadata.AbsolutePath, "fileSize": opts.FileMetadata.Size}
 	for k, v := range opts.ExtraMetadata {
 		if _, ok := metadata[k]; !ok {
 			metadata[k] = v
