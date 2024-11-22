@@ -14,15 +14,16 @@ import (
 	"strings"
 	"time"
 
-	md "github.com/JohannesKaufmann/html-to-markdown"
+	md "github.com/JohannesKaufmann/html-to-markdown/v2/converter"
+	"github.com/JohannesKaufmann/html-to-markdown/v2/plugin/base"
+	"github.com/JohannesKaufmann/html-to-markdown/v2/plugin/commonmark"
 	"github.com/gocolly/colly"
 	"github.com/gptscript-ai/go-gptscript"
 	"github.com/sirupsen/logrus"
 )
 
 func crawlColly(ctx context.Context, input *MetadataInput, output *MetadataOutput, logOut *logrus.Logger, gptscript *gptscript.GPTScript) error {
-	converter := md.NewConverter("", true, nil)
-
+	converter := md.NewConverter(md.WithPlugins(base.NewBasePlugin(), commonmark.NewCommonmarkPlugin()))
 	visited := make(map[string]struct{})
 	folders := make(map[string]struct{})
 
@@ -49,7 +50,16 @@ func crawlColly(ctx context.Context, input *MetadataInput, output *MetadataOutpu
 func scrape(ctx context.Context, converter *md.Converter, logOut *logrus.Logger, output *MetadataOutput, gptscriptClient *gptscript.GPTScript, visited map[string]struct{}, folders map[string]struct{}, url string, limit int) error {
 	collector := colly.NewCollector()
 	collector.OnHTML("body", func(e *colly.HTMLElement) {
-		markdown := converter.Convert(RemoveNonMainContent(e.DOM))
+		html, err := RemoveNonMainContent(e.DOM).Html()
+		if err != nil {
+			logOut.Errorf("Failed to grab HTML: %v", err)
+			return
+		}
+		markdown, err := converter.ConvertString(html)
+		if err != nil {
+			logOut.Errorf("Failed to convert HTML to markdown: %v", err)
+			return
+		}
 		hostname := e.Request.URL.Hostname()
 		urlPathWithQuery := e.Request.URL.Path
 		if e.Request.URL.RawQuery != "" {
