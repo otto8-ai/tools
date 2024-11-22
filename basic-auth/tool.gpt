@@ -1,0 +1,9 @@
+Name: basic-auth
+Param: tool_display_name: The tool name to display to the user when prompting for credentials
+Param: message: The message to display the when prompting for this credential
+Param: username_field: The name of the username field
+Param: username_env: The name of the environment variable to set for the captured username
+Param: password_field: The name of the password field
+Param: password_env: The name of the environment variable to set for the captured password
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool "${GPTSCRIPT_INPUT}"
