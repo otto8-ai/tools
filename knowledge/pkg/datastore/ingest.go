@@ -5,12 +5,14 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"os"
 	"time"
 
 	"github.com/gptscript-ai/knowledge/pkg/datastore/documentloader"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings"
 	"github.com/gptscript-ai/knowledge/pkg/index/types"
 	"github.com/gptscript-ai/knowledge/pkg/log"
+	"github.com/gptscript-ai/knowledge/pkg/output"
 	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
 
 	"github.com/google/uuid"
@@ -73,11 +75,20 @@ func (s *Datastore) Ingest(ctx context.Context, datasetID string, filename strin
 			return nil, fmt.Errorf("failed to get embeddings model provider: %w", err)
 		}
 
-		// TODO: Use the dataset-provided config (merge with override)
-		err = embeddings.CompareRequiredFields(s.EmbeddingModelProvider.Config(), dsEmbeddingProvider.Config())
-		if err != nil {
-			slog.Info("Dataset has attached embeddings provider config", "config", ds.EmbeddingsProviderConfig)
-			return nil, fmt.Errorf("mismatching embedding provider configs: %w", err)
+		if s.EmbeddingModelProvider.EmbeddingModelName() != dsEmbeddingProvider.EmbeddingModelName() {
+			slog.Warn("Embeddings model mismatch", "dataset", datasetID, "attached", dsEmbeddingProvider.EmbeddingModelName(), "configured", s.EmbeddingModelProvider.EmbeddingModelName())
+			if os.Getenv("KNOW_PREFER_NEW_EMBEDDING_MODEL") == "" {
+				slog.Info("Using dataset's embeddings model", "model", dsEmbeddingProvider.EmbeddingModelName())
+				s.EmbeddingModelProvider.UseEmbeddingModel(dsEmbeddingProvider.EmbeddingModelName())
+			}
+		}
+
+		if os.Getenv("KNOW_STRICT_EMBEDDING_CONFIG_CHECK") != "" {
+			err = embeddings.CompareRequiredFields(s.EmbeddingModelProvider.Config(), dsEmbeddingProvider.Config())
+			if err != nil {
+				slog.Info("Dataset has attached embeddings provider config", "config", output.RedactSensitive(ds.EmbeddingsProviderConfig))
+				return nil, fmt.Errorf("mismatching embedding provider configs: %w", err)
+			}
 		}
 	}
 

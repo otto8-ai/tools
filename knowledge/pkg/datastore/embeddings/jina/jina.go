@@ -1,11 +1,12 @@
 package jina
 
 import (
-	"dario.cat/mergo"
 	"fmt"
+	"strings"
+
+	"dario.cat/mergo"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/load"
 	cg "github.com/philippgille/chromem-go"
-	"strings"
 )
 
 type EmbeddingProviderJina struct {
@@ -14,6 +15,14 @@ type EmbeddingProviderJina struct {
 }
 
 const EmbeddingProviderJinaName = "jina"
+
+func (p *EmbeddingProviderJina) UseEmbeddingModel(model string) {
+	p.Model = model
+}
+
+func (p *EmbeddingProviderJina) EmbeddingModelName() string {
+	return p.Model
+}
 
 func (p *EmbeddingProviderJina) Name() string {
 	return EmbeddingProviderJinaName

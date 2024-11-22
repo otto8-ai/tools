@@ -15,7 +15,15 @@ type EmbeddingProviderOllama struct {
 	Model   string `koanf:"model" env:"OLLAMA_MODEL" export:"required"`
 }
 
+func (p *EmbeddingProviderOllama) UseEmbeddingModel(model string) {
+	p.Model = model
+}
+
 const EmbeddingProviderOllamaName = "ollama"
+
+func (p *EmbeddingProviderOllama) EmbeddingModelName() string {
+	return p.Model
+}
 
 func (p *EmbeddingProviderOllama) Name() string {
 	return EmbeddingProviderOllamaName

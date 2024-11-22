@@ -16,7 +16,15 @@ type EmbeddingProviderVertex struct {
 	Model       string `koanf:"model" env:"VERTEX_MODEL" export:"required"`
 }
 
+func (p *EmbeddingProviderVertex) UseEmbeddingModel(model string) {
+	p.Model = model
+}
+
 const EmbeddingProviderVertexName = "vertex"
+
+func (p *EmbeddingProviderVertex) EmbeddingModelName() string {
+	return p.Model
+}
 
 func (p *EmbeddingProviderVertex) Name() string {
 	return EmbeddingProviderVertexName

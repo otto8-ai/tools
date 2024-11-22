@@ -260,7 +260,6 @@ func (s *ClientLoad) run(ctx context.Context, input, output string) error {
 		return fmt.Errorf("failed to write output to %q: %w", output, err)
 	}
 	return nil
-
 }
 
 func dropCommon(target, common map[string]any) map[string]any {

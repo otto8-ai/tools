@@ -53,7 +53,7 @@ func TestLoadConfVertex(t *testing.T) {
 
 	conf := p.Config().(*vertex.EmbeddingProviderVertex)
 
-	require.Equal(t, "foo-embedding-001", conf.Model)
+	require.Equal(t, "foo-embedding-001", conf.EmbeddingModelName)
 	require.Equal(t, "foo-project", conf.Project)
 }
 

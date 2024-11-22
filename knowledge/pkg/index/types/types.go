@@ -105,7 +105,6 @@ func (db *DB) ListDatasets() ([]Dataset, error) {
 }
 
 func (db *DB) DeleteFile(ctx context.Context, datasetID, fileID string) error {
-
 	// Find file in database with associated documents
 	var file File
 	tx := db.WithContext(ctx).Preload("Documents").Where("id = ? AND dataset = ?", fileID, datasetID).First(&file)
@@ -115,7 +114,6 @@ func (db *DB) DeleteFile(ctx context.Context, datasetID, fileID string) error {
 
 	// Remove owned documents from VectorStore and Database
 	for _, doc := range file.Documents {
-
 		tx = db.WithContext(ctx).Delete(&doc)
 		if tx.Error != nil {
 			return fmt.Errorf("failed to delete document from DB: %w", tx.Error)

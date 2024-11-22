@@ -22,12 +22,10 @@ func (c *SofficeConverter) Name() string {
 }
 
 func NewSofficeConverter() (*SofficeConverter, error) {
-
 	return &SofficeConverter{}, nil
 }
 
 func (c *SofficeConverter) Convert(ctx context.Context, reader io.Reader, sourceExt, outputFormat string) (io.Reader, error) {
-
 	// Convert the file using soffice
 	outputFormat = strings.ToLower(outputFormat)
 	sourceExt = strings.ToLower(sourceExt)

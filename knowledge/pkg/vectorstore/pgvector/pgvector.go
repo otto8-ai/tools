@@ -349,14 +349,19 @@ SimilaritySearch performs a similarity search on the given query and returns the
 *   - `<~>` - Hamming distance (binary vectors, added in 0.7.0)
 *   - `<%>` - Jaccard distance (binary vectors, added in 0.7.0)
 */
-func (v VectorStore) SimilaritySearch(ctx context.Context, query string, numDocuments int, collection string, where map[string]string, whereDocument []cg.WhereDocument) ([]vs.Document, error) {
+func (v VectorStore) SimilaritySearch(ctx context.Context, query string, numDocuments int, collection string, where map[string]string, whereDocument []cg.WhereDocument, embeddingFunc cg.EmbeddingFunc) ([]vs.Document, error) {
 	slog.Debug("Similarity search", "query", query, "numDocuments", numDocuments, "collection", collection, "where", where, "whereDocument", whereDocument, "store", "pgvector")
+
+	ef := v.embeddingFunc
+	if embeddingFunc != nil {
+		ef = embeddingFunc
+	}
 
 	if len(whereDocument) > 0 {
 		return nil, fmt.Errorf("pgvector does not support whereDocument")
 	}
 
-	queryEmbedding, err := v.embeddingFunc(ctx, query)
+	queryEmbedding, err := ef(ctx, query)
 	if err != nil {
 		return nil, err
 	}

@@ -17,8 +17,8 @@ import (
 
 type VectorStore interface {
 	CreateCollection(ctx context.Context, collection string, opts *dbtypes.DatasetCreateOpts) error
-	AddDocuments(ctx context.Context, docs []types.Document, collection string) ([]string, error)                                                                                 // @return documentIDs, error
-	SimilaritySearch(ctx context.Context, query string, numDocuments int, collection string, where map[string]string, whereDocument []cg.WhereDocument) ([]types.Document, error) //nolint:lll
+	AddDocuments(ctx context.Context, docs []types.Document, collection string) ([]string, error)                                                                                                                 // @return documentIDs, error
+	SimilaritySearch(ctx context.Context, query string, numDocuments int, collection string, where map[string]string, whereDocument []cg.WhereDocument, embeddingFunc cg.EmbeddingFunc) ([]types.Document, error) //nolint:lll
 	RemoveCollection(ctx context.Context, collection string) error
 	RemoveDocument(ctx context.Context, documentID string, collection string, where map[string]string, whereDocument []cg.WhereDocument) error
 	GetDocuments(ctx context.Context, collection string, where map[string]string, whereDocument []cg.WhereDocument) ([]types.Document, error)
