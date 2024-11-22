@@ -6,10 +6,12 @@ export async function searchPosts (
     since?: string,
     until?: string,
     limit?: string,
+    tags?: string,
 ): Promise<void> {
     let queryParams: AppBskyFeedSearchPosts.QueryParams = {
         q: query ?? '',
         sort: 'latest',
+        limit: 25
     }
 
     if (!query) {
@@ -38,6 +40,12 @@ export async function searchPosts (
         } catch (error: unknown) {
             throw new Error(`Invalid since date format: ${String(error)}`)
         }
+    }
+
+    if (!!tags) {
+        queryParams.tag = tags
+            .split(',')
+            .map(tag => tag.trim().replace(/^#/, ''))
     }
 
     const response = await agent.app.bsky.feed.searchPosts(queryParams)

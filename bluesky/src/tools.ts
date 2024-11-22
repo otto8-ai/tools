@@ -7,11 +7,27 @@ if (process.argv.length !== 3) {
   process.exit(1)
 }
 
+const BLUESKY_HANDLE = process.env.BLUESKY_HANDLE
+const BLUESKY_APP_PASSWORD = process.env.BLUESKY_APP_PASSWORD
+
 const command = process.argv[2]
 
 try {
+  if (!BLUESKY_HANDLE) {
+    throw new Error('bluesky username not set')
+  }
+
+  if (!BLUESKY_APP_PASSWORD) {
+    throw new Error('bluesky app password not set')
+  }
+
   const agent = new AtpAgent({
-    service: 'https://api.bsky.app'
+    service: 'https://bsky.social'
+  })
+
+  await agent.login({
+    identifier: BLUESKY_HANDLE,
+    password: BLUESKY_APP_PASSWORD
   })
 
   switch (command) {
@@ -22,6 +38,7 @@ try {
               process.env.SINCE,
               process.env.UNTIL,
               process.env.LIMIT,
+              process.env.TAGS,
           )
           break
       case 'searchUsers':

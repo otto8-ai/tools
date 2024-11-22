@@ -6,20 +6,23 @@ Share Tools: Search Posts, Search Users
 
 ---
 Name: Search Posts
-Description: Search for posts on Bluesky
+Description: Search for Bluesky posts
+Credential: ./credential
 JSON Response: true
 Share Context: ../time
 Share Tools: Search Users
 Param: query: A Lucene query to search for posts with.
-Param: since: (optional) ISO 8601 timestamp to search for posts since. Defaults to 7 days ago.
-Param: until: (optional) ISO 8601 timestamp to search for posts until. Defaults to now.
+Param: since: (optional) ISO 8601 UTC timestamp to search for posts since (inclusive). Defaults to 7 days ago.
+Param: until: (optional) ISO 8601 UTC timestamp to search for posts until (exclusive). Defaults to now.
 Param: limit: (optional) The maximum number of posts to return. Must be an integer >=1 and <=100. Defaults to 25.
+Param: tags: (optional) A comma separated list of tags to find posts containing any of the specified tags. For example, `#apple,#banana` will return posts that include either `#apple`, `#banana`, both. To search for posts containing multiple tags together, combine hashtags with the 'AND' operator. For instance, `#apple AND #banana,#cherry` will return posts that include both `#apple` and `#banana`, as well as posts that include `#cherry`.
 
 #!/usr/bin/env npm --silent --prefix ${GPTSCRIPT_TOOL_DIR} run tool -- searchPosts
 
 ---
 Name: Search Users
-Description: Search for users on Bluesky
+Description: Search for Bluesky users
+Credential: ./credential
 JSON Response: true
 Share Context: ../time
 Param: query: A Lucene query to search for users with.
