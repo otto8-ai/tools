@@ -16,7 +16,7 @@ async def main():
         raise ValueError("query parameter must be set")
     show_columns = os.getenv('SHOW_COLUMNS')
     if show_columns is not None:
-        show_columns = show_columns.split(',')
+        show_columns = [item.strip() for item in show_columns.split(',')]
     sheet_name = os.getenv('SHEET_NAME')
 
     service = gspread_client()
