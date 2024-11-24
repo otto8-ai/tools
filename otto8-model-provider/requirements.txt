@@ -1,4 +1,3 @@
 fastapi
 httpx
-uvicorn
-uvloop[standard]
+uvicorn[standard]
