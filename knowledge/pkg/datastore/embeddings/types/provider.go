@@ -9,4 +9,6 @@ type EmbeddingModelProvider interface {
 	EmbeddingFunc() (cg.EmbeddingFunc, error)
 	Configure() error
 	Config() any
+	EmbeddingModelName() string
+	UseEmbeddingModel(model string)
 }

@@ -1,11 +1,12 @@
 package mistral
 
 import (
-	"dario.cat/mergo"
 	"fmt"
+	"strings"
+
+	"dario.cat/mergo"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/load"
 	cg "github.com/philippgille/chromem-go"
-	"strings"
 )
 
 type EmbeddingProviderMistral struct {
@@ -13,7 +14,15 @@ type EmbeddingProviderMistral struct {
 	Model  string `koanf:"model" env:"MISTRAL_MODEL" export:"required"`
 }
 
+func (p *EmbeddingProviderMistral) UseEmbeddingModel(model string) {
+	p.Model = model
+}
+
 const EmbeddingProviderMistralName = "mistral"
+
+func (p *EmbeddingProviderMistral) EmbeddingModelName() string {
+	return p.Model
+}
 
 func (p *EmbeddingProviderMistral) Name() string {
 	return EmbeddingProviderMistralName

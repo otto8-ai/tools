@@ -1,18 +1,27 @@
 package localai
 
 import (
-	"dario.cat/mergo"
 	"fmt"
+	"strings"
+
+	"dario.cat/mergo"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/load"
 	cg "github.com/philippgille/chromem-go"
-	"strings"
 )
 
 type EmbeddingProviderLocalAI struct {
 	Model string `koanf:"model" env:"LOCALAI_MODEL" export:"required"`
 }
 
+func (p *EmbeddingProviderLocalAI) UseEmbeddingModel(model string) {
+	p.Model = model
+}
+
 const EmbeddingProviderLocalAIName = "localai"
+
+func (p *EmbeddingProviderLocalAI) EmbeddingModelName() string {
+	return p.Model
+}
 
 func (p *EmbeddingProviderLocalAI) Name() string {
 	return EmbeddingProviderLocalAIName

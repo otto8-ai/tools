@@ -151,8 +151,13 @@ func (v *VectorStore) AddDocuments(ctx context.Context, docs []vs.Document, coll
 	return ids, nil
 }
 
-func (v *VectorStore) SimilaritySearch(ctx context.Context, query string, numDocuments int, collection string, where map[string]string, whereDocument []cg.WhereDocument) ([]vs.Document, error) {
-	q, err := v.embeddingFunc(ctx, query)
+func (v *VectorStore) SimilaritySearch(ctx context.Context, query string, numDocuments int, collection string, where map[string]string, whereDocument []cg.WhereDocument, embeddingFunc cg.EmbeddingFunc) ([]vs.Document, error) {
+	ef := v.embeddingFunc
+	if embeddingFunc != nil {
+		ef = embeddingFunc
+	}
+
+	q, err := ef(ctx, query)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get embedding: %w", err)
 	}

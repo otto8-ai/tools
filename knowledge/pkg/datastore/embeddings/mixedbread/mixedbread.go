@@ -1,11 +1,12 @@
 package mixedbread
 
 import (
-	"dario.cat/mergo"
 	"fmt"
+	"strings"
+
+	"dario.cat/mergo"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/load"
 	cg "github.com/philippgille/chromem-go"
-	"strings"
 )
 
 type EmbeddingProviderMixedbread struct {
@@ -13,7 +14,15 @@ type EmbeddingProviderMixedbread struct {
 	Model  string `koanf:"model" env:"MIXEDBREAD_MODEL" export:"required"`
 }
 
+func (p *EmbeddingProviderMixedbread) UseEmbeddingModel(model string) {
+	p.Model = model
+}
+
 const EmbeddingProviderMixedbreadName = "mixedbread"
+
+func (p *EmbeddingProviderMixedbread) EmbeddingModelName() string {
+	return p.Model
+}
 
 func (p *EmbeddingProviderMixedbread) Name() string {
 	return EmbeddingProviderMixedbreadName

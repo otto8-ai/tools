@@ -54,8 +54,20 @@ func (o OpenAIConfig) Name() string {
 	return EmbeddingModelProviderOpenAIName
 }
 
+func (o OpenAIConfig) EmbeddingModelName() string {
+	return o.EmbeddingModel
+}
+
 type AzureOpenAIConfig struct {
 	Deployment string `usage:"Azure OpenAI deployment name (overrides openai-embedding-model, if set)" default:"" env:"OPENAI_AZURE_DEPLOYMENT" koanf:"deployment"`
+}
+
+func (p *EmbeddingModelProviderOpenAI) UseEmbeddingModel(model string) {
+	p.EmbeddingModel = model
+}
+
+func (p *EmbeddingModelProviderOpenAI) EmbeddingModelName() string {
+	return p.EmbeddingModel
 }
 
 func (p *EmbeddingModelProviderOpenAI) Name() string {

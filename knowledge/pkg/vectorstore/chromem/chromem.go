@@ -147,8 +147,14 @@ func convertStringMapToAnyMap(m map[string]string) map[string]any {
 	return convertedMap
 }
 
-func (s *ChromemStore) SimilaritySearch(ctx context.Context, query string, numDocuments int, collection string, where map[string]string, whereDocument []chromem.WhereDocument) ([]vs.Document, error) {
-	col := s.db.GetCollection(collection, s.embeddingFunc)
+func (s *ChromemStore) SimilaritySearch(ctx context.Context, query string, numDocuments int, collection string, where map[string]string, whereDocument []chromem.WhereDocument, embeddingFunc chromem.EmbeddingFunc) ([]vs.Document, error) {
+	ef := s.embeddingFunc
+	if embeddingFunc != nil {
+		ef = embeddingFunc
+		slog.Debug("Using custom embedding function")
+	}
+
+	col := s.db.GetCollection(collection, ef)
 	if col == nil {
 		return nil, fmt.Errorf("%w: %q", errors.ErrCollectionNotFound, collection)
 	}

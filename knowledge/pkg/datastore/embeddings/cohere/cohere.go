@@ -1,8 +1,9 @@
 package cohere
 
 import (
-	"dario.cat/mergo"
 	"fmt"
+
+	"dario.cat/mergo"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/load"
 	cg "github.com/philippgille/chromem-go"
 )
@@ -12,6 +13,14 @@ const EmbeddingModelProviderCohereName string = "cohere"
 type EmbeddingModelProviderCohere struct {
 	APIKey string `env:"COHERE_API_KEY" koanf:"apiKey" export:"false"`
 	Model  string `env:"COHERE_MODEL" koanf:"model" export:"required"`
+}
+
+func (p *EmbeddingModelProviderCohere) UseEmbeddingModel(model string) {
+	p.Model = model
+}
+
+func (p *EmbeddingModelProviderCohere) EmbeddingModelName() string {
+	return p.Model
 }
 
 func (p *EmbeddingModelProviderCohere) Name() string {
