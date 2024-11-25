@@ -2,7 +2,7 @@
 Name: Bluesky
 Metadata: bundle: true
 Description: Tools for interacting with Bluesky (bsky.app)
-Share Tools: Create Post, Search Posts, Search Users
+Share Tools: Create Post, Delete Post, Search Posts, Search Users
 
 ---
 Name: Search Posts
@@ -40,6 +40,16 @@ Param: text: The text of the post.
 Param: tags: (optional) A comma separated list of tags to add to the post. For example, `#apple,#banana` will add both `#apple` and `#banana` to the post.
 
 #!/usr/bin/env npm --silent --prefix ${GPTSCRIPT_TOOL_DIR} run tool -- createPost
+
+---
+Name: Delete Post
+Description: Delete a Bluesky post
+Credential: ./credential
+JSON Response: true
+Share Context: ../time
+Param: post_uri: The URI of the post to delete.
+
+#!/usr/bin/env npm --silent --prefix ${GPTSCRIPT_TOOL_DIR} run tool -- deletePost
 
 ---
 !metadata:*:category

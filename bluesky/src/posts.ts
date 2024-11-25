@@ -65,3 +65,13 @@ export async function createPost(agent: AtpAgent, text?: string, tags?: string):
 
     console.log('Post created')
 }
+
+export async function deletePost(agent: AtpAgent, postUri?: string): Promise<void> {
+    if (!postUri) {
+        throw new Error('Post URI is required')
+    }
+
+    await agent.deletePost(postUri)
+
+    console.log('Post deleted')
+}

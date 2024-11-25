@@ -1,5 +1,5 @@
 import { AtpAgent } from '@atproto/api'
-import { createPost, searchPosts } from './posts.ts'
+import { createPost, deletePost, searchPosts } from './posts.ts'
 import { searchUsers } from './users.ts'
 
 if (process.argv.length !== 3) {
@@ -36,6 +36,12 @@ try {
               agent,
               process.env.TEXT,
               process.env.TAGS,
+          )
+          break
+      case 'deletePost':
+          await deletePost(
+              agent,
+              process.env.POST_URI,
           )
           break
       case 'searchPosts':
