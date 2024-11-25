@@ -2,7 +2,7 @@
 Name: Bluesky
 Metadata: bundle: true
 Description: Tools for interacting with Bluesky (bsky.app)
-Share Tools: Search Posts, Search Users
+Share Tools: Create Post, Search Posts, Search Users
 
 ---
 Name: Search Posts
@@ -29,6 +29,17 @@ Param: query: A Lucene query to search for users with.
 Param: limit: (optional) The maximum number of users to return. Must be an integer >=1 and <=100. Defaults to 25.
 
 #!/usr/bin/env npm --silent --prefix ${GPTSCRIPT_TOOL_DIR} run tool -- searchUsers
+
+---
+Name: Create Post
+Description: Create a Bluesky post
+Credential: ./credential
+JSON Response: true
+Share Context: ../time
+Param: text: The text of the post.
+Param: tags: (optional) A comma separated list of tags to add to the post. For example, `#apple,#banana` will add both `#apple` and `#banana` to the post.
+
+#!/usr/bin/env npm --silent --prefix ${GPTSCRIPT_TOOL_DIR} run tool -- createPost
 
 ---
 !metadata:*:category

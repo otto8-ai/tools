@@ -1,5 +1,5 @@
 import { AtpAgent } from '@atproto/api'
-import { searchPosts } from './posts.ts'
+import { createPost, searchPosts } from './posts.ts'
 import { searchUsers } from './users.ts'
 
 if (process.argv.length !== 3) {
@@ -31,6 +31,13 @@ try {
   })
 
   switch (command) {
+      case 'createPost':
+          await createPost(
+              agent,
+              process.env.TEXT,
+              process.env.TAGS,
+          )
+          break
       case 'searchPosts':
           await searchPosts(
               agent,
