@@ -52,3 +52,16 @@ export async function searchPosts (
 
     console.log(JSON.stringify(response.data.posts))
 }
+
+export async function createPost(agent: AtpAgent, text?: string, tags?: string): Promise<void> {
+    if (!text) {
+        throw new Error('Text is required')
+    }
+
+    await agent.post({
+        text,
+        tags: tags?.split(',').map(tag => tag.trim().replace(/^#/, '')) ?? [],
+    })
+
+    console.log('Post created')
+}
