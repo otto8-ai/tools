@@ -260,6 +260,11 @@ func scrapePDF(ctx context.Context, logOut *logrus.Logger, output *MetadataOutpu
 		return fmt.Errorf("failed to download PDF %s: status code %d", linkURL.String(), resp.StatusCode)
 	}
 
+	if resp.Header.Get("Content-Type") != "application/pdf" {
+		logOut.Infof("skipping %s because it is not a PDF (likely redirect on old link)", linkURL.String())
+		return nil
+	}
+
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return fmt.Errorf("failed to read PDF %s: %v", linkURL.String(), err)
