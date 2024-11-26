@@ -23,8 +23,15 @@ func New(ctx context.Context, dsn string, gormCfg *gorm.Config, autoMigrate bool
 		return nil, err
 	}
 
-	// Enable foreign key constraint to make sure that deletes cascade
-	tx := db.Exec("PRAGMA foreign_keys = ON")
+	// Enable PRAGMAs
+	// - foreign key constraint to make sure that deletes cascade
+	// - busy_timeout (ms) to prevent db lockups as we're accessing the DB from multiple separate processes in otto8
+	// - journal_mode to WAL for better concurrency performance
+	tx := db.Exec(`
+PRAGMA foreign_keys = ON;
+PRAGMA busy_timeout = 5000;
+PRAGMA journal_mode = WAL;
+`)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
@@ -36,6 +43,9 @@ func New(ctx context.Context, dsn string, gormCfg *gorm.Config, autoMigrate bool
 
 	sqlDB.SetConnMaxLifetime(5 * time.Minute)
 	sqlDB.SetConnMaxIdleTime(3 * time.Minute)
+
+	// These only have an effect on this one process (including goroutines), but not on other processes e.g. as part
+	// of parallel ingestion in otto8, so they won't improve the performance on that end
 	sqlDB.SetMaxIdleConns(1)
 	sqlDB.SetMaxOpenConns(1)
 
