@@ -29,19 +29,6 @@ func New(ctx context.Context, dsn string, embeddingFunc cg.EmbeddingFunc) (*Vect
 		return nil, err
 	}
 
-	// Enable PRAGMAs
-	// - foreign key constraint to make sure that deletes cascade
-	// - busy_timeout (ms) to prevent db lockups as we're accessing the DB from multiple separate processes in otto8
-	// - journal_mode to WAL for better concurrency performance
-	err = db.Exec(`
-PRAGMA foreign_keys = ON;
-PRAGMA busy_timeout = 5000;
-PRAGMA journal_mode = WAL;
-`)
-	if err != nil {
-		return nil, fmt.Errorf("failed to set PRAGMAs in sqlite-vec: %w", err)
-	}
-
 	store := &VectorStore{
 		embeddingFunc:       embeddingFunc,
 		db:                  db,
