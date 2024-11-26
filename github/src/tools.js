@@ -225,7 +225,7 @@ export async function listRepos(octokit, owner) {
         const datasetID = await gptscriptClient.addDatasetElements(elements, {
             name: `${owner}_github_repos`,
             description: `GitHub repos for ${owner}`
-        })
+        });
         console.log(`Created dataset with ID ${datasetID} with ${elements.length} repositories`);
     } catch (e) {
         console.log('Failed to create dataset:', e);
@@ -238,4 +238,70 @@ export async function getStarCount(octokit, owner, repo) {
         repo,
     });
     console.log(data.stargazers_count);
+}
+
+export async function listAssignedIssues(octokit) {
+    const user = await octokit.rest.users.getAuthenticated();
+
+    const { data } = await octokit.rest.search.issuesAndPullRequests({
+        q: `is:open is:issue assignee:${user.data.login} archived:false`
+    });
+
+    try {
+        const gptscriptClient = new GPTScript();
+        const elements = data.items.map(issue => {
+            const owner = issue.html_url.split('/')[3]
+            const repo = issue.html_url.split('/')[4]
+            return {
+                name: `${issue.id}`,
+                description: '',
+                contents: `${owner}/${repo} #${issue.number} - ${issue.title} (ID: ${issue.id}) - ${issue.html_url}`
+            }
+        });
+
+        if (elements.length > 0) {
+            const datasetID = await gptscriptClient.addDatasetElements(elements, {
+                name: `assigned_issues`,
+                description: `Issues assigned to the authenticated user`
+            });
+            console.log(`Created dataset with ID ${datasetID} with ${elements.length} issues`);
+        } else {
+            console.log('No assigned issues found');
+        }
+    } catch (e) {
+        console.log('Failed to create dataset:', e);
+    }
+}
+
+export async function listPRsForReview(octokit) {
+    const user = await octokit.rest.users.getAuthenticated();
+
+    const { data } = await octokit.rest.search.issuesAndPullRequests({
+        q: `is:pr review-requested:${user.data.login} is:open archived:false`,
+    });
+
+    try {
+        const gptscriptClient = new GPTScript();
+        const elements = data.items.map(pr => {
+            const owner = pr.html_url.split('/')[3]
+            const repo = pr.html_url.split('/')[4]
+            return {
+                name: `${pr.id}`,
+                description: '',
+                contents: `${owner}/${repo} #${pr.number} - ${pr.title} (ID: ${pr.id}) - ${pr.html_url}`
+            }
+        });
+
+        if (elements.length > 0) {
+            const datasetID = await gptscriptClient.addDatasetElements(elements, {
+                name: `pr_review_requests`,
+                description: `PRs requesting review from the authenticated user`
+            });
+            console.log(`Created dataset with ID ${datasetID} with ${elements.length} PRs`);
+        } else {
+            console.log('No PRs requesting review found');
+        }
+    } catch (e) {
+        console.log('Failed to create dataset:', e);
+    }
 }
