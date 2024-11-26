@@ -39,24 +39,17 @@ func GetDefaultDSNs(indexDSN, vectorDSN string) (string, string, bool, error) {
 		isArchive = true
 	}
 
+	dataFile, err := xdg.DataFile("gptscript/knowledge/knowledge.db")
+	if err != nil {
+		return "", "", isArchive, err
+	}
 	if indexDSN == "" {
-		var err error
-		indexDSN, err = xdg.DataFile("gptscript/knowledge/knowledge.db")
-		if err != nil {
-			return "", "", isArchive, err
-		}
-		indexDSN = "sqlite://" + indexDSN
+		indexDSN = "sqlite://" + dataFile
 		slog.Debug("Using default Index DSN", "indexDSN", indexDSN)
 	}
 
 	if vectorDSN == "" {
-		path, err := xdg.DataFile("gptscript/knowledge/vector.db")
-		if err != nil {
-			return "", "", isArchive, err
-		}
-
-		vectorDSN = "chromem://" + path
-
+		vectorDSN = "sqlite-vec://" + dataFile
 		slog.Debug("Using default Vector DSN", "vectorDSN", vectorDSN)
 	}
 
