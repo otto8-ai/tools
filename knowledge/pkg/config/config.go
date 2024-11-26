@@ -31,7 +31,7 @@ type DatabaseConfig struct {
 }
 
 type VectorDBConfig struct {
-	DSN string `name:"vector-dsn" usage:"DSN to the vector database (default \"chromem:$XDG_DATA_HOME/gptscript/knowledge/vector.db\")" default:"" env:"KNOW_VECTOR_DSN"`
+	DSN string `name:"vector-dsn" usage:"DSN to the vector database (default \"sqlite-vec://$XDG_DATA_HOME/gptscript/knowledge/vector.db\")" default:"" env:"KNOW_VECTOR_DSN"`
 }
 
 func LoadConfig(configFile string) (*Config, error) {
