@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"strings"
+	"time"
 
 	sqlitevec "github.com/asg017/sqlite-vec-go-bindings/ncruces"
 	dbtypes "github.com/gptscript-ai/knowledge/pkg/index/types"
@@ -27,6 +28,13 @@ func New(ctx context.Context, dsn string, embeddingFunc cg.EmbeddingFunc) (*Vect
 	db, err := sqlite3.Open(dsn)
 	if err != nil {
 		return nil, err
+	}
+
+	// Enable PRAGMAs
+	// - busy_timeout (ms) to prevent db lockups as we're accessing the DB from multiple separate processes in otto8
+	err = db.BusyTimeout(5 * time.Second)
+	if err != nil {
+		return nil, fmt.Errorf("failed to set busy timeout: %w", err)
 	}
 
 	store := &VectorStore{

@@ -42,7 +42,7 @@ require (
 	github.com/lu4p/cat v0.1.5
 	github.com/mitchellh/copystructure v1.2.0
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/ncruces/go-sqlite3 v0.19.0
+	github.com/ncruces/go-sqlite3 v0.20.3
 	github.com/pgvector/pgvector-go v0.2.2
 	github.com/philippgille/chromem-go v0.6.1-0.20240811154507-a1944285b284
 	github.com/pkoukk/tiktoken-go v0.1.6
@@ -145,7 +145,7 @@ require (
 	github.com/skeema/knownhosts v1.2.2 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/ssor/bom v0.0.0-20170718123548-6386211fdfcf // indirect
-	github.com/tetratelabs/wazero v1.8.1 // indirect
+	github.com/tetratelabs/wazero v1.8.2 // indirect
 	github.com/ugorji/go/codec v1.2.12 // indirect
 	github.com/unidoc/unioffice v1.33.0 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
