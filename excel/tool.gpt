@@ -1,7 +1,7 @@
 ---
 Name: Excel
 Description: Tools for interacting with Microsoft Excel workbooks.
-Share Tools: List Workbooks, List Worksheets, Get Worksheet Data, Get Worksheet Tables, Filter Worksheet Data, Add Worksheet Row, Create Worksheet
+Share Tools: List Workbooks, List Worksheets, Get Worksheet Column Headers, Get Worksheet Data, Get Worksheet Tables, Query Worksheet Data, Add Worksheet Row, Create Worksheet
 
 ---
 Name: List Workbooks
@@ -23,7 +23,7 @@ Param: workbook_id: ID of the workbook to list worksheets from
 
 ---
 Name: Get Worksheet Data
-Description: Get the data of a worksheet in a workbook.
+Description: Get all the data of a worksheet in a workbook.
 Share Context: Excel Context
 Credential: ./credential
 Share Tools: List Workbooks, List Worksheets
@@ -31,6 +31,17 @@ Param: workbook_id: ID of the workbook to get worksheet data from
 Param: worksheet_id: ID of the worksheet to get data from
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool getWorksheetData
+
+---
+Name: Get Worksheet Column Headers
+Description: Get the first 3 rows of a worksheet in a workbook to determine if there are column headers.
+Share Context: Excel Context
+Credential: ./credential
+Share Tools: List Workbooks, List Worksheets
+Param: workbook_id: ID of the workbook to get worksheet data from
+Param: worksheet_id: ID of the worksheet to get data from
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool getWorksheetColumnHeaders
 
 ---
 Name: Get Worksheet Tables
@@ -44,18 +55,17 @@ Param: worksheet_id: ID of the worksheet to get data from
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool getWorksheetTables
 
 ---
-Name: Filter Worksheet Data
-Description: Filter specific data from an Excel WorkSheet by retrieving only rows where the values of a specific column match a set of values.
+Name: Query Worksheet Data
+Description: Query specific data from a worksheet in a workbook by retrieving only rows where the values of a specific column match a set of values.
 Share Context: Excel Context
 Credential: ./credential
-Share Tools: List Workbooks, List Worksheets, Get Worksheet Tables
+Share Tools: List Workbooks, List Worksheets, Get Worksheet Column Headers
 Param: workbook_id: ID of the workbook to get worksheet data from
 Param: worksheet_id: ID of the worksheet to get data from
-Param: table_id: ID of the table to get data from
-Param: filter_column: The name of the column to filter against.
-Param: filter_values: A comma-separated list of values we are filtering for inside of the filter_column
+Param: show_columns: a comma-delimited list of columns to show in the output (Optional, by default shows first 5 columns)
+Param: query: The sql-like query to run against the spreadsheet. Should be the format expected by the pandas query function (e.g. "column1 == 'value1' and column2 > 10")
 
-#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool filterWorksheetData
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool queryWorksheetData
 
 ---
 Name: Add Worksheet Row
@@ -92,6 +102,13 @@ You have access to a set of tools to access, create, and modify Microsoft Excel 
 Do not output workbook IDs or worksheet IDs because they are not helpful for the user.
 
 When the Workbook to use is ambiguous, ask the user to to select one before continuing.
+
+When reading data from an Excel Workbook, always start by using the 'Get Worksheet Column Headers' tool to read the first 3 rows to determine if the first row contains column names.
+If there are headers, return the schema to the user.
+If the user asks to filter or list only specific information from the spreadsheet, try to use the 'Query Worksheet Data' tool.
+Write the query such that it returns the minimum number of columns and rows necessary to answer the user request.
+
+Do your best to always return the complete data that the user asked for, even if it is a large dataset.
 
 ## End of instructions for using Excel tools
 

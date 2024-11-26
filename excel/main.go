@@ -23,10 +23,12 @@ func main() {
 		err = commands.ListWorksheets(context.Background(), os.Getenv("WORKBOOK_ID"))
 	case "getWorksheetData":
 		err = commands.GetWorksheetData(context.Background(), os.Getenv("WORKBOOK_ID"), os.Getenv("WORKSHEET_ID"))
+	case "getWorksheetColumnHeaders":
+		err = commands.GetWorksheetColumnHeaders(context.Background(), os.Getenv("WORKBOOK_ID"), os.Getenv("WORKSHEET_ID"))
 	case "getWorksheetTables":
 		err = commands.GetWorksheetTables(context.Background(), os.Getenv("WORKBOOK_ID"), os.Getenv("WORKSHEET_ID"))
-	case "filterWorksheetData":
-		err = commands.FilterWorksheetData(context.Background(), os.Getenv("WORKBOOK_ID"), os.Getenv("WORKSHEET_ID"), os.Getenv("FILTER_COLUMN"), os.Getenv("FILTER_VALUES"))
+	case "queryWorksheetData":
+		err = commands.QueryWorksheetData(context.Background(), os.Getenv("WORKBOOK_ID"), os.Getenv("WORKSHEET_ID"), os.Getenv("QUERY"), os.Getenv("SHOW_COLUMNS"))
 	case "addWorksheetRow":
 		err = commands.AddWorksheetRow(context.Background(), os.Getenv("WORKBOOK_ID"), os.Getenv("WORKSHEET_ID"), os.Getenv("CONTENTS"))
 	case "createWorksheet":
