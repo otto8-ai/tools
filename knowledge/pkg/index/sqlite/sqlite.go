@@ -24,13 +24,11 @@ func New(ctx context.Context, dsn string, gormCfg *gorm.Config, autoMigrate bool
 	}
 
 	// Enable PRAGMAs
-	// - foreign key constraint to make sure that deletes cascade
 	// - busy_timeout (ms) to prevent db lockups as we're accessing the DB from multiple separate processes in otto8
-	// - journal_mode to WAL for better concurrency performance
+	// - foreign key constraint to make sure that deletes cascade
 	tx := db.Exec(`
-PRAGMA foreign_keys = ON;
 PRAGMA busy_timeout = 5000;
-PRAGMA journal_mode = WAL;
+PRAGMA foreign_keys = ON;
 `)
 	if tx.Error != nil {
 		return nil, tx.Error

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"strings"
+	"time"
 
 	sqlitevec "github.com/asg017/sqlite-vec-go-bindings/ncruces"
 	dbtypes "github.com/gptscript-ai/knowledge/pkg/index/types"
@@ -30,16 +31,10 @@ func New(ctx context.Context, dsn string, embeddingFunc cg.EmbeddingFunc) (*Vect
 	}
 
 	// Enable PRAGMAs
-	// - foreign key constraint to make sure that deletes cascade
 	// - busy_timeout (ms) to prevent db lockups as we're accessing the DB from multiple separate processes in otto8
-	// - journal_mode to WAL for better concurrency performance
-	err = db.Exec(`
-PRAGMA foreign_keys = ON;
-PRAGMA busy_timeout = 5000;
-PRAGMA journal_mode = WAL;
-`)
+	err = db.BusyTimeout(5 * time.Second)
 	if err != nil {
-		return nil, fmt.Errorf("failed to set PRAGMAs in sqlite-vec: %w", err)
+		return nil, fmt.Errorf("failed to set busy timeout: %w", err)
 	}
 
 	store := &VectorStore{
