@@ -73,6 +73,7 @@ async function getAllPagesIteratively(
         {
             page: PageObjectResponse;
             path: string;
+            hasChildren: boolean;
         }
     >();
     const stack: (PageObjectResponse | null)[] = [];
@@ -109,6 +110,7 @@ async function getAllPagesIteratively(
         pages.set(currentPage.id, {
             page: currentPage,
             path: "",
+            hasChildren: false,
         });
         let childCursor = null;
         do {
@@ -119,6 +121,15 @@ async function getAllPagesIteratively(
                         page_size: 100,
                         start_cursor: childCursor ?? undefined,
                     });
+
+                const hasChildren = childResponse.results.some(
+                    (child) => (child as any).type === "child_page"
+                );
+                pages.set(currentPage.id, {
+                    page: currentPage,
+                    path: "",
+                    hasChildren: hasChildren,
+                });
 
                 for (const child of childResponse.results) {
                     if (!pages.has(child.id)) {
@@ -158,6 +169,9 @@ async function getAllPagesIteratively(
 
     for (const pageData of pages.values()) {
         let folderPath = "";
+        if (pageData.hasChildren) {
+            folderPath = getTitle(pageData.page);
+        }
         let p = pageData.page;
         while (p.parent) {
             try {
