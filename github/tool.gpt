@@ -2,7 +2,7 @@
 Name: GitHub
 Description: Tools for interacting with GitHub
 Metadata: bundle: true
-Share Tools: Search Issues and PRs, Get Issue, Create Issue, Modify Issue, Close Issue, List Issue Comments, Add Comment to Issue, Get PR, Create PR, Modify PR, Close PR, List PR Comments, Add Comment to PR, List Repos, Get Star Count
+Share Tools: Search Issues and PRs, Get Issue, Create Issue, Modify Issue, Close Issue, List Issue Comments, Add Comment to Issue, Get PR, Create PR, Modify PR, Close PR, List PR Comments, Add Comment to PR, List Repos, Get Star Count, List Assigned Issues, List PRs for Review
 
 ---
 Name: Search Issues and PRs
@@ -61,7 +61,7 @@ Credential: ./credential
 Share Tools: Search Issues and PRs
 Param: owner: the owner of the repository
 Param: repo: the name of the repository
-Param: issueNumber: the number of the issue to close 
+Param: issueNumber: the number of the issue to close
 
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js closeIssue
 
@@ -134,7 +134,7 @@ Credential: ./credential
 Share Tools: Search Issues and PRs
 Param: owner: the owner of the repository
 Param: repo: the name of the repository
-Param: prNumber: the number of the pull request to close 
+Param: prNumber: the number of the pull request to close
 
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js closePR
 
@@ -173,13 +173,29 @@ Param: owner: the owner of the repositories
 
 ---
 Name: Get Star Count
-Description: Return the star count for the specified repo. 
+Description: Return the star count for the specified repo.
 Credential: ./credential
 Share Tool: List Repos
 Param: owner: the owner of the repository
 Param: repo: the name of the repository
 
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js getStarCount
+
+---
+Name: List Assigned Issues
+Description: Lists issues assigned to the authenticated user.
+Credential: ./credential
+Tools: github.com/gptscript-ai/datasets/filter
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js listAssignedIssues
+
+---
+Name: List PRs for Review
+Description: Lists pull requests that are awaiting review by the authenticated user.
+Credential: ./credential
+Tools: github.com/gptscript-ai/datasets/filter
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js listPRsForReview
 
 ---
 !metadata:*:category

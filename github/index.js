@@ -14,7 +14,9 @@ import {
     listPRComments,
     addCommentToPR,
     listRepos,
-    getStarCount
+    getStarCount,
+    listAssignedIssues,
+    listPRsForReview
 } from './src/tools.js';
 
 if (process.argv.length !== 3) {
@@ -78,6 +80,12 @@ try {
             break;
         case 'getStarCount':
             await getStarCount(octokit, process.env.OWNER, process.env.REPO);
+            break;
+        case 'listAssignedIssues':
+            await listAssignedIssues(octokit);
+            break;
+        case 'listPRsForReview':
+            await listPRsForReview(octokit);
             break;
         default:
             throw new Error(`Unknown command: ${command}`);
