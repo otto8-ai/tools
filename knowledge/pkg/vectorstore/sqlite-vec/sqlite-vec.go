@@ -55,7 +55,7 @@ func (v *VectorStore) Close() error {
 }
 
 func (v *VectorStore) prepareTables(ctx context.Context) error {
-	err := v.db.Exec(fmt.Sprintf(`CREATE TABLE IF NOT EXISTS %s
+	err := v.db.Exec(fmt.Sprintf(`CREATE TABLE IF NOT EXISTS [%s]
 		(
 			id TEXT PRIMARY KEY,
 			collection_id TEXT NOT NULL,
@@ -78,7 +78,7 @@ func (v *VectorStore) CreateCollection(ctx context.Context, collection string, o
 	}
 	dimensionality := len(emb) // FIXME: somehow allow to pass this in or set it globally
 
-	return v.db.Exec(fmt.Sprintf(`CREATE VIRTUAL TABLE IF NOT EXISTS %s_vec USING
+	return v.db.Exec(fmt.Sprintf(`CREATE VIRTUAL TABLE IF NOT EXISTS [%s_vec] USING
 	vec0(
 		document_id TEXT PRIMARY KEY,
 		embedding float[%d] distance_metric=cosine
@@ -87,7 +87,7 @@ func (v *VectorStore) CreateCollection(ctx context.Context, collection string, o
 }
 
 func (v *VectorStore) AddDocuments(ctx context.Context, docs []vs.Document, collection string) ([]string, error) {
-	stmt, _, err := v.db.Prepare(fmt.Sprintf(`INSERT INTO %s_vec(document_id, embedding) VALUES (?, ?)`, collection))
+	stmt, _, err := v.db.Prepare(fmt.Sprintf(`INSERT INTO [%s_vec](document_id, embedding) VALUES (?, ?)`, collection))
 	if err != nil {
 		return nil, fmt.Errorf("failed to prepare statement: %w", err)
 	}
@@ -122,7 +122,7 @@ func (v *VectorStore) AddDocuments(ctx context.Context, docs []vs.Document, coll
 	}
 
 	// add to embeddings table
-	stmt, _, err = v.db.Prepare(fmt.Sprintf(`INSERT INTO %s(id, collection_id, content, metadata) VALUES (?, ?, ?, ?)`, v.embeddingsTableName))
+	stmt, _, err = v.db.Prepare(fmt.Sprintf(`INSERT INTO [%s](id, collection_id, content, metadata) VALUES (?, ?, ?, ?)`, v.embeddingsTableName))
 	if err != nil {
 		return nil, fmt.Errorf("failed to prepare statement: %w", err)
 	}
@@ -162,7 +162,7 @@ func (v *VectorStore) SimilaritySearch(ctx context.Context, query string, numDoc
 		return nil, fmt.Errorf("failed to get embedding: %w", err)
 	}
 
-	stmt, _, err := v.db.Prepare(fmt.Sprintf(`SELECT document_id, distance FROM %s_vec WHERE embedding MATCH ? ORDER BY distance LIMIT %d`, collection, numDocuments))
+	stmt, _, err := v.db.Prepare(fmt.Sprintf(`SELECT document_id, distance FROM [%s_vec] WHERE embedding MATCH ? ORDER BY distance LIMIT %d`, collection, numDocuments))
 	if err != nil {
 		return nil, fmt.Errorf("failed to prepare statement: %w", err)
 	}
@@ -189,7 +189,7 @@ func (v *VectorStore) SimilaritySearch(ctx context.Context, query string, numDoc
 		return nil, fmt.Errorf("failed to close statement: %w", err)
 	}
 
-	nstmt, _, err := v.db.Prepare(fmt.Sprintf(`SELECT content, metadata FROM %s WHERE id = ?`, v.embeddingsTableName))
+	nstmt, _, err := v.db.Prepare(fmt.Sprintf(`SELECT content, metadata FROM [%s] WHERE id = ?`, v.embeddingsTableName))
 	if err != nil {
 		return nil, fmt.Errorf("failed to prepare statement: %w", err)
 	}
@@ -221,12 +221,12 @@ func (v *VectorStore) SimilaritySearch(ctx context.Context, query string, numDoc
 }
 
 func (v *VectorStore) RemoveCollection(ctx context.Context, collection string) error {
-	err := v.db.Exec(fmt.Sprintf(`DROP TABLE IF EXISTS %s_vec`, collection))
+	err := v.db.Exec(fmt.Sprintf(`DROP TABLE IF EXISTS [%s_vec]`, collection))
 	if err != nil {
 		return fmt.Errorf("failed to drop table: %w", err)
 	}
 
-	err = v.db.Exec(fmt.Sprintf(`DELETE FROM %s WHERE collection_id = %s`, v.embeddingsTableName, collection))
+	err = v.db.Exec(fmt.Sprintf(`DELETE FROM [%s] WHERE collection_id = '%s'`, v.embeddingsTableName, collection))
 	if err != nil {
 		return fmt.Errorf("failed to delete documents: %w", err)
 	}
@@ -255,7 +255,7 @@ func (v *VectorStore) RemoveDocument(ctx context.Context, documentID string, col
 			whereQuery = "TRUE"
 		}
 
-		stmt, _, err := v.db.Prepare(fmt.Sprintf(`SELECT id FROM %s WHERE collection_id = '%s' AND %s`, v.embeddingsTableName, collection, whereQuery))
+		stmt, _, err := v.db.Prepare(fmt.Sprintf(`SELECT id FROM [%s] WHERE collection_id = '%s' AND %s`, v.embeddingsTableName, collection, whereQuery))
 		if err != nil {
 			return fmt.Errorf("failed to prepare statement: %w", err)
 		}
@@ -274,12 +274,12 @@ func (v *VectorStore) RemoveDocument(ctx context.Context, documentID string, col
 	slog.Debug("deleting documents from sqlite-vec", "ids", ids)
 
 	// delete by ID
-	embStmt, _, err := v.db.Prepare(fmt.Sprintf(`DELETE FROM %s_vec WHERE document_id = ?`, collection))
+	embStmt, _, err := v.db.Prepare(fmt.Sprintf(`DELETE FROM [%s_vec] WHERE document_id = ?`, collection))
 	if err != nil {
 		return fmt.Errorf("failed to prepare statement: %w", err)
 	}
 
-	colStmt, _, err := v.db.Prepare(fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, v.embeddingsTableName))
+	colStmt, _, err := v.db.Prepare(fmt.Sprintf(`DELETE FROM [%s] WHERE id = ?`, v.embeddingsTableName))
 	if err != nil {
 		return fmt.Errorf("failed to prepare statement: %w", err)
 	}
@@ -336,7 +336,7 @@ func (v *VectorStore) GetDocuments(ctx context.Context, collection string, where
 			whereQuery = "TRUE"
 		}
 
-		stmt, _, err := v.db.Prepare(fmt.Sprintf(`SELECT id, content, metadata FROM %s WHERE collection_id = '%s' AND %s`, v.embeddingsTableName, collection, whereQuery))
+		stmt, _, err := v.db.Prepare(fmt.Sprintf(`SELECT id, content, metadata FROM [%s] WHERE collection_id = '%s' AND %s`, v.embeddingsTableName, collection, whereQuery))
 		if err != nil {
 			return nil, fmt.Errorf("failed to prepare statement: %w", err)
 		}
