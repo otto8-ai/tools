@@ -50,7 +50,7 @@ func crawlColly(ctx context.Context, input *MetadataInput, output *MetadataOutpu
 func scrape(ctx context.Context, converter *md.Converter, logOut *logrus.Logger, output *MetadataOutput, gptscriptClient *gptscript.GPTScript, visited map[string]struct{}, folders map[string]struct{}, url string, limit int) error {
 	collector := colly.NewCollector()
 	collector.OnHTML("body", func(e *colly.HTMLElement) {
-		html, err := RemoveNonMainContent(e.DOM).Html()
+		html, err := e.DOM.Html()
 		if err != nil {
 			logOut.Errorf("Failed to grab HTML: %v", err)
 			return
