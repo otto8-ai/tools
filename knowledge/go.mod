@@ -42,7 +42,7 @@ require (
 	github.com/lu4p/cat v0.1.5
 	github.com/mitchellh/copystructure v1.2.0
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/ncruces/go-sqlite3 v0.20.3
+	github.com/ncruces/go-sqlite3/gormlite v0.20.3
 	github.com/pgvector/pgvector-go v0.2.2
 	github.com/philippgille/chromem-go v0.6.1-0.20240811154507-a1944285b284
 	github.com/pkoukk/tiktoken-go v0.1.6
@@ -51,6 +51,7 @@ require (
 	github.com/swaggo/swag v1.16.3
 	github.com/tmc/langchaingo v0.1.12
 	golang.org/x/sync v0.9.0
+	gorm.io/datatypes v1.2.4
 	gorm.io/driver/postgres v1.5.9
 	gorm.io/gorm v1.25.12
 	sigs.k8s.io/yaml v1.4.0
@@ -58,6 +59,7 @@ require (
 
 require (
 	cloud.google.com/go/ai v0.7.0 // indirect
+	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/AssemblyAI/assemblyai-go-sdk v1.3.0 // indirect
 	github.com/EndFirstCorp/peekingReader v0.0.0-20171012052444-257fb6f1a1a6 // indirect
 	github.com/JalfResi/justext v0.0.0-20170829062021-c0282dea7198 // indirect
@@ -98,6 +100,7 @@ require (
 	github.com/go-openapi/spec v0.21.0 // indirect
 	github.com/go-openapi/swag v0.23.0 // indirect
 	github.com/go-resty/resty/v2 v2.3.0 // indirect
+	github.com/go-sql-driver/mysql v1.8.1 // indirect
 	github.com/go-viper/mapstructure/v2 v2.0.0-alpha.1 // indirect
 	github.com/gobwas/ws v1.2.1 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
@@ -128,6 +131,7 @@ require (
 	github.com/microcosm-cc/bluemonday v1.0.26 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
+	github.com/ncruces/go-sqlite3 v0.20.3 // indirect
 	github.com/ncruces/julianday v1.0.0 // indirect
 	github.com/olekukonko/tablewriter v0.0.6-0.20230925090304-df64c4bbad77 // indirect
 	github.com/otiai10/gosseract/v2 v2.2.4 // indirect
@@ -167,6 +171,7 @@ require (
 	google.golang.org/protobuf v1.34.2 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
+	gorm.io/driver/mysql v1.5.6 // indirect
 	modernc.org/libc v1.22.5 // indirect
 	modernc.org/mathutil v1.5.0 // indirect
 	modernc.org/memory v1.5.0 // indirect
