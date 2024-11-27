@@ -124,6 +124,30 @@ func GetWorksheetData(ctx context.Context, c *msgraphsdkgo.GraphServiceClient, w
 	return data, usedRange, nil
 }
 
+func GetWorksheetColumnHeaders(ctx context.Context, c *msgraphsdkgo.GraphServiceClient, workbookID, worksheetID string) ([][]any, models.WorkbookRangeable, error) {
+	drive, err := c.Me().Drive().Get(ctx, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	address := "1:3"
+	usedRange, err := c.Drives().ByDriveId(util.Deref(drive.GetId())).Items().ByDriveItemId(workbookID).Workbook().Worksheets().ByWorkbookWorksheetId(worksheetID).RangeWithAddress(&address).UsedRange().Get(ctx, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	result, err := serialization.SerializeToJson(usedRange.GetValues())
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var data [][]any
+	if err = json.Unmarshal(result, &data); err != nil {
+		return nil, nil, fmt.Errorf("failed to unmarshal data: %w", err)
+	}
+	return data, usedRange, nil
+}
+
 func GetWorksheetTables(ctx context.Context, c *msgraphsdkgo.GraphServiceClient, workbookID, worksheetID string) ([]Table, error) {
 	drive, err := c.Me().Drive().Get(ctx, nil)
 	if err != nil {
