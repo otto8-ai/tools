@@ -1,10 +1,10 @@
 import json
 import os
 
-from voyageai import AsyncClient
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
+from voyageai import AsyncClient
 
 debug = os.environ.get("GPTSCRIPT_DEBUG", "false") == "true"
 client = AsyncClient(api_key=os.environ.get("OTTO8_VOYAGE_MODEL_PROVIDER_API_KEY", ""))
@@ -12,12 +12,12 @@ app = FastAPI()
 uri = "http://127.0.0.1:" + os.environ.get("PORT", "8000")
 
 voyage_models = [
-    {"id": "voyage-3"},
-    {"id": "voyage-3-lite"},
-    {"id": "voyage-finance-2"},
-    {"id": "voyage-multilingual-2"},
-    {"id": "voyage-law-2"},
-    {"id": "voyage-code-2"},
+    {"id": "voyage-3","metadata":{"usage":"text-embedding"},"object":"model"},
+    {"id": "voyage-3-lite","metadata":{"usage":"text-embedding"},"object":"model"},
+    {"id": "voyage-finance-2","metadata":{"usage":"text-embedding"},"object":"model"},
+    {"id": "voyage-multilingual-2","metadata":{"usage":"text-embedding"},"object":"model"},
+    {"id": "voyage-law-2","metadata":{"usage":"text-embedding"},"object":"model"},
+    {"id": "voyage-code-2","metadata":{"usage":"text-embedding"},"object":"model"},
 ]
 
 
@@ -41,7 +41,7 @@ async def root():
 
 @app.get("/v1/models")
 async def list_models() -> JSONResponse:
-    return JSONResponse({"data": voyage_models}, status_code=200)
+    return JSONResponse({"object":"list","data": voyage_models}, status_code=200)
 
 
 @app.post("/v1/embeddings")

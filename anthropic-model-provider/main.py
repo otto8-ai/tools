@@ -25,10 +25,6 @@ async def log_body(request: Request, call_next):
 
 
 @app.post("/")
-async def post_root():
-    return uri
-
-
 @app.get("/")
 async def get_root():
     return uri
@@ -36,7 +32,16 @@ async def get_root():
 
 @app.get("/v1/models")
 async def list_models() -> JSONResponse:
-    return await claude3_provider_common.list_models(client)
+    try:
+        return JSONResponse(content={"object":"list","data": [set_model_usage(m) for m in json.loads((await claude3_provider_common.list_models(client)).body)["data"]]})
+    except Exception as e:
+        print(e)
+        return JSONResponse(content={"object":"list","data": []})
+
+
+def set_model_usage(model: dict) -> dict:
+    model["metadata"] = {"usage":"llm"}
+    return model
 
 
 @app.post("/v1/chat/completions")

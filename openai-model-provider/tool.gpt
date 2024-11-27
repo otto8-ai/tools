@@ -1,5 +1,6 @@
 Name: OpenAI
 Description: Model Provider for OpenAI
 Metadata: envVars: OTTO8_OPENAI_MODEL_PROVIDER_API_KEY
-#!sys.echo
-https://api.openai.com/v1
+Model Provider: true
+
+#!sys.daemon /usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py
