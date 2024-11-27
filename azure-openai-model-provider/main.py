@@ -1,23 +1,47 @@
 import json
 import os
+import sys
 from typing import AsyncIterable
 
+from azure.identity import CredentialUnavailableError, DefaultAzureCredential, get_bearer_token_provider
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse, StreamingResponse
+from openai import AzureOpenAI
 from openai._streaming import Stream
 from openai._types import NOT_GIVEN
-from openai.types.chat import ChatCompletion, ChatCompletionChunk
 from openai.types import CreateEmbeddingResponse, ImagesResponse
-from openai import AzureOpenAI
+from openai.types.chat import ChatCompletion, ChatCompletionChunk
 
-
-endpoint = os.environ.get("OTTO8_AZURE_OPENAI_MODEL_PROVIDER_ENDPOINT", "")
-api_key = os.environ.get("OTTO8_AZURE_OPENAI_MODEL_PROVIDER_API_KEY", "")
 debug = os.environ.get("GPTSCRIPT_DEBUG", "false") == "true"
 uri = "http://127.0.0.1:" + os.environ.get("PORT", "8000")
+api_version = os.environ.get("OTTO8_AZURE_OPENAI_MODEL_PROVIDER_API_VERSION", "2024-10-21")
 
-azure_client = AzureOpenAI(azure_endpoint=endpoint, api_key=api_key, api_version="2024-02-01")
+endpoint = os.environ.get("OTTO8_AZURE_OPENAI_MODEL_PROVIDER_ENDPOINT")
+if endpoint is None:
+    print(f"Azure model endpoint was not configured")
+    sys.exit(1)
+
+api_key = os.environ.get("OTTO8_AZURE_OPENAI_MODEL_PROVIDER_API_KEY")
+if api_key is None:
+    try:
+        token_provider = get_bearer_token_provider(
+            DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default"
+        )
+
+        azure_client = AzureOpenAI(
+            api_version=api_version,
+            azure_endpoint="https://bill-openai-custom.openai.azure.com",
+            azure_ad_token_provider=token_provider,
+        )
+    except CredentialUnavailableError:
+        print(f"Could not get Azure credentials")
+        sys.exit(1)
+    except Exception as e:
+        print(e)
+        sys.exit(1)
+else:
+    azure_client = AzureOpenAI(azure_endpoint=endpoint, api_key=api_key, api_version=api_version)
 
 
 def log(*args):
@@ -79,12 +103,12 @@ async def chat_completions(request: Request):
 
     try:
         res: Stream[ChatCompletionChunk] | ChatCompletion = azure_client.chat.completions.create(model=data["model"],
-                                                                                           messages=messages,
-                                                                                           tools=tools,
-                                                                                           tool_choice=tool_choice,
-                                                                                           temperature=temperature,
-                                                                                           stream=stream
-                                                                                           )
+                                                                                                 messages=messages,
+                                                                                                 tools=tools,
+                                                                                                 tool_choice=tool_choice,
+                                                                                                 temperature=temperature,
+                                                                                                 stream=stream
+                                                                                                 )
         if not stream:
             return JSONResponse(content=jsonable_encoder(res))
 
