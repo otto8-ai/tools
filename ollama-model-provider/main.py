@@ -3,20 +3,19 @@ import json
 import os
 import time
 from collections.abc import Mapping
-from datetime import datetime
 from typing import Any, AsyncIterable, Iterator, List, Optional
 
-from ollama import Client, Options
 import requests
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, StreamingResponse
+from ollama import Client, Options
 from openai.types.chat import ChatCompletionChunk
 from openai.types.chat.chat_completion_chunk import Choice, ChoiceDelta, ChoiceDeltaToolCall, \
     ChoiceDeltaToolCallFunction
 
 debug = os.environ.get('DEBUG', False) == "true"
 uri = "http://127.0.0.1:" + os.environ.get("PORT", "8000")
-ollama_host = os.environ.get("OTTO8_OLLAMA_MODEL_PROVIDER_HOST", "127.0.0.1:11434")
+ollama_host = os.environ.get("OTTO8_OLLAMA_MODEL_PROVIDER_HOST", "127.0.0.1:11436")
 ollama_client = Client(host=ollama_host)
 
 
@@ -58,15 +57,10 @@ async def list_models() -> JSONResponse:
     for model in models['models']:
         # truncate nanoseconds to microseconds
         timestamp = model['modified_at']
-        date_part, nanosecond_part = timestamp.split('.')
-        nanosecond_part, timezone_part = nanosecond_part.split('-')
-        microsecond_part = nanosecond_part[:6]
-        truncated_timestamp = f"{date_part}.{microsecond_part}-{timezone_part}"
-        dt = datetime.strptime(truncated_timestamp, "%Y-%m-%dT%H:%M:%S.%f%z")
-        unix_timestamp = time.mktime(dt.timetuple())
+        unix_timestamp = time.mktime(timestamp.timetuple())
 
         data.append({
-            "id": model['name'],
+            "id": model['model'],
             "object": "model",
             "created": int(unix_timestamp),
             "owned_by": "local",

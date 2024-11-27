@@ -1,9 +1,9 @@
+import asyncio
 import os
 from typing import Any
 
-import uvicorn
-import asyncio
 import httpx
+import uvicorn
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse, StreamingResponse
 
@@ -33,7 +33,7 @@ async def list_models() -> JSONResponse:
     if resp.status_code != 200:
         return JSONResponse({"data": [], "error": resp.text}, status_code=resp.status_code)
 
-    return JSONResponse({"data": [{"id": model["id"]} for model in resp.json()["items"]]}, status_code=200)
+    return JSONResponse({"object":"list","data": [{"id": model["id"], "metadata":{"usage": model.get("usage", "")}} for model in resp.json()["items"]]}, status_code=200)
 
 
 @app.post("/v1/chat/completions")

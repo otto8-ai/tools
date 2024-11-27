@@ -2,34 +2,19 @@ import json
 import os
 from typing import AsyncIterable
 
-from azure.identity import DefaultAzureCredential
-from azure.mgmt.cognitiveservices import CognitiveServicesManagementClient
-from azure.mgmt.cognitiveservices.models import Deployment
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse, StreamingResponse
-from openai import AzureOpenAI
+from openai import OpenAI
 from openai._streaming import Stream
-from openai._types import NOT_GIVEN
 from openai.types import CreateEmbeddingResponse, ImagesResponse
 from openai.types.chat import ChatCompletion, ChatCompletionChunk
 
-from helpers import list_openai
-
-endpoint = os.environ.get("OTTO8_AZURE_OPENAI_MODEL_PROVIDER_ENDPOINT", "")
-api_key = os.environ.get("OTTO8_AZURE_OPENAI_MODEL_PROVIDER_API_KEY", "")
-subscription_id = os.environ.get("OTTO8_AZURE_OPENAI_MODEL_PROVIDER_SUBSCRIPTION_ID", "")
-resource_id = os.environ.get("OTTO8_AZURE_OPENAI_MODEL_PROVIDER_RESOURCE_ID", "")
+api_key = os.environ.get("OTTO8_OPENAI_MODEL_PROVIDER_API_KEY", "")
 debug = os.environ.get("GPTSCRIPT_DEBUG", "false") == "true"
 uri = "http://127.0.0.1:" + os.environ.get("PORT", "8000")
 
-azure_client = AzureOpenAI(azure_endpoint=endpoint, api_key=api_key, api_version="2024-02-01")
-
-os.environ["AZURE_CLIENT_ID"] = os.environ.get("OTTO8_AZURE_OPENAI_MODEL_PROVIDER_CLIENT_ID", "")
-os.environ["AZURE_TENANT_ID"] = os.environ.get("OTTO8_AZURE_OPENAI_MODEL_PROVIDER_TENANT_ID", "")
-os.environ["AZURE_CLIENT_SECRET"] = os.environ.get("OTTO8_AZURE_OPENAI_MODEL_PROVIDER_CLIENT_SECRET", "")
-
-cognitive_services_client = CognitiveServicesManagementClient(credential=DefaultAzureCredential(), subscription_id=subscription_id)
+client = OpenAI(api_key=api_key)
 
 
 def log(*args):
@@ -66,27 +51,19 @@ async def get_root():
 @app.get("/v1/models")
 async def list_models() -> JSONResponse:
     try:
-        return JSONResponse(content={"object":"list","data": [transform_model(d) for d in list_openai(cognitive_services_client, resource_id)]})
+        models = client.models.list()
+        return JSONResponse(content={"object":"list","data": [set_model_usage(m) for m in models.to_dict()["data"]]})
     except Exception as e:
         print(e)
-        return JSONResponse(content={"object":"list","data": []})
 
-
-def transform_model(d: Deployment) -> dict:
-    data = {"id": d.name, "object": "model"}
-    usage = ""
-    if "chatCompletion" in d.properties.capabilities:
-        usage = "llm"
-    elif "embeddings" in d.properties.capabilities:
-        usage = "text-embeddings"
-    elif "imageGenerations" in d.properties.capabilities:
-        usage = "image-generation"
-
-    if usage != "":
-        data["metadata"] = {"usage": usage}
-
-    return data
-
+def set_model_usage(model: dict) -> dict:
+    if (model["id"].startswith("gpt-") or model["id"].startswith("ft:gpt-") or model["id"].startswith("o1-") or model["id"].startswith("ft:o1-")) and "-realtime-" not in model["id"]:
+        model["metadata"] = {"usage":"llm"}
+    elif model["id"].startswith("text-embedding") or model["id"].startswith("ft:text-embedding"):
+        model["metadata"] = {"usage":"text-embedding"}
+    elif model["id"].startswith("dalle-") or model["id"].startswith("ft:dalle-"):
+        model["metadata"] = {"usage":"image-generation"}
+    return model
 
 
 @app.post("/v1/chat/completions")
@@ -94,31 +71,13 @@ async def chat_completions(request: Request):
     data = await request.body()
     data = json.loads(data)
 
-    tools = data.get("tools", NOT_GIVEN)
-
-    if tools is not NOT_GIVEN:
-        tool_choice = 'auto'
-    else:
-        tool_choice = NOT_GIVEN
-
-    temperature = data.get("temperature", NOT_GIVEN)
-    if temperature is not NOT_GIVEN:
-        temperature = float(temperature)
-
     stream = data.get("stream", False)
 
     messages = data["messages"]
     messages.insert(0, {"content": system, "role": "system"})
 
     try:
-        res: Stream[ChatCompletionChunk] | ChatCompletion = azure_client.chat.completions.create(
-            model=data["model"],
-            messages=messages,
-            tools=tools,
-            tool_choice=tool_choice,
-            temperature=temperature,
-            stream=stream
-        )
+        res: Stream[ChatCompletionChunk] | ChatCompletion = client.chat.completions.create(**data)
         if not stream:
             return JSONResponse(content=jsonable_encoder(res))
 
@@ -139,7 +98,7 @@ async def embeddings(request: Request):
     data = json.loads(await request.body())
 
     try:
-        res: CreateEmbeddingResponse = azure_client.embeddings.create(**data)
+        res: CreateEmbeddingResponse = client.embeddings.create(**data)
 
         return JSONResponse(content=jsonable_encoder(res))
     except Exception as e:
@@ -158,7 +117,7 @@ async def image_generation(request: Request):
     data = json.loads(await request.body())
 
     try:
-        res: ImagesResponse = azure_client.images.generate(**data)
+        res: ImagesResponse = client.images.generate(**data)
 
         return JSONResponse(content=jsonable_encoder(res))
     except Exception as e:
