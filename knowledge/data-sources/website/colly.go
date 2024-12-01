@@ -50,7 +50,11 @@ func crawlColly(ctx context.Context, input *MetadataInput, output *MetadataOutpu
 func scrape(ctx context.Context, converter *md.Converter, logOut *logrus.Logger, output *MetadataOutput, gptscriptClient *gptscript.GPTScript, visited map[string]struct{}, folders map[string]struct{}, url string, limit int) error {
 	collector := colly.NewCollector()
 	collector.OnHTML("body", func(e *colly.HTMLElement) {
-		html, err := e.DOM.Html()
+
+		// Clean HTML and convert to Markdown
+		// This is working on a copy of the DOM, so it doesn't affect the original HTML
+		// which we use for scanning for links further down
+		html, err := RemoveNonMainContent(e.DOM.Clone()).Html()
 		if err != nil {
 			logOut.Errorf("Failed to grab HTML: %v", err)
 			return
@@ -60,6 +64,7 @@ func scrape(ctx context.Context, converter *md.Converter, logOut *logrus.Logger,
 			logOut.Errorf("Failed to convert HTML to markdown: %v", err)
 			return
 		}
+
 		hostname := e.Request.URL.Hostname()
 		urlPathWithQuery := e.Request.URL.Path
 		if e.Request.URL.RawQuery != "" {
