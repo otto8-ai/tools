@@ -19,6 +19,7 @@ func TestIsSameDomainOrSubdomain(t *testing.T) {
 		{"example.com", "example.net", false},          // different base domains
 		{"blog.example.com", "www.example.com", false}, // base with www, unrelated subdomain
 		{"www.example.com", "www.example.com", true},   // exact match with www prefix
+		{"www.ukcry.org", "cry.org", false},            // exact match with www prefix
 	}
 
 	for _, test := range tests {
