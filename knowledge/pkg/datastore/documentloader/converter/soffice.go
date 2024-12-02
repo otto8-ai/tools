@@ -53,20 +53,35 @@ func (c *SofficeConverter) Convert(ctx context.Context, reader io.Reader, source
 	}
 	_ = tempfile.Close()
 
+	logger := log.FromCtx(ctx)
+
+	profileDir, err := os.MkdirTemp(os.TempDir(), "libreoffice-profile-*")
+	if err != nil {
+		logger.Error("Failed to create soffice profile directory", "path", profileDir, "error", err)
+		return nil, fmt.Errorf("failed to create soffice profile directory: %w", err)
+	}
+	defer os.RemoveAll(profileDir)
+
 	// Convert the file using soffice
-	cmd := exec.Command("soffice", "--headless", "--convert-to", outputFormat, "--outdir", os.TempDir(), p)
+	cmd := exec.Command(
+		"soffice",
+		"--headless",
+		fmt.Sprintf("-env:UserInstallation=file://%s", profileDir),
+		"--convert-to", outputFormat,
+		"--outdir", os.TempDir(),
+		p,
+	)
 
 	// capture stdout and stderr in a buffer
 	var outb, errb strings.Builder
 	cmd.Stdout = &outb
 	cmd.Stderr = &errb
 
-	logger := log.FromCtx(ctx)
 	logger.Debug("Running soffice command", "command", cmd.String())
 
 	err = cmd.Run()
 	if err != nil {
-		logger.Error("Failed to run soffice command", "error", err, "stderr", errb.String())
+		logger.Error("Failed to run soffice command", "error", err, "stderr", errb.String(), "stdout", outb.String())
 		return nil, err
 	}
 
