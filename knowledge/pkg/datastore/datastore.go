@@ -122,6 +122,22 @@ func NewDatastore(ctx context.Context, indexDSN string, automigrate bool, vector
 	return ds, nil
 }
 
+func (s *Datastore) Close() error {
+	var errmsgs []string
+	if err := s.Index.Close(); err != nil {
+		errmsgs = append(errmsgs, fmt.Sprintf("failed to close index: %v", err))
+	}
+
+	if err := s.Vectorstore.Close(); err != nil {
+		errmsgs = append(errmsgs, fmt.Sprintf("failed to close vectorstore: %v", err))
+	}
+
+	if len(errmsgs) == 0 {
+		return nil
+	}
+	return fmt.Errorf(strings.Join(errmsgs, ", "))
+}
+
 func (s *Datastore) ExportDatasetsToFile(ctx context.Context, path string, datasets ...string) error {
 	tmpDir, err := os.MkdirTemp(os.TempDir(), "knowledge-export-")
 	if err != nil {

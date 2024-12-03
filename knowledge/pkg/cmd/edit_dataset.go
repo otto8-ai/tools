@@ -28,6 +28,7 @@ func (s *ClientEditDataset) Run(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	defer c.Close()
 
 	datasetID := args[0]
 

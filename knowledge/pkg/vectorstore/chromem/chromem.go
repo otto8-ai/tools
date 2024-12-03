@@ -147,6 +147,10 @@ func convertStringMapToAnyMap(m map[string]string) map[string]any {
 	return convertedMap
 }
 
+func (s *ChromemStore) Close() error {
+	return nil
+}
+
 func (s *ChromemStore) SimilaritySearch(ctx context.Context, query string, numDocuments int, collection string, where map[string]string, whereDocument []chromem.WhereDocument, embeddingFunc chromem.EmbeddingFunc) ([]vs.Document, error) {
 	ef := s.embeddingFunc
 	if embeddingFunc != nil {

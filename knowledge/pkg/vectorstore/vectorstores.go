@@ -25,6 +25,8 @@ type VectorStore interface {
 
 	ImportCollectionsFromFile(ctx context.Context, path string, collections ...string) error
 	ExportCollectionsToFile(ctx context.Context, path string, collections ...string) error
+
+	Close() error
 }
 
 func New(ctx context.Context, dsn string, embeddingProvider etypes.EmbeddingModelProvider) (VectorStore, error) {

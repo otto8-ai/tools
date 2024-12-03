@@ -56,6 +56,10 @@ PRAGMA foreign_keys = ON;
 	}, nil
 }
 
+func (i *Index) Close() error {
+	return i.DB.Close()
+}
+
 func (i *Index) AutoMigrate() error {
 	return i.DB.DoAutoMigrate()
 }

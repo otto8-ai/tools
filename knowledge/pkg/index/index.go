@@ -32,4 +32,6 @@ type Index interface {
 
 	// Fundamental Document Operations
 	DeleteDocument(ctx context.Context, documentID, datasetID string) error
+
+	Close() error
 }

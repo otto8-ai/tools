@@ -48,4 +48,5 @@ type Client interface {
 	ExportDatasets(ctx context.Context, path string, datasets ...string) error
 	ImportDatasets(ctx context.Context, path string, datasets ...string) error
 	UpdateDataset(ctx context.Context, dataset types2.Dataset, opts *datastore.UpdateDatasetOpts) (*types2.Dataset, error)
+	Close() error
 }

@@ -22,6 +22,7 @@ func (s *ClientExportDatasets) Run(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	defer c.Close()
 
 	if s.All && len(args) > 0 {
 		return fmt.Errorf("cannot use --all with dataset IDs")

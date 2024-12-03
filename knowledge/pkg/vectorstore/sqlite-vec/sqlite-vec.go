@@ -58,7 +58,11 @@ PRAGMA busy_timeout = 5000;
 }
 
 func (v *VectorStore) Close() error {
-	return nil
+	sqldb, err := v.db.DB()
+	if err != nil {
+		return err
+	}
+	return sqldb.Close()
 }
 
 func (v *VectorStore) prepareTables(ctx context.Context) error {
