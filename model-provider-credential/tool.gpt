@@ -1,0 +1,7 @@
+Name: Model Provider credential
+Description: This is a fake credential tool for the model providers. These credentials are handled in Otto8 and this tool should never be called.
+
+#!/bin/bash
+
+echo "The credential has not been properly configured"
+exit 1
