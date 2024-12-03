@@ -39,6 +39,10 @@ func New(ctx context.Context, dsn string, gormCfg *gorm.Config, autoMigrate bool
 	}, nil
 }
 
+func (i *Index) Close() error {
+	return i.DB.Close()
+}
+
 func (i *Index) AutoMigrate() error {
 	return i.DB.DoAutoMigrate()
 }

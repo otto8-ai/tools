@@ -3,21 +3,23 @@ package sqlite_vec
 import (
 	"context"
 	_ "embed"
+	"encoding/json"
 	"fmt"
 	"log/slog"
 	"strings"
-	"time"
 
 	sqlitevec "github.com/asg017/sqlite-vec-go-bindings/ncruces"
 	dbtypes "github.com/gptscript-ai/knowledge/pkg/index/types"
 	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
-	"github.com/ncruces/go-sqlite3"
 	cg "github.com/philippgille/chromem-go"
+	"gorm.io/gorm"
+
+	"github.com/ncruces/go-sqlite3/gormlite"
 )
 
 type VectorStore struct {
 	embeddingFunc       cg.EmbeddingFunc
-	db                  *sqlite3.Conn
+	db                  *gorm.DB
 	embeddingsTableName string
 }
 
@@ -25,16 +27,18 @@ func New(ctx context.Context, dsn string, embeddingFunc cg.EmbeddingFunc) (*Vect
 	dsn = "file:" + strings.TrimPrefix(dsn, "sqlite-vec://")
 
 	slog.Debug("sqlite-vec", "dsn", dsn)
-	db, err := sqlite3.Open(dsn)
+	db, err := gorm.Open(gormlite.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return nil, err
 	}
 
 	// Enable PRAGMAs
 	// - busy_timeout (ms) to prevent db lockups as we're accessing the DB from multiple separate processes in otto8
-	err = db.BusyTimeout(5 * time.Second)
-	if err != nil {
-		return nil, fmt.Errorf("failed to set busy timeout: %w", err)
+	tx := db.Exec(`
+PRAGMA busy_timeout = 5000;
+`)
+	if tx.Error != nil {
+		return nil, tx.Error
 	}
 
 	store := &VectorStore{
@@ -43,23 +47,22 @@ func New(ctx context.Context, dsn string, embeddingFunc cg.EmbeddingFunc) (*Vect
 		embeddingsTableName: "knowledge_embeddings",
 	}
 
-	stmt, _, err := db.Prepare(`SELECT sqlite_version(), vec_version()`)
-	if err != nil {
-		return nil, fmt.Errorf("failed to initialize sqlite-vec: %w", err)
+	var sqliteVersion, vecVersion string
+	res := db.Raw("SELECT sqlite_version(), vec_version()").Row()
+	if err := res.Scan(&sqliteVersion, &vecVersion); err != nil {
+		return nil, fmt.Errorf("failed to scan results: %w", err)
 	}
-
-	stmt.Step()
-	slog.Debug("sqlite-vec info", "sqlite_version", stmt.ColumnText(0), "vec_version", stmt.ColumnText(1))
-	err = stmt.Close()
-	if err != nil {
-		return nil, err
-	}
+	slog.Debug("sqlite-vec info", "sqlite_version", sqliteVersion, "vec_version", vecVersion)
 
 	return store, store.prepareTables(ctx)
 }
 
 func (v *VectorStore) Close() error {
-	return v.db.Close()
+	sqldb, err := v.db.DB()
+	if err != nil {
+		return err
+	}
+	return sqldb.Close()
 }
 
 func (v *VectorStore) prepareTables(ctx context.Context) error {
@@ -71,9 +74,9 @@ func (v *VectorStore) prepareTables(ctx context.Context) error {
 			metadata JSON
 		)
 		;
-	`, v.embeddingsTableName))
+	`, v.embeddingsTableName)).Error
 	if err != nil {
-		return fmt.Errorf("failed to create %s table: %w", v.embeddingsTableName, err)
+		return fmt.Errorf("failed to create embeddings table %q: %w", v.embeddingsTableName, err)
 	}
 
 	return nil
@@ -86,74 +89,80 @@ func (v *VectorStore) CreateCollection(ctx context.Context, collection string, o
 	}
 	dimensionality := len(emb) // FIXME: somehow allow to pass this in or set it globally
 
-	return v.db.Exec(fmt.Sprintf(`CREATE VIRTUAL TABLE IF NOT EXISTS [%s_vec] USING
+	err = v.db.Exec(fmt.Sprintf(`CREATE VIRTUAL TABLE IF NOT EXISTS [%s_vec] USING
 	vec0(
 		document_id TEXT PRIMARY KEY,
 		embedding float[%d] distance_metric=cosine
 	)
-    `, collection, dimensionality))
+    `, collection, dimensionality)).Error
+
+	if err != nil {
+		return fmt.Errorf("failed to create vector table: %w", err)
+	}
+
+	return nil
 }
 
 func (v *VectorStore) AddDocuments(ctx context.Context, docs []vs.Document, collection string) ([]string, error) {
-	stmt, _, err := v.db.Prepare(fmt.Sprintf(`INSERT INTO [%s_vec](document_id, embedding) VALUES (?, ?)`, collection))
-	if err != nil {
-		return nil, fmt.Errorf("failed to prepare statement: %w", err)
-	}
-
 	ids := make([]string, len(docs))
-	for docIdx, doc := range docs {
-		emb, err := v.embeddingFunc(ctx, doc.Content)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get embedding: %w", err)
-		}
-		v, err := sqlitevec.SerializeFloat32(emb)
-		if err != nil {
-			return nil, fmt.Errorf("failed to serialize embedding: %w", err)
-		}
-		if err := stmt.BindText(1, doc.ID); err != nil {
-			return nil, fmt.Errorf("failed to bind document_id: %w", err)
-		}
-		if err := stmt.BindBlob(2, v); err != nil {
-			return nil, fmt.Errorf("failed to bind embedding: %w", err)
-		}
-		if err := stmt.Exec(); err != nil {
-			return nil, fmt.Errorf("failed to insert document (vector): %w", err)
-		}
-		if err := stmt.Reset(); err != nil {
-			return nil, fmt.Errorf("failed to reset statement: %w", err)
-		}
-		ids[docIdx] = doc.ID
-	}
 
-	if err := stmt.Close(); err != nil {
-		return nil, fmt.Errorf("failed to close statement: %w", err)
-	}
+	err := v.db.Transaction(func(tx *gorm.DB) error {
+		if len(docs) > 0 {
+			valuePlaceholders := make([]string, len(docs))
+			args := make([]interface{}, 0, len(docs)*2) // 2 args per doc: document_id and embedding
 
-	// add to embeddings table
-	stmt, _, err = v.db.Prepare(fmt.Sprintf(`INSERT INTO [%s](id, collection_id, content, metadata) VALUES (?, ?, ?, ?)`, v.embeddingsTableName))
+			for i, doc := range docs {
+				emb, err := v.embeddingFunc(ctx, doc.Content)
+				if err != nil {
+					return fmt.Errorf("failed to compute embedding for document %s: %w", doc.ID, err)
+				}
+
+				serializedEmb, err := sqlitevec.SerializeFloat32(emb)
+				if err != nil {
+					return fmt.Errorf("failed to serialize embedding for document %s: %w", doc.ID, err)
+				}
+
+				valuePlaceholders[i] = "(?, ?)"
+				args = append(args, doc.ID, serializedEmb)
+
+				ids[i] = doc.ID
+			}
+
+			// Raw query for *_vec as gorm doesn't support virtual tables
+			query := fmt.Sprintf(`
+				INSERT INTO [%s_vec] (document_id, embedding)
+				VALUES %s
+			`, collection, strings.Join(valuePlaceholders, ", "))
+
+			if err := tx.Exec(query, args...).Error; err != nil {
+				return fmt.Errorf("failed to batch insert into vector table: %w", err)
+			}
+		}
+
+		embs := make([]map[string]interface{}, len(docs))
+		for i, doc := range docs {
+			metadataJson, err := json.Marshal(doc.Metadata)
+			if err != nil {
+				return fmt.Errorf("failed to marshal metadata for document %s: %w", doc.ID, err)
+			}
+			embs[i] = map[string]interface{}{
+				"id":            doc.ID,
+				"collection_id": collection,
+				"content":       doc.Content,
+				"metadata":      metadataJson,
+			}
+		}
+
+		// Use GORM's Create for the embeddings table
+		if err := tx.Table(v.embeddingsTableName).Create(embs).Error; err != nil {
+			return fmt.Errorf("failed to batch insert into embeddings table: %w", err)
+		}
+
+		return nil
+	})
+
 	if err != nil {
-		return nil, fmt.Errorf("failed to prepare statement: %w", err)
-	}
-
-	for _, doc := range docs {
-		if err := stmt.BindText(1, doc.ID); err != nil {
-			return nil, fmt.Errorf("failed to bind document_id: %w", err)
-		}
-		if err := stmt.BindText(2, collection); err != nil {
-			return nil, fmt.Errorf("failed to bind collection_id: %w", err)
-		}
-		if err := stmt.BindText(3, doc.Content); err != nil {
-			return nil, fmt.Errorf("failed to bind content: %w", err)
-		}
-		if err := stmt.BindJSON(4, doc.Metadata); err != nil {
-			return nil, fmt.Errorf("failed to bind metadata: %w", err)
-		}
-		if err := stmt.Exec(); err != nil {
-			return nil, fmt.Errorf("failed to insert document (embeddings table): %w", err)
-		}
-		if err := stmt.Reset(); err != nil {
-			return nil, fmt.Errorf("failed to reset statement: %w", err)
-		}
+		return nil, err
 	}
 
 	return ids, nil
@@ -167,12 +176,7 @@ func (v *VectorStore) SimilaritySearch(ctx context.Context, query string, numDoc
 
 	q, err := ef(ctx, query)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get embedding: %w", err)
-	}
-
-	stmt, _, err := v.db.Prepare(fmt.Sprintf(`SELECT document_id, distance FROM [%s_vec] WHERE embedding MATCH ? ORDER BY distance LIMIT %d`, collection, numDocuments))
-	if err != nil {
-		return nil, fmt.Errorf("failed to prepare statement: %w", err)
+		return nil, fmt.Errorf("failed to compute embedding: %w", err)
 	}
 
 	qv, err := sqlitevec.SerializeFloat32(q)
@@ -180,61 +184,72 @@ func (v *VectorStore) SimilaritySearch(ctx context.Context, query string, numDoc
 		return nil, fmt.Errorf("failed to serialize query embedding: %w", err)
 	}
 
-	if err := stmt.BindBlob(1, qv); err != nil {
-		return nil, fmt.Errorf("failed to bind query embedding: %w", err)
-	}
-
 	var docs []vs.Document
-	for stmt.Step() {
-		docID := stmt.ColumnText(0)
-		distance := stmt.ColumnFloat(1)
-		docs = append(docs, vs.Document{ID: docID, SimilarityScore: float32(1 - distance)})
-	}
-	if stmt.Err() != nil {
-		return nil, fmt.Errorf("failed to execute statement: %w", stmt.Err())
-	}
-	if err := stmt.Close(); err != nil {
-		return nil, fmt.Errorf("failed to close statement: %w", err)
-	}
-
-	nstmt, _, err := v.db.Prepare(fmt.Sprintf(`SELECT content, metadata FROM [%s] WHERE id = ?`, v.embeddingsTableName))
-	if err != nil {
-		return nil, fmt.Errorf("failed to prepare statement: %w", err)
-	}
-	for i, doc := range docs {
-		if err := nstmt.BindText(1, doc.ID); err != nil {
-			return nil, fmt.Errorf("failed to bind document_id : %w", err)
+	err = v.db.Transaction(func(tx *gorm.DB) error {
+		// Query matching document IDs and distances
+		rows, err := tx.Raw(fmt.Sprintf(`
+            SELECT document_id, distance 
+            FROM [%s_vec]
+            WHERE embedding MATCH ? 
+            ORDER BY distance 
+            LIMIT ?
+        `, collection), qv, numDocuments).Rows()
+		if err != nil {
+			return fmt.Errorf("failed to query vector table: %w", err)
 		}
-		if nstmt.Step() {
-			doc.Content = nstmt.ColumnText(0)
-			err = nstmt.ColumnJSON(1, &doc.Metadata)
-			if err != nil {
-				return nil, fmt.Errorf("failed to get metadata: %w", err)
+		defer rows.Close()
+
+		for rows.Next() {
+			var docID string
+			var distance float32
+			if err := rows.Scan(&docID, &distance); err != nil {
+				return fmt.Errorf("failed to scan row: %w", err)
 			}
+			docs = append(docs, vs.Document{
+				ID:              docID,
+				SimilarityScore: 1 - distance, // Higher score means closer match
+			})
 		}
-		if nstmt.Err() != nil {
-			return nil, fmt.Errorf("failed to execute statement: %w", stmt.Err())
-		}
-		docs[i] = doc
-		if err = nstmt.Reset(); err != nil {
-			return nil, fmt.Errorf("failed to reset statement: %w", err)
-		}
-	}
 
-	if err := nstmt.Close(); err != nil {
-		return nil, fmt.Errorf("failed to close statement: %w", err)
+		// Fetch content and metadata for each document
+		for i, doc := range docs {
+			var content string
+			var metadataJSON []byte
+			err := tx.Raw(fmt.Sprintf(`
+                SELECT content, metadata 
+                FROM [%s]
+                WHERE id = ?
+            `, v.embeddingsTableName), doc.ID).Row().Scan(&content, &metadataJSON)
+			if err != nil {
+				return fmt.Errorf("failed to query embeddings table for document %s: %w", doc.ID, err)
+			}
+
+			var metadata map[string]interface{}
+			if err := json.Unmarshal(metadataJSON, &metadata); err != nil {
+				return fmt.Errorf("failed to parse metadata for document %s: %w", doc.ID, err)
+			}
+
+			docs[i].Content = content
+			docs[i].Metadata = metadata
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
 	}
 
 	return docs, nil
 }
 
 func (v *VectorStore) RemoveCollection(ctx context.Context, collection string) error {
-	err := v.db.Exec(fmt.Sprintf(`DROP TABLE IF EXISTS [%s_vec]`, collection))
+	err := v.db.Exec(fmt.Sprintf(`DROP TABLE IF EXISTS [%s_vec]`, collection)).Error
 	if err != nil {
 		return fmt.Errorf("failed to drop table: %w", err)
 	}
 
-	err = v.db.Exec(fmt.Sprintf(`DELETE FROM [%s] WHERE collection_id = '%s'`, v.embeddingsTableName, collection))
+	err = v.db.Exec(fmt.Sprintf(`DELETE FROM [%s] WHERE collection_id = ?`, v.embeddingsTableName), collection).Error
 	if err != nil {
 		return fmt.Errorf("failed to delete documents: %w", err)
 	}
@@ -249,75 +264,51 @@ func (v *VectorStore) RemoveDocument(ctx context.Context, documentID string, col
 
 	var ids []string
 
-	// delete by metadata filter
-	if len(where) > 0 {
-		whereQueries := make([]string, 0)
-		for k, v := range where {
-			if strings.TrimSpace(k) == "" || strings.TrimSpace(v) == "" {
-				continue
+	err := v.db.Transaction(func(tx *gorm.DB) error {
+		if len(where) > 0 {
+			whereQueries := make([]string, 0)
+			for k, v := range where {
+				if strings.TrimSpace(k) == "" || strings.TrimSpace(v) == "" {
+					continue
+				}
+				whereQueries = append(whereQueries, fmt.Sprintf("(metadata ->> '$.%s') = '%s'", k, v))
 			}
-			whereQueries = append(whereQueries, fmt.Sprintf("(metadata ->> '$.%s') = '%s'", k, v))
-		}
-		whereQuery := strings.Join(whereQueries, " AND ")
-		if len(whereQuery) == 0 {
-			whereQuery = "TRUE"
+			whereQuery := strings.Join(whereQueries, " AND ")
+			if len(whereQuery) == 0 {
+				whereQuery = "TRUE"
+			}
+
+			err := tx.Raw(fmt.Sprintf(`
+                SELECT id 
+                FROM [%s]
+                WHERE collection_id = ? AND %s
+            `, v.embeddingsTableName, whereQuery), collection).Scan(&ids).Error
+			if err != nil {
+				return fmt.Errorf("failed to query IDs: %w", err)
+			}
+		} else {
+			ids = []string{documentID}
 		}
 
-		stmt, _, err := v.db.Prepare(fmt.Sprintf(`SELECT id FROM [%s] WHERE collection_id = '%s' AND %s`, v.embeddingsTableName, collection, whereQuery))
-		if err != nil {
-			return fmt.Errorf("failed to prepare statement: %w", err)
+		if len(ids) == 0 {
+			return nil // No documents to delete
 		}
 
-		for stmt.Step() {
-			ids = append(ids, stmt.ColumnText(0))
+		slog.Debug("deleting documents from sqlite-vec", "ids", ids)
+
+		if err := tx.Table(fmt.Sprintf("%s_vec", collection)).Where("document_id IN ?", ids).Delete(nil).Error; err != nil {
+			return fmt.Errorf("failed to delete documents from vector table: %w", err)
 		}
 
-		if stmt.Err() != nil {
-			return fmt.Errorf("failed to execute statement: %w", stmt.Err())
+		if err := tx.Table(v.embeddingsTableName).Where("id IN ?", ids).Delete(nil).Error; err != nil {
+			return fmt.Errorf("failed to delete documents from embeddings table: %w", err)
 		}
-	} else {
-		ids = []string{documentID}
-	}
 
-	slog.Debug("deleting documents from sqlite-vec", "ids", ids)
+		return nil
+	})
 
-	// delete by ID
-	embStmt, _, err := v.db.Prepare(fmt.Sprintf(`DELETE FROM [%s_vec] WHERE document_id = ?`, collection))
 	if err != nil {
-		return fmt.Errorf("failed to prepare statement: %w", err)
-	}
-
-	colStmt, _, err := v.db.Prepare(fmt.Sprintf(`DELETE FROM [%s] WHERE id = ?`, v.embeddingsTableName))
-	if err != nil {
-		return fmt.Errorf("failed to prepare statement: %w", err)
-	}
-
-	for _, id := range ids {
-		slog.Debug("deleting document from sqlite-vec", "id", id)
-
-		if err := embStmt.BindText(1, id); err != nil {
-			return fmt.Errorf("failed to bind document_id: %w", err)
-		}
-
-		if err := colStmt.BindText(1, id); err != nil {
-			return fmt.Errorf("failed to bind document_id: %w", err)
-		}
-
-		if err := embStmt.Exec(); err != nil {
-			return fmt.Errorf("failed to delete document (vector): %w", err)
-		}
-
-		if err := colStmt.Exec(); err != nil {
-			return fmt.Errorf("failed to delete document (embeddings table): %w", err)
-		}
-
-		if err := embStmt.Reset(); err != nil {
-			return fmt.Errorf("failed to reset statement: %w", err)
-		}
-
-		if err := colStmt.Reset(); err != nil {
-			return fmt.Errorf("failed to reset statement: %w", err)
-		}
+		return err
 	}
 
 	return nil
@@ -330,42 +321,51 @@ func (v *VectorStore) GetDocuments(ctx context.Context, collection string, where
 
 	var docs []vs.Document
 
-	// delete by metadata filter
-	if len(where) > 0 {
-		whereQueries := make([]string, 0)
-		for k, v := range where {
-			if strings.TrimSpace(k) == "" || strings.TrimSpace(v) == "" {
-				continue
-			}
-			whereQueries = append(whereQueries, fmt.Sprintf("(metadata ->> '$.%s') = '%s'", k, v))
-		}
-		whereQuery := strings.Join(whereQueries, " AND ")
-		if len(whereQuery) == 0 {
-			whereQuery = "TRUE"
-		}
+	// Build metadata filter query
+	whereQueries := []string{}
+	args := []interface{}{collection}
 
-		stmt, _, err := v.db.Prepare(fmt.Sprintf(`SELECT id, content, metadata FROM [%s] WHERE collection_id = '%s' AND %s`, v.embeddingsTableName, collection, whereQuery))
-		if err != nil {
-			return nil, fmt.Errorf("failed to prepare statement: %w", err)
+	for k, v := range where {
+		if strings.TrimSpace(k) == "" || strings.TrimSpace(v) == "" {
+			continue
 		}
-
-		for stmt.Step() {
-			doc := vs.Document{
-				ID:      stmt.ColumnText(0),
-				Content: stmt.ColumnText(1),
-			}
-
-			err = stmt.ColumnJSON(2, &doc.Metadata)
-			if err != nil {
-				return nil, fmt.Errorf("failed to get metadata: %w", err)
-			}
-			docs = append(docs, doc)
-		}
-
-		if stmt.Err() != nil {
-			return nil, fmt.Errorf("failed to execute statement: %w", stmt.Err())
-		}
+		whereQueries = append(whereQueries, fmt.Sprintf("(metadata ->> '$.%s') = ?", k))
+		args = append(args, v)
 	}
+
+	whereQuery := strings.Join(whereQueries, " AND ")
+	if len(whereQuery) > 0 {
+		whereQuery = " AND " + whereQuery
+	}
+
+	query := fmt.Sprintf(`
+        SELECT id, content, metadata
+        FROM [%s]
+        WHERE collection_id = ?%s
+    `, v.embeddingsTableName, whereQuery)
+
+	rows, err := v.db.Raw(query, args...).Rows()
+	if err != nil {
+		return nil, fmt.Errorf("failed to query documents: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var doc vs.Document
+		var metadata string
+
+		if err := rows.Scan(&doc.ID, &doc.Content, &metadata); err != nil {
+			return nil, fmt.Errorf("failed to scan row: %w", err)
+		}
+
+		// Parse metadata as JSON
+		if err := json.Unmarshal([]byte(metadata), &doc.Metadata); err != nil {
+			return nil, fmt.Errorf("failed to parse metadata for document %s: %w", doc.ID, err)
+		}
+
+		docs = append(docs, doc)
+	}
+
 	return docs, nil
 }
 

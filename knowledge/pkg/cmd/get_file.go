@@ -29,6 +29,7 @@ func (s *ClientGetFile) Run(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	defer c.Close()
 
 	fileRef := args[0]
 

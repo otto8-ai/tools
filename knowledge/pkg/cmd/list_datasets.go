@@ -23,6 +23,7 @@ func (s *ClientListDatasets) Run(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	defer c.Close()
 
 	ds, err := c.ListDatasets(cmd.Context())
 	if err != nil {

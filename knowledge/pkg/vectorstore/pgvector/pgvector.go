@@ -224,6 +224,13 @@ func (v VectorStore) createEmbeddingTableIfNotExists(ctx context.Context, tx pgx
 	return nil
 }
 
+func (v VectorStore) Close() error {
+	if c, ok := v.conn.(CloseNoErr); ok {
+		c.Close()
+	}
+	return nil
+}
+
 func (v VectorStore) getCollectionUUID(ctx context.Context, collection string) (string, error) {
 	var cuuid string
 	err := v.conn.QueryRow(ctx, fmt.Sprintf(`SELECT uuid FROM %s WHERE name=$1`, v.collectionTableName), collection).Scan(&cuuid)

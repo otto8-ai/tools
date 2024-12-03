@@ -316,6 +316,8 @@ github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 h1:RWengNIwukTxcDr9
 github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826/go.mod h1:TaXosZuwdSHYgviHp1DAtfrULt5eUgsSMsZf+YrPgl8=
 github.com/ncruces/go-sqlite3 v0.20.3 h1:+4G4uEqOeusF0yRuQVUl9fuoEebUolwQSnBUjYBLYIw=
 github.com/ncruces/go-sqlite3 v0.20.3/go.mod h1:ojLIAB243gtz68Eo283Ps+k9PyR3dvzS+9/RgId4+AA=
+github.com/ncruces/go-sqlite3/gormlite v0.20.3 h1:bpnLMMhWFoiY6EHF52pc3Czl8tJCSwEG1a19WzIa/Co=
+github.com/ncruces/go-sqlite3/gormlite v0.20.3/go.mod h1:wxYIO+HouPGhQ9SmnxsStnrMLs8xk6vVkVTwfG9coHo=
 github.com/ncruces/julianday v1.0.0 h1:fH0OKwa7NWvniGQtxdJRxAgkBMolni2BjDHaWTxqt7M=
 github.com/ncruces/julianday v1.0.0/go.mod h1:Dusn2KvZrrovOMJuOt0TNXL6tB7U2E8kvza5fFc9G7g=
 github.com/olekukonko/tablewriter v0.0.0-20180506121414-d4647c9c7a84/go.mod h1:vsDQFd/mU46D+Z4whnwzcISnGGzXWMclvtLoiIKAKIo=

@@ -42,7 +42,7 @@ require (
 	github.com/lu4p/cat v0.1.5
 	github.com/mitchellh/copystructure v1.2.0
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/ncruces/go-sqlite3 v0.20.3
+	github.com/ncruces/go-sqlite3/gormlite v0.20.3
 	github.com/pgvector/pgvector-go v0.2.2
 	github.com/philippgille/chromem-go v0.6.1-0.20240811154507-a1944285b284
 	github.com/pkoukk/tiktoken-go v0.1.6
@@ -128,6 +128,7 @@ require (
 	github.com/microcosm-cc/bluemonday v1.0.26 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
+	github.com/ncruces/go-sqlite3 v0.20.3 // indirect
 	github.com/ncruces/julianday v1.0.0 // indirect
 	github.com/olekukonko/tablewriter v0.0.6-0.20230925090304-df64c4bbad77 // indirect
 	github.com/otiai10/gosseract/v2 v2.2.4 // indirect

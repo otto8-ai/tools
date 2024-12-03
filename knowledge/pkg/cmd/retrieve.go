@@ -55,6 +55,7 @@ func (s *ClientRetrieve) Run(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	defer c.Close()
 
 	retrieveOpts := datastore.RetrieveOpts{
 		TopK:     s.TopK,

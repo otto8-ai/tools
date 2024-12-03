@@ -35,6 +35,7 @@ func (s *ClientAskDir) Run(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	defer c.Close()
 
 	path := s.Path
 

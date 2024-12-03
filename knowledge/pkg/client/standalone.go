@@ -214,3 +214,7 @@ func (c *StandaloneClient) ImportDatasets(ctx context.Context, path string, data
 func (c *StandaloneClient) UpdateDataset(ctx context.Context, dataset types2.Dataset, opts *datastore.UpdateDatasetOpts) (*types2.Dataset, error) {
 	return c.Datastore.UpdateDataset(ctx, dataset, opts)
 }
+
+func (c *StandaloneClient) Close() error {
+	return c.Datastore.Close()
+}

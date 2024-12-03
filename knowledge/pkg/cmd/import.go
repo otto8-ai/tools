@@ -26,6 +26,7 @@ func (s *ClientImportDatasets) Run(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	defer c.Close()
 
 	return c.ImportDatasets(cmd.Context(), args[0], args[1:]...)
 }

@@ -70,6 +70,7 @@ func (s *ClientIngest) run(ctx context.Context, filePath string) error {
 	if err != nil {
 		return err
 	}
+	defer c.Close()
 
 	datasetID := s.Dataset
 
