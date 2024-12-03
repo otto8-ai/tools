@@ -1,0 +1,64 @@
+---
+Name: SQLite
+Description: Tools for interacting with a SQLite database
+Metadata: bundle: true
+Share Tools: List Tables, Get Schema, Query, Exec
+
+---
+Name: List Tables
+Description: List all tables in the SQLite database
+Share Context: SQLite Context
+Tools: github.com/gptscript-ai/datasets/filter
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listTables
+
+---
+Name: Get Schema
+Description: Get the schema of a table in the SQLite database
+Share Context: SQLite Context
+Share Tools: List Tables
+Param: table_name: Name of the table to get the schema of
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool getSchema
+
+---
+Name: Query
+Description: Run a SQL query against the SQLite database
+Share Context: SQLite Context
+Share Tools: List Tables
+Param: query: SQL query to run
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool query
+
+---
+Name: Exec
+Description: Execute a SQL statement against the SQLite database
+Share Context: SQLite Context
+Share Tools: List Tables
+Param: statement: SQL statement to execute
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool exec
+
+---
+Name: SQLite Context
+Type: context
+
+#!sys.echo
+
+## Instructions for using SQLite tools
+
+You have access to tools for interacting with a SQLite database.
+The Exec tool only accepts valid SQLite3 statements.
+The Query tool only accepts valid SQLite3 queries.
+The Query tool returns the result query results in markdown format.
+Display all results from these tools in markdown format.
+
+## End of instructions for using SQLite tools
+
+---
+!metadata:*:category
+SQLite
+
+---
+!metadata:*:icon
+https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/duotone/database-duotone.svg
