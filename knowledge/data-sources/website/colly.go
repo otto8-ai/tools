@@ -216,11 +216,9 @@ func isSameDomainOrSubdomain(linkHostname, baseHostname string) bool {
 
 	// if baseHostname is x.y, linkHostname can be www*.x.y
 	if len(parts) == 2 {
-		if strings.HasSuffix(linkHostname, baseHostname) {
-			linkParts := strings.Split(linkHostname, ".")
-			if len(linkParts) == 3 && (linkParts[0] == "www" || (len(linkParts[0]) == 4 && strings.HasPrefix(linkParts[0], "www"))) {
-				return true
-			}
+		linkParts := strings.Split(linkHostname, ".")
+		if len(linkParts) == 3 && (linkParts[0] == "www" || (len(linkParts[0]) == 4 && strings.HasPrefix(linkParts[0], "www"))) {
+			return strings.Join(linkParts[1:], ".") == baseHostname
 		}
 	}
 
