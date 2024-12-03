@@ -316,18 +316,17 @@ func RequestWithExponentialBackoff(ctx context.Context, client *http.Client, req
 
 		resp, err = client.Do(req)
 		if err == nil && resp.StatusCode == http.StatusOK {
-			defer resp.Body.Close()
-
 			body, err := io.ReadAll(resp.Body)
 			if err != nil {
 				// Log the error and retry for transient error reading response body
 				msg := fmt.Sprintf("#%d/%d: failed to read response body: %v", i+1, maxRetries, err)
 				logger.Warn("Request failed - Retryable", "error", msg)
 				failures = append(failures, msg)
+				_ = resp.Body.Close()
 				continue
 			}
 
-			return body, nil
+			return body, resp.Body.Close()
 		}
 
 		if resp != nil {
@@ -337,7 +336,7 @@ func RequestWithExponentialBackoff(ctx context.Context, client *http.Client, req
 				if rerr == nil {
 					bodystr = string(body)
 				}
-				resp.Body.Close()
+				_ = resp.Body.Close()
 			}
 
 			msg := fmt.Sprintf("#%d/%d: %d <%s> (err: %v)", i+1, maxRetries, resp.StatusCode, bodystr, err)
@@ -353,7 +352,7 @@ func RequestWithExponentialBackoff(ctx context.Context, client *http.Client, req
 				time.Sleep(delay + jitter)
 				continue
 			} else {
-				// Non-retriable error
+				// Non-retryable error
 				logger.Error("Request failed - Non-retryable", "error", msg)
 				break
 			}
@@ -365,9 +364,9 @@ func RequestWithExponentialBackoff(ctx context.Context, client *http.Client, req
 		}
 	}
 
-	logger.Error("request retry limit exceeded or failed with non-retriable error(s)", "request", req)
+	logger.Error("request retry limit exceeded or failed with non-retryable error(s)", "request", req)
 
-	return nil, fmt.Errorf("retry limit (%d) exceeded or failed with non-retriable error(s): %v", maxRetries, strings.Join(failures, "; "))
+	return nil, fmt.Errorf("retry limit (%d) exceeded or failed with non-retryable error(s): %v", maxRetries, strings.Join(failures, "; "))
 }
 
 type OpenAICompatConfig struct {
