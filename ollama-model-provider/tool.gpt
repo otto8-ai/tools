@@ -2,5 +2,6 @@ Name: Ollama
 Description: Model provider for models running on Ollama
 Metadata: envVars: OTTO8_OLLAMA_MODEL_PROVIDER_HOST
 Model Provider: true
+Credential: ../model-provider-credential as ollama-model-provider
 
 #!sys.daemon /usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py
