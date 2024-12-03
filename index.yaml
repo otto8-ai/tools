@@ -1,4 +1,7 @@
 tools:
+  sqlite:
+    reference: ./sqlite
+    all: true
   excel:
     reference: ./excel
     all: true
