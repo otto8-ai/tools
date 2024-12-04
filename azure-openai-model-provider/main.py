@@ -111,7 +111,7 @@ def transform_model(d: Deployment) -> dict:
     if "chatCompletion" in d.properties.capabilities:
         usage = "llm"
     elif "embeddings" in d.properties.capabilities:
-        usage = "text-embeddings"
+        usage = "text-embedding"
     elif "imageGenerations" in d.properties.capabilities:
         usage = "image-generation"
 
