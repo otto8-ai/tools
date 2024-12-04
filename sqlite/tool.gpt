@@ -6,16 +6,13 @@ Share Tools: List Tables, Get Schema, Query, Exec
 
 ---
 Name: List Tables
-Description: List all tables in the SQLite database
-Share Context: SQLite Context
-Tools: github.com/gptscript-ai/datasets/filter
+Description: List all tables in the SQLite database and return the results in markdown format
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listTables
 
 ---
 Name: Get Schema
-Description: Get the schema of a table in the SQLite database
-Share Context: SQLite Context
+Description: Get the schema of a table in the SQLite database in markdown format
 Share Tools: List Tables
 Param: table_name: Name of the table to get the schema of
 
@@ -23,9 +20,8 @@ Param: table_name: Name of the table to get the schema of
 
 ---
 Name: Query
-Description: Run a SQL query against the SQLite database
+Description: Run a SQL query against the SQLite database and return the results in markdown format
 Share Context: SQLite Context
-Share Tools: List Tables
 Param: query: SQL query to run
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool query
@@ -34,7 +30,6 @@ Param: query: SQL query to run
 Name: Exec
 Description: Execute a SQL statement against the SQLite database
 Share Context: SQLite Context
-Share Tools: List Tables
 Param: statement: SQL statement to execute
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool exec
@@ -43,17 +38,7 @@ Param: statement: SQL statement to execute
 Name: SQLite Context
 Type: context
 
-#!sys.echo
-
-## Instructions for using SQLite tools
-
-You have access to tools for interacting with a SQLite database.
-The Exec tool only accepts valid SQLite3 statements.
-The Query tool only accepts valid SQLite3 queries.
-The Query tool returns the result query results in markdown format.
-Display all results from these tools in markdown format.
-
-## End of instructions for using SQLite tools
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool context
 
 ---
 !metadata:*:category
