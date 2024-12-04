@@ -3,10 +3,11 @@ package graph
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -38,6 +39,44 @@ type HTTPErrorBody struct {
 			ClientRequestID string `json:"client-request-id,omitempty"`
 		} `json:"innerError,omitempty"`
 	} `json:"error,omitempty"`
+}
+
+type UpdateBody struct {
+	Values   [][]any `json:"values,omitempty"`
+	Formulas [][]any `json:"formulas,omitempty"`
+}
+
+func (u *UpdateBody) AppendColumnCellToValues(newColumnCell []any) {
+	u.Values = append(u.Values, newColumnCell)
+	u.Formulas = append(u.Formulas, []any{nil})
+}
+
+func (u *UpdateBody) AppendColumnCellToFormulas(newColumnCell []any) {
+	u.Formulas = append(u.Formulas, newColumnCell)
+	u.Values = append(u.Values, []any{nil})
+}
+
+func (u *UpdateBody) AppendRowToValues(newRow []any) {
+	u.Values = append(u.Values, newRow)
+}
+
+func (u *UpdateBody) AppendRowToFormulas(newRow []any) {
+	u.Formulas = append(u.Formulas, newRow)
+}
+
+func numberToColumnLetter(n int) string {
+	if n <= 0 {
+		return ""
+	}
+
+	column := ""
+	for n > 0 {
+		n--
+		column = string(rune('A'+(n%26))) + column
+		n /= 26
+	}
+
+	return column
 }
 
 func ListWorkbooks(ctx context.Context, c *msgraphsdkgo.GraphServiceClient) ([]WorkbookInfo, error) {
@@ -165,193 +204,116 @@ func GetWorksheetTables(ctx context.Context, c *msgraphsdkgo.GraphServiceClient,
 	return tables, nil
 }
 
-func GetColumnIDFromName(ctx context.Context, c *msgraphsdkgo.GraphServiceClient, workbookID, worksheetID, tableID, columnName string) (string, error) {
-	drive, err := c.Me().Drive().Get(ctx, nil)
+func AddWorksheetRow(ctx context.Context, c *msgraphsdkgo.GraphServiceClient, workbookID, worksheetID string, contents []string) error {
+	_, usedRange, err := GetWorksheetData(ctx, c, workbookID, worksheetID)
 	if err != nil {
-		return "", err
+		return err
 	}
-	result, err := c.Drives().ByDriveId(util.Deref(drive.GetId())).Items().ByDriveItemId(workbookID).Workbook().Tables().ByWorkbookTableId(tableID).Columns().Get(ctx, nil)
-	if err != nil {
-		return "", err
-	}
-	for _, column := range result.GetValue() {
-		rangeColumnName := util.Deref(column.GetName())
-		if rangeColumnName == columnName {
-			return util.Deref(column.GetId()), nil
+	rowCount := util.Deref(usedRange.GetRowCount())
+	newRowNumber := int(rowCount + 1)
+
+	endColumnLetter := numberToColumnLetter(len(contents))
+	address := fmt.Sprintf("A%d:%s%d", newRowNumber, endColumnLetter, newRowNumber)
+
+	// Update the worksheet.
+	// Unfortunately, the SDK lacks a function to do what we need to do, so we need to make a raw HTTP request.
+	var values, formulas []any
+	for _, v := range contents {
+		if strings.HasPrefix(v, "=") {
+			formulas = append(formulas, v)
+			values = append(values, nil)
+		} else {
+			values = append(values, v)
+			formulas = append(formulas, nil)
 		}
 	}
-	return "", errors.New("column not found")
-}
-
-func FilterWorksheetData(ctx context.Context, c *msgraphsdkgo.GraphServiceClient, workbookID, worksheetID, tableID, columnID string, filterValues []string) ([][]any, models.WorkbookRangeable, error) {
-	drive, err := c.Me().Drive().Get(ctx, nil)
+	body := &UpdateBody{
+		Values:   [][]any{values},
+		Formulas: [][]any{formulas},
+	}
+	bodyJSON, err := json.Marshal(body)
 	if err != nil {
-		return nil, nil, err
+		return fmt.Errorf("failed to marshal data: %w", err)
 	}
 
-	criteria := map[string]any{
-		"criteria": map[string]any{
-			"filterOn": "Values",
-			"Values":   filterValues,
-		},
-	}
-
-	bodyJSON, err := json.Marshal(criteria)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPatch, fmt.Sprintf("https://graph.microsoft.com/v1.0/me/drive/items/%s/workbook/worksheets/%s/range(address='%s')", workbookID, worksheetID, address), strings.NewReader(string(bodyJSON)))
 	if err != nil {
-		return nil, nil, err
-	}
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, fmt.Sprintf("https://graph.microsoft.com/v1.0/me/drive/items/%s/workbook/worksheets/%s/tables/%s/columns/%s/filter/apply", workbookID, worksheetID, tableID, columnID), strings.NewReader(string(bodyJSON)))
-	if err != nil {
-		return nil, nil, fmt.Errorf("failed to create request: %w", err)
+		return fmt.Errorf("failed to create request: %w", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+os.Getenv(global.CredentialEnv))
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to send request: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusNoContent {
-		var errBody HTTPErrorBody
-		if err := json.NewDecoder(resp.Body).Decode(&errBody); err != nil {
-			return nil, nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
-		}
-		return nil, nil, fmt.Errorf("error applying filter: %s", errBody.Error.Message)
-	}
-	defer func(clear *drives.ItemItemsItemWorkbookWorksheetsItemTablesItemColumnsItemFilterClearRequestBuilder, ctx context.Context, requestConfiguration *drives.ItemItemsItemWorkbookWorksheetsItemTablesItemColumnsItemFilterClearRequestBuilderPostRequestConfiguration) {
-		err := clear.Post(ctx, requestConfiguration)
-		if err != nil {
-			fmt.Printf("failed to clear filter: %s", err)
-		}
-	}(c.Drives().ByDriveId(util.Deref(drive.GetId())).Items().ByDriveItemId(workbookID).Workbook().Worksheets().ByWorkbookWorksheetId(worksheetID).Tables().ByWorkbookTableId(tableID).Columns().ByWorkbookTableColumnId(columnID).Filter().Clear(), ctx, nil)
-
-	usedRange, err := c.Drives().ByDriveId(util.Deref(drive.GetId())).Items().ByDriveItemId(workbookID).Workbook().Worksheets().ByWorkbookWorksheetId(worksheetID).UsedRange().Get(ctx, nil)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	result, err := serialization.SerializeToJson(usedRange.GetValues())
-	if err != nil {
-		return nil, nil, err
-	}
-
-	var data [][]any
-	if err = json.Unmarshal(result, &data); err != nil {
-		return nil, nil, fmt.Errorf("failed to unmarshal data: %w", err)
-	}
-	return data, usedRange, nil
-}
-
-func AddWorksheetRow(ctx context.Context, c *msgraphsdkgo.GraphServiceClient, workbookID, worksheetID string, contents []string) error {
-	// First, get the existing data.
-	data, usedRange, err := GetWorksheetData(ctx, c, workbookID, worksheetID)
-	if err != nil {
-		return err
-	}
-
-	if len(data) == 1 && len(data[0]) == 1 && data[0][0] == "" {
-		data = [][]any{}
-	}
-
-	// Append the new row.
-	var maxRowLength int
-	data, maxRowLength = padData(append(data, stringArrayToAnyArray(contents)))
-
-	// Update the worksheet.
-	// Unfortunately, the SDK lacks a function to do what we need to do, so we need to make a raw HTTP request.
-	dataJSON, err := json.Marshal(data)
-	if err != nil {
-		return fmt.Errorf("failed to marshal data: %w", err)
-	}
-	bodyStr := fmt.Sprintf("{\"values\": %s}", dataJSON)
-	_, address, _ := strings.Cut(util.Deref(usedRange.GetAddress()), "!")
-	address, err = updateAddress(address, len(data), maxRowLength)
-	if err != nil {
-		return fmt.Errorf("failed to update address: %w", err)
-	}
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodPatch, fmt.Sprintf("https://graph.microsoft.com/v1.0/me/drive/items/%s/workbook/worksheets/%s/range(address='%s')", workbookID, worksheetID, address), strings.NewReader(bodyStr))
-	if err != nil {
-		return fmt.Errorf("failed to create request: %w", err)
-	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer"+os.Getenv(global.CredentialEnv))
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
 		return fmt.Errorf("failed to send request: %w", err)
 	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			fmt.Printf("failed to close response body: %s", err)
+		}
+	}(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
+		body, err := io.ReadAll(resp.Body)
+		if err == nil {
+			fmt.Println(string(body))
+		}
 		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 	return nil
 }
 
-func stringArrayToAnyArray(arr []string) []any {
-	var result []any
-	for _, s := range arr {
-		result = append(result, s)
-	}
-	return result
-}
-
-// padData pads the data with nil values to ensure all rows have the same length.
-func padData(data [][]any) ([][]any, int) {
-	// Find the longest row in the data.
-	length := 0
-	for _, row := range data {
-		if len(row) > length {
-			length = len(row)
-		}
-	}
-
-	// Pad all rows to the same length.
-	for i := range data {
-		for len(data[i]) < length {
-			data[i] = append(data[i], nil)
-		}
-	}
-
-	return data, length
-}
-
-// updateAddress takes the current range address (i.e. A1:B3) and updates it to include the new row that will be added.
-func updateAddress(address string, numRows, maxRowLength int) (string, error) {
-	start, _, _ := strings.Cut(address, ":")
-	if len(start) < 2 {
-		return "", fmt.Errorf("invalid address: %s", address)
-	}
-
-	startLetter, startNum := splitPartialAddress(start)
-
-	startNumInt, err := strconv.Atoi(startNum)
+func AddWorksheetColumn(ctx context.Context, workbookID, worksheetID, columnID string, contents []string) error {
+	re := regexp.MustCompile(`\d+$`)
+	startRow, err := strconv.Atoi(re.FindString(columnID))
 	if err != nil {
-		return "", fmt.Errorf("failed to parse end row number: %w", err)
+		return fmt.Errorf("failed to parse starting row.")
 	}
-	endNumInt := startNumInt + numRows - 1
+	endRow := startRow + len(contents) - 1
 
-	// This can sometimes happen if we are appending to a new spreadsheet.
-	if endNumInt < numRows {
-		endNumInt = numRows
-	}
+	endColumnID := re.ReplaceAllString(columnID, fmt.Sprintf("%d", endRow))
+	address := fmt.Sprintf("%s:%s", columnID, endColumnID)
 
-	// The column needs to be the letter corresponding to the number of values. I.e., C is 3.
-	// We start from the column letter from the start of the range.
-	endLetter := util.ColumnNumberToLetters(util.ColumnLettersToNumber(startLetter) + maxRowLength - 1)
-
-	return fmt.Sprintf("%s:%s%d", start, endLetter, endNumInt), nil
-}
-
-// splitPartialAddress splits a partial address (e.g. A1) into the column letter and row number.
-func splitPartialAddress(partial string) (string, string) {
-	for i := 0; i < len(partial); i++ {
-		if partial[i] >= '0' && partial[i] <= '9' {
-			return partial[:i], partial[i:]
+	body := new(UpdateBody)
+	for _, v := range contents {
+		if strings.HasPrefix(v, "=") {
+			body.AppendColumnCellToFormulas([]any{v})
+		} else {
+			body.AppendColumnCellToValues([]any{v})
 		}
 	}
-	return "", ""
+
+	bodyJSON, err := json.Marshal(body)
+	if err != nil {
+		return fmt.Errorf("failed to marshal body: %w", err)
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPatch, fmt.Sprintf("https://graph.microsoft.com/v1.0/me/drive/items/%s/workbook/worksheets/%s/range(address='%s')", workbookID, worksheetID, address), strings.NewReader(string(bodyJSON)))
+	if err != nil {
+		return fmt.Errorf("failed to create request: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+os.Getenv(global.CredentialEnv))
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to send request: %w", err)
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			fmt.Printf("failed to close response body: %s", err)
+		}
+	}(resp.Body)
+
+	if resp.StatusCode != http.StatusOK {
+		body, err := io.ReadAll(resp.Body)
+		if err == nil {
+			fmt.Println(string(body))
+		}
+		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
+	return nil
 }

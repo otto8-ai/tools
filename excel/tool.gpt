@@ -1,7 +1,7 @@
 ---
 Name: Excel
 Description: Tools for interacting with Microsoft Excel workbooks.
-Share Tools: List Workbooks, List Worksheets, Get Worksheet Column Headers, Get Worksheet Data, Get Worksheet Tables, Query Worksheet Data, Add Worksheet Row, Create Worksheet
+Share Tools: List Workbooks, List Worksheets, Get Worksheet Column Headers, Get Worksheet Data, Get Worksheet Tables, Query Worksheet Data, Add Worksheet Row, Add Worksheet Column, Create Worksheet
 
 ---
 Name: List Workbooks
@@ -75,9 +75,22 @@ Credential: ./credential
 Share Tools: List Workbooks, List Worksheets, Get Worksheet Data
 Param: workbook_id: ID of the workbook to add row to
 Param: worksheet_id: ID of the worksheet to add row to
-Param: contents: comma-separated values to add as a new row
+Param: contents: pipe-separated (`|`) values to add as a new row
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool addWorksheetRow
+
+---
+Name: Add Worksheet Column
+Description: Adds a column to an existing worksheet in a workbook.
+Share Context: Excel Context
+Credential: ./credential
+Share Tools: List Workbooks, List Worksheets, Get Worksheet Data
+Param: workbook_id: ID of the workbook to add column to
+Param: worksheet_id: ID of the worksheet to add column to
+Param: contents: pipe-separated (`|`) values to add as a new column
+Param: column_id: The starting address of the column to put the values in (e.g. B1)
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool addWorksheetColumn
 
 ---
 Name: Create Worksheet
@@ -105,10 +118,15 @@ When the Workbook to use is ambiguous, ask the user to to select one before cont
 
 When reading data from an Excel Workbook, always start by using the 'Get Worksheet Column Headers' tool to read the first 3 rows to determine if the first row contains column names.
 If there are headers, return the schema to the user.
-If the user asks to filter or list only specific information from the spreadsheet, try to use the 'Query Worksheet Data' tool.
+If the user asks to filter or list only specific information from the worksheet, try to use the 'Query Worksheet Data' tool.
 Write the query such that it returns the minimum number of columns and rows necessary to answer the user request.
 
 Do your best to always return the complete data that the user asked for, even if it is a large dataset.
+
+An excel formula should always start with `=` - for example `=SUM(A1,A2)`.
+If the user asks for a calculation or a formula, use an excel formula if possible instead of calculating the answer directly.
+
+Before adding or changing data in the worksheet, get a full view of the  existing data inside the worksheet.
 
 ## End of instructions for using Excel tools
 
