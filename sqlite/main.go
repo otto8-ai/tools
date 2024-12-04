@@ -88,6 +88,8 @@ func main() {
 		result, err = cmd.Exec(ctx, db, os.Getenv("STATEMENT"))
 	case "query":
 		result, err = cmd.Query(ctx, db, os.Getenv("QUERY"))
+	case "context":
+		result, err = cmd.Context(ctx, db)
 	default:
 		err = fmt.Errorf("Unknown command: %s", command)
 	}
@@ -115,7 +117,6 @@ func main() {
 
 	// Write the updated file back to the workspace only if the hash has changed
 	if initialHash != updatedHash {
-		fmt.Printf("Changes detected, writing updated DB file (%d bytes)\n", len(updatedData))
 		if err := g.WriteFileInWorkspace(ctx, workspaceFileName, updatedData); err != nil {
 			fmt.Printf("Error writing updated DB file to workspace: %v\n", err)
 			os.Exit(1)
