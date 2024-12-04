@@ -220,31 +220,31 @@ func NewEmbeddingFuncOpenAICompat(config *OpenAICompatConfig) cg.EmbeddingFunc {
 		}
 
 		// Create the HTTP request
-		httpReq, err := http.NewRequestWithContext(ctx, "POST", fullURL, bytes.NewBuffer(reqBody))
+		req, err := http.NewRequestWithContext(ctx, "POST", fullURL, bytes.NewBuffer(reqBody))
 		if err != nil {
 			return nil, fmt.Errorf("couldn't create request: %w", err)
 		}
-		httpReq.Header.Set("Content-Type", "application/json")
-		httpReq.Header.Set("Authorization", "Bearer "+config.apiKey)
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", "Bearer "+config.apiKey)
 
 		// Add headers
 		for k, v := range config.headers {
-			httpReq.Header.Add(k, v)
+			req.Header.Add(k, v)
 		}
 
 		// Add query parameters
-		q := httpReq.URL.Query()
+		q := req.URL.Query()
 		for k, v := range config.queryParams {
 			q.Add(k, v)
 		}
-		httpReq.URL.RawQuery = q.Encode()
+		req.URL.RawQuery = q.Encode()
 
 		var cancel context.CancelFunc
 		ctx, cancel = context.WithTimeout(ctx, OpenAIEmbeddingAPITimeout)
 		defer cancel()
 
 		// Send the request and get the body
-		body, err := RequestWithExponentialBackoff(ctx, client, httpReq, 5, true)
+		body, err := RequestWithExponentialBackoff(ctx, client, req, 5, true)
 		if err != nil {
 			return nil, fmt.Errorf("error sending request(s): %w", err)
 		}
