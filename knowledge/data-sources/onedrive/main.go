@@ -156,10 +156,7 @@ func main() {
 }
 
 func sync(ctx context.Context, logErr *logrus.Logger, input MetadataInput, output *MetadataOutput, client *msgraphsdk.GraphServiceClient, gptscript *gptscript.GPTScript) error {
-	items := make(map[string]struct {
-		Item models.DriveItemable
-		Root string
-	})
+	items := map[string]models.DriveItemable{}
 	for _, link := range input.OneDriveConfig.SharedLinks {
 		requestParameters := &shares.ItemDriveItemRequestBuilderGetQueryParameters{
 			Expand: []string{"children"},
@@ -177,25 +174,29 @@ func sync(ctx context.Context, logErr *logrus.Logger, input MetadataInput, outpu
 			Name:     *shareDriveItem.GetName(),
 		}
 
-		children, err := getChildrenFileForItem(ctx, client, shareDriveItem)
+		children, err := syncChildrenFileForItem(ctx, client, gptscript, shareDriveItem, output, root, logErr)
 		if err != nil {
 			return err
 		}
 		for _, child := range children {
-			// We only sync item that is less than 50 MB, as most of the bigger files won't be supported from knowledge
-			if child.GetSize() != nil && *child.GetSize() < 1024*1024*50 {
-				items[*child.GetId()] = struct {
-					Item models.DriveItemable
-					Root string
-				}{
-					Item: child,
-					Root: root,
-				}
-			}
+			items[*child.GetId()] = child
 		}
 	}
-	if err := saveToMetadata(ctx, logErr, output, client, gptscript, items); err != nil {
-		return err
+
+	for id := range output.Files {
+		found := false
+		if _, ok := items[id]; ok {
+			found = true
+		}
+		if !found {
+			if output.Files[id].FilePath != "" {
+				logErr.Infof("Deleting %s", output.Files[id].FilePath)
+				if err := gptscript.DeleteFileInWorkspace(ctx, output.Files[id].FilePath); err != nil {
+					return err
+				}
+			}
+			delete(output.Files, id)
+		}
 	}
 
 	return nil
@@ -209,8 +210,15 @@ func writeMetadata(ctx context.Context, output *MetadataOutput, gptscript *gptsc
 	return gptscript.WriteFileInWorkspace(ctx, ".metadata.json", data)
 }
 
-func getChildrenFileForItem(ctx context.Context, client *msgraphsdk.GraphServiceClient, item models.DriveItemable) ([]models.DriveItemable, error) {
+func syncChildrenFileForItem(ctx context.Context, client *msgraphsdk.GraphServiceClient, gptscriptClient *gptscript.GPTScript, item models.DriveItemable, output *MetadataOutput, root string, logErr *logrus.Logger) ([]models.DriveItemable, error) {
 	if item.GetFile() != nil {
+		// We only sync item that is less than 50 MB, as most of the bigger files won't be supported from knowledge
+		if item.GetSize() != nil && *item.GetSize() >= 1024*1024*50 {
+			return nil, nil
+		}
+		if err := saveToMetadata(ctx, logErr, output, client, gptscriptClient, item, root); err != nil {
+			return nil, err
+		}
 		return []models.DriveItemable{item}, nil
 	}
 
@@ -224,7 +232,7 @@ func getChildrenFileForItem(ctx context.Context, client *msgraphsdk.GraphService
 		if err != nil {
 			return nil, err
 		}
-		children, err := getChildrenFileForItem(ctx, client, item)
+		children, err := syncChildrenFileForItem(ctx, client, gptscriptClient, item, output, root, logErr)
 		if err != nil {
 			return nil, err
 		}
@@ -233,68 +241,48 @@ func getChildrenFileForItem(ctx context.Context, client *msgraphsdk.GraphService
 	return result, nil
 }
 
-func saveToMetadata(ctx context.Context, logErr *logrus.Logger, output *MetadataOutput, client *msgraphsdk.GraphServiceClient, gptscriptClient *gptscript.GPTScript, items map[string]struct {
-	Item models.DriveItemable
-	Root string
-}) error {
+func saveToMetadata(ctx context.Context, logErr *logrus.Logger, output *MetadataOutput, client *msgraphsdk.GraphServiceClient, gptscriptClient *gptscript.GPTScript, item models.DriveItemable, root string) error {
 	folders := make(map[string]struct{})
 	files := make(map[string]FileState)
-	for _, item := range items {
-		fullPath := getFullName(item.Item)
-		relativePath := strings.TrimPrefix(fullPath, item.Root)
-		topRootFolder := strings.Split(strings.TrimPrefix(relativePath, string(os.PathSeparator)), string(os.PathSeparator))[0]
-		created := false
-		detail, ok := output.Files[*item.Item.GetId()]
-		if !ok {
-			created = true
-			detail.FilePath = relativePath
-			detail.URL = *item.Item.GetWebUrl()
-			detail.UpdatedAt = (*item.Item.GetLastModifiedDateTime()).String()
-			detail.SizeInBytes = *item.Item.GetSize()
-			output.Files[*item.Item.GetId()] = detail
-		}
-		files[*item.Item.GetId()] = FileState{
-			FolderPath: strings.TrimPrefix(filepath.Dir(relativePath), string(os.PathSeparator)),
-			FileName:   path.Base(relativePath),
-			URL:        *item.Item.GetWebUrl(),
-		}
-		if created || detail.UpdatedAt != item.Item.GetLastModifiedDateTime().String() {
-			driveID := *item.Item.GetParentReference().GetDriveId()
-			data, err := client.Drives().ByDriveId(driveID).Items().ByDriveItemId(*item.Item.GetId()).Content().Get(ctx, nil)
-			if err != nil {
-				return err
-			}
-
-			if err := gptscriptClient.WriteFileInWorkspace(ctx, relativePath, data); err != nil {
-				return err
-			}
-			logErr.Infof("Downloaded %s", relativePath)
-			detail.UpdatedAt = item.Item.GetLastModifiedDateTime().String()
-			output.Files[*item.Item.GetId()] = detail
-		} else {
-			logErr.Infof("Skipping %s because it is not changed", relativePath)
-		}
-		folders[topRootFolder] = struct{}{}
-		output.State.OneDriveState.Files = files
-		output.Status = fmt.Sprintf("Synced %d files out of %d", len(output.Files), len(items))
-		if err := writeMetadata(ctx, output, gptscriptClient); err != nil {
+	fullPath := getFullName(item)
+	relativePath := strings.TrimPrefix(fullPath, root)
+	topRootFolder := strings.Split(strings.TrimPrefix(relativePath, string(os.PathSeparator)), string(os.PathSeparator))[0]
+	created := false
+	detail, ok := output.Files[*item.GetId()]
+	if !ok {
+		created = true
+		detail.FilePath = relativePath
+		detail.URL = *item.GetWebUrl()
+		detail.UpdatedAt = (*item.GetLastModifiedDateTime()).String()
+		detail.SizeInBytes = *item.GetSize()
+		output.Files[*item.GetId()] = detail
+	}
+	files[*item.GetId()] = FileState{
+		FolderPath: strings.TrimPrefix(filepath.Dir(relativePath), string(os.PathSeparator)),
+		FileName:   path.Base(relativePath),
+		URL:        *item.GetWebUrl(),
+	}
+	if created || detail.UpdatedAt != item.GetLastModifiedDateTime().String() {
+		driveID := *item.GetParentReference().GetDriveId()
+		data, err := client.Drives().ByDriveId(driveID).Items().ByDriveItemId(*item.GetId()).Content().Get(ctx, nil)
+		if err != nil {
 			return err
 		}
+
+		if err := gptscriptClient.WriteFileInWorkspace(ctx, relativePath, data); err != nil {
+			return err
+		}
+		logErr.Infof("Downloaded %s", relativePath)
+		detail.UpdatedAt = item.GetLastModifiedDateTime().String()
+		output.Files[*item.GetId()] = detail
+	} else {
+		logErr.Infof("Skipping %s because it is not changed", relativePath)
 	}
-	for id := range output.Files {
-		found := false
-		if _, ok := items[id]; ok {
-			found = true
-		}
-		if !found {
-			if output.Files[id].FilePath != "" {
-				logErr.Infof("Deleting %s", output.Files[id].FilePath)
-				if err := gptscriptClient.DeleteFileInWorkspace(ctx, output.Files[id].FilePath); err != nil {
-					return err
-				}
-			}
-			delete(output.Files, id)
-		}
+	folders[topRootFolder] = struct{}{}
+	output.State.OneDriveState.Files = files
+	output.Status = fmt.Sprintf("Syncing file %v", relativePath)
+	if err := writeMetadata(ctx, output, gptscriptClient); err != nil {
+		return err
 	}
 
 	output.State.OneDriveState.Files = files
