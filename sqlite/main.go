@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"crypto/sha256"
 	"database/sql"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"os"
@@ -47,6 +49,9 @@ func main() {
 		fmt.Printf("Error reading DB file: %v\n", err)
 		os.Exit(1)
 	}
+
+	// Calculate hash of the initial data
+	initialHash := hash(data)
 
 	// Create a temporary file for the SQLite database
 	tmpFile, err := os.CreateTemp("", fileName)
@@ -105,13 +110,26 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Printf("Updated DB file: %d bytes\n", len(updatedData))
+	// Calculate hash of the updated data
+	updatedHash := hash(updatedData)
 
-	// Write the updated file back to the workspace
-	if err := g.WriteFileInWorkspace(ctx, workspaceFileName, updatedData); err != nil {
-		fmt.Printf("Error writing updated DB file to workspace: %v\n", err)
-		os.Exit(1)
+	// Write the updated file back to the workspace only if the hash has changed
+	if initialHash != updatedHash {
+		fmt.Printf("Changes detected, writing updated DB file (%d bytes)\n", len(updatedData))
+		if err := g.WriteFileInWorkspace(ctx, workspaceFileName, updatedData); err != nil {
+			fmt.Printf("Error writing updated DB file to workspace: %v\n", err)
+			os.Exit(1)
+		}
 	}
 
 	fmt.Print(result)
+}
+
+// hash computes the SHA-256 hash of the given data and returns it as a hexadecimal string
+func hash(data []byte) string {
+	if data == nil {
+		return ""
+	}
+	hash := sha256.Sum256(data)
+	return hex.EncodeToString(hash[:])
 }
