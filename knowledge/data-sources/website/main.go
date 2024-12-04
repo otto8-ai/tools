@@ -86,11 +86,6 @@ func main() {
 		output.Files = make(map[string]FileDetails)
 	}
 
-	mode := os.Getenv("MODE")
-	if mode == "" {
-		mode = "colly"
-	}
-
 	if err := crawlColly(ctx, &input, &output, logErr, gptscriptClient); err != nil {
 		logOut.WithError(fmt.Errorf("failed to crawl website: error: %w", err)).Error()
 		os.Exit(0)

@@ -14,21 +14,17 @@ import (
 	"strings"
 	"time"
 
-	md "github.com/JohannesKaufmann/html-to-markdown/v2/converter"
-	"github.com/JohannesKaufmann/html-to-markdown/v2/plugin/base"
-	"github.com/JohannesKaufmann/html-to-markdown/v2/plugin/commonmark"
 	"github.com/gocolly/colly"
 	"github.com/gptscript-ai/go-gptscript"
 	"github.com/sirupsen/logrus"
 )
 
 func crawlColly(ctx context.Context, input *MetadataInput, output *MetadataOutput, logOut *logrus.Logger, gptscript *gptscript.GPTScript) error {
-	converter := md.NewConverter(md.WithPlugins(base.NewBasePlugin(), commonmark.NewCommonmarkPlugin()))
 	visited := make(map[string]struct{})
 	folders := make(map[string]struct{})
 
 	for _, url := range input.WebsiteCrawlingConfig.URLs {
-		if err := scrape(ctx, converter, logOut, output, gptscript, visited, folders, url, input.Limit); err != nil {
+		if err := scrape(ctx, logOut, output, gptscript, visited, folders, url, input.Limit); err != nil {
 			return fmt.Errorf("failed to scrape %s: %w", url, err)
 		}
 	}
@@ -47,17 +43,12 @@ func crawlColly(ctx context.Context, input *MetadataInput, output *MetadataOutpu
 	return writeMetadata(ctx, output, gptscript)
 }
 
-func scrape(ctx context.Context, converter *md.Converter, logOut *logrus.Logger, output *MetadataOutput, gptscriptClient *gptscript.GPTScript, visited map[string]struct{}, folders map[string]struct{}, url string, limit int) error {
+func scrape(ctx context.Context, logOut *logrus.Logger, output *MetadataOutput, gptscriptClient *gptscript.GPTScript, visited map[string]struct{}, folders map[string]struct{}, url string, limit int) error {
 	collector := colly.NewCollector()
 	collector.OnHTML("body", func(e *colly.HTMLElement) {
 		html, err := e.DOM.Html()
 		if err != nil {
 			logOut.Errorf("Failed to grab HTML: %v", err)
-			return
-		}
-		markdown, err := converter.ConvertString(html)
-		if err != nil {
-			logOut.Errorf("Failed to convert HTML to markdown: %v", err)
 			return
 		}
 		hostname := e.Request.URL.Hostname()
@@ -68,14 +59,14 @@ func scrape(ctx context.Context, converter *md.Converter, logOut *logrus.Logger,
 
 		var filePath string
 		if urlPathWithQuery == "" {
-			filePath = path.Join(hostname, "index.md")
+			filePath = path.Join(hostname, "index.html")
 		} else {
 			trimmedPath := strings.Trim(urlPathWithQuery, "/")
 			if trimmedPath == "" {
-				filePath = path.Join(hostname, "index.md")
+				filePath = path.Join(hostname, "index.html")
 			} else {
 				segments := strings.Split(trimmedPath, "/")
-				fileName := segments[len(segments)-1] + ".md"
+				fileName := segments[len(segments)-1] + ".html"
 				filePath = path.Join(hostname, strings.Join(segments[:len(segments)-1], "/"), fileName)
 			}
 		}
@@ -113,7 +104,7 @@ func scrape(ctx context.Context, converter *md.Converter, logOut *logrus.Logger,
 			return
 		}
 
-		checksum, err := getChecksum([]byte(markdown))
+		checksum, err := getChecksum([]byte(html))
 		if err != nil {
 			logOut.Errorf("Failed to get checksum for %s: %v", e.Request.URL.String(), err)
 			return
@@ -124,7 +115,7 @@ func scrape(ctx context.Context, converter *md.Converter, logOut *logrus.Logger,
 			return
 		}
 
-		if err := gptscriptClient.WriteFileInWorkspace(ctx, filePath, []byte(markdown)); err != nil {
+		if err := gptscriptClient.WriteFileInWorkspace(ctx, filePath, []byte(html)); err != nil {
 			logOut.Errorf("Failed to write file %s: %v", filePath, err)
 			return
 		}
@@ -136,7 +127,7 @@ func scrape(ctx context.Context, converter *md.Converter, logOut *logrus.Logger,
 			URL:         e.Request.URL.String(),
 			UpdatedAt:   updatedAt,
 			Checksum:    checksum,
-			SizeInBytes: int64(len([]byte(markdown))),
+			SizeInBytes: int64(len([]byte(html))),
 		}
 
 		folders[hostname] = struct{}{}
@@ -173,7 +164,7 @@ func scrape(ctx context.Context, converter *md.Converter, logOut *logrus.Logger,
 				return
 			}
 
-			// if linkURL has absolute path and it doesn't match baseURL, skip
+			// if linkURL has absolute path, and it doesn't match baseURL, skip
 			if strings.HasPrefix(linkURL.Path, "/") && !strings.HasPrefix(linkURL.Path, baseURL.Path) {
 				return
 			}

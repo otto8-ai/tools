@@ -6,15 +6,13 @@ go 1.23.1
 toolchain go1.23.2
 
 require (
-	github.com/JohannesKaufmann/html-to-markdown/v2 v2.2.1
-	github.com/PuerkitoBio/goquery v1.9.2
 	github.com/gocolly/colly v1.2.0
 	github.com/gptscript-ai/go-gptscript v0.9.6-0.20241023195750-c09e0f56b39b
 	github.com/sirupsen/logrus v1.9.3
 )
 
 require (
-	github.com/JohannesKaufmann/dom v0.1.1-0.20240706125338-ff9f3b772364 // indirect
+	github.com/PuerkitoBio/goquery v1.9.2 // indirect
 	github.com/andybalholm/cascadia v1.3.2 // indirect
 	github.com/antchfx/htmlquery v1.3.2 // indirect
 	github.com/antchfx/xmlquery v1.4.1 // indirect
@@ -33,7 +31,6 @@ require (
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
 	github.com/perimeterx/marshmallow v1.1.5 // indirect
 	github.com/saintfish/chardet v0.0.0-20230101081208-5e3ef4b5456d // indirect
-	github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3 // indirect
 	github.com/stretchr/testify v1.9.0 // indirect
 	github.com/temoto/robotstxt v1.1.2 // indirect
 	golang.org/x/net v0.31.0 // indirect
