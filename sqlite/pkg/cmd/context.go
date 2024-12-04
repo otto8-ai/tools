@@ -8,37 +8,60 @@ import (
 )
 
 // Context returns the context text for the SQLite tools.
-// This contains all of the schemas of the tables in the database in markdown format.
+// The resulting string contains all of schemas in the database.
 func Context(ctx context.Context, db *sql.DB) (string, error) {
-	tables, err := listTables(ctx, db)
-	if err != nil {
-		return "", fmt.Errorf("failed to list tables: %w", err)
-	}
-
 	// Build the markdown output
-	var sb strings.Builder
-	sb.WriteString(`# START INSTRUCTIONS: SQLite Tools
+	var out strings.Builder
+	out.WriteString(`# START INSTRUCTIONS: SQLite Tools
+
 You have access to tools for interacting with a SQLite database.
 The Exec tool only accepts valid SQLite3 statements.
 The Query tool only accepts valid SQLite3 queries.
-The Query tool returns query results in markdown format.
-Display all results from these tools in markdown format.
+Display all results from these tools and their schemas in markdown format.
 
+# END INSTRUCTIONS: SQLite Tools
 `)
-	for i, table := range tables {
-		if i == 0 {
-			sb.WriteString("\n# START CURRENT TABLE SCHEMAS\n")
+
+	// Add the schemas section
+	schemas, err := getSchemas(ctx, db)
+	if err != nil {
+		return "", fmt.Errorf("failed to retrieve schemas: %w", err)
+	}
+	if schemas != "" {
+		out.WriteString("# START CURRENT DATABASE SCHEMAS\n")
+		out.WriteString(schemas)
+		out.WriteString("\n# END CURRENT DATABASE SCHEMAS\n")
+	} else {
+		out.WriteString("# DATABASE HAS NO TABLES\n")
+	}
+
+	return out.String(), nil
+}
+
+// getSchemas returns an SQL string containing all schemas in the database.
+func getSchemas(ctx context.Context, db *sql.DB) (string, error) {
+	query := "SELECT sql FROM sqlite_master WHERE type IN ('table', 'index', 'view', 'trigger') AND name NOT LIKE 'sqlite_%' ORDER BY name"
+
+	rows, err := db.QueryContext(ctx, query)
+	if err != nil {
+		return "", fmt.Errorf("failed to query sqlite_master: %w", err)
+	}
+	defer rows.Close()
+
+	var out strings.Builder
+	for rows.Next() {
+		var schema string
+		if err := rows.Scan(&schema); err != nil {
+			return "", fmt.Errorf("failed to scan schema: %w", err)
 		}
-		schema, err := GetSchema(ctx, db, table)
-		if err != nil {
-			return "", fmt.Errorf("failed to get schema for table %s: %w", table, err)
-		}
-		sb.WriteString(schema + "\n")
-		if i == len(tables)-1 {
-			sb.WriteString("# END CURRENT TABLE SCHEMAS\n")
+		if schema != "" {
+			out.WriteString(fmt.Sprintf("\n%s\n", schema))
 		}
 	}
 
-	sb.WriteString("# END INSTRUCTIONS: SQLite Tools\n")
-	return sb.String(), nil
+	if rows.Err() != nil {
+		return "", fmt.Errorf("error iterating over schemas: %w", rows.Err())
+	}
+
+	return out.String(), nil
 }

@@ -74,10 +74,6 @@ func main() {
 	// Run the requested command
 	var result string
 	switch command {
-	case "listTables":
-		result, err = cmd.ListTables(ctx, db)
-	case "getSchema":
-		result, err = cmd.GetSchema(ctx, db, os.Getenv("TABLE_NAME"))
 	case "exec":
 		result, err = cmd.Exec(ctx, db, os.Getenv("STATEMENT"))
 	case "query":
