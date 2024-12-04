@@ -50,6 +50,13 @@ type OpenAIConfig struct {
 	AzureOpenAIConfig AzureOpenAIConfig `koanf:"azure"`
 }
 
+type OpenAIEmbeddingRequest struct {
+	Input          string `json:"input"`
+	Model          string `json:"model"`
+	EncodingFormat string `json:"encoding_format,omitempty"`
+	Dimensions     *int   `json:"dimensions,omitempty"`
+}
+
 func (o OpenAIConfig) Name() string {
 	return EmbeddingModelProviderOpenAIName
 }
@@ -181,18 +188,28 @@ func NewEmbeddingFuncOpenAICompat(config *OpenAICompatConfig) cg.EmbeddingFunc {
 	}
 
 	client := &http.Client{
-		Timeout: OpenAIEmbeddingAPIRequestTimeout, // per request timeout - the overall timeout is set on the context
+		Timeout: OpenAIEmbeddingAPIRequestTimeout,
 	}
 
 	var checkedNormalized bool
 	checkNormalized := sync.Once{}
 
 	return func(ctx context.Context, text string) ([]float32, error) {
-		// Prepare the request body.
-		reqBody, err := json.Marshal(map[string]string{
-			"input": text,
-			"model": config.model,
-		})
+		// Create the OpenAI request payload
+		embedReq := OpenAIEmbeddingRequest{
+			Input:          text,
+			Model:          config.model,
+			EncodingFormat: "float",
+		}
+
+		// Only set dimensions for text-embedding-3-large
+		if config.model == "text-embedding-3-large" {
+			dims := 2000
+			embedReq.Dimensions = &dims
+		}
+
+		// Prepare the request body
+		reqBody, err := json.Marshal(embedReq)
 		if err != nil {
 			return nil, fmt.Errorf("couldn't marshal request body: %w", err)
 		}
@@ -202,33 +219,32 @@ func NewEmbeddingFuncOpenAICompat(config *OpenAICompatConfig) cg.EmbeddingFunc {
 			return nil, fmt.Errorf("couldn't join base URL and endpoint: %w", err)
 		}
 
-		// Create the request. Creating it with context is important for a timeout
-		// to be possible, because the client is configured without a timeout.
-		req, err := http.NewRequestWithContext(ctx, "POST", fullURL, bytes.NewBuffer(reqBody))
+		// Create the HTTP request
+		httpReq, err := http.NewRequestWithContext(ctx, "POST", fullURL, bytes.NewBuffer(reqBody))
 		if err != nil {
 			return nil, fmt.Errorf("couldn't create request: %w", err)
 		}
-		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("Authorization", "Bearer "+config.apiKey)
+		httpReq.Header.Set("Content-Type", "application/json")
+		httpReq.Header.Set("Authorization", "Bearer "+config.apiKey)
 
 		// Add headers
 		for k, v := range config.headers {
-			req.Header.Add(k, v)
+			httpReq.Header.Add(k, v)
 		}
 
 		// Add query parameters
-		q := req.URL.Query()
+		q := httpReq.URL.Query()
 		for k, v := range config.queryParams {
 			q.Add(k, v)
 		}
-		req.URL.RawQuery = q.Encode()
+		httpReq.URL.RawQuery = q.Encode()
 
 		var cancel context.CancelFunc
 		ctx, cancel = context.WithTimeout(ctx, OpenAIEmbeddingAPITimeout)
 		defer cancel()
 
-		// Send the request and get the body.
-		body, err := RequestWithExponentialBackoff(ctx, client, req, 5, true)
+		// Send the request and get the body
+		body, err := RequestWithExponentialBackoff(ctx, client, httpReq, 5, true)
 		if err != nil {
 			return nil, fmt.Errorf("error sending request(s): %w", err)
 		}
