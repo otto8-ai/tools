@@ -23,12 +23,6 @@ func main() {
 	}
 	command := os.Args[1]
 
-	threadID := os.Getenv("OTTO8_THREAD_ID")
-	if threadID == "" {
-		fmt.Println("OTTO8_THREAD_ID is not set")
-		os.Exit(1)
-	}
-
 	g, err := gptscript.NewGPTScript()
 	if err != nil {
 		fmt.Printf("Error creating GPTScript: %v\n", err)
@@ -38,7 +32,7 @@ func main() {
 
 	var (
 		ctx               = context.Background()
-		fileName          = fmt.Sprintf("thread.%s.db", threadID)
+		fileName          = "otto8.db"
 		workspaceFileName = "files/" + fileName
 	)
 
