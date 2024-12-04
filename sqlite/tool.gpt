@@ -2,7 +2,7 @@
 Name: SQLite
 Description: Tools for interacting with a SQLite database
 Metadata: bundle: true
-Share Tools: List Tables, Get Schema, Query, Exec
+Share Tools: Query, Exec
 
 ---
 Name: List Tables
