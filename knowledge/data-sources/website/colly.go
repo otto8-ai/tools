@@ -243,7 +243,10 @@ func scrapePDF(ctx context.Context, logOut *logrus.Logger, output *MetadataOutpu
 			return fmt.Errorf("invalid link URL %s: %v", fullLink, err)
 		}
 	}
-	filePath := path.Join(baseURL.Host, linkURL.Host, strings.TrimPrefix(linkURL.Path, "/"))
+	filePath := path.Join(linkURL.Host, strings.TrimPrefix(linkURL.Path, "/"))
+	if !isSameDomainOrSubdomain(linkURL.Host, baseURL.Host) {
+		filePath = path.Join(baseURL.Host, filePath)
+	}
 	if _, ok := visited[filePath]; ok {
 		return nil
 	}
