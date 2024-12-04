@@ -10,7 +10,7 @@ Description: List emails in the user's Gmail inbox
 Credential: ../credential
 Share Contexts: ../../time, Email List Context
 Tools: github.com/gptscript-ai/datasets/filter
-Param: max_results: Maximum number of emails to list (Optional: Default will list all emails in the inbox)
+Param: max_results: Maximum number of emails to list (Optional: Default will list 100 emails in the inbox)
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/listInbox.py
 
@@ -31,7 +31,7 @@ Credential: ../credential
 Share Contexts: ../../time
 Tools: github.com/gptscript-ai/datasets/filter
 Param: query: Search query to find emails in the user's Gmail account. Uses Gmail search syntax (e.g., "from:someuser@example.com rfc822msgid:<somemsgid@example.com> is:unread")
-Param: max_results: Maximum number of emails to list (Optional: Default will list all emails that match the query)
+Param: max_results: Maximum number of emails to list (Optional: Default will list 100 emails that match the query)
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/searchEmails.py
 
@@ -63,7 +63,7 @@ Description: List drafts in a user's Gmail account
 Credential: ../credential
 Share Contexts: ../../time, Email List Context
 Tools: github.com/gptscript-ai/datasets/filter
-Param: max_results: Maximum number of drafts to list (Optional: Default will list all drafts)
+Param: max_results: Maximum number of drafts to list (Optional: Default will list 100 drafts)
 Param: attachments: A comma separated list of workspace file paths to attach to the email (Optional)
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/listDrafts.py
