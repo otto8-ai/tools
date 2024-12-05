@@ -5,3 +5,7 @@ Model Provider: true
 Credential: ../model-provider-credential as azure-openai-model-provider
 
 #!sys.daemon /usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py
+
+---
+!metadata:*:icon
+/admin/assets/azure_openai_icon.svg

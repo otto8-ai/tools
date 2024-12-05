@@ -5,3 +5,7 @@ Model Provider: true
 Credential: ../model-provider-credential as anthropic-model-provider
 
 #!sys.daemon /usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py
+
+---
+!metadata:*:icon
+/admin/assets/anthropic_icon.svg
