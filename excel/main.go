@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/gptscript-ai/tools/excel/pkg/commands"
 	"os"
+	"strconv"
+	"strings"
 )
 
 func main() {
@@ -35,6 +37,17 @@ func main() {
 		err = commands.AddWorksheetColumn(context.Background(), os.Getenv("WORKBOOK_ID"), os.Getenv("WORKSHEET_ID"), os.Getenv("COLUMN_ID"), os.Getenv("CONTENTS"))
 	case "createWorksheet":
 		err = commands.CreateWorksheet(context.Background(), os.Getenv("WORKBOOK_ID"), os.Getenv("NAME"))
+	case "getDate":
+		serialStrings := strings.Split(os.Getenv("SERIALS"), "|")
+		serials := make([]int, len(serialStrings))
+		for i, v := range serialStrings {
+			val, err := strconv.Atoi(strings.TrimSpace(v))
+			if err != nil {
+				break
+			}
+			serials[i] = val
+		}
+		commands.GetDate(serials)
 	default:
 		fmt.Printf("Unknown command: %s\n", command)
 		os.Exit(1)
