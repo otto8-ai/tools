@@ -35,13 +35,13 @@ type OpenAIOCR struct {
 }
 
 type ImagePayload struct {
-	URL string `json:"url"`
+	URL string `json:"url,omitempty"`
 }
 
 type MessageContent struct {
-	Type     string       `json:"type"`
-	Text     string       `json:"text,omitempty"`
-	ImageURL ImagePayload `json:"image_url,omitempty"`
+	Type     string        `json:"type"`
+	Text     string        `json:"text,omitempty"`
+	ImageURL *ImagePayload `json:"image_url,omitempty"`
 }
 
 type Message struct {
@@ -260,7 +260,7 @@ func (o *OpenAIOCR) SendImageToOpenAI(ctx context.Context, base64Image string) (
 				Role: "user",
 				Content: []MessageContent{
 					{Type: "text", Text: o.Prompt},
-					{Type: "image_url", ImageURL: ImagePayload{URL: "data:image/png;base64," + base64Image}},
+					{Type: "image_url", ImageURL: &ImagePayload{URL: "data:image/png;base64," + base64Image}},
 				},
 			},
 		},
