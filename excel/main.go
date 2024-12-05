@@ -31,6 +31,8 @@ func main() {
 		err = commands.QueryWorksheetData(context.Background(), os.Getenv("WORKBOOK_ID"), os.Getenv("WORKSHEET_ID"), os.Getenv("QUERY"), os.Getenv("SHOW_COLUMNS"))
 	case "addWorksheetRow":
 		err = commands.AddWorksheetRow(context.Background(), os.Getenv("WORKBOOK_ID"), os.Getenv("WORKSHEET_ID"), os.Getenv("CONTENTS"))
+	case "addWorksheetColumn":
+		err = commands.AddWorksheetColumn(context.Background(), os.Getenv("WORKBOOK_ID"), os.Getenv("WORKSHEET_ID"), os.Getenv("COLUMN_ID"), os.Getenv("CONTENTS"))
 	case "createWorksheet":
 		err = commands.CreateWorksheet(context.Background(), os.Getenv("WORKBOOK_ID"), os.Getenv("NAME"))
 	default:
