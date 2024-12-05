@@ -1,7 +1,7 @@
-import OpenAI from 'openai'
-import * as gptscript from '@gptscript-ai/gptscript'
-import axios from 'axios'
-import { createHash } from 'node:crypto'
+import OpenAI from "openai"
+import * as gptscript from "@gptscript-ai/gptscript"
+import axios from "axios"
+import {createHash} from "node:crypto"
 
 type ImageSize = '1024x1024' | '256x256' | '512x512' | '1792x1024' | '1024x1792';
 type ImageQuality = 'standard' | 'hd';
@@ -36,7 +36,7 @@ export async function generateImages(
 
   try {
     const response = await openai.images.generate({
-      model: 'dall-e-3',
+      model: process.env.OTTO8_DEFAULT_IMAGE_GENERATION_MODEL ?? 'dall-e-3',
       prompt,
       size: size as ImageSize,
       quality: quality as ImageQuality,

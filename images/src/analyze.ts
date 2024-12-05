@@ -1,9 +1,9 @@
-import { fileTypeFromBuffer } from 'file-type';
-import { resolve } from 'path';
-import { readFile } from 'fs/promises';
-import OpenAI from 'openai';
-import { ChatCompletionContentPartImage } from 'openai/resources/chat/completions';
-import { GPTScript } from '@gptscript-ai/gptscript';
+import {fileTypeFromBuffer} from "file-type"
+import {resolve} from "path"
+import {readFile} from "fs/promises"
+import OpenAI from "openai"
+import {ChatCompletionContentPartImage} from "openai/resources/chat/completions"
+import {GPTScript} from "@gptscript-ai/gptscript"
 
 export async function analyzeImages(
   prompt: string = '',
@@ -37,7 +37,7 @@ export async function analyzeImages(
 
   const openai = new OpenAI();
   const response = await openai.chat.completions.create({
-    model: 'gpt-4o',
+    model: process.env.OTTO8_DEFAULT_VISION_MODEL ?? 'gpt-4o',
     stream: true,
     messages: [
       {
