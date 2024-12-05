@@ -5,3 +5,7 @@ Model Provider: true
 Credential: ../model-provider-credential as openai-model-provider
 
 #!sys.daemon /usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py
+
+---
+!metadata:*:icon
+https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/duotone/open-ai-logo-duotone.svg
