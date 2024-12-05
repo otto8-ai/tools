@@ -31,7 +31,7 @@ const EmbeddingModelProviderOpenAIName string = "openai"
 type EmbeddingModelProviderOpenAI struct {
 	BaseURL           string            `usage:"OpenAI API base" default:"https://api.openai.com/v1" env:"OPENAI_BASE_URL" koanf:"baseURL"`
 	APIKey            string            `usage:"OpenAI API key (not required if used with clicky-chats)" default:"sk-foo" env:"OPENAI_API_KEY" koanf:"apiKey" mapstructure:"apiKey" export:"false"`
-	Model             string            `usage:"OpenAI model" default:"gpt-4" env:"OPENAI_MODEL" koanf:"openai-model"`
+	Model             string            `usage:"OpenAI model" default:"gpt-4o" env:"OPENAI_MODEL" koanf:"openai-model"`
 	EmbeddingModel    string            `usage:"OpenAI Embedding model" default:"text-embedding-3-large" env:"OPENAI_EMBEDDING_MODEL" koanf:"embeddingModel" export:"required"`
 	EmbeddingEndpoint string            `usage:"OpenAI Embedding endpoint" default:"/embeddings" env:"OPENAI_EMBEDDING_ENDPOINT" koanf:"embeddingEndpoint"`
 	APIVersion        string            `usage:"OpenAI API version (for Azure)" default:"2024-02-01" env:"OPENAI_API_VERSION" koanf:"apiVersion"`
@@ -42,7 +42,7 @@ type EmbeddingModelProviderOpenAI struct {
 type OpenAIConfig struct {
 	BaseURL           string            `usage:"OpenAI API base" default:"https://api.openai.com/v1" env:"OPENAI_BASE_URL" koanf:"baseURL"`
 	APIKey            string            `usage:"OpenAI API key (not required if used with clicky-chats)" default:"sk-foo" env:"OPENAI_API_KEY" koanf:"apiKey" mapstructure:"apiKey" export:"false"`
-	Model             string            `usage:"OpenAI model" default:"gpt-4" env:"OPENAI_MODEL" koanf:"openai-model"`
+	Model             string            `usage:"OpenAI model" default:"gpt-4o" env:"OPENAI_MODEL" koanf:"openai-model"`
 	EmbeddingModel    string            `usage:"OpenAI Embedding model" default:"text-embedding-3-large" env:"OPENAI_EMBEDDING_MODEL" koanf:"embeddingModel" export:"required"`
 	EmbeddingEndpoint string            `usage:"OpenAI Embedding endpoint" default:"/embeddings" env:"OPENAI_EMBEDDING_ENDPOINT" koanf:"embeddingEndpoint"`
 	APIVersion        string            `usage:"OpenAI API version (for Azure)" default:"2024-02-01" env:"OPENAI_API_VERSION" koanf:"apiVersion"`
@@ -101,7 +101,7 @@ func (p *EmbeddingModelProviderOpenAI) fillDefaults() error {
 	defaultConfig := EmbeddingModelProviderOpenAI{
 		BaseURL:           "https://api.openai.com/v1",
 		APIKey:            "sk-foo",
-		Model:             "gpt-4",
+		Model:             "gpt-4o",
 		EmbeddingModel:    "text-embedding-3-large",
 		EmbeddingEndpoint: "/embeddings",
 		APIVersion:        "2024-02-01",
