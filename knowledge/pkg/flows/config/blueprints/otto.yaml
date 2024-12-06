@@ -30,7 +30,7 @@ flows:
       - filetypes: [".pdf"]
         documentloader:
           name: smartpdf
-      - filetypes: [ ".pptx", ".doc", ".ppt" ]
+      - filetypes: [ ".pptx", ".doc", ".ppt", ".pages" ]
         converter:
           name: soffice
           targetFormat: pdf
