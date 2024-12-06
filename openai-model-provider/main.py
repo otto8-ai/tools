@@ -61,7 +61,7 @@ def set_model_usage(model: dict) -> dict:
         model["metadata"] = {"usage":"llm"}
     elif model["id"].startswith("text-embedding") or model["id"].startswith("ft:text-embedding"):
         model["metadata"] = {"usage":"text-embedding"}
-    elif model["id"].startswith("dalle-") or model["id"].startswith("ft:dalle-"):
+    elif model["id"].startswith("dall-e") or model["id"].startswith("ft:dall-e"):
         model["metadata"] = {"usage":"image-generation"}
     return model
 
