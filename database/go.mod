@@ -1,4 +1,4 @@
-module sqlite
+module otto8-ai/database
 
 go 1.23.3
 
