@@ -56,7 +56,7 @@ func main() {
 	}
 
 	if output == "" {
-		logOut.WithError(fmt.Errorf("input is empty")).Error()
+		logOut.WithError(fmt.Errorf("output is empty")).Error()
 		os.Exit(0)
 	}
 
