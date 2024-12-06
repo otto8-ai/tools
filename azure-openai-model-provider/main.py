@@ -6,16 +6,16 @@ from typing import AsyncIterable
 from azure.identity import CredentialUnavailableError, DefaultAzureCredential, get_bearer_token_provider
 from azure.mgmt.cognitiveservices import CognitiveServicesManagementClient
 from azure.mgmt.cognitiveservices.models import Deployment
+
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse, StreamingResponse
-from openai import AzureOpenAI
-from openai._streaming import Stream
+from helpers import list_openai
+from openai import AsyncAzureOpenAI
+from openai._streaming import AsyncStream
 from openai._types import NOT_GIVEN
 from openai.types import CreateEmbeddingResponse, ImagesResponse
 from openai.types.chat import ChatCompletion, ChatCompletionChunk
-
-from helpers import list_openai
 
 debug = os.environ.get("GPTSCRIPT_DEBUG", "false") == "true"
 
@@ -45,7 +45,7 @@ try:
         DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default"
     )
 
-    azure_client = AzureOpenAI(
+    azure_client = AsyncAzureOpenAI(
         api_version=api_version,
         azure_endpoint=endpoint,
         azure_ad_token_provider=token_provider,
@@ -143,7 +143,7 @@ async def chat_completions(request: Request):
     messages.insert(0, {"content": system, "role": "system"})
 
     try:
-        res: Stream[ChatCompletionChunk] | ChatCompletion = azure_client.chat.completions.create(
+        res: AsyncStream[ChatCompletionChunk] | ChatCompletion = await azure_client.chat.completions.create(
             model=data["model"],
             messages=messages,
             tools=tools,
@@ -171,7 +171,7 @@ async def embeddings(request: Request):
     data = json.loads(await request.body())
 
     try:
-        res: CreateEmbeddingResponse = azure_client.embeddings.create(**data)
+        res: CreateEmbeddingResponse = await azure_client.embeddings.create(**data)
 
         return JSONResponse(content=jsonable_encoder(res))
     except Exception as e:
@@ -190,7 +190,7 @@ async def image_generation(request: Request):
     data = json.loads(await request.body())
 
     try:
-        res: ImagesResponse = azure_client.images.generate(**data)
+        res: ImagesResponse = await azure_client.images.generate(**data)
 
         return JSONResponse(content=jsonable_encoder(res))
     except Exception as e:
@@ -204,8 +204,8 @@ async def image_generation(request: Request):
         raise HTTPException(status_code=error_code, detail=f"Error occurred: {error_message}")
 
 
-async def convert_stream(stream: Stream[ChatCompletionChunk]) -> AsyncIterable[str]:
-    for chunk in stream:
+async def convert_stream(stream: AsyncStream[ChatCompletionChunk]) -> AsyncIterable[str]:
+    async for chunk in stream:
         log("CHUNK: ", chunk.model_dump_json())
         yield "data: " + str(chunk.model_dump_json()) + "\n\n"
 

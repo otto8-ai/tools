@@ -6,7 +6,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse, StreamingResponse
 from openai import AsyncOpenAI
-from openai._streaming import Stream
+from openai._streaming import AsyncStream
 from openai.types import CreateEmbeddingResponse, ImagesResponse
 from openai.types.chat import ChatCompletion, ChatCompletionChunk
 
@@ -77,7 +77,7 @@ async def chat_completions(request: Request):
     messages.insert(0, {"content": system, "role": "system"})
 
     try:
-        res: Stream[ChatCompletionChunk] | ChatCompletion = await client.chat.completions.create(**data)
+        res: AsyncStream[ChatCompletionChunk] | ChatCompletion = await client.chat.completions.create(**data)
         if not stream:
             return JSONResponse(content=jsonable_encoder(res))
 
@@ -131,8 +131,8 @@ async def image_generation(request: Request):
         raise HTTPException(status_code=error_code, detail=f"Error occurred: {error_message}")
 
 
-async def convert_stream(stream: Stream[ChatCompletionChunk]) -> AsyncIterable[str]:
-    for chunk in stream:
+async def convert_stream(stream: AsyncStream[ChatCompletionChunk]) -> AsyncIterable[str]:
+    async for chunk in stream:
         log("CHUNK: ", chunk.model_dump_json())
         yield "data: " + str(chunk.model_dump_json()) + "\n\n"
 
