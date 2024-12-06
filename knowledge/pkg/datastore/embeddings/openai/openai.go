@@ -16,14 +16,15 @@ import (
 	"time"
 
 	"dario.cat/mergo"
+	"github.com/gptscript-ai/knowledge/pkg/datastore/defaults"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/load"
 	"github.com/gptscript-ai/knowledge/pkg/env"
 	"github.com/gptscript-ai/knowledge/pkg/log"
 	cg "github.com/philippgille/chromem-go"
 )
 
-var OpenAIEmbeddingAPITimeout = time.Duration(env.GetIntFromEnvOrDefault("KNOW_OPENAI_EMBEDDING_API_TIMEOUT_SECONDS", 1200)) * time.Second
-var OpenAIEmbeddingAPIRequestTimeout = time.Duration(env.GetIntFromEnvOrDefault("KNOW_OPENAI_EMBEDDING_API_REQUEST_TIMEOUT_SECONDS", 240)) * time.Second
+var OpenAIEmbeddingAPITimeout = time.Duration(env.GetIntFromEnvOrDefault("KNOW_OPENAI_EMBEDDING_API_TIMEOUT_SECONDS", defaults.ModelAPIRequestTimeoutSeconds)) * time.Second
+var OpenAIEmbeddingAPIRequestTimeout = time.Duration(env.GetIntFromEnvOrDefault("KNOW_OPENAI_EMBEDDING_API_REQUEST_TIMEOUT_SECONDS", 120)) * time.Second
 
 const EmbeddingModelProviderOpenAIName string = "openai"
 
