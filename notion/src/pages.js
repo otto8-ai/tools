@@ -51,12 +51,9 @@ function sliceAndMergeContents(contents, maxLength = 2000) {
 export async function createPage(client, name, contents, parentPageId) {
     const contentChunks = sliceAndMergeContents(contents);
 
-    const children = contentChunks.map(chunk => ({
-        object: "block",
-        type: "paragraph",
-        paragraph: {
-            rich_text: [{ type: "text", text: { content: chunk } }],
-        },
+    const richTexts = contentChunks.map(chunk => ({
+        type: "text",
+        text: { content: chunk.trim() }
     }));
 
     // Create the page with sliced chunks as children
@@ -67,7 +64,15 @@ export async function createPage(client, name, contents, parentPageId) {
         properties: {
             title: [{ type: "text", text: { content: name } }],
         },
-        children: children,
+        children: [
+            {
+                object: "block",
+                type: "paragraph",
+                paragraph: {
+                    rich_text: richTexts,
+                },
+            },
+        ],
     });
 
     console.log(`Created page with ID: ${page.id}`);
