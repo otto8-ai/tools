@@ -1,7 +1,7 @@
 Name: Website Markdown Content Cleaner
 Description: Removes unwanted tags from website HTML, converts it to Markdown and then has an LLM clean extra header, footer, and navigation content from the markdown version
-Params: Input: Input File (HTML)
-Params: Output: Output File (Markdown)
+Params: Input: input file name (HTML)
+Params: Output: output file name (Markdown)
 Credential: github.com/gptscript-ai/credentials/model-provider
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool
