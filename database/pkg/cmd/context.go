@@ -12,14 +12,14 @@ import (
 func Context(ctx context.Context, db *sql.DB) (string, error) {
 	// Build the markdown output
 	var out strings.Builder
-	out.WriteString(`# START INSTRUCTIONS: SQLite Tools
+	out.WriteString(`# START INSTRUCTIONS: Database Tools
 
 You have access to tools for interacting with a SQLite database.
 The Exec tool only accepts valid SQLite3 statements.
 The Query tool only accepts valid SQLite3 queries.
 Display all results from these tools and their schemas in markdown format.
 
-# END INSTRUCTIONS: SQLite Tools
+# END INSTRUCTIONS: Database Tools
 `)
 
 	// Add the schemas section
