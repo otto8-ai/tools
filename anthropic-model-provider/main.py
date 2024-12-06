@@ -35,8 +35,7 @@ async def list_models() -> JSONResponse:
     try:
         return JSONResponse(content={"object":"list","data": [set_model_usage(m) for m in json.loads((await claude3_provider_common.list_models(client)).body)["data"]]})
     except Exception as e:
-        print(e)
-        return JSONResponse(content={"object":"list","data": []})
+        return JSONResponse(content={"error": e}, status_code=500)
 
 
 def set_model_usage(model: dict) -> dict:
