@@ -16,15 +16,14 @@ import (
 	"time"
 
 	"dario.cat/mergo"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/defaults"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/load"
 	"github.com/gptscript-ai/knowledge/pkg/env"
 	"github.com/gptscript-ai/knowledge/pkg/log"
 	cg "github.com/philippgille/chromem-go"
 )
 
-var OpenAIEmbeddingAPITimeout = time.Duration(env.GetIntFromEnvOrDefault("KNOW_OPENAI_EMBEDDING_API_TIMEOUT_SECONDS", defaults.ModelAPIRequestTimeoutSeconds)) * time.Second
-var OpenAIEmbeddingAPIRequestTimeout = time.Duration(env.GetIntFromEnvOrDefault("KNOW_OPENAI_EMBEDDING_API_REQUEST_TIMEOUT_SECONDS", 120)) * time.Second
+var OpenAIEmbeddingAPITimeout = time.Duration(env.GetIntFromEnvOrDefault("KNOW_OPENAI_EMBEDDING_API_TIMEOUT_SECONDS", 1200)) * time.Second
+var OpenAIEmbeddingAPIRequestTimeout = time.Duration(env.GetIntFromEnvOrDefault("KNOW_OPENAI_EMBEDDING_API_REQUEST_TIMEOUT_SECONDS", 240)) * time.Second
 
 const EmbeddingModelProviderOpenAIName string = "openai"
 
@@ -32,7 +31,7 @@ type EmbeddingModelProviderOpenAI struct {
 	BaseURL           string            `usage:"OpenAI API base" default:"https://api.openai.com/v1" env:"OPENAI_BASE_URL" koanf:"baseURL"`
 	APIKey            string            `usage:"OpenAI API key (not required if used with clicky-chats)" default:"sk-foo" env:"OPENAI_API_KEY" koanf:"apiKey" mapstructure:"apiKey" export:"false"`
 	Model             string            `usage:"OpenAI model" default:"gpt-4" env:"OPENAI_MODEL" koanf:"openai-model"`
-	EmbeddingModel    string            `usage:"OpenAI Embedding model" default:"text-embedding-3-small" env:"OPENAI_EMBEDDING_MODEL" koanf:"embeddingModel" export:"required"`
+	EmbeddingModel    string            `usage:"OpenAI Embedding model" default:"text-embedding-3-large" env:"OPENAI_EMBEDDING_MODEL" koanf:"embeddingModel" export:"required"`
 	EmbeddingEndpoint string            `usage:"OpenAI Embedding endpoint" default:"/embeddings" env:"OPENAI_EMBEDDING_ENDPOINT" koanf:"embeddingEndpoint"`
 	APIVersion        string            `usage:"OpenAI API version (for Azure)" default:"2024-02-01" env:"OPENAI_API_VERSION" koanf:"apiVersion"`
 	APIType           string            `usage:"OpenAI API type (OPEN_AI, AZURE, AZURE_AD, ...)" default:"OPEN_AI" env:"OPENAI_API_TYPE" koanf:"apiType"`
@@ -43,11 +42,18 @@ type OpenAIConfig struct {
 	BaseURL           string            `usage:"OpenAI API base" default:"https://api.openai.com/v1" env:"OPENAI_BASE_URL" koanf:"baseURL"`
 	APIKey            string            `usage:"OpenAI API key (not required if used with clicky-chats)" default:"sk-foo" env:"OPENAI_API_KEY" koanf:"apiKey" mapstructure:"apiKey" export:"false"`
 	Model             string            `usage:"OpenAI model" default:"gpt-4" env:"OPENAI_MODEL" koanf:"openai-model"`
-	EmbeddingModel    string            `usage:"OpenAI Embedding model" default:"text-embedding-3-small" env:"OPENAI_EMBEDDING_MODEL" koanf:"embeddingModel" export:"required"`
+	EmbeddingModel    string            `usage:"OpenAI Embedding model" default:"text-embedding-3-large" env:"OPENAI_EMBEDDING_MODEL" koanf:"embeddingModel" export:"required"`
 	EmbeddingEndpoint string            `usage:"OpenAI Embedding endpoint" default:"/embeddings" env:"OPENAI_EMBEDDING_ENDPOINT" koanf:"embeddingEndpoint"`
 	APIVersion        string            `usage:"OpenAI API version (for Azure)" default:"2024-02-01" env:"OPENAI_API_VERSION" koanf:"apiVersion"`
 	APIType           string            `usage:"OpenAI API type (OPEN_AI, AZURE, AZURE_AD, ...)" default:"OPEN_AI" env:"OPENAI_API_TYPE" koanf:"apiType"`
 	AzureOpenAIConfig AzureOpenAIConfig `koanf:"azure"`
+}
+
+type OpenAIEmbeddingRequest struct {
+	Input          string `json:"input"`
+	Model          string `json:"model"`
+	EncodingFormat string `json:"encoding_format,omitempty"`
+	Dimensions     *int   `json:"dimensions,omitempty"`
 }
 
 func (o OpenAIConfig) Name() string {
@@ -95,7 +101,7 @@ func (p *EmbeddingModelProviderOpenAI) fillDefaults() error {
 		BaseURL:           "https://api.openai.com/v1",
 		APIKey:            "sk-foo",
 		Model:             "gpt-4",
-		EmbeddingModel:    "text-embedding-3-small",
+		EmbeddingModel:    "text-embedding-3-large",
 		EmbeddingEndpoint: "/embeddings",
 		APIVersion:        "2024-02-01",
 		APIType:           "OPEN_AI",
@@ -188,11 +194,21 @@ func NewEmbeddingFuncOpenAICompat(config *OpenAICompatConfig) cg.EmbeddingFunc {
 	checkNormalized := sync.Once{}
 
 	return func(ctx context.Context, text string) ([]float32, error) {
-		// Prepare the request body.
-		reqBody, err := json.Marshal(map[string]string{
-			"input": text,
-			"model": config.model,
-		})
+		// Create the OpenAI request payload
+		embedReq := OpenAIEmbeddingRequest{
+			Input:          text,
+			Model:          config.model,
+			EncodingFormat: "float",
+		}
+
+		// Only set dimensions for text-embedding-3-large
+		if config.model == "text-embedding-3-large" {
+			dims := 2000
+			embedReq.Dimensions = &dims
+		}
+
+		// Prepare the request body
+		reqBody, err := json.Marshal(embedReq)
 		if err != nil {
 			return nil, fmt.Errorf("couldn't marshal request body: %w", err)
 		}

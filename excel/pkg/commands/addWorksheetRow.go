@@ -16,7 +16,7 @@ func AddWorksheetRow(ctx context.Context, workbookID, worksheetID, contents stri
 		return err
 	}
 
-	if err := graph.AddWorksheetRow(ctx, c, workbookID, worksheetID, strings.Split(contents, ",")); err != nil {
+	if err := graph.AddWorksheetRow(ctx, c, workbookID, worksheetID, strings.Split(contents, "|")); err != nil {
 		return err
 	}
 	fmt.Println("Row added successfully")

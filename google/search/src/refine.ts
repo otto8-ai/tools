@@ -1,5 +1,5 @@
-import { GPTScript, type ToolDef } from '@gptscript-ai/gptscript'
-import { type SearchResults, type SearchResult } from './search.ts'
+import {GPTScript, type ToolDef} from "@gptscript-ai/gptscript"
+import {type SearchResult, type SearchResults} from "./search.ts"
 
 const gptscript = new GPTScript()
 
@@ -34,7 +34,7 @@ async function refineResult (
   const tool: ToolDef = {
     chat: false,
     jsonResponse: true,
-    modelName: 'gpt-4o-mini',
+    modelName: process.env.OTTO8_DEFAULT_LLM_MINI_MODEL ?? 'gpt-4o-mini',
     temperature: 0.0,
     arguments: {
       type: 'object',

@@ -1,13 +1,13 @@
-import express, { type Request, type Response } from 'express'
-import bodyParser from 'body-parser'
-import { type Page } from 'playwright'
-import { browse, filterContent } from './browse.ts'
-import { fill } from './fill.ts'
-import { enter } from './enter.ts'
-import { scrollToBottom } from './scrollToBottom.ts'
-import { randomBytes } from 'node:crypto'
-import { getSessionId, SessionManager } from './session.ts'
-import { screenshot, ScreenshotInfo } from './screenshot.ts'
+import express, {type Request, type Response} from "express"
+import bodyParser from "body-parser"
+import {type Page} from "playwright"
+import {browse, filterContent} from "./browse.ts"
+import {fill} from "./fill.ts"
+import {enter} from "./enter.ts"
+import {scrollToBottom} from "./scrollToBottom.ts"
+import {randomBytes} from "node:crypto"
+import {getSessionId, SessionManager} from "./session.ts"
+import {screenshot, ScreenshotInfo} from "./screenshot.ts"
 
 async function main (): Promise<void> {
   console.log('Starting browser server')
@@ -29,7 +29,7 @@ async function main (): Promise<void> {
   app.post('/*', async (req: Request, res: Response) => {
     const data = req.body
 
-    const model: string = data.model ?? 'gpt-4o-mini'
+    const model: string = data.model ?? process.env.OTTO8_DEFAULT_LLM_MINI_MODEL ?? 'gpt-4o-mini'
     const website: string = data.website ?? ''
     const userInput: string = data.userInput ?? ''
     const keywords: string[] = (data.keywords ?? '').split(',')
