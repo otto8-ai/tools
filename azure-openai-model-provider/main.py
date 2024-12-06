@@ -6,16 +6,16 @@ from typing import AsyncIterable
 from azure.identity import CredentialUnavailableError, DefaultAzureCredential, get_bearer_token_provider
 from azure.mgmt.cognitiveservices import CognitiveServicesManagementClient
 from azure.mgmt.cognitiveservices.models import Deployment
-
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse, StreamingResponse
-from helpers import list_openai
-from openai import AsyncAzureOpenAI
+from openai import AsyncAzureOpenAI, APIStatusError
 from openai._streaming import AsyncStream
 from openai._types import NOT_GIVEN
 from openai.types import CreateEmbeddingResponse, ImagesResponse
 from openai.types.chat import ChatCompletion, ChatCompletionChunk
+
+from helpers import list_openai
 
 debug = os.environ.get("GPTSCRIPT_DEBUG", "false") == "true"
 
@@ -100,9 +100,10 @@ async def list_models() -> JSONResponse:
             list_openai(cognitive_services_client,
                         resource_group)
         ]})
+    except APIStatusError as e:
+        return JSONResponse(content={"error": e.message}, status_code=e.status_code)
     except Exception as e:
-        print(e)
-        return JSONResponse(content={"object": "list", "data": []})
+        return JSONResponse(content={"error": e}, status_code=500)
 
 
 def transform_model(d: Deployment) -> dict:

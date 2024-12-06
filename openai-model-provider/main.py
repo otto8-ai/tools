@@ -5,7 +5,7 @@ from typing import AsyncIterable
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse, StreamingResponse
-from openai import AsyncOpenAI
+from openai import AsyncOpenAI, APIStatusError
 from openai._streaming import AsyncStream
 from openai.types import CreateEmbeddingResponse, ImagesResponse
 from openai.types.chat import ChatCompletion, ChatCompletionChunk
@@ -53,8 +53,10 @@ async def list_models() -> JSONResponse:
     try:
         models = await client.models.list()
         return JSONResponse(content={"object":"list","data": [set_model_usage(m) for m in models.to_dict()["data"]]})
+    except APIStatusError as e:
+        return JSONResponse(content={"error": e.message}, status_code=e.status_code)
     except Exception as e:
-        print(e)
+        return JSONResponse(content={"error": e}, status_code=500)
 
 def set_model_usage(model: dict) -> dict:
     if (model["id"].startswith("gpt-") or model["id"].startswith("ft:gpt-") or model["id"].startswith("o1-") or model["id"].startswith("ft:o1-")) and "-realtime-" not in model["id"]:
