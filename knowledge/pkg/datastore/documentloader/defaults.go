@@ -1,10 +1,6 @@
 package documentloader
 
 import (
-	"archive/tar"
-	"archive/zip"
-	"bytes"
-	"compress/bzip2"
 	"context"
 	"encoding/csv"
 	"errors"
@@ -15,7 +11,6 @@ import (
 
 	"code.sajari.com/docconv/v2"
 	pdfdefaults "github.com/gptscript-ai/knowledge/pkg/datastore/documentloader/pdf/defaults"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/filetypes"
 	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
 	golcdocloaders "github.com/hupe1980/golc/documentloader"
 	"github.com/lu4p/cat/rtftxt"
@@ -125,102 +120,6 @@ func DefaultDocLoaderFunc(filetype string, opts DefaultDocLoaderFuncOpts) Loader
 
 			return docs, nil
 		}
-	case "application/zip", ".zip":
-		var result []vs.Document
-		return func(ctx context.Context, reader io.Reader) ([]vs.Document, error) {
-			data, err := io.ReadAll(reader)
-			if err != nil {
-				return nil, err
-			}
-			zipReader, err := zip.NewReader(bytes.NewReader(data), int64(len(data)))
-			if err != nil {
-				return nil, err
-			}
-			for _, f := range zipReader.File {
-				if f.FileInfo().IsDir() {
-					continue
-				}
-				rc, err := f.Open()
-				if err != nil {
-					return nil, err
-				}
-				content, err := io.ReadAll(rc)
-				if err != nil {
-					return nil, err
-				}
-				ft, err := filetypes.GetFiletype(f.Name, content)
-				if err != nil {
-					return nil, err
-				}
-				dlf := DefaultDocLoaderFunc(ft, opts)
-				if dlf == nil {
-					slog.Debug("Unsupported file type in ZIP", "type", ft, "filename", f.Name)
-					if opts.Archive.ErrOnUnsupportedFiletype {
-						return nil, fmt.Errorf("%w (file %q) in ZIP", &UnsupportedFileTypeError{ft}, f.Name)
-					}
-					continue
-				}
-				docs, err := dlf(ctx, bytes.NewReader(content))
-				if err != nil {
-					if opts.Archive.ErrOnFailedFile {
-						return nil, fmt.Errorf("failed to load file %q from ZIP: %w", f.Name, err)
-					}
-					slog.Warn("Failed to load file from ZIP", "file", f.Name, "error", err)
-					continue
-				}
-				result = append(result, docs...)
-			}
-			return result, nil
-		}
-
-	case "application/x-bzip2", ".bz2":
-		return func(ctx context.Context, reader io.Reader) ([]vs.Document, error) {
-			tarReader := tar.NewReader(bzip2.NewReader(reader))
-			var result []vs.Document
-			for {
-				header, err := tarReader.Next()
-				if err == io.EOF {
-					break
-				}
-				if err != nil {
-					return nil, err
-				}
-
-				// ignore any apple metadata files https://en.wikipedia.org/wiki/AppleSingle_and_AppleDouble_formats
-				if strings.HasPrefix(header.Name, "._") {
-					continue
-				}
-
-				var buf bytes.Buffer
-				if _, err := io.Copy(&buf, tarReader); err != nil {
-					return nil, err
-				}
-				content := buf.Bytes()
-				ft, err := filetypes.GetFiletype(header.Name, content)
-				if err != nil {
-					return nil, err
-				}
-				dlf := DefaultDocLoaderFunc(ft, opts)
-				if dlf == nil {
-					slog.Debug("Unsupported file type in BZ2", "type", ft, "filename", header.Name)
-					if opts.Archive.ErrOnUnsupportedFiletype {
-						return nil, fmt.Errorf("unsupported file type %q (file %q) in BZ2", header.Name, ft)
-					}
-					continue
-				}
-				docs, err := dlf(ctx, bytes.NewReader(content))
-				if err != nil {
-					if opts.Archive.ErrOnFailedFile {
-						return nil, err
-					}
-					slog.Warn("Failed to load file from BZ2", "file", header.Name, "error", err)
-					continue
-				}
-				result = append(result, docs...)
-			}
-			return result, nil
-		}
-
 	default:
 		slog.Debug("Unsupported file type", "type", filetype)
 		return nil
