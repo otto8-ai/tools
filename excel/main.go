@@ -18,6 +18,7 @@ func main() {
 	command := os.Args[1]
 
 	var err error
+switchBlock:
 	switch command {
 	case "listWorkbooks":
 		err = commands.ListWorkbooks(context.Background())
@@ -41,9 +42,10 @@ func main() {
 		serialStrings := strings.Split(os.Getenv("SERIALS"), "|")
 		serials := make([]int, len(serialStrings))
 		for i, v := range serialStrings {
-			val, err := strconv.Atoi(strings.TrimSpace(v))
-			if err != nil {
-				break
+			val, innerErr := strconv.Atoi(strings.TrimSpace(v))
+			if innerErr != nil {
+				err = innerErr
+				break switchBlock
 			}
 			serials[i] = val
 		}
