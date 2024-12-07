@@ -1,60 +1,60 @@
 import {getPropertyString} from "./database.js"
 
 function sliceAndMergeContents(contents, maxLength = 2000) {
-    let chunks = [];
-    let tempChunks = contents.split('\n');
-    let currentChunk = "";
+    let chunks = []
+    let tempChunks = contents.split('\n')
+    let currentChunk = ""
 
     for (let chunk of tempChunks) {
         // If adding the current chunk exceeds the limit, push the accumulated chunk
         if ((currentChunk + chunk + '\n').length > maxLength) {
-            chunks.push(currentChunk.trim());
-            currentChunk = chunk + '\n';
+            chunks.push(currentChunk.trim())
+            currentChunk = chunk + '\n'
         } else {
-            currentChunk += chunk + '\n';
+            currentChunk += chunk + '\n'
         }
     }
 
     // Push the remaining chunk
     if (currentChunk.trim().length > 0) {
-        chunks.push(currentChunk.trim());
+        chunks.push(currentChunk.trim())
     }
 
     // Further split any chunk that still exceeds maxLength using `.`
-    let finalChunks = [];
+    let finalChunks = []
     for (let chunk of chunks) {
         if (chunk.length > maxLength) {
-            let subChunks = chunk.split('.');
-            let mergedChunk = "";
+            let subChunks = chunk.split('.')
+            let mergedChunk = ""
 
             for (let subChunk of subChunks) {
                 if ((mergedChunk + subChunk + '.').length > maxLength) {
-                    finalChunks.push(mergedChunk.trim());
-                    mergedChunk = subChunk + '.';
+                    finalChunks.push(mergedChunk.trim())
+                    mergedChunk = subChunk + '.'
                 } else {
-                    mergedChunk += subChunk + '.';
+                    mergedChunk += subChunk + '.'
                 }
             }
 
             // Push the remaining part
             if (mergedChunk.trim().length > 0) {
-                finalChunks.push(mergedChunk.trim());
+                finalChunks.push(mergedChunk.trim())
             }
         } else {
-            finalChunks.push(chunk);
+            finalChunks.push(chunk)
         }
     }
 
-    return finalChunks;
+    return finalChunks
 }
 
 export async function createPage(client, name, contents, parentPageId) {
-    const contentChunks = sliceAndMergeContents(contents);
+    const contentChunks = sliceAndMergeContents(contents)
 
     const richTexts = contentChunks.map(chunk => ({
         type: "text",
         text: { content: chunk.trim() }
-    }));
+    }))
 
     // Create the page with sliced chunks as children
     const page = await client.pages.create({
@@ -73,9 +73,9 @@ export async function createPage(client, name, contents, parentPageId) {
                 },
             },
         ],
-    });
+    })
 
-    console.log(`Created page with ID: ${page.id}`);
+    console.log(`Created page with ID: ${page.id}`)
 }
 
 
