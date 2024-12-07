@@ -1,21 +1,131 @@
 import {getPropertyString} from "./database.js"
 
+function sliceAndMergeContents(contents, maxLength = 2000) {
+    let chunks = []
+    let tempChunks = contents.split('\n')
+    let currentChunk = ""
+
+    for (let chunk of tempChunks) {
+        // If adding the current chunk exceeds the limit, push the accumulated chunk
+        if ((currentChunk + chunk + '\n').length > maxLength) {
+            chunks.push(currentChunk.trim())
+            currentChunk = chunk + '\n'
+        } else {
+            currentChunk += chunk + '\n'
+        }
+    }
+
+    // Push the remaining chunk
+    if (currentChunk.trim().length > 0) {
+        chunks.push(currentChunk.trim())
+    }
+
+    // Further split any chunk that still exceeds maxLength using `.`
+    let finalChunks = []
+    for (let chunk of chunks) {
+        if (chunk.length > maxLength) {
+            let subChunks = chunk.split('.')
+            let mergedChunk = ""
+
+            for (let subChunk of subChunks) {
+                if ((mergedChunk + subChunk + '.').length > maxLength) {
+                    finalChunks.push(mergedChunk.trim())
+                    mergedChunk = subChunk + '.'
+                } else {
+                    mergedChunk += subChunk + '.'
+                }
+            }
+
+            // Push the remaining part
+            if (mergedChunk.trim().length > 0) {
+                finalChunks.push(mergedChunk.trim())
+            }
+        } else {
+            finalChunks.push(chunk)
+        }
+    }
+
+    return finalChunks
+}
+
 export async function createPage(client, name, contents, parentPageId) {
+    const contentChunks = sliceAndMergeContents(contents)
+
+    const richTexts = contentChunks.map(chunk => ({
+        type: "text",
+        text: { content: chunk.trim() }
+    }))
+
+    // Create the page with sliced chunks as children
     const page = await client.pages.create({
         parent: {
             page_id: parentPageId,
         },
         properties: {
-            title: [{type: "text", text: {content: name}}],
+            title: [{ type: "text", text: { content: name } }],
         },
-        children: [{
-            paragraph: {
-                rich_text: [{type: "text", text: {content: contents}}],
-            }
-        }]
+        children: [
+            {
+                object: "block",
+                type: "paragraph",
+                paragraph: {
+                    rich_text: richTexts,
+                },
+            },
+        ],
     })
+
     console.log(`Created page with ID: ${page.id}`)
 }
+
+
+export async function appendBlock(client, blockId, contents) {
+    const contentChunks = sliceAndMergeContents(contents)
+
+    const richTexts = contentChunks.map(chunk => ({
+        type: "text",
+        text: { content: chunk.trim() }
+    }))
+
+    // Append blocks to the specified block ID
+    const response = await client.blocks.children.append({
+        block_id: blockId,
+        children: [
+            {
+                object: "block",
+                type: "paragraph",
+                paragraph: {
+                    rich_text: richTexts
+                }
+            }
+        ]
+    })
+
+    return response
+}
+
+export async function updatePage(client, pageId, contents, mode = "append") {
+    if (mode === "overwrite") {
+        // delete all existing blocks
+        const existingBlocks = await client.blocks.children.list({
+            block_id: pageId
+        })
+
+        for (const block of existingBlocks.results) {
+            await client.blocks.delete({
+                block_id: block.id
+            })
+        }
+
+        console.log(`Cleared all blocks in page with ID: ${pageId}`)
+    }
+
+    // Append new content.
+    const response = await appendBlock(client, pageId, contents)
+    console.log(`Updated page ${pageId} with a new block: ${response.results[0].id}`)
+}
+
+
 
 export async function printPageProperties(client, id) {
     const page = await client.pages.retrieve({page_id: id})
