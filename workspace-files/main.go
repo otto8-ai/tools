@@ -23,8 +23,8 @@ var (
 func main() {
 	if len(os.Args) == 1 {
 		fmt.Printf(`
-Subcommands: read, write
-env: FILENAME, CONTENT, GPTSCRIPT_WORKSPACE_DIR
+Subcommands: read, write, copy
+env: FILENAME, CONTENT,  TO_FILENAME, GPTSCRIPT_WORKSPACE_DIR
 Usage: go run main.go <path>\n`)
 		return
 	}
@@ -58,6 +58,12 @@ Usage: go run main.go <path>\n`)
 			return
 		}
 		fmt.Printf("Wrote %d bytes\n", len(content))
+	case "copy":
+		toFilename := gptscript.GetEnv("TO_FILENAME", "")
+		if err := copy(ctx, FileEnv, toFilename); err != nil {
+			fmt.Printf("Failed to copy %s to %s: %v\n", FileEnv, toFilename, err)
+			return
+		}
 	}
 }
 
@@ -179,4 +185,18 @@ func write(ctx context.Context, filename, content string) error {
 	}
 
 	return client.WriteFileInWorkspace(ctx, path.Join(FilesDir, filename), []byte(content))
+}
+
+func copy(ctx context.Context, filename, toFilename string) error {
+	client, err := gptscript.NewGPTScript()
+	if err != nil {
+		return err
+	}
+
+	data, err := client.ReadFileInWorkspace(ctx, path.Join(FilesDir, filename))
+	if err != nil {
+		return err
+	}
+
+	return client.WriteFileInWorkspace(ctx, path.Join(FilesDir, toFilename), data)
 }
