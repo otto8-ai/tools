@@ -1,5 +1,5 @@
 import {APIResponseError, Client} from "@notionhq/client"
-import {createPage, printPageProperties, recursivePrintChildBlocks} from "./src/pages.js"
+import {createPage, updatePage, printPageProperties, recursivePrintChildBlocks} from "./src/pages.js"
 import {addDatabaseRow, describeProperty, printDatabaseRow, updateDatabaseRow} from "./src/database.js";
 import {search} from "./src/search.js";
 import {listUsers} from "./src/users.js";
@@ -54,6 +54,9 @@ async function main() {
                 break
             case "createPage":
                 await createPage(notion, process.env.NAME, process.env.CONTENTS, process.env.PARENTPAGEID)
+                break
+            case "updatePage":
+                await updatePage(notion, process.env.PAGEID, process.env.CONTENTS, process.env.UPDATEMODE)
                 break
             default:
                 console.log(`Unknown command: ${command}`)

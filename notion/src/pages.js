@@ -79,6 +79,53 @@ export async function createPage(client, name, contents, parentPageId) {
 }
 
 
+export async function appendBlock(client, blockId, contents) {
+    const contentChunks = sliceAndMergeContents(contents)
+
+    const richTexts = contentChunks.map(chunk => ({
+        type: "text",
+        text: { content: chunk.trim() }
+    }))
+
+    // Append blocks to the specified block ID
+    const response = await client.blocks.children.append({
+        block_id: blockId,
+        children: [
+            {
+                object: "block",
+                type: "paragraph",
+                paragraph: {
+                    rich_text: richTexts
+                }
+            }
+        ]
+    })
+
+    return response
+}
+
+export async function updatePage(client, pageId, contents, mode = "append") {
+    if (mode === "overwrite") {
+        // delete all existing blocks
+        const existingBlocks = await client.blocks.children.list({
+            block_id: pageId
+        })
+
+        for (const block of existingBlocks.results) {
+            await client.blocks.delete({
+                block_id: block.id
+            })
+        }
+
+        console.log(`Cleared all blocks in page with ID: ${pageId}`)
+    }
+
+    // Append new content.
+    const response = await appendBlock(client, pageId, contents)
+    console.log(`Updated page ${pageId} with a new block: ${response.results[0].id}`)
+}
+
+
 export async function printPageProperties(client, id) {
     const page = await client.pages.retrieve({page_id: id})
     console.log("Page Properties:")
