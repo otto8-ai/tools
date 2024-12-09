@@ -99,7 +99,7 @@ def get_api_key(request: Request) -> str:
 
 if __name__ == "__main__":
     try:
-        config = uvicorn.Config("main:app", host="127.0.0.1", port=int(os.environ.get("PORT", "8000")),
+        config = uvicorn.Config("main:app", host="127.0.0.1", port=int(os.environ.get("PORT", "8000")), workers=4,
                                 log_level="debug" if debug else "critical", access_log=debug)
         server = uvicorn.Server(config)
 

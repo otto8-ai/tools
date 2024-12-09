@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"os"
 
-	"sqlite/pkg/cmd"
+	"otto8-ai/database/pkg/cmd"
 
 	"github.com/gptscript-ai/go-gptscript"
 	_ "github.com/ncruces/go-sqlite3/driver"

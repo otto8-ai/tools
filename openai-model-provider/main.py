@@ -5,8 +5,8 @@ from typing import AsyncIterable
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse, StreamingResponse
-from openai import OpenAI
-from openai._streaming import Stream
+from openai import AsyncOpenAI, APIStatusError
+from openai._streaming import AsyncStream
 from openai.types import CreateEmbeddingResponse, ImagesResponse
 from openai.types.chat import ChatCompletion, ChatCompletionChunk
 
@@ -14,7 +14,7 @@ api_key = os.environ.get("OTTO8_OPENAI_MODEL_PROVIDER_API_KEY", "")
 debug = os.environ.get("GPTSCRIPT_DEBUG", "false") == "true"
 uri = "http://127.0.0.1:" + os.environ.get("PORT", "8000")
 
-client = OpenAI(api_key=api_key)
+client = AsyncOpenAI(api_key=api_key)
 
 
 def log(*args):
@@ -51,17 +51,19 @@ async def get_root():
 @app.get("/v1/models")
 async def list_models() -> JSONResponse:
     try:
-        models = client.models.list()
+        models = await client.models.list()
         return JSONResponse(content={"object":"list","data": [set_model_usage(m) for m in models.to_dict()["data"]]})
+    except APIStatusError as e:
+        return JSONResponse(content={"error": e.message}, status_code=e.status_code)
     except Exception as e:
-        print(e)
+        return JSONResponse(content={"error": e}, status_code=500)
 
 def set_model_usage(model: dict) -> dict:
     if (model["id"].startswith("gpt-") or model["id"].startswith("ft:gpt-") or model["id"].startswith("o1-") or model["id"].startswith("ft:o1-")) and "-realtime-" not in model["id"]:
         model["metadata"] = {"usage":"llm"}
     elif model["id"].startswith("text-embedding") or model["id"].startswith("ft:text-embedding"):
         model["metadata"] = {"usage":"text-embedding"}
-    elif model["id"].startswith("dalle-") or model["id"].startswith("ft:dalle-"):
+    elif model["id"].startswith("dall-e") or model["id"].startswith("ft:dall-e"):
         model["metadata"] = {"usage":"image-generation"}
     return model
 
@@ -77,7 +79,7 @@ async def chat_completions(request: Request):
     messages.insert(0, {"content": system, "role": "system"})
 
     try:
-        res: Stream[ChatCompletionChunk] | ChatCompletion = client.chat.completions.create(**data)
+        res: AsyncStream[ChatCompletionChunk] | ChatCompletion = await client.chat.completions.create(**data)
         if not stream:
             return JSONResponse(content=jsonable_encoder(res))
 
@@ -98,7 +100,7 @@ async def embeddings(request: Request):
     data = json.loads(await request.body())
 
     try:
-        res: CreateEmbeddingResponse = client.embeddings.create(**data)
+        res: CreateEmbeddingResponse = await client.embeddings.create(**data)
 
         return JSONResponse(content=jsonable_encoder(res))
     except Exception as e:
@@ -117,7 +119,7 @@ async def image_generation(request: Request):
     data = json.loads(await request.body())
 
     try:
-        res: ImagesResponse = client.images.generate(**data)
+        res: ImagesResponse = await client.images.generate(**data)
 
         return JSONResponse(content=jsonable_encoder(res))
     except Exception as e:
@@ -131,8 +133,8 @@ async def image_generation(request: Request):
         raise HTTPException(status_code=error_code, detail=f"Error occurred: {error_message}")
 
 
-async def convert_stream(stream: Stream[ChatCompletionChunk]) -> AsyncIterable[str]:
-    for chunk in stream:
+async def convert_stream(stream: AsyncStream[ChatCompletionChunk]) -> AsyncIterable[str]:
+    async for chunk in stream:
         log("CHUNK: ", chunk.model_dump_json())
         yield "data: " + str(chunk.model_dump_json()) + "\n\n"
 
@@ -142,7 +144,7 @@ if __name__ == "__main__":
     import asyncio
 
     try:
-        uvicorn.run("main:app", host="127.0.0.1", port=int(os.environ.get("PORT", "8000")),
+        uvicorn.run("main:app", host="127.0.0.1", port=int(os.environ.get("PORT", "8000")), workers=4,
                     log_level="debug" if debug else "critical", access_log=debug)
     except (KeyboardInterrupt, asyncio.CancelledError):
         pass

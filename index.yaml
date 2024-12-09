@@ -1,6 +1,6 @@
 tools:
-  sqlite:
-    reference: ./sqlite
+  database:
+    reference: ./database
     all: true
   excel:
     reference: ./excel

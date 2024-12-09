@@ -126,7 +126,6 @@ export async function updatePage(client, pageId, contents, mode = "append") {
 }
 
 
-
 export async function printPageProperties(client, id) {
     const page = await client.pages.retrieve({page_id: id})
     console.log("Page Properties:")
