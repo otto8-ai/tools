@@ -4,7 +4,7 @@ Metadata: envVars: OTTO8_OPENAI_MODEL_PROVIDER_API_KEY
 Model Provider: true
 Credential: ../model-provider-credential as openai-model-provider
 
-#!sys.daemon /usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py
+#!sys.daemon (path=/healthz) ${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool
 
 ---
 !metadata:*:icon
