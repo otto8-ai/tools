@@ -1,0 +1,13 @@
+---
+Name: Jira
+Description: Tools for interacting with Jira
+Metadata: bundle: true
+Share Tools: 
+
+---
+!metadata:*:category
+Jira
+
+---
+!metadata:*:icon
+https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/jira.svg

@@ -1,0 +1,12 @@
+{
+  "name": "jira",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "author": "otto8-ai",
+  "license": "Apache-2.0",
+  "description": "Otto8 jira tool package.",
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  }
+}
