@@ -10,6 +10,8 @@ import (
 	"image/png"
 	"io"
 	"net/http"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/acorn-io/z"
@@ -61,7 +63,8 @@ type RespMessage struct {
 
 type Choice struct {
 	FinishReason string      `json:"finish_reason"`
-	Message      RespMessage `json:"message"`
+	Message      RespMessage `json:"message"` // e.g. OpenAI provider resp
+	Delta        RespMessage `json:"delta"`   // e.g. Anthropic/Claude provider StreamResponse
 }
 
 type Response struct {
@@ -290,10 +293,34 @@ func (o *OpenAIOCR) SendImageToOpenAI(ctx context.Context, base64Image string) (
 		return "", fmt.Errorf("OpenAI OCR error sending request(s): %w", err)
 	}
 
-	var result Response
-	if err := json.Unmarshal(body, &result); err != nil {
-		return "", err
+	err = os.WriteFile("/tmp/openai_response.json", body, 0777)
+	if err != nil {
+		return "", fmt.Errorf("error writing openai response to file: %w", err)
 	}
 
-	return result.Choices[0].Message.Content, nil
+	body = []byte(strings.TrimSpace(strings.TrimPrefix(string(body), "data: "))) // required e.g. for the anthropic/claude provider
+
+	log.FromCtx(ctx).Debug("OpenAI OCR response", "body", string(body))
+
+	var result Response
+	if err := json.Unmarshal(body, &result); err != nil {
+		return "", fmt.Errorf("error unmarshaling openai response: %w", err)
+	}
+
+	log.FromCtx(ctx).Debug("OpenAI OCR result", "result", result)
+
+	if len(result.Choices) == 0 {
+		return "", fmt.Errorf("no choices in OpenAI OCR response")
+	}
+
+	text := result.Choices[0].Message.Content
+	if text == "" {
+		text = result.Choices[0].Delta.Content
+	}
+
+	if text == "" {
+		return "", fmt.Errorf("no content in OpenAI OCR response")
+	}
+
+	return text, nil
 }
