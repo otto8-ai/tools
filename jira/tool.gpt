@@ -2,7 +2,7 @@
 Name: Jira v3
 Description: Tools for interacting with Jira using Jira v3 API
 Metadata: bundle: true
-Share Tools: 
+Share Tools: Get All Projects, Get Project, Get All Users, Get User, List Issues, Get Issue, Get Issue Types, Get Priority Schemes, Get Available Priorities, Create Issue, Get All Dashboards, Get Dashboard
 
 ---
 Name: Get All Projects
