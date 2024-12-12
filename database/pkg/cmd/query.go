@@ -1,15 +1,23 @@
 package cmd
 
 import (
-	"bytes"
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
-	"strings"
 )
 
-// Query executes a SQL query (e.g., SELECT) and returns the result formatted in Markdown.
+type Output struct {
+	Columns []string         `json:"columns"`
+	Rows    []map[string]any `json:"rows"`
+}
+
+// Query executes a SQL query (e.g., SELECT) and returns the result formatted in JSON
 func Query(ctx context.Context, db *sql.DB, query string) (string, error) {
+	if query == "" {
+		return "", fmt.Errorf("empty query")
+	}
+
 	rows, err := db.QueryContext(ctx, query)
 	if err != nil {
 		return "", fmt.Errorf("error executing query: %v", err)
@@ -22,11 +30,10 @@ func Query(ctx context.Context, db *sql.DB, query string) (string, error) {
 		return "", fmt.Errorf("error retrieving columns: %v", err)
 	}
 
-	var output bytes.Buffer
-
-	// Write the Markdown header row
-	output.WriteString("| " + strings.Join(columns, " | ") + " |\n")
-	output.WriteString("| " + strings.Repeat("--- | ", len(columns)) + "\n")
+	var output = Output{
+		Columns: columns,
+		Rows:    []map[string]any{},
+	}
 
 	// Prepare a slice of interface{} for each row's column values
 	values := make([]interface{}, len(columns))
@@ -43,16 +50,13 @@ func Query(ctx context.Context, db *sql.DB, query string) (string, error) {
 		}
 
 		// Convert values to strings
-		rowData := make([]string, len(columns))
+		rowData := map[string]any{}
 		for i, val := range values {
-			if val == nil {
-				rowData[i] = "NULL"
-			} else {
-				rowData[i] = fmt.Sprintf("%v", val)
-			}
+			rowData[columns[i]] = val
 		}
-		output.WriteString("| " + strings.Join(rowData, " | ") + " |\n")
+		output.Rows = append(output.Rows, rowData)
 	}
 
-	return output.String(), nil
+	content, err := json.Marshal(output)
+	return string(content), err
 }

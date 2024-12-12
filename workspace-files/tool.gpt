@@ -1,7 +1,8 @@
 Name: Workspace Files
 Description: Adds the capability for users to read and write workspace files
 Type: context
-Metadata: category: Utilities
+Metadata: category: Capability
+Metadata: icon: https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/duotone/file-text-duotone.svg
 Context: workspace_list
 Share Tools: workspace_read, workspace_write
 Share Input Filter: input_parse

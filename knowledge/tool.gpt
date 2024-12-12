@@ -1,7 +1,31 @@
 Name: Knowledge
-Description: Retrieve information from files uploaded by the user.
+Description: Obtain search result from the knowledge set
 Credential: github.com/gptscript-ai/credentials/model-provider
-Params: Datasets: The datasets to query
-Params: Query: The query to search for
+Output Filter: ../result-formatter
+Share Context: context
+Params: Query: A search query that will be evaluated against the knowledge set
+Metadata: category: Capability
+Metadata: icon: https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/duotone/brain-duotone.svg
 
-#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool retrieve --flows-file=blueprint:otto --dataset="${DATASETS}" "${QUERY}"
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool retrieve --flows-file=blueprint:otto "${QUERY}"
+
+---
+Name: context
+Type: context
+
+#!/bin/bash
+
+if [ -z "${KNOW_DATASETS}" ]; then
+  exit 0
+else
+  cat <<EOF
+START INSTRUCTIONS: KNOWLEDGE
+
+Use the tool knowledge to query your knowledge set to assist in Retrieval-Augmented Generation (RAG).
+The knowledge set contains data described as:
+
+${KNOW_DATASET_DESCRIPTION}
+
+END INSTRUCTIONS: KNOWLEDGE
+EOF
+fi

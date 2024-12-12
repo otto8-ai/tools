@@ -1,7 +1,6 @@
 tools:
   database:
     reference: ./database
-    all: true
   excel:
     reference: ./excel
     all: true
@@ -45,6 +44,10 @@ tools:
     reference: ./time
   workspace-files:
     reference: ./workspace-files
+  tasks:
+    reference: ./tasks
+  knowledge:
+    reference: ./knowledge
 
 knowledgeDataSources:
   notion-data-source:
@@ -67,6 +70,8 @@ system:
     reference: ./knowledge/delete-file.gpt
   website-cleaner:
     reference: ./website-cleaner
+  workflow:
+    reference: ./workflow
   result-formatter:
     reference: ./result-formatter
   otto8-model-provider:
