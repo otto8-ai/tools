@@ -1,6 +1,9 @@
 tools:
   database:
     reference: ./database
+  jira:
+    reference: ./jira
+    all: true
   excel:
     reference: ./excel
     all: true
