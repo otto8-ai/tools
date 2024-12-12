@@ -1,6 +1,6 @@
 import fetch from 'node-fetch'
 
-export async function getAllDashboard(baseUrl, auth) {
+export async function getAllDashboards(baseUrl, auth) {
     try {
         const response = await fetch(`${baseUrl}/dashboard`, {
             method: 'GET',

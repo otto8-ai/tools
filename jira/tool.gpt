@@ -1,8 +1,103 @@
 ---
-Name: Jira
-Description: Tools for interacting with Jira
+Name: Jira v3
+Description: Tools for interacting with Jira using Jira v3 API
 Metadata: bundle: true
 Share Tools: 
+
+---
+Name: Get All Projects
+Description: Gets all projects in a Jira instance
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js getAllProjects
+
+---
+Name: Get Project
+Description: Gets a project in a Jira instance
+Share Tools: Get All Projects
+Args: projectIdOrKey: the ID or key of the project to get
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js getProject
+
+---
+Name: Get All Users
+Description: Gets all users in a Jira instance
+Args: includeAppUsers: Optional, whether to include app users in the response. Defaults to false. 
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js getAllUsers
+
+---
+Name: Get User
+Description: Gets a user in a Jira instance
+Share Tools: Get All Users
+Args: accountId: the ID of the user to get
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js getUser
+
+---
+Name: List Issues
+Description: Lists all issues in a Jira project or all projects
+Share Tools: Get Project, Get All Projects
+Args: projectIdOrKey: Optional, the ID or key of the project to list the issues in
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js listIssues
+
+---
+Name: Get Issue
+Description: Gets an issue in a Jira project
+Share Tools: List Issues
+Args: issueKey: the key of the issue to get
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js getIssue
+
+---
+Name: Get Issue Types
+Description: Gets the issue types in a Jira project. Each Jira project can have different issue types, so this is useful to get the issue types for a specific project, and can then be used to create an issue.
+Share Tools: Get Project, Get All Projects
+Args: projectIdOrKey: the ID or key of the project to get the issue types in
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js getIssueTypes
+
+---
+Name: Get Priority Schemes
+Description: Gets the priority schemes in a Jira instance.
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js getPrioritySchemes
+
+---
+Name: Get Available Priorities
+Description: Gets the available priorities of a priority scheme. if no schemeId is provided, it will get the default priority scheme.
+Share Tools: Get Priority Schemes
+Args: schemeId: Optional, the ID of the priority scheme to get the available priorities in.
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js getAvailablePriorities
+
+---
+Name: Create Issue
+Description: Creates an issue in a Jira project
+Share Tools: Get Issue Types, Get Available Priorities, Get User, Get Project
+Args: projectId: the ID of the project to create the issue in
+Args: summary: the summary/title of the issue
+Args: description: Optional, the description of the issue.
+Args: issueType: Optional, the type of the issue
+Args: priority: Optional, the priority of the issue
+Args: assigneeId: Optional, the account ID of the assignee of the issue
+Args: reporterId: Optional, the account ID of the reporter of the issue
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js createIssue
+
+---
+Name: Get All Dashboards
+Description: Gets all dashboards in a Jira instance
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js getAllDashboards
+
+---
+Name: Get Dashboard
+Description: Gets a dashboard in a Jira instance
+Share Tools: Get All Dashboards
+Args: dashboardId: the ID of the dashboard to get
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js getDashboard
 
 ---
 !metadata:*:category
