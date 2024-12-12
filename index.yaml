@@ -45,6 +45,9 @@ tools:
     reference: ./time
   workspace-files:
     reference: ./workspace-files
+  jira:
+    reference: ./jira
+    all: true
 
 knowledgeDataSources:
   notion-data-source:
