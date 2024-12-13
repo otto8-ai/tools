@@ -99,75 +99,11 @@ func main() {
 
 	if markdownSize < 100_000 {
 		logErr.Info("Markdown content is less than 100,000 characters -> sending to LLM for further cleanup")
-
-		prompt := "The following content is a scraped webpage converted to markdown. Please remove any content that came from the website header, footer, or navigation. The output should focus on just the main content body of the page. Maintain the markdown format, including any links or images.\n\n" + markdown
-
-		url := fmt.Sprintf("%s/chat/completions", os.Getenv("OPENAI_BASE_URL"))
-
-		headers := map[string]string{
-			"Content-Type":  "application/json",
-			"Authorization": "Bearer " + os.Getenv("OPENAI_API_KEY"),
-		}
-
-		var cancel context.CancelFunc
-		ctx, cancel = context.WithTimeout(ctx, 10*time.Minute)
-		defer cancel()
-
-		model := os.Getenv("OTTO8_DEFAULT_LLM_MINI_MODEL")
-		if model == "" {
-			model = "gpt-4o-mini"
-		}
-		logErr.Infof("Sending request to %s - using model %s", url, model)
-
-		payload := Payload{
-			Model: model,
-			Messages: []Message{
-				{
-					Role: "user",
-					Content: []MessageContent{
-						{Type: "text", Text: prompt},
-					},
-				},
-			},
-		}
-
-		payloadBytes, err := json.Marshal(payload)
+		markdown, err = llmCleaning(ctx, logOut, logErr, markdown)
 		if err != nil {
-			logOut.WithError(fmt.Errorf("failed to marshal payload: %v", err)).Error()
+			logOut.WithError(fmt.Errorf("failed to LLM-clean markdown: %v", err)).Error()
 			os.Exit(0)
 		}
-
-		req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(payloadBytes))
-		if err != nil {
-			logOut.WithError(fmt.Errorf("failed to create request: %v", err)).Error()
-			os.Exit(0)
-		}
-
-		for k, v := range headers {
-			req.Header.Set(k, v)
-		}
-
-		client := &http.Client{
-			Timeout: 2 * time.Minute, // per request timeout - the overall timeout is set on the context
-		}
-
-		body, err := requestWithExponentialBackoff(ctx, client, req, 5, true, logErr)
-		if err != nil {
-			logOut.WithError(fmt.Errorf("error sending request(s): %v", err)).Error()
-			os.Exit(0)
-		}
-
-		var result Response
-		if err := json.Unmarshal(body, &result); err != nil {
-			logOut.WithError(fmt.Errorf("failed to unmarshal response: %v", err)).Error()
-			os.Exit(0)
-		}
-
-		if len(result.Choices) == 0 {
-			logOut.WithError(fmt.Errorf("no choices in response")).Error()
-			os.Exit(0)
-		}
-		markdown = result.Choices[0].Message.Content
 	}
 
 	finalSize := len(markdown)
@@ -180,6 +116,74 @@ func main() {
 
 	logErr.Infof("Output written to %s", output)
 
+}
+
+func llmCleaning(ctx context.Context, logOut, logErr *logrus.Logger, markdown string) (string, error) {
+
+	prompt := "The following content is a scraped webpage converted to markdown. Please remove any content that came from the website header, footer, or navigation. The output should focus on just the main content body of the page. Maintain the markdown format, including any links or images.\n\n" + markdown
+
+	url := fmt.Sprintf("%s/chat/completions", os.Getenv("OPENAI_BASE_URL"))
+
+	headers := map[string]string{
+		"Content-Type":  "application/json",
+		"Authorization": "Bearer " + os.Getenv("OPENAI_API_KEY"),
+	}
+
+	var cancel context.CancelFunc
+	ctx, cancel = context.WithTimeout(ctx, 10*time.Minute)
+	defer cancel()
+
+	model := os.Getenv("OTTO8_DEFAULT_LLM_MINI_MODEL")
+	if model == "" {
+		model = "gpt-4o-mini"
+	}
+	logErr.Infof("Sending request to %s - using model %s", url, model)
+
+	payload := Payload{
+		Model: model,
+		Messages: []Message{
+			{
+				Role: "user",
+				Content: []MessageContent{
+					{Type: "text", Text: prompt},
+				},
+			},
+		},
+	}
+
+	payloadBytes, err := json.Marshal(payload)
+	if err != nil {
+		return markdown, fmt.Errorf("failed to marshal payload: %v", err)
+	}
+
+	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(payloadBytes))
+	if err != nil {
+		return markdown, fmt.Errorf("failed to create request: %v", err)
+	}
+
+	for k, v := range headers {
+		req.Header.Set(k, v)
+	}
+
+	client := &http.Client{
+		Timeout: 2 * time.Minute, // per request timeout - the overall timeout is set on the context
+	}
+
+	body, err := requestWithExponentialBackoff(ctx, client, req, 5, true, logErr)
+	if err != nil {
+		return markdown, fmt.Errorf("error sending request(s): %v", err)
+	}
+
+	var result Response
+	if err := json.Unmarshal(body, &result); err != nil {
+		return markdown, fmt.Errorf("failed to unmarshal response: %v", err)
+	}
+
+	if len(result.Choices) == 0 {
+		return markdown, fmt.Errorf("no choices in response")
+	}
+
+	return result.Choices[0].Message.Content, nil
 }
 
 type MessageContent struct {
