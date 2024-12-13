@@ -115,8 +115,7 @@ func main() {
 
 		model := os.Getenv("OTTO8_DEFAULT_LLM_MINI_MODEL")
 		if model == "" {
-			logOut.WithError(fmt.Errorf("OTTO8_DEFAULT_LLM_MINI_MODEL is empty")).Error()
-			os.Exit(0)
+			model = "gpt-4o-mini"
 		}
 		logErr.Infof("Sending request to %s - using model %s", url, model)
 
@@ -217,18 +216,17 @@ func requestWithExponentialBackoff(ctx context.Context, client *http.Client, req
 	var resp *http.Response
 	var err error
 
-	var failures []string
-
 	// Save the original request body
 	var bodyBytes []byte
 	if req.Body != nil {
 		bodyBytes, err = io.ReadAll(req.Body)
+		_ = req.Body.Close()
 		if err != nil {
-			failures = append(failures, fmt.Sprintf("failed to read request body: %v", err))
-			return nil, fmt.Errorf("failed to read request body: %v; failures: %v", err, strings.Join(failures, "; "))
+			return nil, fmt.Errorf("failed to read request body: %v", err)
 		}
 	}
 
+	var failures []string
 	for i := 0; i < maxRetries; i++ {
 		// Check if context was canceled (timeout) before retrying
 		if ctx.Err() != nil {
