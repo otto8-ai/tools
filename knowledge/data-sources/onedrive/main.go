@@ -184,11 +184,7 @@ func sync(ctx context.Context, logErr *logrus.Logger, input MetadataInput, outpu
 	}
 
 	for id := range output.Files {
-		found := false
-		if _, ok := items[id]; ok {
-			found = true
-		}
-		if !found {
+		if _, ok := items[id]; !ok {
 			if output.Files[id].FilePath != "" {
 				logErr.Infof("Deleting %s", output.Files[id].FilePath)
 				if err := gptscript.DeleteFileInWorkspace(ctx, output.Files[id].FilePath); err != nil {
