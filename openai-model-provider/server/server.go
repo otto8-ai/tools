@@ -22,7 +22,7 @@ func Run(apiKey, port string) error {
 		port:   port,
 	}
 
-	mux.HandleFunc("/healthz", s.healthz)
+	mux.HandleFunc("/{$}", s.healthz)
 	mux.Handle("GET /v1/models", &httputil.ReverseProxy{
 		Director:       s.proxy,
 		ModifyResponse: s.rewriteModelsResponse,
