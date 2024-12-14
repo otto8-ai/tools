@@ -7,12 +7,8 @@ const token = process.env.JIRA_TOKEN
 
 // TODO: once Oauth2.0 is implemented, this URL will be something like https://api.atlassian.com/ex/jira/<cloudId>/rest/api/3
 // where the cloudId can be obtained fron Oauth. see more details here https://developer.atlassian.com/cloud/jira/platform/oauth-2-3lo-apps/#implementing-oauth-2-0--3lo-
-const baseUrl = 'https://acorn-team-yb.atlassian.net/rest/api/3'
+// const baseUrl = 'https://acorn-team-yb.atlassian.net/rest/api/3'
 
-// TODO: replace auth with Oauth2.0 token. it will look like Bearer aBCxYz654123
-const auth = `Basic ${Buffer.from(
-            `yingbei@acorn.io:${token}`
-          ).toString('base64')}`
 
 if (process.argv.length !== 3) {
     console.error('Usage: node index.js <command>')
@@ -22,6 +18,33 @@ if (process.argv.length !== 3) {
 const command = process.argv[2]
 
 async function main() {
+    let cloudId = ""
+    const auth = `Bearer ${token}`
+    try {
+        
+        // const response = await fetch('https://api.atlassian.com/oauth/token/accessible-resources', {
+        //     method: 'GET',
+        //     headers: {
+        //       'Authorization': auth,
+        //       'Accept': 'application/json',
+        //     },
+        //   })
+      
+        // if (!response.ok) {
+        // throw new Error(`Error: ${response.status} ${response.statusText}`)
+        // }
+    
+        // const resources = await response.json()
+        // console.log(resources)
+        
+        cloudId = "ae52b6ab-6f0b-4bce-9574-2ddc949dca56"
+        
+    } catch (error) {
+        console.error("Failed to get Jira auth:", error.message)
+        throw error
+    }
+    const baseUrl = `https://api.atlassian.com/ex/jira/${cloudId}/rest/api/3`
+    
     try {
         switch (command) {
             case "createIssue":
