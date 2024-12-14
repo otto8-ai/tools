@@ -26,7 +26,7 @@ async function main() {
           })
       
         if (!response.ok) {
-        throw new Error(`Error: ${response.status} ${response.statusText}`)
+            throw new Error(`Error: ${response.status} ${response.statusText}`)
         }
     
         const resources = await response.json()
