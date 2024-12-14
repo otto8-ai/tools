@@ -5,11 +5,6 @@ import { getAllUsers, getUser } from './src/users.js'
 
 const token = process.env.JIRA_TOKEN
 
-// TODO: once Oauth2.0 is implemented, this URL will be something like https://api.atlassian.com/ex/jira/<cloudId>/rest/api/3
-// where the cloudId can be obtained fron Oauth. see more details here https://developer.atlassian.com/cloud/jira/platform/oauth-2-3lo-apps/#implementing-oauth-2-0--3lo-
-// const baseUrl = 'https://acorn-team-yb.atlassian.net/rest/api/3'
-
-
 if (process.argv.length !== 3) {
     console.error('Usage: node index.js <command>')
     process.exit(1)
@@ -21,26 +16,24 @@ async function main() {
     let cloudId = ""
     const auth = `Bearer ${token}`
     try {
-        
-        // const response = await fetch('https://api.atlassian.com/oauth/token/accessible-resources', {
-        //     method: 'GET',
-        //     headers: {
-        //       'Authorization': auth,
-        //       'Accept': 'application/json',
-        //     },
-        //   })
+        // get the cloudId corresponding to the access token from the Jira instance
+        const response = await fetch('https://api.atlassian.com/oauth/token/accessible-resources', {
+            method: 'GET',
+            headers: {
+              'Authorization': auth,
+              'Accept': 'application/json',
+            },
+          })
       
-        // if (!response.ok) {
-        // throw new Error(`Error: ${response.status} ${response.statusText}`)
-        // }
+        if (!response.ok) {
+        throw new Error(`Error: ${response.status} ${response.statusText}`)
+        }
     
-        // const resources = await response.json()
-        // console.log(resources)
-        
-        cloudId = "ae52b6ab-6f0b-4bce-9574-2ddc949dca56"
+        const resources = await response.json()
+        cloudId = resources[0].id // TODO: if the user has multiple Jira instances, we need to add a way to select the correct one
         
     } catch (error) {
-        console.error("Failed to get Jira auth:", error.message)
+        console.error("Failed to get Jira cloudId:", error.message)
         throw error
     }
     const baseUrl = `https://api.atlassian.com/ex/jira/${cloudId}/rest/api/3`

@@ -71,6 +71,7 @@ export async function getProject(baseUrl, auth, projectIdOrKey) {
 export async function listIssues(baseUrl, auth, projectKeyOrId = null) {
   try {
     // Build the JQL query dynamically
+    // TODO: add more fields to the function to support more complex queries, such as status, assignee, reporter, created, updated, etc.
     const jql = projectKeyOrId ? `project = ${projectKeyOrId}` : '' // Fetch all issues if no projectKey
     const query = jql ? `?jql=${encodeURIComponent(jql)}` : ''
 
@@ -87,7 +88,7 @@ export async function listIssues(baseUrl, auth, projectKeyOrId = null) {
     // Extract and print a summary of each issue
     console.log(`Issues ${projectKeyOrId ? `in Project: ${projectKeyOrId}` : 'across all projects'}`)
     data.issues.forEach(issue => {
-      console.log(`- Key: ${issue.key}, Summary: ${issue.fields.summary}, Status: ${issue.fields.status.name}`)
+      console.log(`- Key: ${issue.key}, Summary: ${issue.fields.summary}, Status: ${issue.fields.status.name}, Assignee: ${issue.fields.assignee ? issue.fields.assignee.displayName : 'Unassigned'}, Reporter: ${issue.fields.reporter.displayName}, Created: ${issue.fields.created}, Created At: ${issue.fields.createdAt}`)
     })
 
     // Return a filtered list of issues
