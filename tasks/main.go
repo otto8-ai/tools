@@ -17,7 +17,7 @@ var (
 	url      = os.Getenv("OTTO8_SERVER_URL")
 	token    = os.Getenv("OTTO8_TOKEN")
 	id       = os.Getenv("ID")
-	threadID = os.Getenv("OTTO_THREAD_ID")
+	threadID = os.Getenv("OTTO8_THREAD_ID")
 	args     = os.Getenv("ARGS")
 )
 
