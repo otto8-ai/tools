@@ -1,8 +1,15 @@
 ---
 Name: Database
 Description: Tools for interacting with a database
-Metadata: bundle: true
+Metadata: category: Capability
+Metadata: icon: https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/duotone/database-duotone.svg
 Share Tools: Query, Exec
+
+---
+Name: Tables
+Description: List all tables in the SQLite database and return the results in markdown format
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listTables
 
 ---
 Name: Query
@@ -25,11 +32,3 @@ Name: Database Context
 Type: context
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool context
-
----
-!metadata:*:category
-Database
-
----
-!metadata:*:icon
-https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/duotone/database-duotone.svg

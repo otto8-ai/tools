@@ -16,6 +16,8 @@ import (
 	_ "github.com/ncruces/go-sqlite3/embed"
 )
 
+var workspaceID = os.Getenv("DATABASE_WORKSPACE_ID")
+
 func main() {
 	if len(os.Args) != 2 {
 		fmt.Println("Usage: gptscript-go-tool <command>")
@@ -37,7 +39,9 @@ func main() {
 	)
 
 	// Read the database file from the workspace
-	initialDBData, err := g.ReadFileInWorkspace(ctx, dbWorkspacePath)
+	initialDBData, err := g.ReadFileInWorkspace(ctx, dbWorkspacePath, gptscript.ReadFileInWorkspaceOptions{
+		WorkspaceID: workspaceID,
+	})
 	var notFoundErr *gptscript.NotFoundInWorkspaceError
 	if err != nil && !errors.As(err, &notFoundErr) {
 		fmt.Printf("Error reading DB file: %v\n", err)
@@ -72,6 +76,8 @@ func main() {
 	// Run the requested command
 	var result string
 	switch command {
+	case "listTables":
+		result, err = cmd.ListTables(ctx, db)
 	case "exec":
 		result, err = cmd.Exec(ctx, db, os.Getenv("STATEMENT"))
 		if err == nil {
@@ -82,7 +88,7 @@ func main() {
 	case "context":
 		result, err = cmd.Context(ctx, db)
 	default:
-		err = fmt.Errorf("Unknown command: %s", command)
+		err = fmt.Errorf("unknown command: %s", command)
 	}
 
 	if err != nil {
@@ -110,7 +116,9 @@ func saveWorkspaceDB(
 		return nil
 	}
 
-	if err := g.WriteFileInWorkspace(ctx, dbWorkspacePath, updatedDBData); err != nil {
+	if err := g.WriteFileInWorkspace(ctx, dbWorkspacePath, updatedDBData, gptscript.WriteFileInWorkspaceOptions{
+		WorkspaceID: workspaceID,
+	}); err != nil {
 		return fmt.Errorf("Error writing updated DB file to workspace: %v", err)
 	}
 

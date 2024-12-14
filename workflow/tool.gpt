@@ -1,0 +1,10 @@
+Name: Workflows
+Description: Implements the workflow constructs for otto8
+Type: tool
+Share Context: context
+
+---
+Name: context
+Description: The context for the workflow
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool

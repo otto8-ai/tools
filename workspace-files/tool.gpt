@@ -1,9 +1,10 @@
 Name: Workspace Files
 Description: Adds the capability for users to read and write workspace files
 Type: context
-Metadata: category: Utilities
+Metadata: category: Capability
+Metadata: icon: https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/duotone/file-text-duotone.svg
 Context: workspace_list
-Share Tools: workspace_read, workspace_write
+Share Tools: workspace_read, workspace_write, workspace_copy
 Share Input Filter: input_parse
 
 #!/bin/bash
@@ -16,8 +17,8 @@ fi
 cat << EOF
 # START INSTRUCTIONS: "Workspace Files"
 
-You have the ability to read and write files in a workspace which is specific to your user. Use the given
-workspace_read and workspace_write tools to interact with files. The files that you write are available for the user
+You have the ability to read, write, and copy files in a workspace which is specific to your user. Use the given
+workspace_read, workspace_write, and workspace_copy tools to interact with files. The files that you write are available for the user
 to read and write in their user interface. You can collaborate with the user by reading and writing these files.
 Do not ask first to create files in the workspace. Immediately write contents to the workspace as opposed to describing
 the contents to the user. If the user changes a file, they will inform you that content has changed, with the new
@@ -47,6 +48,14 @@ Params: filename: The filename to write to
 Params: content: The contents to write to the file
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool write
+
+---
+Name: workspace_copy
+Description: Copy the contents of a file to a new filename
+Params: filename: The filename to copy from
+Params: to_filename: The new filename to copy to
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool copy
 
 ---
 Name: input_parse
