@@ -7,6 +7,7 @@ Share Tools: Get All Projects, Get Project, Get All Users, Get User, List Issues
 ---
 Name: Get All Projects
 Description: Gets all projects in a Jira instance
+Credential: ./credential
 
 #!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js getAllProjects
 
@@ -14,6 +15,7 @@ Description: Gets all projects in a Jira instance
 Name: Get Project
 Description: Gets a project in a Jira instance
 Share Tools: Get All Projects
+Credential: ./credential
 Args: projectIdOrKey: the ID or key of the project to get
 
 #!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js getProject
@@ -21,6 +23,7 @@ Args: projectIdOrKey: the ID or key of the project to get
 ---
 Name: Get All Users
 Description: Gets all users in a Jira instance
+Credential: ./credential
 Args: includeAppUsers: Optional, whether to include app users in the response. Defaults to false. 
 
 #!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js getAllUsers
@@ -29,6 +32,7 @@ Args: includeAppUsers: Optional, whether to include app users in the response. D
 Name: Get User
 Description: Gets a user in a Jira instance
 Share Tools: Get All Users
+Credential: ./credential
 Args: accountId: the ID of the user to get
 
 #!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js getUser
@@ -37,6 +41,7 @@ Args: accountId: the ID of the user to get
 Name: List Issues
 Description: Lists all issues in a Jira project or all projects
 Share Tools: Get Project, Get All Projects
+Credential: ./credential
 Args: projectIdOrKey: Optional, the ID or key of the project to list the issues in
 
 #!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js listIssues
@@ -45,6 +50,7 @@ Args: projectIdOrKey: Optional, the ID or key of the project to list the issues 
 Name: Get Issue
 Description: Gets an issue in a Jira project
 Share Tools: List Issues
+Credential: ./credential
 Args: issueKey: the key of the issue to get
 
 #!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js getIssue
@@ -53,6 +59,7 @@ Args: issueKey: the key of the issue to get
 Name: Get Issue Types
 Description: Gets the issue types in a Jira project. Each Jira project can have different issue types, so this is useful to get the issue types for a specific project, and can then be used to create an issue.
 Share Tools: Get Project, Get All Projects
+Credential: ./credential
 Args: projectIdOrKey: the ID or key of the project to get the issue types in
 
 #!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js getIssueTypes
@@ -60,6 +67,7 @@ Args: projectIdOrKey: the ID or key of the project to get the issue types in
 ---
 Name: Get Priority Schemes
 Description: Gets the priority schemes in a Jira instance.
+Credential: ./credential
 
 #!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js getPrioritySchemes
 
@@ -67,6 +75,7 @@ Description: Gets the priority schemes in a Jira instance.
 Name: Get Available Priorities
 Description: Gets the available priorities of a priority scheme. if no schemeId is provided, it will get the default priority scheme.
 Share Tools: Get Priority Schemes
+Credential: ./credential
 Args: schemeId: Optional, the ID of the priority scheme to get the available priorities in.
 
 #!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js getAvailablePriorities
@@ -75,6 +84,7 @@ Args: schemeId: Optional, the ID of the priority scheme to get the available pri
 Name: Create Issue
 Description: Creates an issue in a Jira project
 Share Tools: Get Issue Types, Get Available Priorities, Get User, Get Project
+Credential: ./credential
 Args: projectId: the ID of the project to create the issue in
 Args: summary: the summary/title of the issue
 Args: description: Optional, the description of the issue.
@@ -88,6 +98,7 @@ Args: reporterId: Optional, the account ID of the reporter of the issue
 ---
 Name: Get All Dashboards
 Description: Gets all dashboards in a Jira instance
+Credential: ./credential
 
 #!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js getAllDashboards
 
@@ -95,6 +106,7 @@ Description: Gets all dashboards in a Jira instance
 Name: Get Dashboard
 Description: Gets a dashboard in a Jira instance
 Share Tools: Get All Dashboards
+Credential: ./credential
 Args: dashboardId: the ID of the dashboard to get
 
 #!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js getDashboard
