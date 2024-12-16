@@ -41,10 +41,10 @@ export async function screenshot (
 
   // Build the download URL used by the UI to display the image
   let downloadUrl: string | undefined
-  const ottoServerUrl = getGPTScriptEnv(headers, 'ACORN_SERVER_URL')
+  const acornServerUrl = getGPTScriptEnv(headers, 'ACORN_SERVER_URL')
   const threadId = getGPTScriptEnv(headers, 'ACORN_THREAD_ID')
-  if (ottoServerUrl !== undefined && threadId !== undefined) {
-    downloadUrl = `${ottoServerUrl}/api/threads/${threadId}/file/${screenshotName}`
+  if (acornServerUrl !== undefined && threadId !== undefined) {
+    downloadUrl = `${acornServerUrl}/api/threads/${threadId}/file/${screenshotName}`
   }
 
   return {
