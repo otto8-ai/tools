@@ -9,15 +9,15 @@ import (
 	"os"
 	"slices"
 
-	"github.com/otto8-ai/otto8/apiclient"
-	"github.com/otto8-ai/otto8/apiclient/types"
+	"github.com/acorn-io/acorn/apiclient"
+	"github.com/acorn-io/acorn/apiclient/types"
 )
 
 var (
-	url      = os.Getenv("OTTO8_SERVER_URL")
-	token    = os.Getenv("OTTO8_TOKEN")
+	url      = os.Getenv("ACORN_SERVER_URL")
+	token    = os.Getenv("ACORN_TOKEN")
 	id       = os.Getenv("ID")
-	threadID = os.Getenv("OTTO8_THREAD_ID")
+	threadID = os.Getenv("ACORN_THREAD_ID")
 	args     = os.Getenv("ARGS")
 )
 

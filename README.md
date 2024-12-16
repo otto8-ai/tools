@@ -1,2 +1,2 @@
-# tools
-the home of official GPTScript tools
+# Tools
+The home of official Acorn tools

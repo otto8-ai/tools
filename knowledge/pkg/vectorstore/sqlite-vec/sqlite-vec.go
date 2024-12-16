@@ -33,7 +33,7 @@ func New(ctx context.Context, dsn string, embeddingFunc cg.EmbeddingFunc) (*Vect
 	}
 
 	// Enable PRAGMAs
-	// - busy_timeout (ms) to prevent db lockups as we're accessing the DB from multiple separate processes in otto8
+	// - busy_timeout (ms) to prevent db lockups as we're accessing the DB from multiple separate processes in acorn
 	tx := db.Exec(`
 PRAGMA busy_timeout = 5000;
 `)

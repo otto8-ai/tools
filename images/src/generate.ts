@@ -6,8 +6,8 @@ import {createHash} from "node:crypto"
 type ImageSize = '1024x1024' | '256x256' | '512x512' | '1792x1024' | '1024x1792';
 type ImageQuality = 'standard' | 'hd';
 
-const threadId = process.env.OTTO8_THREAD_ID
-const ottoServerUrl = process.env.OTTO8_SERVER_URL
+const threadId = process.env.ACORN_THREAD_ID
+const ottoServerUrl = process.env.ACORN_SERVER_URL
 const downloadBaseUrl = (threadId && ottoServerUrl) ? `${ottoServerUrl}/api/threads/${threadId}/file` : null
 
 export async function generateImages(
@@ -36,7 +36,7 @@ export async function generateImages(
 
   try {
     const response = await openai.images.generate({
-      model: process.env.OTTO8_DEFAULT_IMAGE_GENERATION_MODEL ?? 'dall-e-3',
+      model: process.env.ACORN_DEFAULT_IMAGE_GENERATION_MODEL ?? 'dall-e-3',
       prompt,
       size: size as ImageSize,
       quality: quality as ImageQuality,

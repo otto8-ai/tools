@@ -37,7 +37,7 @@ export async function analyzeImages(
 
   const openai = new OpenAI();
   const response = await openai.chat.completions.create({
-    model: process.env.OTTO8_DEFAULT_VISION_MODEL ?? 'gpt-4o',
+    model: process.env.ACORN_DEFAULT_VISION_MODEL ?? 'gpt-4o',
     stream: true,
     messages: [
       {
@@ -57,8 +57,8 @@ export async function analyzeImages(
 }
 
 const supportedMimeTypes = ['image/jpeg', 'image/png'];
-const threadId = process.env.OTTO8_THREAD_ID
-const ottoServerUrl = process.env.OTTO8_SERVER_URL
+const threadId = process.env.ACORN_THREAD_ID
+const ottoServerUrl = process.env.ACORN_SERVER_URL
 const imageGenBaseUrl = (threadId && ottoServerUrl) ? `${ottoServerUrl}/api/threads/${threadId}/file/` : null
 
 async function resolveImageURL (image: string): Promise<string> {
