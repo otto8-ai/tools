@@ -21,6 +21,10 @@ export async function search (
   if (query === '') {
     throw new Error('No query provided')
   }
+
+  const encodedQuery = encodeURIComponent(query)
+  const searchUrl = `https://www.google.com/search?q=${encodedQuery}&udm=14`
+  
   const foundURLs = new Set<string>()
   const results: Array<Promise<SearchResult | null>> = []
 
@@ -40,7 +44,7 @@ export async function search (
   )
 
   try {
-    await page.goto(`https://www.google.com/search?q=${query}&udm=14`)
+    await page.goto(searchUrl)
     const content = await page.content()
     const $ = cheerio.load(content)
     const elements = $('#rso a[jsname]')
