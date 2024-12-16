@@ -7,8 +7,8 @@ type ImageSize = '1024x1024' | '256x256' | '512x512' | '1792x1024' | '1024x1792'
 type ImageQuality = 'standard' | 'hd';
 
 const threadId = process.env.ACORN_THREAD_ID
-const ottoServerUrl = process.env.ACORN_SERVER_URL
-const downloadBaseUrl = (threadId && ottoServerUrl) ? `${ottoServerUrl}/api/threads/${threadId}/file` : null
+const acornServerUrl = process.env.ACORN_SERVER_URL
+const downloadBaseUrl = (threadId && acornServerUrl) ? `${acornServerUrl}/api/threads/${threadId}/file` : null
 
 export async function generateImages(
   prompt: string = '',
