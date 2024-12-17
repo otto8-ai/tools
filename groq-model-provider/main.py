@@ -15,7 +15,7 @@ uri = "http://127.0.0.1:" + os.environ.get("PORT", "8000")
 # Initialize Groq client
 client = OpenAI(
     base_url="https://api.groq.com/openai/v1",
-    api_key=os.environ.get("ACORN_GROQ_MODEL_PROVIDER_API_KEY", ""),
+    api_key=os.environ.get("OBOT_GROQ_MODEL_PROVIDER_API_KEY", ""),
 )
 
 
