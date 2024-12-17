@@ -1,5 +1,5 @@
 Name: Model Provider credential
-Description: This is a fake credential tool for the model providers. These credentials are handled in Otto8 and this tool should never be called.
+Description: This is a fake credential tool for the model providers. These credentials are handled in Acorn and this tool should never be called.
 
 #!/bin/bash
 

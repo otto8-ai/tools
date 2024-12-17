@@ -1,5 +1,5 @@
 Name: Workflows
-Description: Implements the workflow constructs for otto8
+Description: Implements the workflow constructs for acorn
 Type: tool
 Share Context: context
 

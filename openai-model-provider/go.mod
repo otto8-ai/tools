@@ -1,4 +1,4 @@
-module github.com/otto8-ai/tools/openai-model-provider
+module github.com/acorn-io/tools/openai-model-provider
 
 go 1.23.4
 

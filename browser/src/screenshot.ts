@@ -28,7 +28,7 @@ export async function screenshot (
     // Take the screenshot
     const screenshot = await page.screenshot({ fullPage, animations: 'disabled' })
 
-    // If we are running in otto8, we need to save the screenshot in the files directory
+    // If we are running in acorn, we need to save the screenshot in the files directory
     const workspaceId = getWorkspaceId(headers)
     const screenshotPath = workspaceId !== undefined ? `files/${screenshotName}` : screenshotName
 
@@ -41,10 +41,10 @@ export async function screenshot (
 
   // Build the download URL used by the UI to display the image
   let downloadUrl: string | undefined
-  const ottoServerUrl = getGPTScriptEnv(headers, 'OTTO8_SERVER_URL')
-  const threadId = getGPTScriptEnv(headers, 'OTTO8_THREAD_ID')
-  if (ottoServerUrl !== undefined && threadId !== undefined) {
-    downloadUrl = `${ottoServerUrl}/api/threads/${threadId}/file/${screenshotName}`
+  const acornServerUrl = getGPTScriptEnv(headers, 'ACORN_SERVER_URL')
+  const threadId = getGPTScriptEnv(headers, 'ACORN_THREAD_ID')
+  if (acornServerUrl !== undefined && threadId !== undefined) {
+    downloadUrl = `${acornServerUrl}/api/threads/${threadId}/file/${screenshotName}`
   }
 
   return {

@@ -1,4 +1,4 @@
-module otto8-ai/database
+module acorn-io/database
 
 go 1.23.3
 

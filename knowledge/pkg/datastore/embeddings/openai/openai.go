@@ -31,7 +31,7 @@ const EmbeddingModelProviderOpenAIName string = "openai"
 type EmbeddingModelProviderOpenAI struct {
 	BaseURL           string            `usage:"OpenAI API base" default:"https://api.openai.com/v1" env:"OPENAI_BASE_URL" koanf:"baseURL"`
 	APIKey            string            `usage:"OpenAI API key (not required if used with clicky-chats)" default:"sk-foo" env:"OPENAI_API_KEY" koanf:"apiKey" mapstructure:"apiKey" export:"false"`
-	Model             string            `usage:"OpenAI model" default:"gpt-4" env:"OPENAI_MODEL" koanf:"openai-model"`
+	Model             string            `usage:"OpenAI model" default:"gpt-4o" env:"OPENAI_MODEL" koanf:"openai-model"`
 	EmbeddingModel    string            `usage:"OpenAI Embedding model" default:"text-embedding-3-large" env:"OPENAI_EMBEDDING_MODEL" koanf:"embeddingModel" export:"required"`
 	EmbeddingEndpoint string            `usage:"OpenAI Embedding endpoint" default:"/embeddings" env:"OPENAI_EMBEDDING_ENDPOINT" koanf:"embeddingEndpoint"`
 	APIVersion        string            `usage:"OpenAI API version (for Azure)" default:"2024-02-01" env:"OPENAI_API_VERSION" koanf:"apiVersion"`
@@ -42,7 +42,7 @@ type EmbeddingModelProviderOpenAI struct {
 type OpenAIConfig struct {
 	BaseURL           string            `usage:"OpenAI API base" default:"https://api.openai.com/v1" env:"OPENAI_BASE_URL" koanf:"baseURL"`
 	APIKey            string            `usage:"OpenAI API key (not required if used with clicky-chats)" default:"sk-foo" env:"OPENAI_API_KEY" koanf:"apiKey" mapstructure:"apiKey" export:"false"`
-	Model             string            `usage:"OpenAI model" default:"gpt-4" env:"OPENAI_MODEL" koanf:"openai-model"`
+	Model             string            `usage:"OpenAI model" default:"gpt-4o" env:"OPENAI_MODEL" koanf:"openai-model"`
 	EmbeddingModel    string            `usage:"OpenAI Embedding model" default:"text-embedding-3-large" env:"OPENAI_EMBEDDING_MODEL" koanf:"embeddingModel" export:"required"`
 	EmbeddingEndpoint string            `usage:"OpenAI Embedding endpoint" default:"/embeddings" env:"OPENAI_EMBEDDING_ENDPOINT" koanf:"embeddingEndpoint"`
 	APIVersion        string            `usage:"OpenAI API version (for Azure)" default:"2024-02-01" env:"OPENAI_API_VERSION" koanf:"apiVersion"`
@@ -101,7 +101,7 @@ func (p *EmbeddingModelProviderOpenAI) fillDefaults() error {
 	defaultConfig := EmbeddingModelProviderOpenAI{
 		BaseURL:           "https://api.openai.com/v1",
 		APIKey:            "sk-foo",
-		Model:             "gpt-4",
+		Model:             "gpt-4o",
 		EmbeddingModel:    "text-embedding-3-large",
 		EmbeddingEndpoint: "/embeddings",
 		APIVersion:        "2024-02-01",
@@ -316,18 +316,17 @@ func RequestWithExponentialBackoff(ctx context.Context, client *http.Client, req
 
 		resp, err = client.Do(req)
 		if err == nil && resp.StatusCode == http.StatusOK {
-			defer resp.Body.Close()
-
 			body, err := io.ReadAll(resp.Body)
 			if err != nil {
 				// Log the error and retry for transient error reading response body
 				msg := fmt.Sprintf("#%d/%d: failed to read response body: %v", i+1, maxRetries, err)
 				logger.Warn("Request failed - Retryable", "error", msg)
 				failures = append(failures, msg)
+				_ = resp.Body.Close()
 				continue
 			}
 
-			return body, nil
+			return body, resp.Body.Close()
 		}
 
 		if resp != nil {
@@ -337,7 +336,7 @@ func RequestWithExponentialBackoff(ctx context.Context, client *http.Client, req
 				if rerr == nil {
 					bodystr = string(body)
 				}
-				resp.Body.Close()
+				_ = resp.Body.Close()
 			}
 
 			msg := fmt.Sprintf("#%d/%d: %d <%s> (err: %v)", i+1, maxRetries, resp.StatusCode, bodystr, err)
@@ -353,7 +352,7 @@ func RequestWithExponentialBackoff(ctx context.Context, client *http.Client, req
 				time.Sleep(delay + jitter)
 				continue
 			} else {
-				// Non-retriable error
+				// Non-retryable error
 				logger.Error("Request failed - Non-retryable", "error", msg)
 				break
 			}
@@ -365,9 +364,9 @@ func RequestWithExponentialBackoff(ctx context.Context, client *http.Client, req
 		}
 	}
 
-	logger.Error("request retry limit exceeded or failed with non-retriable error(s)", "request", req)
+	logger.Error("request retry limit exceeded or failed with non-retryable error(s)", "request", req)
 
-	return nil, fmt.Errorf("retry limit (%d) exceeded or failed with non-retriable error(s): %v", maxRetries, strings.Join(failures, "; "))
+	return nil, fmt.Errorf("retry limit (%d) exceeded or failed with non-retryable error(s): %v", maxRetries, strings.Join(failures, "; "))
 }
 
 type OpenAICompatConfig struct {

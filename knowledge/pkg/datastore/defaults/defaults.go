@@ -7,7 +7,7 @@ import (
 const (
 	TopK int = 10
 
-	TokenModel         = "gpt-4"
+	TokenModel         = "llm"
 	TokenEncoding      = "cl100k_base"
 	ChunkSizeTokens    = 2048
 	ChunkOverlapTokens = 256

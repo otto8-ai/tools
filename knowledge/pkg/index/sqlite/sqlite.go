@@ -24,7 +24,7 @@ func New(ctx context.Context, dsn string, gormCfg *gorm.Config, autoMigrate bool
 	}
 
 	// Enable PRAGMAs
-	// - busy_timeout (ms) to prevent db lockups as we're accessing the DB from multiple separate processes in otto8
+	// - busy_timeout (ms) to prevent db lockups as we're accessing the DB from multiple separate processes in acorn
 	// - foreign key constraint to make sure that deletes cascade
 	tx := db.Exec(`
 PRAGMA busy_timeout = 5000;
@@ -43,7 +43,7 @@ PRAGMA foreign_keys = ON;
 	sqlDB.SetConnMaxIdleTime(3 * time.Minute)
 
 	// These only have an effect on this one process (including goroutines), but not on other processes e.g. as part
-	// of parallel ingestion in otto8, so they won't improve the performance on that end
+	// of parallel ingestion in acorn, so they won't improve the performance on that end
 	sqlDB.SetMaxIdleConns(1)
 	sqlDB.SetMaxOpenConns(1)
 

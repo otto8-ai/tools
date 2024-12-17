@@ -1,4 +1,4 @@
-module github.com/otto8-ai/otto8/context
+module github.com/acorn-io/acorn/context
 
 go 1.23.2
 

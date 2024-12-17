@@ -77,8 +77,8 @@ system:
     reference: ./workflow
   result-formatter:
     reference: ./result-formatter
-  otto8-model-provider:
-    reference: ./otto8-model-provider
+  acorn-model-provider:
+    reference: ./acorn-model-provider
 
 modelProviders:
   openai-model-provider:

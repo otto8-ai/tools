@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"os"
 
-	"otto8-ai/database/pkg/cmd"
+	"acorn-io/database/pkg/cmd"
 
 	"github.com/gptscript-ai/go-gptscript"
 	_ "github.com/ncruces/go-sqlite3/driver"
@@ -34,7 +34,7 @@ func main() {
 
 	var (
 		ctx             = context.Background()
-		dbFileName      = "otto8.db"
+		dbFileName      = "acorn.db"
 		dbWorkspacePath = "/databases/" + dbFileName
 	)
 
