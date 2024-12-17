@@ -1,4 +1,4 @@
-module github.com/otto8-ai/tools/website-cleaner
+module github.com/obot-platform/tools/website-cleaner
 
 go 1.23.3
 
