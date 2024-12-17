@@ -1,0 +1,11 @@
+Name: Groq
+Description: Model provider for models running on Groq
+Metadata: envVars: OBOT_GROQ_MODEL_PROVIDER_API_KEY
+Model Provider: true
+Credential: ../model-provider-credential as groq-model-provider
+
+#!sys.daemon /usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py
+
+---
+!metadata:*:icon
+https://www.groq.com/logo.svg
