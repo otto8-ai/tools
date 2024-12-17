@@ -4,4 +4,4 @@ Credential: github.com/gptscript-ai/credentials/model-provider
 Params: Input: Input File
 Params: Dataset: Dataset ID
 
-#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool ingest --flows-file=blueprint:otto --dataset ${DATASET} "ws://${INPUT}"
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool ingest --flows-file=blueprint:obot --dataset ${DATASET} "ws://${INPUT}"

@@ -65,7 +65,7 @@ func main() {
 	}
 
 	if input.Limit == 0 {
-		input.Limit = getFromEnvOrDefault("OTTO_WEBSCRAPER_LIMIT", 250)
+		input.Limit = getFromEnvOrDefault("OBOT_WEBSCRAPER_LIMIT", 250)
 	}
 
 	output := MetadataOutput{}

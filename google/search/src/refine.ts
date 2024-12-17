@@ -34,7 +34,7 @@ async function refineResult (
   const tool: ToolDef = {
     chat: false,
     jsonResponse: true,
-    modelName: process.env.ACORN_DEFAULT_LLM_MINI_MODEL ?? 'gpt-4o-mini',
+    modelName: process.env.OBOT_DEFAULT_LLM_MINI_MODEL ?? 'gpt-4o-mini',
     temperature: 0.0,
     arguments: {
       type: 'object',

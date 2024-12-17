@@ -1,4 +1,4 @@
-module github.com/acorn-io/tools/result-formatter
+module github.com/obot-platform/tools/result-formatter
 
 go 1.23.2
 

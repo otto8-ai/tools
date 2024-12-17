@@ -28,7 +28,7 @@ export async function screenshot (
     // Take the screenshot
     const screenshot = await page.screenshot({ fullPage, animations: 'disabled' })
 
-    // If we are running in acorn, we need to save the screenshot in the files directory
+    // If we are running in obot, we need to save the screenshot in the files directory
     const workspaceId = getWorkspaceId(headers)
     const screenshotPath = workspaceId !== undefined ? `files/${screenshotName}` : screenshotName
 
@@ -41,10 +41,10 @@ export async function screenshot (
 
   // Build the download URL used by the UI to display the image
   let downloadUrl: string | undefined
-  const acornServerUrl = getGPTScriptEnv(headers, 'ACORN_SERVER_URL')
-  const threadId = getGPTScriptEnv(headers, 'ACORN_THREAD_ID')
-  if (acornServerUrl !== undefined && threadId !== undefined) {
-    downloadUrl = `${acornServerUrl}/api/threads/${threadId}/file/${screenshotName}`
+  const obotServerUrl = getGPTScriptEnv(headers, 'OBOT_SERVER_URL')
+  const threadId = getGPTScriptEnv(headers, 'OBOT_THREAD_ID')
+  if (obotServerUrl !== undefined && threadId !== undefined) {
+    downloadUrl = `${obotServerUrl}/api/threads/${threadId}/file/${screenshotName}`
   }
 
   return {

@@ -7,7 +7,7 @@ Params: Query: A search query that will be evaluated against the knowledge set
 Metadata: category: Capability
 Metadata: icon: https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/duotone/brain-duotone.svg
 
-#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool retrieve --flows-file=blueprint:otto "${QUERY}"
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool retrieve --flows-file=blueprint:obot "${QUERY}"
 
 ---
 Name: context

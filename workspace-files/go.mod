@@ -1,4 +1,4 @@
-module github.com/acorn-io/acorn/context
+module github.com/obot-platform/tools/context
 
 go 1.23.2
 

@@ -1,6 +1,6 @@
 Name: Voyage
 Description: Model provider for Voyage Embeddings
-Metadata: envVars: ACORN_VOYAGE_MODEL_PROVIDER_API_KEY
+Metadata: envVars: OBOT_VOYAGE_MODEL_PROVIDER_API_KEY
 Model Provider: true
 Credential: ../model-provider-credential as voyage-model-provider
 

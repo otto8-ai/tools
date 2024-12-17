@@ -14,7 +14,7 @@ embeddings:
     type: vertex
     config:
       apiKey: "${GOOGLE_API_KEY}"
-      project: "acorn-io"
+      project: "obot"
       # apiEndpoint: https://us-central1-aiplatform.googleapis.com
       model: "text-embedding-004"
   - name: local

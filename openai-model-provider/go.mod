@@ -1,4 +1,4 @@
-module github.com/acorn-io/tools/openai-model-provider
+module github.com/obot-platform/tools/openai-model-provider
 
 go 1.23.4
 

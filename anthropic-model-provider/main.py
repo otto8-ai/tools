@@ -7,7 +7,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 
 debug = os.environ.get("GPTSCRIPT_DEBUG", "false") == "true"
-client = AsyncAnthropic(api_key=os.environ.get("ACORN_ANTHROPIC_MODEL_PROVIDER_API_KEY", ""))
+client = AsyncAnthropic(api_key=os.environ.get("OBOT_ANTHROPIC_MODEL_PROVIDER_API_KEY", ""))
 app = FastAPI()
 uri = "http://127.0.0.1:" + os.environ.get("PORT", "8000")
 

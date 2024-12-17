@@ -37,7 +37,7 @@ export async function analyzeImages(
 
   const openai = new OpenAI();
   const response = await openai.chat.completions.create({
-    model: process.env.ACORN_DEFAULT_VISION_MODEL ?? 'gpt-4o',
+    model: process.env.OBOT_DEFAULT_VISION_MODEL ?? 'gpt-4o',
     stream: true,
     messages: [
       {
@@ -57,9 +57,9 @@ export async function analyzeImages(
 }
 
 const supportedMimeTypes = ['image/jpeg', 'image/png'];
-const threadId = process.env.ACORN_THREAD_ID
-const acornServerUrl = process.env.ACORN_SERVER_URL
-const imageGenBaseUrl = (threadId && acornServerUrl) ? `${acornServerUrl}/api/threads/${threadId}/file/` : null
+const threadId = process.env.OBOT_THREAD_ID
+const obotServerUrl = process.env.OBOT_SERVER_URL
+const imageGenBaseUrl = (threadId && obotServerUrl) ? `${obotServerUrl}/api/threads/${threadId}/file/` : null
 
 async function resolveImageURL (image: string): Promise<string> {
   // If the image is a URL, return it as is
@@ -93,12 +93,12 @@ async function resolveImageURL (image: string): Promise<string> {
 
 async function readImageFile(path: string): Promise<Buffer> {
   if (threadId === undefined) {
-    // Not running in Otto, just read the file
+    // Not running in Obot, just read the file
     return await readFile(resolve(path))
   }
 
   // The Generate Images tool returns file paths with a special prefix
-  // so that they can be rendered in the Otto UI.
+  // so that they can be rendered in the Obot UI.
   // e.g. /api/threads/<thread-id>/file/generated_image_<hash>.png
   // It must be stripped before reading the file from the workspace
   path = path.replace(/^\/?api\/threads\/[a-z0-9]+\/file\//, '')

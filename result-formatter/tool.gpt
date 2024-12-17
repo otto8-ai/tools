@@ -1,5 +1,5 @@
 Name: Query Results Formatter
-Description: Alters the output of knowledge and search results to format consistently for Otto
+Description: Alters the output of knowledge and search results to format consistently for Obot
 Type: outputfilter
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool

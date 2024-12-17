@@ -9,7 +9,7 @@ import { Mutex } from 'async-mutex'
 
 const APP_CACHE_DIR = (() => {
   const homeDir = os.homedir()
-  const appPath = path.join('acorn', 'tools', 'browser')
+  const appPath = path.join('obot', 'tools', 'browser')
 
   switch (os.platform()) {
     case 'win32':

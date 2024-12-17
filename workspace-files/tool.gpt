@@ -59,7 +59,7 @@ Params: to_filename: The new filename to copy to
 
 ---
 Name: input_parse
-Description: Prompt formatting for Otto
+Description: Prompt formatting for Obot
 Params: input: The input to filter
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool input

@@ -1,9 +1,9 @@
-# Default Flows used for Otto.
+# Default Flows used for Obot.
 # We have two flows here, since we separated loading (i.e. parsing files into Markdown-in-JSON format) and ingestion
 # Since ingestion only works on the pre-processed JSON files, we need a different flow for the loading process, which does
 # not expect JSON files to be structured in the knowledge-specific format.
 flows:
-  otto:
+  obot:
     default: true
     globals:
       ingestion:
@@ -20,7 +20,7 @@ flows:
         options:
           topK: 10
 
-  ottoload:
+  obotload:
     globals:
       ingestion:
         textsplitter:
