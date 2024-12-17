@@ -171,23 +171,18 @@ export async function getIssueTypes(baseUrl, auth, projectIdOrKey, isFunctionCal
   }
 }
 
-
-
-
-
-  
 export async function createIssue(
-  baseUrl, 
-  auth, 
-  projectId, 
-  summary, 
-  description = "", 
+  baseUrl,
+  auth,
+  projectId,
+  summary,
+  description = '',
   issueTypeId = '', // different type of project can have different issue types
   priority = '', 
-  assignee = "", 
-  reporter = "", 
-  // dueDate = "", // TODO: add dueDate
-  // parentKey = "", // TODO: add parentKey to support sub-issues
+  assignee = '', 
+  reporter = '', 
+  // dueDate = '', // TODO: add dueDate
+  // parentKey = '', // TODO: add parentKey to support sub-issues
 ) {
   // Build the body dynamically
   const bodyData = {

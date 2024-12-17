@@ -1,0 +1,156 @@
+---
+Name: Jira
+Description: Tools for interacting with Jira
+Metadata: bundle: true
+Share Tools: List Jira Sites, Get All Projects, Get Project, Get All Users, Get User, Get Current User, List Issues, Get Issue, Get Issue Types, Get Priority Schemes, Get Available Priorities, Create Issue
+
+---
+Name: List Jira Sites
+Description: Lists all Jira sites that the user has access to
+Credential: ../credential
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js listJiraSites
+
+---
+Name: Get All Projects
+Description: Gets all projects in a Jira instance
+Credential: ../credential
+Share Context: Jira Context
+Param: site_id: The ID of the Jira site to get the projects in
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js getAllProjects
+
+---
+Name: Get Project
+Description: Gets a project in a Jira instance
+Share Tools: Get All Projects
+Credential: ../credential
+Share Context: Jira Context
+Param: site_id: The ID of the Jira site to get the project in
+Param: project_id_or_key: The ID or key of the project to get
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js getProject
+
+---
+Name: Get All Users
+Description: Gets all users in a Jira instance
+Credential: ../credential
+Share Context: Jira Context
+Param: site_id: The ID of the Jira site to get users in
+Param: include_app_users: Optional, whether to include app users in the response. Defaults to false.
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js getAllUsers
+
+---
+Name: Get User
+Description: Gets a user in a Jira instance
+Share Tools: Get All Users
+Credential: ../credential
+Share Context: Jira Context
+Param: site_id: The ID of the Jira site to get the user in
+Param: account_id: The ID of the user to get
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js getUser
+
+---
+Name: Get Current User
+Description: Gets the current Jira user
+Share Tools: Get All Users
+Credential: ../credential
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js getUser
+
+---
+Name: List Issues
+Description: Lists all issues in a Jira project or all projects
+Share Tools: Get Project, Get All Projects
+Credential: ../credential
+Share Context: Jira Context
+Param: site_id: The ID of the Jira site to list the issues in
+Param: project_id_or_key: Optional, the ID or key of the project to list the issues in
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js listIssues
+
+---
+Name: Get Issue
+Description: Gets an issue in a Jira project
+Share Tools: List Issues
+Credential: ../credential
+Share Context: Jira Context
+Param: site_id: The ID of the Jira site to get the issue in
+Param: issue_key: The key of the issue to get
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js getIssue
+
+---
+Name: Get Issue Types
+Description: Gets the issue types in a Jira project. Each Jira project can have different issue types, so this is useful to get the issue types for a specific project, and can then be used to create an issue.
+Share Tools: Get Project, Get All Projects
+Credential: ../credential
+Share Context: Jira Context
+Param: site_id: The ID of the Jira site to get the issue types in
+Param: project_id_or_key: The ID or key of the project to get the issue types in
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js getIssueTypes
+
+---
+Name: Get Priority Schemes
+Description: Gets the priority schemes in a Jira instance.
+Credential: ../credential
+Share Context: Jira Context
+Param: site_id: The ID of the Jira site to get the priority schemes in
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js getPrioritySchemes
+
+---
+Name: Get Available Priorities
+Description: Gets the available priorities of a priority scheme. if no scheme_id is provided, it will get the default priority scheme.
+Share Tools: Get Priority Schemes
+Credential: ../credential
+Share Context: Jira Context
+Param: site_id: The ID of the Jira site to get the available priorities in
+Param: scheme_id: Optional, the ID of the priority scheme to get the available priorities in.
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js getAvailablePriorities
+
+---
+Name: Create Issue
+Description: Creates an issue in a Jira project
+Share Tools: Get Issue Types, Get Available Priorities, Get User, Get Project
+Credential: ../credential
+Share Context: Jira Context
+Param: site_id: The ID of the Jira site to create the issue in
+Param: project_id: The ID of the project to create the issue in
+Param: summary: The summary/title of the issue
+Param: description: Optional, the description of the issue.
+Param: issue_type: Optional, the type of the issue
+Param: priority: Optional, the priority of the issue
+Param: assignee_id: Optional, the account ID of the assignee of the issue
+Param: reporter_id: Optional, the account ID of the reporter of the issue
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js createIssue
+
+---
+Name: Jira Context
+Type: context
+Share Tools: List Jira Sites, Get Current User
+
+#!/sys.echo
+
+## START INSTRUCTIONS: Jira Tools
+
+You have access to tools for interacting with Jira.
+If you don't know what Jira Sites are available for the current user, call the List Jira Sites tool
+to get the list of sites that the user has access to.
+Tools that require a site_id must be called with a site_id from the Jira Sites that are available for the current user.
+If you don't have info about current user's Jira account, call the Get Current User tool.
+
+## END INSTRUCTIONS: Jira Tools
+
+---
+!metadata:*:category
+Jira
+
+---
+!metadata:*:icon
+/admin/assets/jira_icon.svg
