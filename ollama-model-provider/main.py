@@ -15,7 +15,7 @@ from openai.types.chat.chat_completion_chunk import Choice, ChoiceDelta, ChoiceD
 
 debug = os.environ.get('DEBUG', False) == "true"
 uri = "http://127.0.0.1:" + os.environ.get("PORT", "8000")
-ollama_host = os.environ.get("ACORN_OLLAMA_MODEL_PROVIDER_HOST", "127.0.0.1:11436")
+ollama_host = os.environ.get("OBOT_OLLAMA_MODEL_PROVIDER_HOST", "127.0.0.1:11436")
 ollama_client = Client(host=ollama_host)
 
 

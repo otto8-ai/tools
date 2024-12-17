@@ -7,7 +7,7 @@ from fastapi.responses import JSONResponse
 from voyageai import AsyncClient
 
 debug = os.environ.get("GPTSCRIPT_DEBUG", "false") == "true"
-client = AsyncClient(api_key=os.environ.get("ACORN_VOYAGE_MODEL_PROVIDER_API_KEY", ""))
+client = AsyncClient(api_key=os.environ.get("OBOT_VOYAGE_MODEL_PROVIDER_API_KEY", ""))
 app = FastAPI()
 uri = "http://127.0.0.1:" + os.environ.get("PORT", "8000")
 

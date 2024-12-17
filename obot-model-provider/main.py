@@ -8,7 +8,7 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse, StreamingResponse
 
 debug = os.environ.get("GPTSCRIPT_DEBUG", "false") == "true"
-acorn_url = os.environ.get("ACORN_URL", "http://localhost:8080")
+obot_url = os.environ.get("OBOT_URL", "http://localhost:8080")
 app = FastAPI()
 
 
@@ -29,7 +29,7 @@ async def root():
 @app.get("/v1/models")
 async def list_models() -> JSONResponse:
     # Collect all the LLM providers
-    resp = httpx.get(f"{acorn_url}/api/models")
+    resp = httpx.get(f"{obot_url}/api/models")
     if resp.status_code != 200:
         return JSONResponse({"data": [], "error": resp.text}, status_code=resp.status_code)
 
@@ -54,7 +54,7 @@ async def completions(request: Request) -> StreamingResponse:
 @app.post("/v1/{path:path}")
 async def generic_api_handler(request: Request) -> JSONResponse:
     try:
-        resp = httpx.post(f"{acorn_url}/api/llm-proxy/"+request.path_params["path"], json=await request.json())
+        resp = httpx.post(f"{obot_url}/api/llm-proxy/"+request.path_params["path"], json=await request.json())
         if resp.status_code != 200:
             return JSONResponse({"error": resp.text}, status_code=resp.status_code)
 
@@ -73,7 +73,7 @@ async def _stream_chat_completion(content: Any, api_key: str):
     async with httpx.AsyncClient(timeout=httpx.Timeout(30 * 60.0)) as client:
         async with client.stream(
                 "POST",
-                f"{acorn_url}/api/llm-proxy/chat/completions",
+                f"{obot_url}/api/llm-proxy/chat/completions",
                 json=content,
                 headers={
                     "Authorization": f"Bearer {api_key}",

@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/acorn-io/tools/openai-model-provider/server"
+	"github.com/obot-platform/tools/openai-model-provider/server"
 )
 
 func main() {
-	apiKey := os.Getenv("ACORN_OPENAI_MODEL_PROVIDER_API_KEY")
+	apiKey := os.Getenv("OBOT_OPENAI_MODEL_PROVIDER_API_KEY")
 	if apiKey == "" {
-		fmt.Println("ACORN_OPENAI_MODEL_PROVIDER_API_KEY environment variable not set")
+		fmt.Println("OBOT_OPENAI_MODEL_PROVIDER_API_KEY environment variable not set")
 		os.Exit(1)
 	}
 

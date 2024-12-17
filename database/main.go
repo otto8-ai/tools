@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"os"
 
-	"acorn-io/database/pkg/cmd"
+	"obot-platform/database/pkg/cmd"
 
 	"github.com/gptscript-ai/go-gptscript"
 	_ "github.com/ncruces/go-sqlite3/driver"

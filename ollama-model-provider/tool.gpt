@@ -1,6 +1,6 @@
 Name: Ollama
 Description: Model provider for models running on Ollama
-Metadata: envVars: ACORN_OLLAMA_MODEL_PROVIDER_HOST
+Metadata: envVars: OBOT_OLLAMA_MODEL_PROVIDER_HOST
 Model Provider: true
 Credential: ../model-provider-credential as ollama-model-provider
 

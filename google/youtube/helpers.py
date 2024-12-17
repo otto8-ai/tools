@@ -48,7 +48,7 @@ gptscript_client = GPTScript()
 
 
 async def get_clean_transcript(text: str) -> Transcript:
-    model = os.getenv('MODEL', os.getenv('ACORN_DEFAULT_LLM_MODEL', 'gpt-4o'))
+    model = os.getenv('MODEL', os.getenv('OBOT_DEFAULT_LLM_MODEL', 'gpt-4o'))
     if text is None or text == '':
         raise ValueError('Error: no transcript text provided')
 

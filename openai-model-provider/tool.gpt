@@ -1,6 +1,6 @@
 Name: OpenAI
 Description: Model Provider for OpenAI
-Metadata: envVars: ACORN_OPENAI_MODEL_PROVIDER_API_KEY
+Metadata: envVars: OBOT_OPENAI_MODEL_PROVIDER_API_KEY
 Model Provider: true
 Credential: ../model-provider-credential as openai-model-provider
 

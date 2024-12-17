@@ -1,6 +1,6 @@
 Name: Anthropic
 Description: Model provider for Anthropic hosted Claude3 models
-Metadata: envVars: ACORN_ANTHROPIC_MODEL_PROVIDER_API_KEY
+Metadata: envVars: OBOT_ANTHROPIC_MODEL_PROVIDER_API_KEY
 Model Provider: true
 Credential: ../model-provider-credential as anthropic-model-provider
 

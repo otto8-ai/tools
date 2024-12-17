@@ -74,8 +74,8 @@ system:
     reference: ./workflow
   result-formatter:
     reference: ./result-formatter
-  acorn-model-provider:
-    reference: ./acorn-model-provider
+  obot-model-provider:
+    reference: ./obot-model-provider
 
 modelProviders:
   openai-model-provider:

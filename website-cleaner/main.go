@@ -33,7 +33,6 @@ var tagsToRemove = []string{
 }
 
 func main() {
-
 	input := os.Getenv("INPUT")
 	output := os.Getenv("OUTPUT")
 
@@ -119,7 +118,6 @@ func main() {
 }
 
 func llmCleaning(ctx context.Context, logOut, logErr *logrus.Logger, markdown string) (string, error) {
-
 	prompt := "The following content is a scraped webpage converted to markdown. Please remove any content that came from the website header, footer, or navigation. The output should focus on just the main content body of the page. Maintain the markdown format, including any links or images.\n\n" + markdown
 
 	url := fmt.Sprintf("%s/chat/completions", os.Getenv("OPENAI_BASE_URL"))
@@ -133,7 +131,7 @@ func llmCleaning(ctx context.Context, logOut, logErr *logrus.Logger, markdown st
 	ctx, cancel = context.WithTimeout(ctx, 10*time.Minute)
 	defer cancel()
 
-	model := os.Getenv("OTTO8_DEFAULT_LLM_MINI_MODEL")
+	model := os.Getenv("OBOT_DEFAULT_LLM_MINI_MODEL")
 	if model == "" {
 		model = "gpt-4o-mini"
 	}

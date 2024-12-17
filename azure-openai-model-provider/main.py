@@ -20,25 +20,25 @@ from helpers import list_openai
 debug = os.environ.get("GPTSCRIPT_DEBUG", "false") == "true"
 
 uri = "http://127.0.0.1:" + os.environ.get("PORT", "8000")
-api_version = os.environ.get("ACORN_AZURE_OPENAI_MODEL_PROVIDER_API_VERSION", "2024-10-21")
-subscription_id = os.environ.get("ACORN_AZURE_OPENAI_MODEL_PROVIDER_SUBSCRIPTION_ID")
+api_version = os.environ.get("OBOT_AZURE_OPENAI_MODEL_PROVIDER_API_VERSION", "2024-10-21")
+subscription_id = os.environ.get("OBOT_AZURE_OPENAI_MODEL_PROVIDER_SUBSCRIPTION_ID")
 if subscription_id is None:
     print(f"Azure subscription ID was not configured")
     sys.exit(1)
 
-resource_group = os.environ.get("ACORN_AZURE_OPENAI_MODEL_PROVIDER_RESOURCE_GROUP")
+resource_group = os.environ.get("OBOT_AZURE_OPENAI_MODEL_PROVIDER_RESOURCE_GROUP")
 if resource_group is None:
     print("Azure Resource Group was not configured")
     sys.exit(1)
 
-endpoint = os.environ.get("ACORN_AZURE_OPENAI_MODEL_PROVIDER_ENDPOINT")
+endpoint = os.environ.get("OBOT_AZURE_OPENAI_MODEL_PROVIDER_ENDPOINT")
 if endpoint is None:
     print("Azure model endpoint was not configured")
     sys.exit(1)
 
-os.environ["AZURE_CLIENT_ID"] = os.environ.get("ACORN_AZURE_OPENAI_MODEL_PROVIDER_CLIENT_ID")
-os.environ["AZURE_TENANT_ID"] = os.environ.get("ACORN_AZURE_OPENAI_MODEL_PROVIDER_TENANT_ID")
-os.environ["AZURE_CLIENT_SECRET"] = os.environ.get("ACORN_AZURE_OPENAI_MODEL_PROVIDER_CLIENT_SECRET")
+os.environ["AZURE_CLIENT_ID"] = os.environ.get("OBOT_AZURE_OPENAI_MODEL_PROVIDER_CLIENT_ID")
+os.environ["AZURE_TENANT_ID"] = os.environ.get("OBOT_AZURE_OPENAI_MODEL_PROVIDER_TENANT_ID")
+os.environ["AZURE_CLIENT_SECRET"] = os.environ.get("OBOT_AZURE_OPENAI_MODEL_PROVIDER_CLIENT_SECRET")
 
 try:
     token_provider = get_bearer_token_provider(

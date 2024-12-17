@@ -1,3 +1,3 @@
-module github.com/acorn-io/tools/workflow
+module github.com/obot-platform/tools/workflow
 
 go 1.23.3

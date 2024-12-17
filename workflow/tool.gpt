@@ -1,5 +1,5 @@
 Name: Workflows
-Description: Implements the workflow constructs for acorn
+Description: Implements the workflow constructs for obot
 Type: tool
 Share Context: context
 

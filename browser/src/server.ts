@@ -29,7 +29,7 @@ async function main (): Promise<void> {
   app.post('/*', async (req: Request, res: Response) => {
     const data = req.body
 
-    const model: string = data.model ?? process.env.ACORN_DEFAULT_LLM_MINI_MODEL ?? 'gpt-4o-mini'
+    const model: string = data.model ?? process.env.OBOT_DEFAULT_LLM_MINI_MODEL ?? 'gpt-4o-mini'
     const website: string = data.website ?? ''
     const userInput: string = data.userInput ?? ''
     const keywords: string[] = (data.keywords ?? '').split(',')

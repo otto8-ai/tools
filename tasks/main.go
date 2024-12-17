@@ -9,15 +9,15 @@ import (
 	"os"
 	"slices"
 
-	"github.com/acorn-io/acorn/apiclient"
-	"github.com/acorn-io/acorn/apiclient/types"
+	"github.com/obot-platform/obot/apiclient"
+	"github.com/obot-platform/obot/apiclient/types"
 )
 
 var (
-	url      = os.Getenv("ACORN_SERVER_URL")
-	token    = os.Getenv("ACORN_TOKEN")
+	url      = os.Getenv("OBOT_SERVER_URL")
+	token    = os.Getenv("OBOT_TOKEN")
 	id       = os.Getenv("ID")
-	threadID = os.Getenv("ACORN_THREAD_ID")
+	threadID = os.Getenv("OBOT_THREAD_ID")
 	args     = os.Getenv("ARGS")
 )
 
