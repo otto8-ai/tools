@@ -1,4 +1,4 @@
 fastapi
 uvicorn[standard]
 anthropic==0.40.0
-claude3_provider_common @ git+https://github.com/gptscript-ai/claude3-provider-common@332d95d729e696d2f12d0d4edd7a870623764bf2
+claude3_provider_common @ git+https://github.com/gptscript-ai/claude3-provider-common@2682b94fce767c810254075253ffc6e6900654fc
