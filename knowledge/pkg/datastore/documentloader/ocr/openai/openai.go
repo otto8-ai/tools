@@ -10,7 +10,6 @@ import (
 	"image/png"
 	"io"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 
@@ -293,21 +292,12 @@ func (o *OpenAIOCR) SendImageToOpenAI(ctx context.Context, base64Image string) (
 		return "", fmt.Errorf("OpenAI OCR error sending request(s): %w", err)
 	}
 
-	err = os.WriteFile("/tmp/openai_response.json", body, 0777)
-	if err != nil {
-		return "", fmt.Errorf("error writing openai response to file: %w", err)
-	}
-
 	body = []byte(strings.TrimSpace(strings.TrimPrefix(string(body), "data: "))) // required e.g. for the anthropic/claude provider
-
-	log.FromCtx(ctx).Debug("OpenAI OCR response", "body", string(body))
 
 	var result Response
 	if err := json.Unmarshal(body, &result); err != nil {
 		return "", fmt.Errorf("error unmarshaling openai response: %w", err)
 	}
-
-	log.FromCtx(ctx).Debug("OpenAI OCR result", "result", result)
 
 	if len(result.Choices) == 0 {
 		return "", fmt.Errorf("no choices in OpenAI OCR response")
