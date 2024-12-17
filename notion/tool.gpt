@@ -2,7 +2,7 @@
 Name: Notion
 Description: Tools for interacting with Notion
 Metadata: bundle: true
-Share Tools: Get Page, Get Database, Search, Create Page, List Users, Get Database Properties, Add Database Row, Update Database Row
+Share Tools: Get Page, Get Database, Search, Create Page, List Users, Get Database Properties, Add Database Row, Update Database Row, Update Page
 
 ---
 Name: Get Page
