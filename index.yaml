@@ -1,6 +1,9 @@
 tools:
   database:
     reference: ./database
+  atlassian-jira:
+    reference: ./atlassian/jira
+    all: true
   excel:
     reference: ./excel
     all: true
