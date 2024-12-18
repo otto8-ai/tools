@@ -1,0 +1,190 @@
+---
+Name: Jira
+Description: Tools for interacting with Jira
+Metadata: bundle: true
+Share Tools: List Jira Sites, List Projects, Get Project, List Users, Get User, Get Current User, Search Issues, List Issues, Get Issue, Create Issue, Edit Issue, Add Comment, List Comments
+
+---
+Name: List Jira Sites
+Description: Lists all Jira sites that the user has access to
+Credential: ../credential
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js listJiraSites
+
+---
+Name: List Projects
+Description: Lists all projects in a Jira Site
+Credential: ../credential
+Param: site_id: The ID of the Jira site to get the projects in
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js listProjects
+
+---
+Name: Get Project
+Description: Gets a project in a Jira Site
+Share Tools: List Projects
+Credential: ../credential
+Share Context: Jira Context
+Param: site_id: The ID of the Jira site to get the project in
+Param: project_id_or_key: The ID or key of the project to get
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js getProject
+
+---
+Name: List Users
+Description: Lists all users in a Jira Site
+Credential: ../credential
+Share Context: Jira Context
+Param: site_id: The ID of the Jira site to get users in
+Param: include_app_users: (Optional) Whether to include app users in the response. Defaults to false.
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js listUsers
+
+---
+Name: Get User
+Description: Get a user in a Jira Site
+Share Tools: List Users
+Credential: ../credential
+Share Context: Jira Context
+Param: site_id: The ID of the Jira site to get the user in
+Param: account_id: The ID of the user to get
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js getUser
+
+---
+Name: Get Current User
+Description: Gets the current Jira user for a given site
+Share Tools: List Jira Sites
+Credential: ../credential
+Param: site_id: The ID of the Jira site to get the current user in
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js getCurrentUser
+
+---
+Name: Create Issue
+Description: Creates an issue in a Jira project
+Share Tools: List Priorities, List Projects, Get Project
+Credential: ../credential
+Share Context: Jira Context
+Param: site_id: The ID of the Jira site to create the issue in
+Param: project_id: The ID of the project to create the issue in
+Param: summary: The summary/title of the issue
+Param: description: (Optional) The description of the issue in ADF (Atlassian Document Format) as a JSON string.
+Param: issue_type_id: (Optional) The ID of the Issue Type to assign to the issue
+Param: priority_id: (Optional) The ID of the Priority to assign to the issue
+Param: assignee_id: (Optional) The ID of the User to assign to the issue
+Param: reporter_id: (Optional) The ID of the User to assign to the issue. Defaults to the current user's ID.
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js createIssue
+
+---
+Name: Edit Issue
+Description: Edits an issue in a Jira project
+Share Tools: Search Issues, List Issues, Get Issue
+Credential: ../credential
+Share Context: Jira Context
+Param: site_id: The ID of the Jira site to edit the issue in
+Param: issue_id_or_key: The ID or key of the issue to edit
+Param: new_summary: (Optional) The new summary/title of the issue
+Param: new_description: (Optional) The new description of the issue in ADF (Atlassian Document Format) as a JSON string
+Param: new_assignee_id: (Optional) The ID of the User to assign to the issue
+Param: new_priority_id: (Optional) The ID of the Priority to assign to the issue
+Param: new_name: (Optional) The new name of the issue
+Param: new_status_name: (Optional) The new status name to transition the issue to
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js editIssue
+
+---
+Name: Search Issues
+Description: Searches for issues in a Jira Site
+Share Tools: List Projects, Get Project
+Credential: ../credential
+Share Context: Jira Context
+Param: site_id: The ID of the Jira site to search the issues in
+Param: jql_query: The JQL query to search for issues
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js searchIssues
+
+---
+Name: List Issues
+Description: Lists all issues in a Jira project or all projects
+Share Tools: List Projects, Get Project
+Credential: ../credential
+Share Context: Jira Context
+Param: site_id: The ID of the Jira site to list the issues in
+Param: project_id_or_key: (Optional) The ID or key of the project to list the issues in. If not provided, all issues for all projects will be returned.
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js listIssues
+
+---
+Name: Get Issue
+Description: Gets an issue in a Jira project
+Share Tools: List Issues
+Credential: ../credential
+Share Context: Jira Context
+Param: site_id: The ID of the Jira site to get the issue in
+Param: issue_id_or_key: The ID or key of the issue to get
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js getIssue
+
+---
+Name: Add Comment
+Description: Adds a comment to an issue
+Share Tools: Search Issues, List Comments
+Credential: ../credential
+Share Context: Jira Context
+Param: site_id: The ID of the Jira site to add the comment to
+Param: issue_id_or_key: The ID or key of the issue to add the comment to
+Param: comment_body: The body of the comment in ADF (Atlassian Document Format) as a JSON string
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js addComment
+
+---
+Name: List Comments
+Description: Lists all comments for an issue
+Share Tools: Search Issues
+Credential: ../credential
+Share Context: Jira Context
+Param: site_id: The ID of the Jira site to list the comments in
+Param: issue_id_or_key: The ID or key of the issue to list the comments in
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js listComments
+
+---
+Name: List Priorities
+Description: Gets the available priorities for a Jira Site.
+Credential: ../credential
+Share Context: Jira Context
+Param: site_id: The ID of the Jira site to get the available priorities in
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js listPriorities
+
+
+---
+Name: Jira Context
+Type: context
+Share Tools: List Jira Sites, Get Current User
+
+#!sys.echo
+
+# START INSTRUCTIONS: Jira Tools
+
+You have access to tools for interacting with Jira.
+If you don't know what Jira Sites are available for the current user, call the List Jira Sites tool
+to get the list of sites that the user has access to.
+Tools that require a site_id must be called with a site_id from the Jira Sites that are available for the current user.
+When it's unclear which Jira Site a user is referring to, always ask the user to select a site before calling a tool that requires a site_id argument.
+When information about the current user is needed to fulfill a request, call the Get Current User tool for the applicable Jira Sites.
+Always call Get Project to gather more information about a Project when prompted to interact with the issues in a project.
+Issue descriptions are always in ADF (Atlassian Document Format) and must be passed as a JSON string when calling the Create Issue tool.
+The List Issues tool can be used to search for issues in a Jira instance. The jql_query argument provided to this tool must be valid JQL (Jira Query Language) query.
+
+# END INSTRUCTIONS: Jira Tools
+
+---
+!metadata:*:category
+Jira
+
+---
+!metadata:*:icon
+/admin/assets/jira_icon.svg
