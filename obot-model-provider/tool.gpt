@@ -1,5 +1,5 @@
-Name: Acorn
-Description: Model provider for Acorn
+Name: Odot
+Description: Model provider for Odot
 Model Provider: true
 
 #!sys.daemon /usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py

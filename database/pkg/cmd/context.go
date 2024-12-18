@@ -18,6 +18,8 @@ You have access to tools for interacting with a SQLite database.
 The Exec tool only accepts valid SQLite3 statements.
 The Query tool only accepts valid SQLite3 queries.
 Display all results from these tools and their schemas in markdown format.
+If the user refers to creating or modifying tables assume they mean a SQLite3 table and not writing a table
+in a markdown file.
 
 # END INSTRUCTIONS: Database Tools
 `)
