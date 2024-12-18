@@ -99,7 +99,7 @@ async function readImageFile(path: string): Promise<Buffer> {
 
   // The Generate Images tool returns file paths with a special prefix
   // so that they can be rendered in the Obot UI.
-  // e.g. /api/threads/<thread-id>/file/generated_image_<hash>.png
+  // e.g. /api/threads/<thread-id>/file/generated_image_<hash>.webp
   // It must be stripped before reading the file from the workspace
   path = path.replace(/^\/?api\/threads\/[a-z0-9]+\/file\//, '')
 
