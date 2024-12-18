@@ -1,5 +1,5 @@
-Name: Odot
-Description: Model provider for Odot
+Name: Obot
+Description: Model provider for Obot
 Model Provider: true
 
-#!sys.daemon /usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py
+#!sys.daemon ${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool
