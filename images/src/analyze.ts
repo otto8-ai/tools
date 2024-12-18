@@ -56,7 +56,7 @@ export async function analyzeImages(
   }
 }
 
-const supportedMimeTypes = ['image/jpeg', 'image/png'];
+const supportedMimeTypes = ['image/jpeg', 'image/png', 'image/webp'];
 const threadId = process.env.OBOT_THREAD_ID
 const obotServerUrl = process.env.OBOT_SERVER_URL
 const imageGenBaseUrl = (threadId && obotServerUrl) ? `${obotServerUrl}/api/threads/${threadId}/file/` : null
