@@ -297,8 +297,7 @@ func RequestWithExponentialBackoff(ctx context.Context, client *http.Client, req
 	if req.Body != nil {
 		bodyBytes, err = io.ReadAll(req.Body)
 		if err != nil {
-			failures = append(failures, fmt.Sprintf("failed to read request body: %v", err))
-			return nil, fmt.Errorf("failed to read request body: %v; failures: %v", err, strings.Join(failures, "; "))
+			return nil, fmt.Errorf("failed to read request body: %v", err)
 		}
 	}
 
@@ -364,9 +363,9 @@ func RequestWithExponentialBackoff(ctx context.Context, client *http.Client, req
 		}
 	}
 
-	logger.Error("request retry limit exceeded or failed with non-retryable error(s)", "request", req)
+	logger.Error("request retry limit exceeded or failed with non-retryable error(s)", "request", req, "maxTries", maxRetries, "failures", strings.Join(failures, ";"))
 
-	return nil, fmt.Errorf("retry limit (%d) exceeded or failed with non-retryable error(s): %v", maxRetries, strings.Join(failures, "; "))
+	return nil, fmt.Errorf("retry limit exceeded or request failed with non-retryable error: %v", failures[len(failures)-1])
 }
 
 type OpenAICompatConfig struct {
