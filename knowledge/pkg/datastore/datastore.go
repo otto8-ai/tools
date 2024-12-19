@@ -13,7 +13,6 @@ import (
 
 	"github.com/gptscript-ai/knowledge/pkg/config"
 	etypes "github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/types"
-	"github.com/gptscript-ai/knowledge/pkg/index/types"
 	"github.com/gptscript-ai/knowledge/pkg/log"
 	"github.com/gptscript-ai/knowledge/pkg/output"
 
@@ -104,19 +103,6 @@ func NewDatastore(ctx context.Context, indexDSN string, automigrate bool, vector
 	// If loaded from archive, do not create a default dataset
 	if isArchive {
 		return ds, nil
-	}
-
-	// Ensure default dataset exists
-	defaultDS, err := ds.GetDataset(context.Background(), "default")
-	if err != nil {
-		return nil, fmt.Errorf("failed to ensure default dataset: %w", err)
-	}
-
-	if defaultDS == nil {
-		err = ds.CreateDataset(context.Background(), types.Dataset{ID: "default"}, nil)
-		if err != nil {
-			return nil, fmt.Errorf("failed to create default dataset: %w", err)
-		}
 	}
 
 	return ds, nil

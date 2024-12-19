@@ -25,7 +25,6 @@ func (s *ClientDeleteFile) Customize(cmd *cobra.Command) {
 }
 
 func (s *ClientDeleteFile) Run(cmd *cobra.Command, args []string) error {
-
 	if s.Dataset == "" {
 		exitErr0(fmt.Errorf("no dataset specified"))
 	}

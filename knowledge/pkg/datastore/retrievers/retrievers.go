@@ -79,7 +79,7 @@ func (r *BasicRetriever) DecodeConfig(cfg map[string]any) error {
 
 func (r *BasicRetriever) Retrieve(ctx context.Context, store store.Store, query string, datasetIDs []string, where map[string]string, whereDocument []chromem.WhereDocument) ([]vs.Document, error) {
 	if len(datasetIDs) == 0 {
-		datasetIDs = []string{"default"}
+		return nil, fmt.Errorf("no dataset specified for retrieval")
 	}
 
 	var results []vs.Document
