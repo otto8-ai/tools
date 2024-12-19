@@ -10,6 +10,9 @@ tools:
   bluesky:
     reference: ./bluesky
     all: true
+  salesforce:
+    reference: ./salesforce
+    all: true
   slack:
     reference: ./slack
     all: true

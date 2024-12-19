@@ -1,0 +1,232 @@
+---
+Name: Salesforce
+Metadata: bundle: true
+Description: Tools for interacting with a user's Salesforce account
+Share Tools: Describe Contact Schema, Create Contact, Update Contact, Delete Contact, Describe Lead Schema, Create Lead, Update Lead, Delete Lead, Describe Account Schema, Create Account, Update Account, Delete Account, Describe Opportunity Schema, Create Opportunity, Update Opportunity, Delete Opportunity, Describe Case Schema, Create Case, Update Case, Delete Case, Query,
+
+---
+Name: Describe Contact Schema
+Description: Describes the available fields for a contact object in Salesforce
+Share Context: Salesforce Context
+Credential: ./credential
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/contacts/describeContactSchema.py
+
+---
+Name: Create Contact
+Description: Create a new contact in Salesforce
+Share Context: Salesforce Context
+Credential: ./credential
+Share Tools: Describe Contact Schema
+Param: contact: A json-formatted string containing the contact fields to use for the new contact
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/contacts/createContact.py
+
+---
+Name: Update Contact
+Description: Update an existing contact in Salesforce
+Share Context: Salesforce Context
+Credential: ./credential
+Share Tools: Describe Contact Schema, Query
+Param: contact: A json-formatted string containing the contact fields to update in the existing contact
+Param: contact_id: A string containing the Salesforce Id of the contact to update
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/contacts/updateContact.py
+
+---
+Name: Delete Contact
+Description: Delete an existing contact in Salesforce
+Share Context: Salesforce Context
+Credential: ./credential
+Share Tools: Describe Contact Schema, Query
+Param: contact_id: A string containing the Salesforce Id of the contact to delete
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/contacts/deleteContact.py
+
+---
+Name: Describe Lead Schema
+Description: Describes the available fields for a lead object in Salesforce
+Share Context: Salesforce Context
+Credential: ./credential
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/leads/describeLeadSchema.py
+
+---
+Name: Create Lead
+Description: Create a new lead in Salesforce
+Share Context: Salesforce Context
+Credential: ./credential
+Share Tools: Describe Lead Schema
+Param: lead: A json-formatted string containing the lead fields to use for the new lead
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/leads/createLead.py
+
+---
+Name: Update Lead
+Description: Update an existing lead in Salesforce
+Share Context: Salesforce Context
+Credential: ./credential
+Share Tools: Describe Lead Schema, Query
+Param: lead: A json-formatted string containing the lead fields to update in the existing lead
+Param: lead_id: A string containing the Salesforce Id of the lead to update
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/leads/updateLead.py
+
+---
+Name: Delete Lead
+Description: Delete an existing lead in Salesforce
+Share Context: Salesforce Context
+Credential: ./credential
+Share Tools: Describe Lead Schema, Query
+Param: lead_id: A string containing the Salesforce Id of the lead to delete
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/leads/deleteLead.py
+
+---
+Name: Describe Account Schema
+Description: Describes the available fields for a account object in Salesforce
+Share Context: Salesforce Context
+Credential: ./credential
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/accounts/describeAccountSchema.py
+
+---
+Name: Create Account
+Description: Create a new account in Salesforce
+Share Context: Salesforce Context
+Credential: ./credential
+Share Tools: Describe Account Schema
+Param: account: A json-formatted string containing the account fields to use for the new account
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/accounts/createAccount.py
+
+---
+Name: Update Account
+Description: Update an existing account in Salesforce
+Share Context: Salesforce Context
+Credential: ./credential
+Share Tools: Describe Account Schema, Query
+Param: account: A json-formatted string containing the account fields to update in the existing account
+Param: account_id: A string containing the Salesforce Id of the account to update
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/accounts/updateAccount.py
+
+---
+Name: Delete Account
+Description: Delete an existing account in Salesforce
+Share Context: Salesforce Context
+Credential: ./credential
+Share Tools: Describe Account Schema, Query
+Param: account_id: A string containing the Salesforce Id of the account to delete
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/accounts/deleteAccount.py
+
+---
+Name: Describe Opportunity Schema
+Description: Describes the available fields for a opportunity object in Salesforce
+Share Context: Salesforce Context
+Credential: ./credential
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/opportunities/describeOpportunitySchema.py
+
+---
+Name: Create Opportunity
+Description: Create a new opportunity in Salesforce
+Share Context: Salesforce Context
+Credential: ./credential
+Share Tools: Describe Opportunity Schema
+Param: opportunity: A json-formatted string containing the opportunity fields to use for the new opportunity
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/opportunities/createOpportunity.py
+
+---
+Name: Update Opportunity
+Description: Update an existing opportunity in Salesforce
+Share Context: Salesforce Context
+Credential: ./credential
+Share Tools: Describe Opportunity Schema, Query
+Param: opportunity: A json-formatted string containing the opportunity fields to update in the existing opportunity
+Param: opportunity_id: A string containing the Salesforce Id of the opportunity to update
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/opportunities/updateOpportunity.py
+
+---
+Name: Delete Opportunity
+Description: Delete an existing opportunity in Salesforce
+Share Context: Salesforce Context
+Credential: ./credential
+Share Tools: Describe Opportunity Schema, Query
+Param: opportunity_id: A string containing the Salesforce Id of the opportunity to delete
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/opportunities/deleteOpportunity.py
+
+---
+Name: Describe Case Schema
+Description: Describes the available fields for a case object in Salesforce
+Share Context: Salesforce Context
+Credential: ./credential
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/cases/describeCaseSchema.py
+
+---
+Name: Create Case
+Description: Create a new case in Salesforce
+Share Context: Salesforce Context
+Credential: ./credential
+Share Tools: Describe Case Schema
+Param: case: A json-formatted string containing the case fields to use for the new case
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/cases/createCase.py
+
+---
+Name: Update Case
+Description: Update an existing case in Salesforce
+Share Context: Salesforce Context
+Credential: ./credential
+Share Tools: Describe Case Schema, Query
+Param: case: A json-formatted string containing the case fields to update in the existing case
+Param: case_id: A string containing the Salesforce Id of the case to update
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/cases/updateCase.py
+
+---
+Name: Delete Case
+Description: Delete an existing case in Salesforce
+Share Context: Salesforce Context
+Credential: ./credential
+Share Tools: Describe Case Schema, Query
+Param: case_id: A string containing the Salesforce Id of the case to delete
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/cases/deleteCase.py
+
+---
+Name: Query
+Description: Query Salesforce using SOQL
+Share Context: Salesforce Context
+Credential: ./credential
+Param: query: The SOQL query to execute
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/query.py
+
+---
+Name: Salesforce Context
+Type: context
+
+#!sys.echo
+
+## Instructions for using Salesforce tools
+
+Do not output Salesforce Ids because they are not helpful for the user.
+Call the relevant 'Describe * Schema' tool to get a list of fields for an object in Salesforce before trying to create or update a resource of that type.
+Use the 'Query' tool to search for objects in Salesforce using SOQL (Salesforce Object Query Language).
+Use the 'Query' tool to get the Salesforce Id of an object if it is required for another tool.
+
+## End of instructions for using Salesforce tools
+
+---
+!metadata:*:category
+Salesforce
+
+---
+!metadata:*:icon
+/admin/assets/salesforce_logo.png
