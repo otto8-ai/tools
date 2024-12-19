@@ -22,7 +22,7 @@ def main():
             print_res(res)
     else:
         print("No records found")
-        exit(1)
+        exit(0)
 
 
 def print_res(res):
