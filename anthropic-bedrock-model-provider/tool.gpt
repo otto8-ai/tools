@@ -1,0 +1,12 @@
+Name: Anthropic on AWS Bedrock
+Description: Model provider for AWS Bedrock hosted Anthropic models
+Metadata: envVars: OBOT_ANTHROPIC_BEDROCK_MODEL_PROVIDER_ACCESS_KEY_ID,OBOT_ANTHROPIC_BEDROCK_MODEL_PROVIDER_SECRET_ACCESS_KEY,OBOT_ANTHROPIC_BEDROCK_MODEL_PROVIDER_REGION,OBOT_ANTHROPIC_BEDROCK_MODEL_PROVIDER_SESSION_TOKEN
+Model Provider: true
+Credential: ../model-provider-credential as anthropic-bedrock-model-provider
+
+
+#!sys.daemon /usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py
+
+---
+!metadata:*:icon
+/admin/assets/anthropic_bedrock_icon.svg

@@ -90,3 +90,5 @@ modelProviders:
     reference: ./groq-model-provider
   voyage-model-provider:
     reference: ./voyage-model-provider
+  anthropic-bedrock-model-provider:
+    reference: ./anthropic-bedrock-model-provider
