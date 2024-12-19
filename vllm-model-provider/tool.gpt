@@ -8,4 +8,4 @@ Credential: ../model-provider-credential as vllm-model-provider
 
 ---
 !metadata:*:icon
-https://raw.githubusercontent.com/vllm-project/media-kit/refs/heads/main/vLLM-Full-Logo.svg
+/admin/assets/vllm-logo.svg
