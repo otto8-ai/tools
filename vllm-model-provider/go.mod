@@ -1,4 +1,4 @@
-module github.com/sanjay920/tools/vllm-model-provider
+module github.com/obot-platform/tools/vllm-model-provider
 
 go 1.23.4
 
