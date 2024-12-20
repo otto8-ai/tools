@@ -1,0 +1,11 @@
+Name: vLLM
+Description: Model Provider for vLLM
+Metadata: envVars: OBOT_VLLM_MODEL_PROVIDER_ENDPOINT,OBOT_VLLM_MODEL_PROVIDER_API_KEY
+Model Provider: true
+Credential: ../model-provider-credential as vllm-model-provider
+
+#!sys.daemon ${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool
+
+---
+!metadata:*:icon
+/admin/assets/vllm-logo.svg
