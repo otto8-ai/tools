@@ -3,7 +3,6 @@ package server
 import (
 	"bytes"
 	"compress/gzip"
-	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -27,9 +26,13 @@ func Run(apiKey, endpointStr, port string) error {
 		return fmt.Errorf("invalid endpoint URL: %w", err)
 	}
 
-	// Ensure scheme is set
+	// More intelligent scheme handling
 	if endpoint.Scheme == "" {
-		endpoint.Scheme = "https"
+		if endpoint.Hostname() == "localhost" || endpoint.Hostname() == "127.0.0.1" {
+			endpoint.Scheme = "http"
+		} else {
+			endpoint.Scheme = "https"
+		}
 	}
 
 	mux := http.NewServeMux()
@@ -44,19 +47,9 @@ func Run(apiKey, endpointStr, port string) error {
 	mux.Handle("GET /v1/models", &httputil.ReverseProxy{
 		Director:       s.proxy,
 		ModifyResponse: s.rewriteModelsResponse,
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
-			},
-		},
 	})
 	mux.Handle("/{path...}", &httputil.ReverseProxy{
 		Director: s.proxy,
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
-			},
-		},
 	})
 
 	httpServer := &http.Server{
