@@ -16,17 +16,12 @@ import (
 )
 
 func Run(apiKey, endpointStr, port string) error {
-	if endpointStr == "" {
-		return fmt.Errorf("endpoint is required")
-	}
-
 	// Parse the endpoint URL
 	endpoint, err := url.Parse(endpointStr)
 	if err != nil {
-		return fmt.Errorf("invalid endpoint URL: %w", err)
+		return fmt.Errorf("Invalid endpoint URL %q: %w", endpointStr, err)
 	}
 
-	// More intelligent scheme handling
 	if endpoint.Scheme == "" {
 		if endpoint.Hostname() == "localhost" || endpoint.Hostname() == "127.0.0.1" {
 			endpoint.Scheme = "http"
