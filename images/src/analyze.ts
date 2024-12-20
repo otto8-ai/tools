@@ -56,7 +56,7 @@ export async function analyzeImages(
   }
 }
 
-const supportedMimeTypes = ['image/jpeg', 'image/png'];
+const supportedMimeTypes = ['image/jpeg', 'image/png', 'image/webp'];
 const threadId = process.env.OBOT_THREAD_ID
 const obotServerUrl = process.env.OBOT_SERVER_URL
 const imageGenBaseUrl = (threadId && obotServerUrl) ? `${obotServerUrl}/api/threads/${threadId}/file/` : null
@@ -99,7 +99,7 @@ async function readImageFile(path: string): Promise<Buffer> {
 
   // The Generate Images tool returns file paths with a special prefix
   // so that they can be rendered in the Obot UI.
-  // e.g. /api/threads/<thread-id>/file/generated_image_<hash>.png
+  // e.g. /api/threads/<thread-id>/file/generated_image_<hash>.webp
   // It must be stripped before reading the file from the workspace
   path = path.replace(/^\/?api\/threads\/[a-z0-9]+\/file\//, '')
 

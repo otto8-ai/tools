@@ -27,7 +27,6 @@ func New() *cobra.Command {
 		new(ClientDeleteFile),
 		new(ClientGetFile),
 		new(ClientRetrieve),
-		new(ClientResetDatastore),
 		new(ClientAskDir),
 		new(ClientExportDatasets),
 		new(ClientImportDatasets),

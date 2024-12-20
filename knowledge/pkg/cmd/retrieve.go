@@ -15,7 +15,7 @@ import (
 
 type ClientRetrieve struct {
 	Client
-	Datasets []string `usage:"Target Dataset IDs" short:"d" default:"default" env:"KNOW_DATASETS" name:"dataset"`
+	Datasets []string `usage:"Target Dataset IDs" short:"d" env:"KNOW_DATASETS" name:"dataset"`
 	Archive  string   `usage:"Path to the archive file"`
 	ClientRetrieveOpts
 	ClientFlowsConfig
@@ -46,8 +46,8 @@ func (s *ClientRetrieve) Run(cmd *cobra.Command, args []string) error {
 	}
 
 	datasetIDs := s.Datasets
-	if len(s.Datasets) == 0 {
-		datasetIDs = []string{"default"}
+	if len(datasetIDs) == 0 {
+		exitErr0(fmt.Errorf("no dataset specified for retrieval - probably there was nothing ingested yet"))
 	}
 	slog.Info("Retrieving sources for query", "query", query, "datasets", datasetIDs)
 

@@ -270,6 +270,8 @@ func saveToMetadata(ctx context.Context, logErr *logrus.Logger, output *Metadata
 		}
 		logErr.Infof("Downloaded %s", relativePath)
 		detail.UpdatedAt = item.GetLastModifiedDateTime().String()
+		detail.URL = *item.GetWebUrl()
+		detail.FilePath = relativePath
 		output.Files[*item.GetId()] = detail
 	} else {
 		logErr.Infof("Skipping %s because it is not changed", relativePath)

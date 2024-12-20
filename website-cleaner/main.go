@@ -291,7 +291,7 @@ func requestWithExponentialBackoff(ctx context.Context, client *http.Client, req
 		}
 	}
 
-	logger.Error("request retry limit exceeded or failed with non-retryable error(s)", "request", req)
+	logger.Error("request retry limit exceeded or failed with non-retryable error(s)", "request", req, "maxTries", maxRetries, "failures", strings.Join(failures, ";"))
 
-	return nil, fmt.Errorf("retry limit (%d) exceeded or failed with non-retryable error(s): %v", maxRetries, strings.Join(failures, "; "))
+	return nil, fmt.Errorf("retry limit exceeded or request failed with non-retryable error: %v", failures[len(failures)-1])
 }

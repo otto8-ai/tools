@@ -21,7 +21,7 @@ import (
 
 type ClientIngest struct {
 	Client
-	Dataset string `usage:"Target Dataset ID" short:"d" default:"default" env:"KNOW_DATASET"`
+	Dataset string `usage:"Target Dataset ID" short:"d" env:"KNOW_DATASET"`
 	Prune   bool   `usage:"Prune deleted files" env:"KNOW_INGEST_PRUNE"`
 	ClientIngestOpts
 	ClientFlowsConfig
@@ -73,6 +73,9 @@ func (s *ClientIngest) run(ctx context.Context, filePath string) error {
 	defer c.Close()
 
 	datasetID := s.Dataset
+	if datasetID == "" {
+		exitErr0(fmt.Errorf("no dataset specified for ingestion"))
+	}
 
 	if !strings.HasPrefix(filePath, "ws://") {
 		finfo, err := os.Stat(filePath)

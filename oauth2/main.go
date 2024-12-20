@@ -22,12 +22,13 @@ import (
 )
 
 type oauthResponse struct {
-	TokenType    string `json:"token_type"`
-	Scope        string `json:"scope"`
-	ExpiresIn    int    `json:"expires_in"`
-	ExtExpiresIn int    `json:"ext_expires_in"`
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
+	TokenType    string            `json:"token_type"`
+	Scope        string            `json:"scope"`
+	ExpiresIn    int               `json:"expires_in"`
+	ExtExpiresIn int               `json:"ext_expires_in"`
+	AccessToken  string            `json:"access_token"`
+	RefreshToken string            `json:"refresh_token"`
+	Extras       map[string]string `json:"extras"`
 }
 
 type cred struct {
@@ -48,7 +49,7 @@ type cliConfig struct {
 
 var (
 	integration   = os.Getenv("INTEGRATION")
-	env           = os.Getenv("ENV")
+	token         = os.Getenv("TOKEN")
 	scope         = os.Getenv("SCOPE")
 	optionalScope = os.Getenv("OPTIONAL_SCOPE")
 )
@@ -164,10 +165,16 @@ func main() {
 			os.Exit(1)
 		}
 
+		envVars := map[string]string{
+			token: oauthResp.AccessToken,
+		}
+
+		for k, v := range oauthResp.Extras {
+			envVars[k] = v
+		}
+
 		out := cred{
-			Env: map[string]string{
-				env: oauthResp.AccessToken,
-			},
+			Env:          envVars,
 			RefreshToken: oauthResp.RefreshToken,
 		}
 
@@ -299,10 +306,16 @@ func main() {
 		}
 		_ = resp.Body.Close()
 
+		envVars := map[string]string{
+			token: oauthResp.AccessToken,
+		}
+
+		for k, v := range oauthResp.Extras {
+			envVars[k] = v
+		}
+
 		out := cred{
-			Env: map[string]string{
-				env: oauthResp.AccessToken,
-			},
+			Env:          envVars,
 			RefreshToken: oauthResp.RefreshToken,
 		}
 

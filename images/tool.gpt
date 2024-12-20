@@ -10,13 +10,13 @@ Description: Analyze images using a given prompt and return relevant information
 Credential: github.com/gptscript-ai/credentials/model-provider
 Share Context: Analyze Images Context
 Param: prompt: (optional) A prompt to analyze the images with (defaults "Provide a brief description of each image")
-Param: images: (required) A JSON array containing one or more URLs or file paths of images to analyze. Only supports jpegs and pngs.
+Param: images: (required) A JSON array containing one or more URLs or file paths of images to analyze. Only supports jpeg, png, and webp.
 
 #!/usr/bin/env npm --silent --prefix ${GPTSCRIPT_TOOL_DIR} run tool -- analyzeImages
 
 ---
 Name: Generate Images
-Description: Generate images images based on a given prompt
+Description: Generate images based on a given prompt
 Credential: github.com/gptscript-ai/credentials/model-provider
 Share Context: Generate Images Context
 Param: prompt: (required) Text describing the images to generate
@@ -32,12 +32,14 @@ Type: context
 
 #!sys.echo
 
-START TOOL USAGE: Generate Images
+## START TOOL USAGE: Generate Images
 
 The Generate Images tool returns JSON containing the `workspaceFilePath` and `downloadUrl` of every image it generates.
 Always use the `downloadUrl` of a generated image when embedding it in markdown.
+Unless otherwise specified, always display the images you generate in embedded markdown after generating them.
+Never provide the `downloadUrl` to the user as a clickable link.
 
-END TOOL USAGE: Generate Images
+## END TOOL USAGE: Generate Images
 
 ---
 Name: Analyze Images Context
@@ -45,18 +47,17 @@ Type: context
 
 #!sys.echo
 
-START TOOL USAGE: Analyze Images
+## START TOOL USAGE: Analyze Images
 
 Use the Analyze Images tool to whenever you need to inspect, compare, or answer questions about the contents of images.
 
 You can pass multiple images to the Analyze Images tool at once using a single call.
 
-The Analyze Images tool requires an `images` argument, which must be formatted as a JSON array containing one or more URLs or workspace file paths.
-e.g. Analyzing a single image: `["https://example.com/image1.png"]`
-e.g. Analyzing multiple images: `["https://example.com/image1.png", "cool.jpg", "generated_image_defg1234.png", "https://example.com/image2.png"]`
+When calling the Analyze Images tool, always provide a JSON array containing one or more URLs or workspace file paths for the `images` argument, even if you are only analyzing a single image.
+e.g. Analyzing a single image: ["https://example.com/image2.png"]
+e.g. Analyzing multiple images: ["https://example.com/image1.webp", "cool.jpg", "cow.webp", "generated_image_defg1234.png", "https://example.com/image2.png"]
 
-
-END TOOL USAGE: Analyze Images tool
+## END TOOL USAGE: Analyze Images tool
 
 ---
 !metadata:*:category

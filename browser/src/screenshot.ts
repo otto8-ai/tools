@@ -41,7 +41,7 @@ export async function screenshot (
 
   // Build the download URL used by the UI to display the image
   let downloadUrl: string | undefined
-  const obotServerUrl = getGPTScriptEnv(headers, 'OBOT_SERVER_URL')
+  const obotServerUrl = process.env?.OBOT_SERVER_URL
   const threadId = getGPTScriptEnv(headers, 'OBOT_THREAD_ID')
   if (obotServerUrl !== undefined && threadId !== undefined) {
     downloadUrl = `${obotServerUrl}/api/threads/${threadId}/file/${screenshotName}`

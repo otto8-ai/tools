@@ -1,0 +1,5 @@
+boto3
+fastapi
+uvicorn[standard]
+anthropic[bedrock]==0.40.0
+claude3_provider_common @ git+https://github.com/gptscript-ai/claude3-provider-common@2682b94fce767c810254075253ffc6e6900654fc
