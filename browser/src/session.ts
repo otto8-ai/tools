@@ -132,18 +132,19 @@ export function getWorkspaceId (headers: IncomingHttpHeaders): string | undefine
 export function getGPTScriptEnv (headers: IncomingHttpHeaders, envKey: string): string | undefined {
   const envHeader = headers?.['x-gptscript-env']
   const envArray = Array.isArray(envHeader) ? envHeader : [envHeader]
+
   for (const env of envArray) {
     if (env == null) {
       continue
     }
 
     for (const pair of env.split(',')) {
-      const [key, value] = pair.split('=')
+      const [key, value] = pair.split('=').map(part => part.trim())
       if (key === envKey) {
-        return value ?? process.env?.[envKey]
+        return value
       }
     }
   }
 
-  return process.env?.[envKey]
+  return undefined
 }

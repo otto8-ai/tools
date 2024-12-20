@@ -1,6 +1,7 @@
 import OpenAI from "openai"
 import * as gptscript from "@gptscript-ai/gptscript"
 import axios from "axios"
+import sharp from "sharp"
 import {createHash} from "node:crypto"
 
 type ImageSize = '1024x1024' | '256x256' | '512x512' | '1792x1024' | '1024x1792';
@@ -75,13 +76,17 @@ export async function generateImages(
 }
 
 async function download(client: gptscript.GPTScript, imageUrl: string): Promise<string> {
+  // Download the image from the URL, typically a PNG
   const response = await axios.get(imageUrl, {
     responseType: 'arraybuffer'
   })
-  const content = Buffer.from(response.data, 'binary')
+  let content = Buffer.from(response.data, 'binary')
+
+  // Convert the image to webp format
+  content = await sharp(content).webp({ quality: 100 }).toBuffer()
 
   // Generate a SHA-256 hash of the imageURL to use as the filename
-  const filePath = `generated_image_${createHash('sha256').update(imageUrl).digest('hex').substring(0, 8)}.png`;
+  const filePath = `generated_image_${createHash('sha256').update(imageUrl).digest('hex').substring(0, 8)}.webp`;
 
   await client.writeFileInWorkspace(`${threadId ? 'files/' : ''}${filePath}`, content);
 

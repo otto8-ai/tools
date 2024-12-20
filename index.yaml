@@ -1,6 +1,9 @@
 tools:
   database:
     reference: ./database
+  atlassian-jira:
+    reference: ./atlassian/jira
+    all: true
   excel:
     reference: ./excel
     all: true
@@ -9,6 +12,9 @@ tools:
     all: true
   bluesky:
     reference: ./bluesky
+    all: true
+  salesforce:
+    reference: ./salesforce
     all: true
   slack:
     reference: ./slack
@@ -92,3 +98,5 @@ modelProviders:
     reference: ./voyage-model-provider
   vllm-model-provider:
     reference: ./vllm-model-provider
+  anthropic-bedrock-model-provider:
+    reference: ./anthropic-bedrock-model-provider
