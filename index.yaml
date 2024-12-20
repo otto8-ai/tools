@@ -96,5 +96,7 @@ modelProviders:
     reference: ./groq-model-provider
   voyage-model-provider:
     reference: ./voyage-model-provider
+  vllm-model-provider:
+    reference: ./vllm-model-provider
   anthropic-bedrock-model-provider:
     reference: ./anthropic-bedrock-model-provider
