@@ -25,7 +25,7 @@ func main() {
 		port = "8000"
 	}
 
-	if err := server.Run(apiKey, port); err != nil {
+	if err := server.Run(apiKey, endpoint, port); err != nil {
 		panic(err)
 	}
 }

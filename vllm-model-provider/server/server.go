@@ -11,16 +11,14 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"os"
 	"path"
 
 	openai "github.com/gptscript-ai/chat-completion-client"
 )
 
-func Run(apiKey, port string) error {
-	endpointStr := os.Getenv("OBOT_VLLM_MODEL_PROVIDER_ENDPOINT")
+func Run(apiKey, endpointStr, port string) error {
 	if endpointStr == "" {
-		return fmt.Errorf("OBOT_VLLM_MODEL_PROVIDER_ENDPOINT environment variable not set")
+		return fmt.Errorf("endpoint is required")
 	}
 
 	// Parse the endpoint URL
