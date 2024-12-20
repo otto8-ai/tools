@@ -1,0 +1,14 @@
+Name: LlamaIndex PDF Document Loader
+Params: input: Path to input PDF file
+Params: output: Path to output file where the extracted markdown content should be written to. Should end with .md
+metadata: supported-file-type: pdf
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/load.py
+---
+Name: LlamaIndex Generic Document Loader
+Params: Input: Input File
+Params: Output: Output File
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/load.py
+
+
